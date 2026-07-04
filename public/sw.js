@@ -1,4 +1,6 @@
-const CACHE_NAME = "pokemon-lab-v4";
+const CACHE_NAME = "pokemon-lab-v5";
+const IMAGE_CACHE_NAME = "pokemon-lab-images-v1";
+const IMAGE_CACHE_LIMIT = 300;
 const APP_SHELL = [
   "/",
   "/quiz",
@@ -21,11 +23,59 @@ self.addEventListener("activate", (event) => {
     caches
       .keys()
       .then((keys) =>
-        Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))),
+        Promise.all(
+          keys
+            .filter(
+              (key) =>
+                key !== CACHE_NAME && key !== IMAGE_CACHE_NAME,
+            )
+            .map((key) => caches.delete(key)),
+        ),
       ),
   );
   self.clients.claim();
 });
+
+async function trimImageCache(cache) {
+  const requests = await cache.keys();
+  const overflow = requests.length - IMAGE_CACHE_LIMIT;
+
+  if (overflow > 0) {
+    await Promise.all(
+      requests.slice(0, overflow).map((request) => cache.delete(request)),
+    );
+  }
+}
+
+async function cacheImage(cache, request, response) {
+  if (!response.ok) return;
+
+  // 再登録して、最近使った画像がキャッシュ順の末尾になるようにする。
+  await cache.delete(request);
+  await cache.put(request, response.clone());
+  await trimImageCache(cache);
+}
+
+async function respondWithCachedImage(event) {
+  const cache = await caches.open(IMAGE_CACHE_NAME);
+  const cached = await cache.match(event.request);
+
+  if (cached) {
+    const refresh = cacheImage(cache, event.request, cached)
+      .then(() => fetch(event.request))
+      .then(async (response) => {
+        await cacheImage(cache, event.request, response);
+        return response;
+      })
+      .catch(() => null);
+    event.waitUntil(refresh);
+    return cached;
+  }
+
+  const response = await fetch(event.request);
+  event.waitUntil(cacheImage(cache, event.request, response));
+  return response;
+}
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
@@ -41,6 +91,11 @@ self.addEventListener("fetch", (event) => {
     request.headers.get("Accept")?.includes("text/x-component");
 
   if (isReactServerComponent || url.pathname.startsWith("/_next/webpack-hmr")) {
+    return;
+  }
+
+  if (url.pathname === "/_next/image") {
+    event.respondWith(respondWithCachedImage(event));
     return;
   }
 
