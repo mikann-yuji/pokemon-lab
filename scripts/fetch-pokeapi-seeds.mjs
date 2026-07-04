@@ -3,7 +3,10 @@ import path from "node:path";
 
 const apiBaseUrl = "https://pokeapi.co/api/v2";
 const outputDirectory = path.join(process.cwd(), "database", "seeds");
-const sampleSpeciesIds = Array.from({ length: 10 }, (_, index) => index + 1);
+const speciesLimit = process.env.POKEAPI_SPECIES_LIMIT
+  ? Number(process.env.POKEAPI_SPECIES_LIMIT)
+  : null;
+const maxAttempts = 3;
 const responseCache = new Map();
 
 function resourceId(resource) {
@@ -42,22 +45,37 @@ function masterText(resource, language) {
   );
 }
 
-async function getJson(url) {
-  if (!responseCache.has(url)) {
-    responseCache.set(
-      url,
-      fetch(url, {
+function wait(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+async function fetchJson(url) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await fetch(url, {
         headers: {
           Accept: "application/json",
           "User-Agent": "PokemonLab seed generator",
         },
-      }).then(async (response) => {
-        if (!response.ok) {
-          throw new Error(`${response.status} ${response.statusText}: ${url}`);
-        }
-        return response.json();
-      }),
-    );
+      });
+      if (!response.ok) {
+        throw new Error(`${response.status} ${response.statusText}: ${url}`);
+      }
+      return response.json();
+    } catch (error) {
+      lastError = error;
+      if (attempt < maxAttempts) await wait(500 * attempt);
+    }
+  }
+
+  throw lastError;
+}
+
+async function getJson(url) {
+  if (!responseCache.has(url)) {
+    responseCache.set(url, fetchJson(url));
   }
   return responseCache.get(url);
 }
@@ -83,9 +101,7 @@ async function mapWithConcurrency(items, concurrency, mapper) {
 function uniqueResources(resources) {
   return [
     ...new Map(
-      resources
-        .filter(Boolean)
-        .map((resource) => [resource.url, resource]),
+      resources.filter(Boolean).map((resource) => [resource.url, resource]),
     ).values(),
   ];
 }
@@ -112,11 +128,12 @@ function writeCsv(filename, columns, rows) {
 
 mkdirSync(outputDirectory, { recursive: true });
 
-const speciesResources = await mapWithConcurrency(
-  sampleSpeciesIds,
-  6,
-  (id) => getJson(`${apiBaseUrl}/pokemon-species/${id}/`),
+const speciesList = await getJson(
+  `${apiBaseUrl}/pokemon-species?limit=${speciesLimit ?? 100000}&offset=0`,
 );
+const speciesResources = (
+  await mapWithConcurrency(speciesList.results, 12, ({ url }) => getJson(url))
+).sort((left, right) => left.id - right.id);
 const pokemonReferences = uniqueResources(
   speciesResources.flatMap((species) =>
     species.varieties.map(({ pokemon }) => pokemon),
@@ -124,7 +141,7 @@ const pokemonReferences = uniqueResources(
 );
 const pokemonResources = await mapWithConcurrency(
   pokemonReferences,
-  6,
+  12,
   ({ url }) => getJson(url),
 );
 const pokemonFormReferences = uniqueResources(
@@ -145,14 +162,10 @@ const abilityReferences = uniqueResources(
   ),
 );
 const statReferences = uniqueResources(
-  pokemonResources.flatMap((pokemon) =>
-    pokemon.stats.map(({ stat }) => stat),
-  ),
+  pokemonResources.flatMap((pokemon) => pokemon.stats.map(({ stat }) => stat)),
 );
 const moveReferences = uniqueResources(
-  pokemonResources.flatMap((pokemon) =>
-    pokemon.moves.map(({ move }) => move),
-  ),
+  pokemonResources.flatMap((pokemon) => pokemon.moves.map(({ move }) => move)),
 );
 const [abilityResources, statResources, moveResources] = await Promise.all([
   mapWithConcurrency(abilityReferences, 6, ({ url }) => getJson(url)),
@@ -197,9 +210,7 @@ const speciesRows = speciesResources.map((species) => ({
   is_baby: booleanToInteger(species.is_baby),
   is_legendary: booleanToInteger(species.is_legendary),
   is_mythical: booleanToInteger(species.is_mythical),
-  has_gender_differences: booleanToInteger(
-    species.has_gender_differences,
-  ),
+  has_gender_differences: booleanToInteger(species.has_gender_differences),
   forms_switchable: booleanToInteger(species.forms_switchable),
 }));
 
@@ -240,8 +251,7 @@ const formRows = pokemonResources.map((pokemon) => {
     sprite_shiny_url: pokemon.sprites.front_shiny,
     artwork_default_url:
       pokemon.sprites.other?.["official-artwork"]?.front_default,
-    artwork_shiny_url:
-      pokemon.sprites.other?.["official-artwork"]?.front_shiny,
+    artwork_shiny_url: pokemon.sprites.other?.["official-artwork"]?.front_shiny,
     cry_latest_url: pokemon.cries?.latest,
     cry_legacy_url: pokemon.cries?.legacy,
   };
@@ -254,8 +264,7 @@ const abilityRows = abilityResources.map((ability) => ({
   generation_id: resourceId(ability.generation),
   is_main_series: booleanToInteger(ability.is_main_series),
   effect_en: masterText(ability, "en"),
-  effect_ja:
-    masterText(ability, "ja-Hrkt") ?? masterText(ability, "ja"),
+  effect_ja: masterText(ability, "ja-Hrkt") ?? masterText(ability, "ja"),
 }));
 const formAbilityRows = pokemonResources.flatMap((pokemon) =>
   pokemon.abilities.map(({ ability, is_hidden: isHidden, slot }) => ({
@@ -416,11 +425,7 @@ writeCsv(
   ["form_id", "stat_id", "base_stat", "effort"],
   formStatRows,
 );
-writeCsv(
-  "form_types.csv",
-  ["form_id", "type_name", "slot"],
-  formTypeRows,
-);
+writeCsv("form_types.csv", ["form_id", "type_name", "slot"], formTypeRows);
 writeCsv(
   "moves.csv",
   [
@@ -447,11 +452,7 @@ writeCsv(
   ["id", "name", "sort_order", "generation_id"],
   versionGroupRows,
 );
-writeCsv(
-  "move_learn_methods.csv",
-  ["id", "name", "name_ja"],
-  learnMethodRows,
-);
+writeCsv("move_learn_methods.csv", ["id", "name", "name_ja"], learnMethodRows);
 writeCsv(
   "form_moves.csv",
   [

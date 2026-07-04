@@ -9,7 +9,9 @@
     "prebuild": "npm run db:init",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seeds:fetch": "node scripts/fetch-pokeapi-seeds.mjs",
+    "seeds:validate": "node scripts/validate-pokeapi-seeds.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^12.11.1",
