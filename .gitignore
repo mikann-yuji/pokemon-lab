@@ -20,6 +20,7 @@
 # production
 /build
 /data/*.db
+!/data/pokemon-lab.db
 /data/*.db-*
 
 # misc
