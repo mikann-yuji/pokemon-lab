@@ -216,8 +216,7 @@
 }
 
 .card:hover,
-.card:focus-visible,
-.selectedCard {
+.card:focus-visible {
   border-color: #2857a4;
   box-shadow: 0 8px 0 rgb(40 87 164 / 20%);
   transform: translateY(-2px);
@@ -247,7 +246,7 @@
   background: linear-gradient(145deg, #eef6ff, #fff5d8);
 }
 
-.detailHero h2 {
+.detailHero h1 {
   margin: 0.2rem 0;
   font-size: clamp(1.7rem, 5vw, 3rem);
   line-height: 1.1;
@@ -280,8 +279,8 @@
   background: #ffffff;
 }
 
-.detailSection h3,
-.movesHeader h3 {
+.detailSection h2,
+.movesHeader h2 {
   margin: 0 0 0.8rem;
   font-size: 1.1rem;
 }
