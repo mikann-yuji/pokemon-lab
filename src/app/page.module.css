@@ -1,142 +1,212 @@
 .page {
-  --background: #fafafa;
-  --foreground: #fff;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 204, 0, 0.18), transparent 28rem),
+    linear-gradient(135deg, #f8fbff 0%, #eef6f5 52%, #fff8e1 100%);
+  color: #182236;
+  font-family: Arial, Helvetica, sans-serif;
+}
 
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
-
-  display: flex;
-  flex: 1;
-  flex-direction: column;
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 48px;
   align-items: center;
-  justify-content: center;
-  font-family: var(--font-geist-sans);
-  background-color: var(--background);
+  width: min(1120px, calc(100% - 40px));
+  min-height: 72vh;
+  margin: 0 auto;
+  padding: 56px 0 32px;
 }
 
-.main {
-  display: flex;
-  flex: 1;
-  width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
+.heroCopy {
+  display: grid;
+  gap: 20px;
 }
 
-.intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
-}
-
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
-}
-
-.intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
-  color: var(--text-secondary);
-}
-
-.intro a {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.ctas {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  max-width: 440px;
-  gap: 16px;
-  font-size: 14px;
-}
-
-.ctas a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
+.kicker {
   width: fit-content;
-  font-weight: 500;
+  border: 1px solid rgba(24, 34, 54, 0.18);
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #2e6f8f;
+  font-size: 0.88rem;
+  font-weight: 700;
 }
 
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
+.hero h1 {
+  max-width: 680px;
+  color: #102033;
+  font-size: clamp(3rem, 8vw, 6.7rem);
+  font-weight: 850;
+  line-height: 0.95;
+  letter-spacing: 0;
+}
+
+.lede {
+  max-width: 620px;
+  color: #405167;
+  font-size: clamp(1.08rem, 2vw, 1.35rem);
+  line-height: 1.65;
+}
+
+.device {
+  display: grid;
+  gap: 24px;
+  width: min(100%, 420px);
+  aspect-ratio: 3 / 4;
+  justify-self: end;
+  border: 1px solid rgba(24, 34, 54, 0.12);
+  border-radius: 8px;
+  padding: 22px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(24, 34, 54, 0.18);
+}
+
+.deviceHeader {
+  display: flex;
   gap: 8px;
 }
 
-a.secondary {
-  border-color: var(--button-secondary-border);
+.deviceHeader span {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #ef5350;
 }
 
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-  }
-
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
-  }
+.deviceHeader span:nth-child(2) {
+  background: #ffca28;
 }
 
-@media (max-width: 600px) {
-  .main {
-    padding: 48px 24px;
-  }
-
-  .intro {
-    gap: 16px;
-  }
-
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
-  }
+.deviceHeader span:nth-child(3) {
+  background: #43a047;
 }
 
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
+.pokemonMark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(78%, 260px);
+  aspect-ratio: 1;
+  margin: 10px auto 0;
+  border: 16px solid #202f44;
+  border-radius: 50%;
+  background:
+    linear-gradient(#ef5350 0 46%, #202f44 46% 54%, #ffffff 54% 100%);
+}
+
+.pokemonMark::before {
+  content: "";
+  position: absolute;
+  width: 36%;
+  aspect-ratio: 1;
+  border: 12px solid #202f44;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.spark {
+  position: relative;
+  z-index: 1;
+  color: #2e6f8f;
+  font-size: 2.2rem;
+  font-weight: 900;
+}
+
+.scanLines {
+  display: grid;
+  gap: 14px;
+}
+
+.scanLines span {
+  height: 14px;
+  border-radius: 999px;
+  background: #d9e8ef;
+}
+
+.scanLines span:nth-child(2) {
+  width: 76%;
+  background: #ffe39f;
+}
+
+.scanLines span:nth-child(3) {
+  width: 52%;
+  background: #cfe6d6;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  width: min(1120px, calc(100% - 40px));
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid rgba(24, 34, 54, 0.12);
+  border-radius: 8px;
+  background: rgba(24, 34, 54, 0.12);
+}
+
+.stat {
+  display: grid;
+  gap: 6px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.stat strong {
+  color: #102033;
+  font-size: 2rem;
+}
+
+.stat span {
+  color: #5a697d;
+  font-size: 0.95rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  width: min(1120px, calc(100% - 40px));
+  margin: 18px auto 0;
+  padding-bottom: 48px;
+}
+
+.card {
+  border: 1px solid rgba(24, 34, 54, 0.12);
+  border-radius: 8px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.card h2 {
+  margin-bottom: 12px;
+  color: #102033;
+  font-size: 1.2rem;
+}
+
+.card p {
+  color: #536376;
+  line-height: 1.65;
+}
+
+@media (max-width: 800px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    min-height: auto;
+    padding-top: 36px;
   }
 
-  .page {
-    --background: #000;
-    --foreground: #000;
+  .device {
+    justify-self: stretch;
+    width: 100%;
+    max-width: 380px;
+  }
 
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
+  .stats,
+  .cards {
+    grid-template-columns: 1fr;
   }
 }

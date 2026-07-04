@@ -1,0 +1,233 @@
+.quizContainer {
+  width: min(100%, 44rem);
+  padding: clamp(1rem, 4vw, 2rem);
+  border-radius: 12px;
+  background: var(--quiz-surface);
+  box-shadow: var(--quiz-shadow);
+  color: var(--quiz-text);
+  animation: slide-in 0.3s ease-out;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.questionHeader {
+  margin-bottom: clamp(1.25rem, 4vw, 2rem);
+}
+
+.progress {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e0e0e0;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--quiz-accent) 0%,
+    var(--quiz-accent-dark) 100%
+  );
+  transition: width 0.3s ease-out;
+}
+
+.question {
+  margin-bottom: 1.5rem;
+  color: var(--quiz-text);
+  font-size: clamp(1.05rem, 3vw, 1.3rem);
+  line-height: 1.5;
+}
+
+.hint {
+  display: block;
+  margin-top: 0.5rem;
+  color: #777;
+  font-size: 0.8rem;
+  font-weight: normal;
+}
+
+.typeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(7rem, 100%), 1fr));
+  gap: clamp(0.5rem, 2vw, 0.8rem);
+  margin-bottom: 1.5rem;
+}
+
+.typeButton {
+  min-height: 48px;
+  padding: 0.75rem 0.5rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  color: var(--quiz-text);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.typeButton:hover:not(:disabled) {
+  border-color: var(--quiz-accent);
+  background: #f5f7ff;
+}
+
+.typeButton:focus-visible,
+.button:focus-visible {
+  outline: 3px solid var(--quiz-accent);
+  outline-offset: 3px;
+}
+
+.typeButton.selected {
+  border-color: var(--quiz-accent);
+  background: var(--quiz-accent);
+  color: white;
+}
+
+.typeButton.correct {
+  border-color: #4caf50;
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.typeButton.incorrect {
+  border-color: #f44336;
+  background: #ffebee;
+  color: #c62828;
+}
+
+.typeButton:disabled {
+  cursor: not-allowed;
+}
+
+.explanation {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f5f5f5;
+  animation: fade-in 0.3s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.feedbackText {
+  margin: 0 0 1rem;
+  color: #555;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.button {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(
+    135deg,
+    var(--quiz-accent) 0%,
+    var(--quiz-accent-dark) 100%
+  );
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    opacity 0.2s;
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgb(102 126 234 / 40%);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.scoreSection {
+  text-align: center;
+}
+
+.scoreSection h1 {
+  margin-bottom: clamp(1.25rem, 4vw, 2rem);
+  color: var(--quiz-text);
+  font-size: clamp(1.5rem, 6vw, 2rem);
+}
+
+.score {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  padding: clamp(1.25rem, 5vw, 2rem);
+  border-radius: 8px;
+  background: linear-gradient(
+    135deg,
+    var(--quiz-accent) 0%,
+    var(--quiz-accent-dark) 100%
+  );
+  color: white;
+}
+
+.scoreText {
+  font-size: clamp(2.25rem, 10vw, 3rem);
+  font-weight: bold;
+}
+
+.percentage {
+  display: flex;
+  align-items: center;
+  font-size: clamp(1.15rem, 5vw, 1.5rem);
+  opacity: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quizContainer,
+  .explanation {
+    animation: none;
+  }
+
+  .progressFill,
+  .typeButton,
+  .button {
+    transition: none;
+  }
+}

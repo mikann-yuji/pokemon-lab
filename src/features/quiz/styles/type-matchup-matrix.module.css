@@ -1,0 +1,94 @@
+.matrixSection {
+  width: min(100%, 80rem);
+  margin-top: clamp(1rem, 4vw, 2rem);
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border-radius: 12px;
+  background: var(--quiz-surface);
+  box-shadow: var(--quiz-shadow);
+  color: var(--quiz-text);
+}
+
+.matrixSection h2 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.25rem, 4vw, 1.5rem);
+}
+
+.matrixNote {
+  margin: 0 0 1rem;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.matrixScroller {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.matrix {
+  border-collapse: separate;
+  border-spacing: 0;
+  white-space: nowrap;
+  font-size: clamp(0.7rem, 2vw, 0.75rem);
+}
+
+.matrix th,
+.matrix td {
+  min-width: clamp(2.5rem, 8vw, 3rem);
+  height: 2.5rem;
+  padding: 0.25rem;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.matrix tr:first-child th {
+  border-top: 1px solid #ddd;
+}
+
+.matrix th:first-child,
+.matrix td:first-child {
+  border-left: 1px solid #ddd;
+}
+
+.matrix th {
+  background: #f4f4f4;
+}
+
+.matrix thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.matrix tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.matrix thead th:first-child {
+  left: 0;
+  z-index: 3;
+}
+
+.superEffective {
+  background: #dff3e2;
+  color: #176b26;
+  font-weight: 700;
+}
+
+.notVeryEffective {
+  background: #fff1d6;
+  color: #875900;
+  font-weight: 700;
+}
+
+.noEffect {
+  background: #ececec;
+  color: #555;
+  font-weight: 700;
+}
