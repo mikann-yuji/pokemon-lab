@@ -4,6 +4,7 @@ const IMAGE_CACHE_LIMIT = 300;
 const APP_SHELL = [
   "/",
   "/quiz",
+  "/pokemon",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",

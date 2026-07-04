@@ -25,6 +25,11 @@ const researchCards = [
     body: "Test your knowledge of Pokémon type matchups with an interactive quiz.",
     link: "/quiz",
   },
+  {
+    title: "Pokémon Search",
+    body: "Search registered Pokémon and forms by their Japanese or English names.",
+    link: "/pokemon",
+  },
 ];
 
 export default function Home() {
