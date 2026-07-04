@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: Next.js App Routerのルートレイアウト。全ページ共通のHTML骨格、メタデータ、PWA登録を定義する。
+ */
+
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";

@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: 現在のクイズ問題、選択肢、解説、進捗を表示するプレゼンテーションコンポーネント。
+ */
+
 import Image from "next/image";
 import type { TypeMatchup, TypeName } from "@/domain/type-matchup";
 import { getQuestionText, type Question } from "../quiz-logic";

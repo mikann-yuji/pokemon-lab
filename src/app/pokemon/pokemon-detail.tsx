@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: ポケモン詳細ページの見た目を構成し、タイプ・特性・種族値・技を表示するコンポーネント。
+ */
+
 import Image from "next/image";
 import type { PokemonDetail } from "@/infrastructure/database/pokemon-search-repository";
 import styles from "./pokemon-search.module.css";

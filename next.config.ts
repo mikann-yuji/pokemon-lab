@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: Next.jsのビルド・実行時設定を定義する設定ファイル。
+ */
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {

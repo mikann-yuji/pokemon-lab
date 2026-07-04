@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: SQLiteからポケモン検索結果と詳細情報を読み出すインフラ層リポジトリ。
+ */
+
 import "server-only";
 
 import Database from "better-sqlite3";
@@ -103,7 +107,9 @@ export function searchPokemon(query: string): PokemonSearchResult[] {
     process.env.DATABASE_PATH ??
     path.join(process.cwd(), "data", "pokemon-lab.db");
   const database = new Database(databasePath, { readonly: true });
+  // 前後の空白は検索意図に含めず、空文字なら一覧の先頭100件を返す。
   const normalizedQuery = query.trim();
+  // LIKEのワイルドカード文字をエスケープし、入力文字そのものとして検索する。
   const escapedQuery = normalizedQuery.replaceAll(
     /([%_\\])/g,
     "\\$1",
@@ -138,6 +144,7 @@ export function searchPokemon(query: string): PokemonSearchResult[] {
         LIMIT 100
       `)
       .all({ query: normalizedQuery, pattern: searchPattern }) as PokemonSearchRow[];
+    // 複数タイプのJOINで同じフォームが複数行になるため、Mapで1件にまとめる。
     const results = new Map<number, PokemonSearchResult>();
 
     for (const row of rows) {
@@ -192,6 +199,7 @@ export function getPokemonDetail(id: number): PokemonDetail | null {
       return null;
     }
 
+        // 1行目にはフォーム共通情報が入っている。タイプだけは複数行から配列化する。
     const base = rows[0];
     const abilities = database
       .prepare(`

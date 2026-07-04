@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: SQLiteのタイプ相性行を、アプリのドメイン型に変換して返すインフラ層リポジトリ。
+ */
+
 import "server-only";
 
 import Database from "better-sqlite3";

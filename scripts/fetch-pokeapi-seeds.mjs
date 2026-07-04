@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: PokeAPIからポケモン・技・特性などのマスターデータを取得し、アプリ用CSVシードへ変換するスクリプト。
+ */
+
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
@@ -7,6 +11,7 @@ const speciesLimit = process.env.POKEAPI_SPECIES_LIMIT
   ? Number(process.env.POKEAPI_SPECIES_LIMIT)
   : null;
 const maxAttempts = 3;
+// 同じURLを何度も取得しないよう、Promise自体をキャッシュする。
 const responseCache = new Map();
 
 function resourceId(resource) {
@@ -49,6 +54,7 @@ function wait(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+// PokeAPIへの一時的な失敗に備え、短い待機を挟んでリトライする。
 async function fetchJson(url) {
   let lastError;
 
@@ -80,6 +86,7 @@ async function getJson(url) {
   return responseCache.get(url);
 }
 
+// APIへ負荷をかけすぎないよう、同時実行数を制限して配列を非同期処理する。
 async function mapWithConcurrency(items, concurrency, mapper) {
   const results = new Array(items.length);
   let nextIndex = 0;
@@ -112,6 +119,7 @@ function csvValue(value) {
   return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 }
 
+// オブジェクト配列を指定カラム順のCSVとして書き出す。
 function writeCsv(filename, columns, rows) {
   const lines = [
     columns.join(","),

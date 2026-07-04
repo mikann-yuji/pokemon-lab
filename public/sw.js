@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: 静的アセットをキャッシュし、ネットワーク失敗時にキャッシュへフォールバックするPWA用Service Worker。
+ */
+
 const CACHE_NAME = "pokemon-lab-v5";
 const IMAGE_CACHE_NAME = "pokemon-lab-images-v1";
 const IMAGE_CACHE_LIMIT = 300;

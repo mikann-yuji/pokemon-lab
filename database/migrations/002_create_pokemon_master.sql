@@ -1,3 +1,5 @@
+-- このファイルの役割: ポケモン検索・詳細表示・クイズで使うポケモン関連マスタテーブルを作成するマイグレーション。
+
 -- PokeAPI mapping:
 --   species = /pokemon-species/{id}
 --   forms   = /pokemon/{id} (battle-relevant variety, including Mega forms)

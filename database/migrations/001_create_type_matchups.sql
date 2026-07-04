@@ -1,3 +1,5 @@
+-- このファイルの役割: タイプ名マスタとタイプ相性表を作成する初期マイグレーション。
+
 CREATE TABLE IF NOT EXISTS types (
   name TEXT PRIMARY KEY,
   name_ja TEXT NOT NULL,

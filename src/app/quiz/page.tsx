@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: タイプ相性クイズ画面。DBから相性データと画像候補を読み込み、クイズUIへ渡す。
+ */
+
 import Link from "next/link";
 import QuizGame from "@/features/quiz/components/quiz-game";
 import TypeMatchupMatrix from "@/features/quiz/components/type-matchup-matrix";
