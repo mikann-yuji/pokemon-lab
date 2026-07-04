@@ -1,0 +1,1101 @@
+id,pokeapi_id,name_ja,generation_id,type_name,damage_class_name,target_name,ailment_name,power,pp,accuracy,priority,effect_chance,effect_en,effect_ja
+razor-wind,13,かまいたち,1,Normal,special,all-opponents,none,80,10,100,0,,"Inflicts regular damage.  User’s critical hit rate is one level higher when using this move.  User charges for one turn before attacking.
+
+This move cannot be selected by Sleep Talk.","風の　刃を　つくり
+２ターン目に　相手を　攻撃する。
+急所に　当たりやすい。"
+swords-dance,14,つるぎのまい,1,Normal,status,user,none,,20,,0,,Raises the user’s Attack by two stages.,"戦いの舞を　激しく　おどって
+気合を　高める。
+自分の　攻撃を　ぐーんと　あげる。"
+cut,15,いあいぎり,1,Normal,physical,selected-pokemon,none,50,30,95,0,,Inflicts regular damage.,"カマや　ツメなどで
+相手を　切りつけて　攻撃する。
+細い木も　切ることが　できる。"
+bind,20,しめつける,1,Normal,physical,selected-pokemon,trap,15,20,85,0,100,"Inflicts regular damage.  For the next 2–5 turns, the target cannot leave the field and is damaged for 1/16 its max HP at the end of each turn.  The user continues to use other moves during this time.  If the user leaves the field, this effect ends.
+
+Has a 3/8 chance each to hit 2 or 3 times, and a 1/8 chance each to hit 4 or 5 times.  Averages to 3 hits per use.
+
+Rapid Spin cancels this effect.","長い　体や　つるなどを　使い
+４ー５ターンの　あいだ
+相手を　締めつけて　攻撃する。"
+vine-whip,22,つるのムチ,1,Grass,physical,selected-pokemon,none,45,25,100,0,,Inflicts regular damage.,"ムチのように　しなる　細長い　つるで
+相手を　たたきつけて　攻撃する。
+"
+headbutt,29,ずつき,1,Normal,physical,selected-pokemon,none,70,15,100,0,30,Inflicts regular damage.  Has a chance to make the target flinch.,"頭を　突きだして
+まっすぐ　つっこんで　攻撃する。
+相手を　ひるませることが　ある。"
+tackle,33,たいあたり,1,Normal,physical,selected-pokemon,none,40,35,100,0,,Inflicts regular damage.,"相手に　むかって　全身で
+ぶつかっていき　攻撃する。
+"
+body-slam,34,のしかかり,1,Normal,physical,selected-pokemon,paralysis,85,15,100,0,30,Inflicts regular damage.  Has a chance to paralyze the target.,"全身で
+相手に　のしかかり　攻撃する。
+まひ状態に　することが　ある。"
+take-down,36,とっしん,1,Normal,physical,selected-pokemon,none,90,20,85,0,,Inflicts regular damage.  User takes 1/4 the damage it inflicts in recoil.,"すごい　勢いで
+相手に　ぶつかって　攻撃する。
+自分も　少し　ダメージを　受ける。"
+double-edge,38,すてみタックル,1,Normal,physical,selected-pokemon,none,120,15,100,0,,Inflicts regular damage.  User takes 1/3 the damage it inflicts in recoil.,"命を　懸けて
+相手に　突進して　攻撃する。
+自分も　かなり　ダメージを　受ける。"
+growl,45,なきごえ,1,Normal,status,all-opponents,none,,40,100,0,,Lowers the target’s Attack by one stage.,"かわいい　なきごえを　聞かせて
+気を　ひき　油断を　させて
+相手の　攻撃を　さげる。"
+strength,70,かいりき,1,Normal,physical,selected-pokemon,none,80,15,100,0,,Inflicts regular damage.,"こん身の　力で
+相手を　なぐりつけて　攻撃する。
+重たい　岩を　押すことも　できる。"
+mega-drain,72,メガドレイン,1,Grass,special,selected-pokemon,none,40,15,100,0,,Inflicts regular damage.  Drains half the damage inflicted to heal the user.,"養分を　吸い取り　攻撃する。
+相手に　与えた　ダメージの
+半分の　ＨＰを　回復できる。"
+leech-seed,73,やどりぎのタネ,1,Grass,status,selected-pokemon,leech-seed,,10,90,0,,"Plants a seed on the target that drains 1/8 of its max HP at the end of every turn and heals the user for the amount taken.  Has no effect on Grass Pokémon.  The seed remains until the target leaves the field.
+
+The user takes damage instead of being healed if the target has Liquid Ooze.
+
+Rapid Spin will remove this effect.
+
+This effect is passed on by Baton Pass.","植えつけた　相手の　ＨＰを
+毎ターン　少しだけ　吸い取り
+自分の　ＨＰを　回復する。"
+growth,74,せいちょう,1,Normal,status,user,none,,20,,0,,"Raises the user’s Attack and Special Attack by one stage each.  During Sunny Day, raises both stats by two stages.","体を　一気に
+大きく　生長させて
+攻撃と　特攻を　あげる。"
+razor-leaf,75,はっぱカッター,1,Grass,physical,all-opponents,none,55,25,95,0,,Inflicts regular damage.  User’s critical hit rate is one level higher when using this move.,"はっぱを　とばして
+相手を　切りつけて　攻撃する。
+急所に　当たりやすい。"
+solar-beam,76,ソーラービーム,1,Grass,special,selected-pokemon,none,120,10,100,0,,"Inflicts regular damage.  User charges for one turn before attacking.
+
+During Sunny Day, the charge turn is skipped.
+
+During Hail, Rain Dance, or Sandstorm, power is halved.
+
+This move cannot be selected by Sleep Talk.","１ターン目に　光を　いっぱいに　集め
+２ターン目に　光の　束を
+発射して　攻撃する。"
+poison-powder,77,どくのこな,1,Poison,status,selected-pokemon,poison,,35,75,0,,Poisons the target.,"毒の　ある　粉を
+たくさん　ふりまいて
+相手を　毒状態に　する。"
+sleep-powder,79,ねむりごな,1,Grass,status,selected-pokemon,sleep,,15,75,0,,Puts the target to sleep.,"眠くなる　粉を
+たくさん　ふりまいて
+相手を　眠り状態に　する。"
+petal-dance,80,はなびらのまい,1,Grass,special,random-opponent,none,120,10,100,0,,"Inflicts regular damage.  User is forced to attack with this move for 2–3 turns,selected at random.  After the last hit, the user becomes confused.
+
+Safeguard does not protect against the confusion from this move.","２ー３ターンの　あいだ　花を
+まきちらして　相手を　攻撃する。
+まきちらした　あとは　混乱する。"
+string-shot,81,いとをはく,1,Bug,status,all-opponents,none,,40,95,0,,Lowers the target’s Speed by two stages.,"口から　吹きだした
+糸を　まきつけて　相手の
+素早さを　がくっと　さげる。"
+toxic,92,どくどく,1,Poison,status,selected-pokemon,poison,,10,90,0,,Badly poisons the target.  Never misses when used by a Poison-type Pokémon.,"相手を　猛毒の　状態に　する。
+ターンが　すすむほど
+毒の　ダメージが　増えていく。"
+rage,99,いかり,1,Normal,physical,selected-pokemon,none,20,20,100,0,,"Inflicts regular damage.  Every time the user is hit after it uses this move but before its next action, its Attack raises by one stage.","技を　だしたときに　攻撃を
+受けると　怒りの　力で
+攻撃が　あがる。"
+mimic,102,ものまね,1,Normal,status,selected-pokemon,none,,10,,0,,"This move is replaced by the target’s last successfully used move, and its PP changes to 5.  If the target hasn’t used a move since entering the field, if it tried to use a move this turn and failed, or if the user already knows the targeted move, this move will fail.  This effect vanishes when the user leaves the field.
+
+If Chatter, Metronome, Mimic, Sketch, or Struggle is selected, this move will fail.
+
+This move cannot be copied by Mirror Move, nor selected by Assist or Metronome, nor forced by Encore.","相手が　最後に　使った　技を
+戦闘の　あいだ
+自分の　技に　することが　できる。"
+double-team,104,かげぶんしん,1,Normal,status,user,none,,15,,0,,Raises the user’s evasion by one stage.,"素早い　動きで　分身を　つくり
+相手を　まどわせて
+回避率を　あげる。"
+defense-curl,111,まるくなる,1,Normal,status,user,none,,40,,0,,"Raises user’s Defense by one stage.
+
+After this move is used, the power of Ice Ball and Rollout are doubled until the user leaves the field.","体を　まるめて　ちぢこまり
+自分の　防御を　あげる。
+"
+light-screen,113,ひかりのかべ,1,Psychic,status,users-field,none,,30,,0,,"Erects a barrier around the user’s side of the field that reduces damage from special attacks by half for five turns.  In double battles, the reduction is 1/3.  Critical hits are not affected by the barrier.
+
+If the user is holding Light Clay, the barrier lasts for eight turns.
+
+Brick Break or Defog used by an opponent will destroy the barrier.","５ターンの　あいだ　不思議な　かべで
+相手から　受ける　特殊攻撃の
+ダメージを　弱める。"
+reflect,115,リフレクター,1,Psychic,status,users-field,none,,20,,0,,"Erects a barrier around the user’s side of the field that reduces damage from physical attacks by half for five turns.  In double battles, the reduction is 1/3.  Critical hits are not affected by the barrier.
+
+If the user is holding Light Clay, the barrier lasts for eight turns.
+
+Brick Break or Defog used by an opponent will destroy the barrier.","５ターンの　あいだ　不思議な　かべで
+相手から　受ける　物理攻撃の
+ダメージを　弱める。"
+bide,117,がまん,1,Normal,physical,user,none,,10,,1,,"User waits for two turns.  On the second turn, the user inflicts twice the damage it accumulated on the last Pokémon to hit it.  Damage inflicted is typeless.
+
+This move cannot be selected by Sleep Talk.","２ターンの　あいだ　攻撃に　たえて
+受けた　ダメージを　２倍にして
+相手に　返す。"
+sludge,124,ヘドロこうげき,1,Poison,special,selected-pokemon,poison,65,20,100,0,30,Inflicts regular damage.  Has a chance to poison the target.,"汚い　ヘドロを
+相手に　投げつけて　攻撃する。
+毒状態に　することが　ある。"
+skull-bash,130,ロケットずつき,1,Normal,physical,selected-pokemon,none,130,10,100,0,100,"Inflicts regular damage.  Raises the user’s Defense by one stage.  User then charges for one turn before attacking.
+
+This move cannot be selected by Sleep Talk.","１ターン目に　頭を　ひっこめて
+防御を　あげる。
+２ターン目に　相手を　攻撃する。"
+amnesia,133,ドわすれ,1,Psychic,status,user,none,,20,,0,,Raises the user’s Special Defense by two stages.,"頭を　からにして
+一瞬　なにかを　忘れることで
+自分の　特防を　ぐーんと　あげる。"
+flash,148,フラッシュ,1,Normal,status,selected-pokemon,none,,20,100,0,,Lowers the target’s accuracy by one stage.,"まぶしい　光で　相手の
+命中率を　さげる。
+"
+rest,156,ねむる,1,Psychic,status,user,none,,5,,0,,"User falls to sleep and immediately regains all its HP.  If the user has another major status effect, sleep will replace it.  The user will always wake up after two turns, or one turn with Early Bird.
+
+This move fails if the Pokémon cannot fall asleep due to Uproar, Insomnia, or Vital Spirit.  It also fails if the Pokémon is at full health or is already asleep.","２ターンの　あいだ　眠り続ける。
+自分の　ＨＰと　状態異常を
+すべて　回復する。"
+substitute,164,みがわり,1,Normal,status,user,none,,10,,0,,"Transfers 1/4 the user’s max HP into a doll that absorbs damage and causes most negative move effects to fail.  If the user leaves the field, the doll will vanish.  If the user cannot pay the HP cost, this move will fail.
+
+The doll takes damage as normal, using the user’s stats and types, and will break when its HP reaches zero.  Self-inflicted damage from confusion or recoil is not absorbed.  Healing effects from opponents ignore the doll and heal the user as normal.  Moves that work based on the user’s HP still do so; the doll’s HP does not influence any move.
+
+The doll will block major status effects, confusion, and flinching.  The effects of Smelling Salts and Wake-Up Slap do not trigger against a doll, even if the Pokémon behind the doll has the appropriate major status effect.  Multi-turn trapping moves like Wrap will hit the doll for their regular damage, but the multi-turn trapping and damage effects will not activate.
+
+Moves blocked or damage absorbed by the doll do not count as hitting the user or inflicting damage for any effects that respond to such, e.g., Avalanche, Counter, or a Rowap Berry.  Magic Coat still works as normal, even against moves the doll would block.  Opposing Pokémon that damage the doll with a leech move like Absorb are healed as normal.
+
+It will also block Acupressure, Block, the curse effect of Curse, Dream Eater, Embargo, Flatter, Gastro Acid, Grudge, Heal Block, Leech Seed, Lock-On, Mean Look, Mimic, Mind Reader, Nightmare, Pain Split, Psycho Shift, Spider Web, Sketch, Swagger, Switcheroo, Trick, Worry Seed, and Yawn.  A Pokémon affected by Yawn before summoning the doll will still fall to sleep.
+
+The doll blocks Intimidate, but all other abilities act as though the doll did not exist.  If the user has an ability that absorbs moves of a certain type for HP (such as Volt Absorb absorbing Thunder Wave), such moves will not be blocked.
+
+Life Orb and berries that cause confusion still work as normal, but their respective HP loss and confusion are absorbed/blocked by the doll.
+
+The user is still vulnerable to damage inflicted when entering or leaving the field, such as by Pursuit or Spikes; however, the doll will block the poison effect of Toxic Spikes.
+
+The doll is passed on by Baton Pass.  It keeps its existing HP, but uses the replacement Pokémon’s stats and types for damage calculation.
+
+All other effects work as normal.","自分の　ＨＰを　少し　削って
+分身を　だす。
+分身は　自分の　身代わりに　なる。"
+snore,173,いびき,2,Normal,special,selected-pokemon,none,50,15,100,0,30,Only usable if the user is sleeping.  Inflicts regular damage.  Has a chance to make the target flinch.,"自分が　寝ているときに
+雑音を　だして　攻撃する。
+相手を　ひるませることが　ある。"
+curse,174,のろい,2,Ghost,status,specific-move,none,,10,,0,,"If the user is a Ghost: user pays half its max HP to place a curse on the target, damaging it for 1/4 its max HP every turn.
+Otherwise: Lowers the user’s Speed by one stage, and raises its Attack and Defense by one stage each.
+
+The curse effect is passed on by Baton Pass.
+
+This move cannot be copied by Mirror Move.","使う　ポケモンが
+ゴーストタイプと　それ以外　とでは
+効果が　変わる。"
+protect,182,まもる,2,Normal,status,user,none,,10,,4,,"No moves will hit the user for the remainder of this turn.  If the user is last to act this turn, this move will fail.
+
+If the user successfully used Detect, Endure, Protect, Quick Guard, or Wide Guard on the last turn, this move has a 50% chance to fail.
+
+Lock-On, Mind Reader, and No Guard provide a (100 – accuracy)% chance for moves to break through this move.  This does not apply to one-hit KO moves (Fissure, Guillotine, Horn Drill, and Sheer Cold); those are always blocked by this move.
+
+Thunder during Rain Dance and Blizzard during Hail have a 30% chance to break through this move.
+
+The following effects are not prevented by this move:
+
+* Acupressure from an ally
+* Curse’s curse effect
+* Delayed damage from Doom Desire and Future Sight; however, these moves will be prevented if they are used this turn
+* Feint, which will also end this move’s protection after it hits
+* Imprison
+* Perish Song
+* Shadow Force
+* Moves that merely copy the user, such as Transform or Psych Up
+
+This move cannot be selected by Assist or Metronome.","相手の　攻撃を
+まったく　受けない。
+連続で　だすと　失敗しやすい。"
+sludge-bomb,188,ヘドロばくだん,2,Poison,special,selected-pokemon,poison,90,10,100,0,30,Inflicts regular damage.  Has a chance to poison the target.,"汚い　ヘドロを
+相手に　投げつけて　攻撃する。
+毒状態に　することが　ある。"
+mud-slap,189,どろかけ,2,Ground,special,selected-pokemon,none,20,10,100,0,100,Inflicts regular damage.  Has a chance to lower the target’s accuracy by one stage.,"相手の　顔などに
+泥を　投げつけて　攻撃する。
+命中率を　さげる。"
+outrage,200,げきりん,2,Dragon,physical,random-opponent,none,120,10,100,0,,"Inflicts regular damage.  User is forced to attack with this move for 2–3 turns,selected at random.  After the last hit, the user becomes confused.
+
+Safeguard does not protect against the confusion from this move.","２ー３ターンの　あいだ
+暴れまくって　攻撃する。
+暴れたあとは　混乱する。"
+giga-drain,202,ギガドレイン,2,Grass,special,selected-pokemon,none,75,10,100,0,,Inflicts regular damage.  Drains half the damage inflicted to heal the user.,"養分を　吸い取り　攻撃する。
+与えた　ダメージの
+半分の　ＨＰを　回復できる。"
+endure,203,こらえる,2,Normal,status,user,none,,10,,4,,"The user’s HP cannot be lowered below 1 by any means for the remainder of this turn.
+
+If the user successfully used Detect, Endure, Protect, Quick Guard, or Wide Guard on the last turn, this move has a 50% chance to fail.
+
+This move cannot be selected by Assist or Metronome.","攻撃を　受けても
+ＨＰを　必ず　１だけ　残せる。
+連続で　だすと　失敗しやすい。"
+charm,204,あまえる,2,Fairy,status,selected-pokemon,none,,20,100,0,,Lowers the target’s Attack by two stages.,"かわいく　みつめて　油断を　誘い
+相手の　攻撃を　がくっと　さげる。
+"
+false-swipe,206,みねうち,2,Normal,physical,selected-pokemon,none,40,40,100,0,,Inflicts regular damage.  Will not reduce the target’s HP below 1.,"相手の　ＨＰが
+必ず　１だけ　残るように
+手加減して　攻撃する。"
+swagger,207,いばる,2,Normal,status,selected-pokemon,confusion,,15,85,0,,"Raises the target’s Attack by two stages, then confuses it.  If the target’s Attack cannot be raised by two stages, the confusion is not applied.","相手を　怒らせて　混乱させる。
+怒りで　相手の　攻撃は
+ぐーんと　あがってしまう。"
+fury-cutter,210,れんぞくぎり,2,Bug,physical,selected-pokemon,none,40,20,95,0,,"Inflicts regular damage.  Power doubles after every time this move is used, whether consecutively or not, maxing out at 16x.  If this move misses or the user leaves the field, power resets.","カマや　ツメなどで　相手を
+切りつけて　攻撃する。
+連続で　当てると　威力が　あがる。"
+attract,213,メロメロ,2,Normal,status,selected-pokemon,infatuation,,15,100,0,,"Causes the target to fall in love with the user, giving it a 50% chance to do nothing each turn.  If the user and target are the same gender, or either is genderless, this move will fail.  If either Pokémon leaves the field, this effect ends.","♂なら♀を　♀なら♂を　誘惑して
+メロメロに　する。
+相手は　技が　だしにくくなる。"
+sleep-talk,214,ねごと,2,Normal,status,user,none,,10,,0,,"Only usable if the user is sleeping.  Randomly selects and uses one of the user’s other three moves.  Use of the selected move requires and costs 0 PP.
+
+This move will not select Assist, Bide, Bounce, Chatter, Copycat, Dig, Dive, Fly, Focus Punch, Me First, Metronome, Mirror Move, Shadow Force, Skull Bash, Sky Attack, Sky Drop, Sleep Talk, Solar Beam, Razor Wind, or Uproar.
+
+If the selected move requires a recharge turn—i.e., one of Blast Burn, Frenzy Plant, Giga Impact, Hydro Cannon, Hyper Beam, Roar of Time, or Rock Wrecker—and the user is still sleeping next turn, then it’s forced to use this move again and pay another PP for the recharge turn.
+
+This move cannot be copied by Mirror Move, nor selected by Assist, Metronome, or Sleep Talk.","自分が　おぼえている　技の　うち
+どれか　１つを　くりだす。
+自分が　寝ているときだけ　使える。"
+return,216,おんがえし,2,Normal,physical,selected-pokemon,none,,20,100,0,,"Inflicts regular damage.  Power increases with happiness, given by `happiness * 2 / 5`, to a maximum of 102.  Power bottoms out at 1.","トレーナーの　ために　全力で
+相手を　攻撃する。
+なついているほど　威力は　あがる。"
+frustration,218,やつあたり,2,Normal,physical,selected-pokemon,none,,20,100,0,,"Inflicts regular damage.  Power increases inversely with happiness, given by `(255 - happiness) * 2 / 5`, to a maximum of 102.  Power bottoms out at 1.","不満を　はらすため　全力で
+相手を　攻撃する。
+なついていないほど　威力は　あがる。"
+safeguard,219,しんぴのまもり,2,Normal,status,users-field,none,,25,,0,,"Protects Pokémon on the user’s side of the field from major status effects and confusion for five turns.  Does not cancel existing ailments.  This effect remains even if the user leaves the field.
+
+If Yawn is used while this move is in effect, it will immediately fail.
+
+Defog used by an opponent will end this effect.
+
+This effect does not prevent the confusion caused by Outrage, Petal Dance, or Thrash.","５ターンの　あいだ
+不思議な　力に　守られて
+状態異常に　ならなくなる。"
+sweet-scent,230,あまいかおり,2,Normal,status,all-opponents,none,,20,100,0,,Lowers the target’s evasion by one stage.,"香りで　相手の　回避率を
+がくっと　さげる。草むら　などで
+使うと　ポケモンが　よってくる。"
+synthesis,235,こうごうせい,2,Grass,status,user,none,,5,,0,,"Heals the user for half its max HP.
+
+During Sunny Day, the healing is increased to 2/3 max HP.
+
+During Hail, Rain Dance, or Sandstorm, the healing is decreased to 1/4 max HP.","自分の　ＨＰを　回復する。
+天気に　よって
+回復の　量が　変化する。"
+hidden-power,237,めざめるパワー,2,Normal,special,selected-pokemon,none,60,15,100,0,,"Inflicts regular damage.  Power and type are determined by the user’s IVs.
+
+Power is given by `x * 40 / 63 + 30`.  `x` is obtained by arranging bit 1 from the IV for each of Special Defense, Special Attack, Speed, Defense, Attack, and HP in that order.  (Bit 1 is 1 if the IV is of the form `4n + 2` or `4n + 3`.  `x` is then 64 * Special Defense IV bit 1, plus 32 * Special Attack IV bit 1, etc.)
+
+Power is always between 30 and 70, inclusive.  Average power is 49.5.
+
+Type is given by `y * 15 / 63`, where `y` is similar to `x` above, except constructed from bit 0.  (Bit 0 is 1 if the IV is odd.)  The result is looked up in the following table.
+
+Value | Type
+----: | --------
+    0 | Fighting
+    1 | Flying
+    2 | Poison
+    3 | Ground
+    4 | Rock
+    5 | Bug
+    6 | Ghost
+    7 | Steel
+    8 | Fire
+    9 | Water
+   10 | Grass
+   11 | Electric
+   12 | Psychic
+   13 | Ice
+   14 | Dragon
+   15 | Dark
+
+This move thus cannot be Normal.  Most other types have an equal 1/16 chance to be selected, given random IVs.  However, due to the flooring used here, Bug, Fighting, and Grass appear 5/64 of the time, and Dark only 1/64 of the time.","技を　使った　ポケモンに　よって
+技の　タイプが　変わる。"
+sunny-day,241,にほんばれ,2,Fire,status,entire-field,none,,5,,0,,"Changes the weather to sunshine for five turns, during which Fire moves inflict 50% extra damage, and Water moves inflict half damage.
+
+If the user is holding Heat Rock, this effect lasts for eight turns.
+
+Pokémon cannot become frozen.
+
+Thunder has 50% accuracy.
+
+Solar Beam skips its charge turn.
+
+Moonlight, Morning Sun, and Synthesis heal 2/3 of the user’s max HP.
+
+Pokémon with Chlorophyll have doubled original Speed.
+
+Pokémon with Forecast become Fire.
+
+Pokémon with Leaf Guard are not affected by major status effects.
+
+Pokémon with Flower Gift change form; every Pokémon on their side of the field have their original Attack and Special Attack increased by 50%.
+
+Pokémon with Dry Skin lose 1/8 max HP at the end of each turn.
+
+Pokémon with Solar Power have their original Special Attack raised by 50% but lose 1/8 their max HP at the end of each turn.","５ターンの　あいだ　日差しを
+強くして　ほのおタイプの
+技の　威力を　あげる。"
+rock-smash,249,いわくだき,2,Fighting,physical,selected-pokemon,none,40,15,100,0,50,Inflicts regular damage.  Has a chance to lower the target’s Defense by one stage.,"パンチで　攻撃する。相手の
+防御を　さげる　ことが　ある。
+岩を　砕くことも　ある。"
+facade,263,からげんき,3,Normal,physical,selected-pokemon,none,70,20,100,0,,"Inflicts regular damage.  If the user is burned, paralyzed, or poisoned, this move has double power.","自分が　毒　まひ　やけど
+状態のとき　相手に　くりだすと
+技の　威力が　２倍に　なる。"
+nature-power,267,しぜんのちから,3,Normal,status,selected-pokemon,none,,20,,0,,"Uses another move chosen according to the terrain.
+
+Terrain                   | Selected move
+------------------------- | ------------------
+Building                  | Tri Attack
+Cave                      | Rock Slide
+Deep water                | Hydro Pump
+Desert                    | Earthquake
+Grass                     | Seed Bomb
+Mountain                  | Rock Slide
+Road                      | Earthquake
+Shallow water             | Hydro Pump
+Snow                      | Blizzard
+Tall grass                | Seed Bomb
+Electric Terrain | Thunderbolt
+Grassy Terrain   | Energy Ball
+Misty Terrain    | Moonblast
+
+In Pokémon Battle Revolution:
+
+Terrain        | Selected move
+-------------- | ------------------
+Courtyard      | Tri Attack
+Crystal        | Rock Slide
+Gateway        | Hydro Pump
+Magma          | Rock Slide
+Main Street    | Tri Attack
+Neon           | Tri Attack
+Stargazer      | Rock Slide
+Sunny Park     | Seed Bomb
+Sunset         | Earthquake
+Waterfall      | Seed Bomb
+
+This move cannot be copied by Mirror Move.","自然の　力で　攻撃する。
+使う　場所で
+でてくる　技が　変化する。"
+helping-hand,270,てだすけ,3,Normal,status,ally,none,,20,,5,,"Boosts the power of the target’s moves by 50% until the end of this turn.
+
+This move cannot be copied by Mirror Move, nor selected by Assist or Metronome.","仲間を　助ける。
+てだすけ　された　ポケモンの　技の
+威力は　いつもより　大きくなる。"
+ingrain,275,ねをはる,3,Grass,status,user,ingrain,,20,,0,,"Prevents the user from switching out.  User regains 1/16 of its max HP at the end of every turn.  If the user was immune to Ground attacks, it will now take normal damage from them.
+
+Roar and Whirlwind will not affect the user.  The user cannot use Magnet Rise.
+
+The user may still use U-turn to leave the field.
+
+This effect can be passed with Baton Pass.","大地に　根を　張り
+毎ターン　自分の　ＨＰを　回復する。
+根を　張っているので　入れ替えられない。"
+knock-off,282,はたきおとす,3,Dark,physical,selected-pokemon,none,65,20,100,0,,"Inflicts regular damage.  Target loses its held item.
+
+Neither the user nor the target can recover its item with Recycle.
+
+If the target has Multitype or Sticky Hold, it will take damage but not lose its item.","相手の　持ち物を　はたき　落として
+戦闘が　終わるまで　使えなくする。
+物を持つ　相手には　ダメージが増す。"
+secret-power,290,ひみつのちから,3,Normal,physical,selected-pokemon,none,70,20,100,0,30,"Inflicts regular damage.  Has a chance to inflict an effect chosen according to the terrain.
+
+Terrain        | Effect
+-------------- | -------------------------------------------------------------
+Building       | Paralyzes target
+Cave           | Makes target flinch
+Deep water     | Lowers target’s Attack by one stage
+Desert         | Lowers target’s accuracy by one stage
+Grass          | Puts target to sleep
+Mountain       | Makes target flinch
+Road           | Lowers target’s accuracy by one stage
+Shallow water  | Lowers target’s Attack by one stage
+Snow           | Freezes target
+Tall grass     | Puts target to sleep
+
+In Pokémon Battle Revolution:
+
+Terrain        | Effect
+-------------- | -------------------------------------------------------------
+Courtyard      | Paralyzes target
+Crystal        | Makes target flinch
+Gateway        | Lowers target’s Attack by one stage
+Magma          | Makes target flinch
+Main Street    | Paralyzes target
+Neon           | Paralyzes target
+Stargazer      | Makes target flinch
+Sunny Park     | Puts target to sleep
+Sunset         | Lowers target’s accuracy by one stage
+Waterfall      | Puts target to sleep
+","秘密の　力で
+相手を　攻撃する。使う　場所で
+追加効果が　変化する。"
+weather-ball,311,ウェザーボール,3,Normal,special,selected-pokemon,none,50,10,100,0,,"Inflicts regular damage.  If a weather move is active, this move has double power, and its type becomes the type of the weather move.  Shadow Sky is typeless for the purposes of this move.","使ったときの　天気に　よって
+技の　タイプと　威力が　変わる。
+"
+grass-whistle,320,くさぶえ,3,Grass,status,selected-pokemon,sleep,,15,55,0,,Puts the target to sleep.,"心地好い　笛の　音色を　聞かせて
+相手を　眠りの　状態に　する。
+"
+bullet-seed,331,タネマシンガン,3,Grass,physical,selected-pokemon,none,25,30,100,0,,"Inflicts regular damage.  Hits 2–5 times in one turn.
+
+Has a 3/8 chance each to hit 2 or 3 times, and a 1/8 chance each to hit 4 or 5 times.  Averages to 3 hits per use.","タネを　勢いよく
+相手に　発射して　攻撃する。
+２ー５回の　あいだ　連続で　だす。"
+magical-leaf,345,マジカルリーフ,3,Grass,special,selected-pokemon,none,60,20,,0,,Inflicts regular damage.  Ignores accuracy and evasion modifiers.,"相手を　追跡する
+不思議な　はっぱを まきちらす。
+攻撃は　必ず　命中する。"
+natural-gift,363,しぜんのめぐみ,4,Normal,physical,selected-pokemon,none,,15,100,0,,"Inflicts regular damage.  Power and type are determined by the user’s held berry.  The berry is consumed.  If the user is not holding a berry, this move will fail.","きのみから　力を　もらい
+攻撃する。持たせた　きのみで
+技の　タイプと　威力が　変わる。"
+worry-seed,388,なやみのタネ,4,Grass,status,selected-pokemon,none,,10,100,0,,"Changes the target’s ability to Insomnia.
+
+If the target’s ability is Truant or Multitype, this move will fail.","心を　なやませる　タネを
+植えつける。相手を　眠れなくして
+特性を　ふみんに　する。"
+seed-bomb,402,タネばくだん,4,Grass,physical,selected-pokemon,none,80,15,100,0,,Inflicts regular damage.,"硬い　殻を　もつ　大きな　タネを
+上から　たたきつけて
+相手を　攻撃する。"
+energy-ball,412,エナジーボール,4,Grass,special,selected-pokemon,none,90,10,100,0,10,Inflicts regular damage.  Has a chance to lower the target’s Special Defense by one stage.,"自然から　集めた
+命の力を　発射する。
+相手の　特防を　さげることがある。"
+leaf-storm,437,リーフストーム,4,Grass,special,selected-pokemon,none,130,5,90,0,100,"Inflicts regular damage, then lowers the user’s Special Attack by two stages.","とがった　はっぱで　相手に　あらしを
+おこす。使うと　反動で
+自分の　特攻が　がくっと　さがる。"
+power-whip,438,パワーウィップ,4,Grass,physical,selected-pokemon,none,120,10,85,0,,Inflicts regular damage.,"ツタや　触手を　激しく　ふるって
+相手を　たたきつけ　攻撃する。
+"
+captivate,445,ゆうわく,4,Normal,status,all-opponents,none,,20,100,0,,"Lowers the target’s Special Attack by two stages.  If the user and target are the same gender, or either is genderless, this move will fail.","♂なら♀を　♀なら♂を　誘惑して
+相手の　特攻を　がくっと　さげる。
+"
+grass-knot,447,くさむすび,4,Grass,special,selected-pokemon,none,,20,100,0,,"Inflicts regular damage.  Power increases with the target’s weight in kilograms, to a maximum of 120.
+
+Target’s weight | Power
+--------------- | ----:
+Up to 10kg      |    20
+Up to 25kg      |    40
+Up to 50kg      |    60
+Up to 100kg     |    80
+Up to 200kg     |   100
+Above 200kg     |   120
+","草を　からませて　相手を
+転ばせる。相手が　重いほど
+威力が　あがる。"
+venoshock,474,ベノムショック,5,Poison,special,selected-pokemon,none,65,10,100,0,,"Inflicts regular damage.  If the target is poisoned, this move has double power.","特殊な　毒液を　浴びせかける。
+毒状態の　相手には
+威力が　２倍に　なる。"
+acid-spray,491,アシッドボム,5,Poison,special,selected-pokemon,none,40,20,100,0,100,Inflicts regular damage.  Lowers the target’s Special Defense by two stages.,"相手を　とかす　液体を
+吐きだして　攻撃する。
+相手の　特防を　がくっと　さげる。"
+round,496,りんしょう,5,Normal,special,selected-pokemon,none,60,15,100,0,,"Inflicts regular damage.  If Round has already been used this turn, this move’s power is doubled.  After this move is used, any other Pokémon using it this turn will immediately do so (in the order they would otherwise act), regardless of Speed or priority.  Pokémon using other moves will then continue to act as usual.","歌で　相手を　攻撃する。
+みんなで　輪唱すると　続けて
+だすことが　でき　威力も　あがる。"
+echoed-voice,497,エコーボイス,5,Normal,special,selected-pokemon,none,40,15,100,0,,"Inflicts regular damage.  If any friendly Pokémon used this move earlier this turn or on the previous turn, that use’s power is added to this move’s power, to a maximum of 200.","響く　声で　相手を　攻撃する。
+毎ターン　だれかが　技を
+使い続けると　威力が　あがる。"
+grass-pledge,520,くさのちかい,5,Grass,special,selected-pokemon,none,80,10,100,0,,"Inflicts regular damage.  If a friendly Pokémon used Fire Pledge earlier this turn, all opposing Pokémon will take 1/8 their max HP in damage at the end of every turn for four turns (including this one).","草の柱で　攻撃する。
+みずと　組みあわせると　威力が
+あがって　あたりが　湿原に　なる。"
+work-up,526,ふるいたてる,5,Normal,status,user,none,,30,,0,,Raises the user’s Attack and Special Attack by one stage each.,"自分を　奮いたてて
+攻撃と　特攻を　あげる。
+"
+grassy-terrain,580,グラスフィールド,6,Grass,status,entire-field,none,,10,,0,,"For five turns, heals all Pokémon on the ground for 1/16 their max HP each turn and strengthens their Grass moves to 1.5× their power.
+
+Changes Nature Power to Energy Ball.","５ターンの　あいだ　足元を
+グラスフィールドにする。地面にいる
+ポケモンは　毎ターン　回復する。"
+confide,590,ないしょばなし,6,Normal,status,selected-pokemon,none,,20,,0,100,Lowers the target’s Special Attack by one stage.,"ないしょばなしを　することで　相手の
+集中力を　失わせ
+相手の　特攻を　さげる。"
+grassy-glide,803,グラススライダー,8,Grass,physical,selected-pokemon,none,55,20,100,0,,Inflicts regular damage.,"地面を　滑るように　相手を　攻撃。
+グラスフィールドの時
+必ず　先制攻撃　できる。"
+tera-blast,851,テラバースト,9,Normal,special,selected-pokemon,,80,10,100,0,,"If the user has Terastallized, it unleashes energy of its Tera Type. This move inflicts damage using the Attack or Sp. Atk stat—whichever is higher for the user.",
+trailblaze,885,くさわけ,9,Grass,physical,selected-pokemon,,50,20,100,0,,The user attacks suddenly as if leaping out from tall grass. The user's nimble footwork boosts its Speed stat.,
+roar,46,ほえる,1,Normal,status,selected-pokemon,none,,20,,-6,,"Switches the target out for another of its trainer’s Pokémon selected at random.  Wild battles end immediately.
+
+Doesn’t affect Pokémon with Suction Cups or under the effect of Ingrain.","相手を　逃がして
+控えの　ポケモンを　ひきずりだす。
+野生の　場合は　戦闘が　終わる。"
+hyper-beam,63,はかいこうせん,1,Normal,special,selected-pokemon,none,150,5,90,0,,"Inflicts regular damage.  User loses its next turn to ""recharge"", and cannot attack or switch out during that turn.","強い　光線を
+相手に　発射して　攻撃する。
+次の　ターンは　動けなくなる。"
+earthquake,89,じしん,1,Ground,physical,all-other-pokemon,none,100,10,100,0,,"Inflicts regular damage.
+
+If the target is in the first turn of Dig, this move will hit with double power.","地震の　衝撃で　自分の
+周りに　いるものを　攻撃する。
+"
+scary-face,184,こわいかお,2,Normal,status,selected-pokemon,none,,10,100,0,,Lowers the target’s Speed by two stages.,"恐ろしい　顔で　にらみ　おびえさせて
+相手の　素早さを　がくっと　さげる。
+"
+block,335,とおせんぼう,3,Normal,status,selected-pokemon,none,,5,,0,,"The target cannot switch out normally.  Ignores accuracy and evasion modifiers.  This effect ends when the user leaves the field.
+
+The target may still escape by using Baton Pass, U-turn, or a Shed Shell.
+
+Both the user and the target pass on this effect with Baton Pass.","両手を　ひろげて　たちはだかり
+相手の　逃げ道を　ふさいで
+逃げられなくする。"
+frenzy-plant,338,ハードプラント,3,Grass,special,selected-pokemon,none,150,5,90,0,,"Inflicts regular damage.  User loses its next turn to ""recharge"", and cannot attack or switch out during that turn.","大きな　樹木で
+相手を　たたきつけて　攻撃する。
+次の　ターンは　動けなくなる。"
+poison-jab,398,どくづき,4,Poison,physical,selected-pokemon,poison,80,20,100,0,30,Inflicts regular damage.  Has a chance to poison the target.,"毒に　そまった　触手や　腕で
+相手を　突き刺す。
+毒状態に　することが　ある。"
+earth-power,414,だいちのちから,4,Ground,special,selected-pokemon,none,90,10,100,0,10,Inflicts regular damage.  Has a chance to lower the target’s Special Defense by one stage.,"相手の　足下へ　大地の力を
+放出する。相手の　特防を
+さげることが　ある。"
+giga-impact,416,ギガインパクト,4,Normal,physical,selected-pokemon,none,150,5,90,0,,"Inflicts regular damage.  User loses its next turn to ""recharge"", and cannot attack or switch out during that turn.","持てる　力を　すべて　使って
+相手に　突撃する。
+次の　ターンは　動けなくなる。"
+rock-climb,431,ロッククライム,4,Normal,physical,selected-pokemon,confusion,90,20,85,0,20,Inflicts regular damage.  Has a chance to confuse the target.,"すごい　勢いで　相手に
+つっこみ　攻撃する。
+相手を　混乱させることが　ある。"
+sludge-wave,482,ヘドロウェーブ,5,Poison,special,all-other-pokemon,poison,95,10,100,0,10,Inflicts regular damage.  Has a chance to poison the target.,"ヘドロの　波で　自分の
+周りに　いるものを　攻撃する。
+毒状態に　することが　ある。"
+bulldoze,523,じならし,5,Ground,physical,all-other-pokemon,none,60,20,100,0,100,Inflicts regular damage.  Has a chance to lower the target’s Speed by one stage.,"地面を　踏みならして　自分の
+周りに　いるものを　攻撃する。
+相手の　素早さを　さげる。"
+petal-blizzard,572,はなふぶき,6,Grass,physical,all-other-pokemon,none,90,15,100,0,,Inflicts regular damage.,"激しい　花吹雪を　起こし
+周りに　いるものに　攻撃して
+ダメージを　与える。"
+stomping-tantrum,707,じだんだ,7,Ground,physical,selected-pokemon,none,75,10,100,0,,"Inflicts regular damage.  Power is doubled if the user’s last move failed for any reason (i.e., produced the message ""But it failed!"") or was ineffective due to types.","悔しさを　バネにして　攻撃する。
+前の　ターンに　技を　外していると
+威力が　倍に　なる。"
+terrain-pulse,805,だいちのはどう,8,Normal,special,selected-pokemon,none,50,10,100,0,,Inflicts regular damage.,"フィールドの力を　借りて　攻撃。
+使った時の　フィールドの状態に　よって
+技の　タイプと　威力が　変わる。"
+mega-punch,5,メガトンパンチ,1,Normal,physical,selected-pokemon,none,80,20,85,0,,Inflicts regular damage.,"力を　こめた　パンチで
+相手を　攻撃する。
+"
+fire-punch,7,ほのおのパンチ,1,Fire,physical,selected-pokemon,burn,75,15,100,0,10,Inflicts regular damage.  Has a chance to burn the target.,"炎を　こめた　パンチで
+相手を　攻撃する。
+やけど状態に　することが　ある。"
+thunder-punch,9,かみなりパンチ,1,Electric,physical,selected-pokemon,paralysis,75,15,100,0,10,Inflicts regular damage.  Has a chance to paralyze the target.,"電撃を　こめた　パンチで
+相手を　攻撃する。
+まひ状態に　することが　ある。"
+scratch,10,ひっかく,1,Normal,physical,selected-pokemon,none,40,35,100,0,,Inflicts regular damage.,"硬く　とがった　鋭い　ツメで
+相手を　ひっかいて　攻撃する。
+"
+wing-attack,17,つばさでうつ,1,Flying,physical,selected-pokemon,none,60,35,100,0,,Inflicts regular damage.,"大きく　ひろげた　りっぱな　翼を
+相手に　ぶつけて　攻撃する。
+"
+mega-kick,25,メガトンキック,1,Normal,physical,selected-pokemon,none,120,5,75,0,,Inflicts regular damage.,"ものすごい　力を　こめた　キックで
+相手を　けとばして　攻撃する。
+"
+leer,43,にらみつける,1,Normal,status,all-opponents,none,,30,100,0,100,Lowers the target’s Defense by one stage.,"鋭い　目つきで　おびえさせて
+相手の　防御を　さげる。
+"
+bite,44,かみつく,1,Dark,physical,selected-pokemon,none,60,25,100,0,30,Inflicts regular damage.  Has a chance to make the target flinch.,"鋭く　とがった　歯で
+かみついて　攻撃する。
+相手を　ひるませることが　ある。"
+ember,52,ひのこ,1,Fire,special,selected-pokemon,burn,40,25,100,0,10,Inflicts regular damage.  Has a chance to burn the target.,"小さな　炎を
+相手に　発射して　攻撃する。
+やけど状態に　することが　ある。"
+flamethrower,53,かえんほうしゃ,1,Fire,special,selected-pokemon,burn,90,15,100,0,10,Inflicts regular damage.  Has a chance to burn the target.,"激しい　炎を
+相手に　発射して　攻撃する。
+やけど状態に　することが　ある。"
+submission,66,じごくぐるま,1,Fighting,physical,selected-pokemon,none,80,20,80,0,,Inflicts regular damage.  User takes 1/4 the damage it inflicts in recoil.,"地面に　自分ごと
+相手を　投げつけて　攻撃する。
+自分も　少し　ダメージを　受ける。"
+counter,68,カウンター,1,Fighting,physical,specific-move,none,,20,100,-5,,"Targets the last opposing Pokémon to hit the user with a physical move this turn.  Inflicts twice the damage that move did to the user.  If there is no eligible target, this move will fail.  Type immunity applies, but other type effects are ignored.
+
+This move cannot be copied by Mirror Move, nor selected by Assist or Metronome.","相手から　受けた　物理攻撃の
+ダメージを　２倍に　して
+同じ　相手に　返す。"
+seismic-toss,69,ちきゅうなげ,1,Fighting,physical,selected-pokemon,none,,20,100,0,,"Inflicts damage equal to the user’s level.  Type immunity applies, but other type effects are ignored.","引力を　使い　投げとばす。
+自分の　レベルと　同じ　ダメージを
+相手に　与える。"
+dragon-rage,82,りゅうのいかり,1,Dragon,special,selected-pokemon,none,,10,100,0,,Inflicts exactly 40 damage.,"怒りの　衝撃波を
+相手に　ぶつけて　攻撃する。
+４０の　ダメージを　決まって　与える。"
+fire-spin,83,ほのおのうず,1,Fire,special,selected-pokemon,trap,35,15,85,0,100,"Inflicts regular damage.  For the next 2–5 turns, the target cannot leave the field and is damaged for 1/16 its max HP at the end of each turn.  The user continues to use other moves during this time.  If the user leaves the field, this effect ends.
+
+Has a 3/8 chance each to hit 2 or 3 times, and a 1/8 chance each to hit 4 or 5 times.  Averages to 3 hits per use.
+
+Rapid Spin cancels this effect.","激しく　渦をまく　炎の中に
+４ー５ターンの　あいだ
+相手を　閉じこめて　攻撃する。"
+dig,91,あなをほる,1,Ground,physical,selected-pokemon,none,80,10,100,0,,"Inflicts regular damage.  User digs underground for one turn, becoming immune to attack, and hits on the second turn.
+
+During the immune turn, Earthquake, Fissure, and Magnitude still hit the user normally, and their power is doubled if appropriate.
+
+The user may be hit during its immune turn if under the effect of Lock-On, Mind Reader, or No Guard.
+
+This move cannot be selected by Sleep Talk.","１ターン目に　潜り　２ターン目で
+相手を　攻撃する。
+洞窟からの　脱出も　できる。"
+smokescreen,108,えんまく,1,Normal,status,selected-pokemon,none,,20,100,0,,Lowers the target’s accuracy by one stage.,"煙や　墨などを　吹きかけて
+相手の　命中率を　さげる。
+"
+fire-blast,126,だいもんじ,1,Fire,special,selected-pokemon,burn,110,5,85,0,10,Inflicts regular damage.  Has a chance to burn the target.,"大の字の　炎で
+相手を　焼きつくす。
+やけど状態に　することが　ある。"
+swift,129,スピードスター,1,Normal,special,all-opponents,none,60,20,,0,,Inflicts regular damage.  Ignores accuracy and evasion modifiers.,"星型の　光を　発射して
+相手を　攻撃する。
+攻撃は　必ず　命中する。"
+fury-swipes,154,みだれひっかき,1,Normal,physical,selected-pokemon,none,18,15,80,0,,"Inflicts regular damage.  Hits 2–5 times in one turn.
+
+Has a 3/8 chance each to hit 2 or 3 times, and a 1/8 chance each to hit 4 or 5 times.  Averages to 3 hits per use.","ツメや　カマなどで
+相手を　ひっかいて　攻撃する。
+２ー５回の　あいだ　連続で　だす。"
+rock-slide,157,いわなだれ,1,Rock,physical,all-opponents,none,75,10,90,0,30,Inflicts regular damage.  Has a chance to make the target flinch.,"大きな　岩を
+激しく　ぶつけて　攻撃する。
+相手を　ひるませることが　ある。"
+slash,163,きりさく,1,Normal,physical,selected-pokemon,none,70,20,100,0,,Inflicts regular damage.  User’s critical hit rate is one level higher when using this move.,"ツメや　カマなどで
+相手を　切り裂いて　攻撃する。
+急所に　当たりやすい。"
+belly-drum,187,はらだいこ,2,Normal,status,user,none,,10,,0,,"User pays half its max HP to raise its Attack to +6 stages.  If the user cannot pay the HP cost, this move will fail.","自分の　ＨＰを　最大ＨＰの
+半分　減らして　自分の　攻撃を
+最大に　あげる。"
+dynamic-punch,223,ばくれつパンチ,2,Fighting,physical,selected-pokemon,confusion,100,5,50,0,100,Inflicts regular damage.  Has a chance to confuse the target.,"こん身の　力で
+パンチを　くりだして　攻撃する。
+相手を　必ず　混乱させる。"
+dragon-breath,225,りゅうのいぶき,2,Dragon,special,selected-pokemon,paralysis,60,20,100,0,30,Inflicts regular damage.  Has a chance to paralyze the target.,"ものすごい　息を
+相手に　吹きつけて　攻撃する。
+まひ状態に　することが　ある。"
+iron-tail,231,アイアンテール,2,Steel,physical,selected-pokemon,none,100,15,75,0,30,Inflicts regular damage.  Has a chance to lower the target’s Defense by one stage.,"硬い　しっぽで
+相手を　たたきつけて　攻撃する。
+相手の　防御を　さげることが　ある。"
+metal-claw,232,メタルクロー,2,Steel,physical,selected-pokemon,none,50,35,95,0,10,Inflicts regular damage. Has a chance to raise the user’s Attack one stage.,"鋼鉄の　ツメで
+相手を　切り裂いて　攻撃する。
+自分の　攻撃が　あがることが　ある。"
+crunch,242,かみくだく,2,Dark,physical,selected-pokemon,none,80,15,100,0,20,Inflicts regular damage.  Has a chance to lower the target’s Defense by one stage.,"鋭い　歯で
+相手を　かみくだいて　攻撃する。
+相手の　防御を　さげることが　ある。"
+ancient-power,246,げんしのちから,2,Rock,special,selected-pokemon,none,60,5,100,0,10,Inflicts regular damage. Has a chance to raise all of the user’s stats one stage.,"原始の　力で　攻撃する。
+自分の　すべての
+能力が　あがることが　ある。"
+beat-up,251,ふくろだたき,2,Dark,physical,selected-pokemon,none,,10,100,0,,"Inflicts typeless regular damage.  Every Pokémon in the user’s party, excepting those that have fainted or have a major status effect, attacks the target.  Calculated stats are ignored; the base stats for the target and assorted attackers are used instead.  The random factor in the damage formula is not used.  Dark Pokémon still get STAB.
+
+This effect breaks through Wonder Guard.","味方　全員で　攻撃する。
+仲間の　ポケモンが　多いほど
+技の　攻撃回数が　増える。"
+heat-wave,257,ねっぷう,3,Fire,special,all-opponents,burn,95,10,90,0,10,Inflicts regular damage.  Has a chance to burn the target.,"熱い　息を
+相手に　吹きつけて　攻撃する。
+やけど状態に　することが　ある。"
+will-o-wisp,261,おにび,3,Fire,status,selected-pokemon,burn,,15,85,0,,Burns the target.,"不気味で　怪しい　炎を　放って
+相手を　やけどの　状態に　する。
+"
+focus-punch,264,きあいパンチ,3,Fighting,physical,selected-pokemon,none,150,20,100,-3,,"Inflicts regular damage.  If the user takes damage this turn before hitting, this move will fail.
+
+This move cannot be copied by Mirror Move, nor selected by Assist, Metronome, or Sleep Talk.","精神を　高めて　パンチを　くりだす。
+技を　だすまでに
+攻撃を　受けると　失敗する。"
+brick-break,280,かわらわり,3,Fighting,physical,selected-pokemon,none,75,15,100,0,,"Destroys any Light Screen or Reflect on the target’s side of the field, then inflicts regular damage.","手刀を　勢いよく　振りおろして
+相手を　攻撃する。ひかりのかべや
+リフレクターも　破壊できる。"
+air-cutter,314,エアカッター,3,Flying,special,all-opponents,none,60,25,95,0,,Inflicts regular damage.  User’s critical hit rate is one level higher when using this move.,"鋭い　風で
+相手を　切りつけて　攻撃する。
+急所に　当たりやすい。"
+overheat,315,オーバーヒート,3,Fire,special,selected-pokemon,none,130,5,90,0,100,"Inflicts regular damage, then lowers the user’s Special Attack by two stages.","フルパワーで　相手を　攻撃する。
+使うと　反動で
+自分の　特攻が　がくっと　さがる。"
+rock-tomb,317,がんせきふうじ,3,Rock,physical,selected-pokemon,none,60,15,95,0,100,Inflicts regular damage.  Has a chance to lower the target’s Speed by one stage.,"岩石を　投げつけて　攻撃する。
+相手の　動きを　封じることで
+素早さを　さげる。"
+aerial-ace,332,つばめがえし,3,Flying,physical,selected-pokemon,none,60,20,,0,,Inflicts regular damage.  Ignores accuracy and evasion modifiers.,"素早い　動きで
+相手を　ほんろうして　切りつける。
+攻撃は　必ず　命中する。"
+dragon-claw,337,ドラゴンクロー,3,Dragon,physical,selected-pokemon,none,80,15,100,0,,Inflicts regular damage.,"鋭く　とがった　巨大な　ツメで
+相手を　切り裂いて　攻撃する。
+"
+dragon-dance,349,りゅうのまい,3,Dragon,status,user,none,,20,,0,,Raises the user’s Attack and Speed by one stage each.,"神秘的で　力強い　舞を
+激しく　おどる。自分の
+攻撃と　素早さを　あげる。"
+fling,374,なげつける,4,Dark,physical,selected-pokemon,none,,10,100,0,,"Inflicts regular damage.  Power and type are determined by the user’s held item.  The item is consumed.  If the user is not holding an item, or its item has no set type and power, this move will fail.
+
+This move ignores Sticky Hold.
+
+If the user is under the effect of Embargo, this move will fail.","持たせた　道具を
+素早く　投げつけて　攻撃する。
+道具で　威力と　効果が　変わる。"
+flare-blitz,394,フレアドライブ,4,Fire,physical,selected-pokemon,burn,120,15,100,0,10,"Inflicts regular damage.  User takes 1/3 the damage it inflicts in recoil.  Has a chance to burn the target.  Frozen Pokémon may use this move, in which case they will thaw.","炎を　まとって　突進する。
+自分も　かなり　ダメージを　受ける。
+やけど状態に　することが　ある。"
+dragon-pulse,406,りゅうのはどう,4,Dragon,special,selected-pokemon,none,85,10,100,0,,Inflicts regular damage.,"大きな　口から　衝撃波を
+まきおこして　相手を　攻撃する。
+"
+dragon-rush,407,ドラゴンダイブ,4,Dragon,physical,selected-pokemon,none,100,10,75,0,20,Inflicts regular damage.  Has a chance to make the target flinch.,"すさまじい　殺気で　威圧しながら
+体当たりする。
+相手を　ひるませることが　ある。"
+focus-blast,411,きあいだま,4,Fighting,special,selected-pokemon,none,120,5,70,0,10,Inflicts regular damage.  Has a chance to lower the target’s Special Defense by one stage.,"気合を　高めて
+ありったけの　力を　放出する。
+相手の　特防を　さげることが　ある。"
+shadow-claw,421,シャドークロー,4,Ghost,physical,selected-pokemon,none,70,15,100,0,,Inflicts regular damage.  User’s critical hit rate is one level higher when using this move.,"影から　つくった　鋭い　ツメで
+相手を　切り裂く。
+急所に　当たりやすい。"
+fire-fang,424,ほのおのキバ,4,Fire,physical,selected-pokemon,burn,65,15,95,0,10,Inflicts regular damage.  Has a chance to burn the target and a separate chance to make the target flinch.,"炎を　まとった　キバで　かみつく。
+相手を　ひるませたり
+やけど状態に　することが　ある。"
+hone-claws,468,つめとぎ,5,Dark,status,user,none,,15,,0,,Raises the user’s Attack and accuracy by one stage.,"ツメを　磨いて　鋭く　する。
+自分の　攻撃と
+命中率を　あげる。"
+flame-burst,481,はじけるほのお,5,Fire,special,selected-pokemon,none,70,15,100,0,,"Inflicts regular damage.  If this move successfully hits the target, any Pokémon adjacent to the target are damaged for 1/16 their max HP.","当たると　はじける　炎で　相手を
+攻撃する。はじけた　炎は
+隣の　相手にも　ふりかかる。"
+flame-charge,488,ニトロチャージ,5,Fire,physical,selected-pokemon,none,50,20,100,0,100,Inflicts regular damage.  Raises the user’s Speed by one stage.,"炎を　まとい　相手を　攻撃する。
+力を　ためて　自分の
+素早さを　あげる。"
+incinerate,510,やきつくす,5,Fire,special,all-opponents,none,60,15,100,0,,"Inflicts regular damage.  If the target is holding a berry, it’s destroyed and cannot be used in response to this move.","炎で　相手を　攻撃する。
+相手が　きのみなどを　持っているとき
+燃やして　使えなくする。"
+acrobatics,512,アクロバット,5,Flying,physical,selected-pokemon,none,55,15,100,0,,"Inflicts regular damage.  If the user has no held item, this move has double power.","軽やかに　相手を　攻撃する。
+自分が　道具を　持っていないとき
+大きな　ダメージを　与える。"
+inferno,517,れんごく,5,Fire,special,selected-pokemon,burn,100,5,50,0,100,Inflicts regular damage.  Has a chance to burn the target.,"激しい　炎で
+相手を　包みこみ　攻撃する。
+やけど状態に　する。"
+fire-pledge,519,ほのおのちかい,5,Fire,special,selected-pokemon,none,80,10,100,0,,"Inflicts regular damage.  If a friendly Pokémon used Water Pledge earlier this turn, moves used by any friendly Pokémon have doubled effect chance for four turns (including this one).","炎の柱で　攻撃する。
+くさと　組みあわせると　威力が
+あがって　周りが　火の海に　なる。"
+dragon-tail,525,ドラゴンテール,5,Dragon,physical,selected-pokemon,none,60,10,90,-6,,"Inflicts regular damage, then switches the target out for another of its trainer’s Pokémon, selected at random.
+
+If the target is under the effect of Ingrain or Suction Cups, or it has a Substitute, or its Trainer has no more usable Pokémon, it will not be switched out.  If the target is a wild Pokémon, the battle ends instead.","相手を　はじきとばして
+控えの　ポケモンを　ひきずりだす。
+野生の　場合は　戦闘が　終わる。"
+power-up-punch,612,グロウパンチ,6,Fighting,physical,selected-pokemon,none,40,20,100,0,100,Inflicts regular damage.  Raises the user’s Attack by one stage.,"繰り返し　打つことで
+だんだん　こぶしが　固くなる。
+相手に　当てると　攻撃が　あがる。"
+breaking-swipe,784,ワイドブレイカー,8,Dragon,physical,all-opponents,none,60,15,100,0,100,Inflicts regular damage.  Lowers the target’s Attack by one stage.,"きょうじんな　しっぽを　激しく
+ふりはらって　相手を　攻撃する。
+相手の　攻撃を　下げる。"
+temper-flare,915,やけっぱち,9,Fire,physical,selected-pokemon,,75,10,100,0,,"Spurred by desperation, the user attacks the target. This move's power is doubled if the user's previous move failed.",
+fly,19,そらをとぶ,1,Flying,physical,selected-pokemon,none,90,15,95,0,,"Inflicts regular damage.  User flies high into the air for one turn, becoming immune to attack, and hits on the second turn.
+
+During the immune turn, Gust, Hurricane, Sky Uppercut, Smack Down, Thunder, Twister, and Whirlwind still hit the user normally.  Gust and Twister also have double power against the user.
+
+The damage from Hail and Sandstorm still applies during the immune turn.
+
+The user may be hit during its immune turn if under the effect of Lock-On, Mind Reader, or No Guard.
+
+This move cannot be used while Gravity is in effect.
+
+This move cannot be selected by Sleep Talk.","１ターン目で　空へ　飛び
+２ターン目に　相手を　攻撃する。
+知っている　街に　飛ぶことも　できる。"
+fissure,90,じわれ,1,Ground,physical,selected-pokemon,none,,5,30,0,,"Inflicts damage equal to the target’s max HP.  Ignores accuracy and evasion modifiers.  This move’s accuracy is 30% plus 1% for each level the user is higher than the target.  If the user is a lower level than the target, this move will fail.
+
+Because this move inflicts a specific and finite amount of damage, Endure still prevents the target from fainting.
+
+The effects of Lock-On, Mind Reader, and No Guard still apply, as long as the user is equal or higher level than the target.  However, they will not give this move a chance to break through Detect or Protect.","地割れの　裂け目に
+相手を　落として　攻撃する。
+当たれば　一撃で　ひんしに　する。"
+sandstorm,201,すなあらし,2,Rock,status,entire-field,none,,10,,0,,"Changes the weather to a sandstorm for five turns.  Pokémon that are not Ground, Rock, or Steel take 1/16 their max HP at the end of every turn.  Every Rock Pokémon’s original Special Defense is raised by 50% for the duration of this effect.
+
+Solar Beam’s power is halved.
+
+Moonlight, Morning Sun, and Synthesis only heal 1/4 the user’s max HP.","５ターンの　あいだ　砂あらしで
+いわ　じめん　はがねタイプ　以外の
+ポケモンに　ダメージを　与える。"
+steel-wing,211,はがねのつばさ,2,Steel,physical,selected-pokemon,none,70,25,90,0,10,Inflicts regular damage. Has a chance to raise the user’s Defense one stage.,"硬い　翼を　相手に　たたきつけて
+攻撃する。自分の　防御が
+あがることが　ある。"
+twister,239,たつまき,2,Dragon,special,all-opponents,none,40,20,100,0,20,"Inflicts regular damage.  Has a chance to make each target flinch.
+
+If the target is under the effect of Bounce, Fly, or Sky Drop, this move will hit with double power.","竜巻を　おこして
+相手を　まきこみ　攻撃する。
+相手を　ひるませることが　ある。"
+blaze-kick,299,ブレイズキック,3,Fire,physical,selected-pokemon,burn,85,10,90,0,10,Inflicts regular damage.  User’s critical hit rate is one level higher when using this move. Has a chance to burn the target.,"攻撃した　相手を
+やけど状態に　することが　ある。
+急所にも　当たりやすい。"
+blast-burn,307,ブラストバーン,3,Fire,special,selected-pokemon,none,150,5,90,0,,"Inflicts regular damage.  User loses its next turn to ""recharge"", and cannot attack or switch out during that turn.","爆発の　炎で
+相手を　焼きつくして　攻撃する。
+次の　ターンは　動けなくなる。"
+roost,355,はねやすめ,4,Flying,status,user,none,,5,,0,,"Heals the user for half its max HP.  If the user is Flying, its Flying type is ignored until the end of this turn.","地面に　降りて　体を　やすめる。
+最大ＨＰの　半分の
+ＨＰを　回復する。"
+tailwind,366,おいかぜ,4,Flying,status,users-field,none,,15,,0,,"For the next three turns, all Pokémon on the user’s side of the field have their original Speed doubled.  This effect remains if the user leaves the field.","激しく　吹きあれる
+風の渦を　つくり　４ターンの　あいだ
+味方　全員の　素早さを　あげる。"
+air-slash,403,エアスラッシュ,4,Flying,special,selected-pokemon,none,75,15,95,0,30,Inflicts regular damage.  Has a chance to make the target flinch.,"空をも　切り裂く
+空気の　刃で　攻撃する。
+相手を　ひるませることが　ある。"
+defog,432,きりばらい,4,Flying,status,selected-pokemon,none,,15,,0,,"Lowers the target’s evasion by one stage.  Clears away fog.  Removes the effects of Mist, Light Screen, Reflect, Safeguard, Spikes, Stealth Rock, and Toxic Spikes from the target’s side of the field.
+
+If the target is protected by Mist, it will prevent the evasion change, then be removed by this move.","強い風で　相手の　リフレクターや
+ひかりのかべ　などを　はらいのける。
+回避率も　さげる。"
+ominous-wind,466,あやしいかぜ,4,Ghost,special,selected-pokemon,none,60,5,100,0,10,Inflicts regular damage. Has a chance to raise all of the user’s stats one stage.,"みのけも　よだつ　突風で　相手を
+攻撃する。自分の　すべての
+能力が　あがることが　ある。"
+sky-drop,507,フリーフォール,5,Flying,physical,selected-pokemon,none,60,10,100,0,,"Inflicts regular damage.  User carries the target high into the air for one turn, during which no moves will hit either Pokémon and neither can act.  On the following turn, the user drops the target, inflicting damage and ending the effect.
+
+If the target is Flying-type, this move will function as normal but inflict no damage.
+
+Gust, Hurricane, Sky Uppercut, Smack Down, Thunder, Twister, and Whirlwind can hit both the user and the target during this effect.  Gust and Twister will additionally have double power.
+
+The damage from Hail and Sandstorm still applies during this effect.
+
+Either Pokémon may be hit during this effect if also under the effect of Lock-On, Mind Reader, or No Guard.
+
+This move cannot be used while Gravity is in effect.
+
+This move cannot be selected by Sleep Talk.
+
+*Bug*: If Gravity is used during a double or triple battle while this move is in effect, this move is not correctly canceled on the target, and it remains high in the air indefinitely.  As this move prevents the target from acting, the only way to subsequently remove it from the field is to faint it.","１ターン目で　相手を　空へ　連れさり
+２ターン目に　落として　攻撃する。
+連れさられた　相手は　動けない。"
+heat-crash,535,ヒートスタンプ,5,Fire,physical,selected-pokemon,none,,10,100,0,,"Inflicts regular damage.  The greater the user’s weight compared to the target’s, the higher power this move has, to a maximum of 120.
+
+User’s weight                    | Power
+-------------------------------- | ----:
+Up to 2× the target’s weight     |    40
+Up to 3× the target’s weight     |    60
+Up to 4× the target’s weight     |    80
+Up to 5× the target’s weight     |   100
+More than 5× the target’s weight |   120
+","燃える　体で　相手に　ぶつかって
+攻撃する。自分が　相手より
+重いほど　威力が　あがる。"
+hurricane,542,ぼうふう,5,Flying,special,selected-pokemon,confusion,110,10,70,0,30,"Inflicts regular damage.  Has a chance to confuse the target.
+
+This move can hit Pokémon under the effect of Bounce, Fly, or Sky Drop.
+
+During Rain Dance, this move has 100% accuracy.  During Sunny Day, this move has 50% accuracy.","強烈な　風で　相手を
+包みこんで　攻撃する。
+相手を　混乱させることが　ある。"
+mystical-fire,595,マジカルフレイム,6,Fire,special,selected-pokemon,none,75,10,100,0,100,Inflicts regular damage.  Has a chance to lower the target’s Special Attack by one stage.,"口から　吐きだす　特別
+熱い　炎で　攻撃する。
+相手の　特攻を　さげる。"
+brutal-swing,693,ぶんまわす,7,Dark,physical,all-other-pokemon,none,60,20,100,0,,Inflicts regular damage.,"自分の　体を
+ぶんまわして　相手に
+ダメージを　与える。"
+scale-shot,799,スケイルショット,8,Dragon,physical,selected-pokemon,none,25,20,90,0,,"Inflicts regular damage two to five times in a row, raising the user’s Speed and lowering the user’s Defense by one stage each upon last hit.","ウロコを　撃ちだして　攻撃する。
+２ー５回の　間　連続で　だす。
+素早さが　あがるが　防御が　さがる。"
+dual-wingbeat,814,ダブルウイング,8,Flying,physical,selected-pokemon,none,40,10,90,0,,Inflicts regular damage.,"翼を　相手に　ぶつけて
+攻撃する。　２回連続で
+ダメージを　与える。"
+scorching-sands,815,ねっさのだいち,8,Ground,special,selected-pokemon,burn,70,10,100,0,30,Inflicts regular damage.  Has a chance to burn the target.,"熱く　焼けた　砂を
+相手に　ぶつけて　攻撃する。
+やけど状態に　することが　ある。"
+dragon-cheer,913,ドラゴンエール,9,Dragon,status,all-allies,,0,15,0,0,,The user raises its allies’ morale with a draconic cry so that their future attacks have a heightened chance of landing critical hits. This rouses Dragon types more.,
+ice-punch,8,れいとうパンチ,1,Ice,physical,selected-pokemon,freeze,75,15,100,0,10,Inflicts regular damage.  Has a chance to freeze the target.,"冷気を　こめた　パンチで
+相手を　攻撃する。
+こおり状態に　することが　ある。"
+tail-whip,39,しっぽをふる,1,Normal,status,all-opponents,none,,30,100,0,,Lowers the target’s Defense by one stage.,"しっぽを　左右に　かわいく　ふって
+油断を　誘う。
+相手の　防御を　さげる。"
+mist,54,しろいきり,1,Ice,status,users-field,none,,30,,0,,"Pokémon on the user’s side of the field are immune to stat-lowering effects for five turns.
+
+Guard Swap, Heart Swap, and Power Swap may still be used.
+
+Defog used by an opponent will end this effect.","白い霧で　体を　おおう。
+５ターンの　あいだ　相手に
+能力を　さげられなく　なる。"
+water-gun,55,みずでっぽう,1,Water,special,selected-pokemon,none,40,25,100,0,,Inflicts regular damage.,"水を　勢いよく
+相手に　発射して　攻撃する。
+"
+hydro-pump,56,ハイドロポンプ,1,Water,special,selected-pokemon,none,110,5,80,0,,Inflicts regular damage.,"大量の　水を
+激しい　勢いで
+相手に　発射して　攻撃する。"
+surf,57,なみのり,1,Water,special,all-other-pokemon,none,90,15,100,0,,"Inflicts regular damage.
+
+If the target is in the first turn of Dive, this move will hit with double power.","大きな　波で　自分の
+周りに　いるものを　攻撃する。
+水上も　泳いで　進める。"
+ice-beam,58,れいとうビーム,1,Ice,special,selected-pokemon,freeze,90,10,100,0,10,Inflicts regular damage.  Has a chance to freeze the target.,"凍える　ビームを
+相手に　発射して　攻撃する。
+こおり状態に　することが　ある。"
+blizzard,59,ふぶき,1,Ice,special,all-opponents,freeze,110,5,70,0,10,"Inflicts regular damage.  Has a chance to freeze the target.
+
+During Hail, this move has 100% accuracy.  It also has a (100 - accuracy)% chance to break through the protection of Protect and Detect.","激しい　吹雪を
+相手に　吹きつけて　攻撃する。
+こおり状態に　することが　ある。"
+bubble-beam,61,バブルこうせん,1,Water,special,selected-pokemon,none,65,20,100,0,10,Inflicts regular damage.  Has a chance to lower the target’s Speed by one stage.,"泡を　勢いよく
+相手に　発射して　攻撃する。
+素早さを　さげる　ことが　ある。"
+confusion,93,ねんりき,1,Psychic,special,selected-pokemon,confusion,50,25,100,0,10,Inflicts regular damage.  Has a chance to confuse the target.,"弱い　念力を
+相手に　送って　攻撃する。
+相手を　混乱させることが　ある。"
+withdraw,110,からにこもる,1,Water,status,user,none,,40,,0,,Raises the user’s Defense by one stage.,"殻に　潜りこんで　身を守り
+自分の　防御を　あげる。
+"
+haze,114,くろいきり,1,Ice,status,entire-field,none,,30,,0,,"Removes stat, accuracy, and evasion modifiers from every Pokémon on the field.
+
+This does not count as a stat reduction for the purposes of Clear Body or White Smoke.","黒い霧を　だして　戦闘に
+でている　ポケモン　全員の
+能力変化を　もとに　もどす。"
+waterfall,127,たきのぼり,1,Water,physical,selected-pokemon,none,80,15,100,0,20,Inflicts regular damage.  Has a chance to make the target flinch.,"すごい　勢いで　相手に　つっこむ。
+相手を　ひるませることが　ある。
+滝も　泳いで　のぼれる。"
+bubble,145,あわ,1,Water,special,all-opponents,none,40,30,100,0,10,Inflicts regular damage.  Has a chance to lower the target’s Speed by one stage.,"無数の　泡を　相手に　吹きかけて
+攻撃する。相手の　素早さを
+さげることが　ある。"
+flail,175,じたばた,2,Normal,physical,selected-pokemon,none,,15,100,0,,"Inflicts regular damage.  Power varies inversely with the user’s proportional remaining HP.
+
+64 * current HP / max HP | Power
+-----------------------: | ----:
+ 0– 1                    |  200
+ 2– 5                    |  150
+ 6–12                    |  100
+13–21                    |   80
+22–42                    |   40
+43–64                    |   20
+","じたばた　暴れて　攻撃する。
+自分の　ＨＰが　少ないほど
+技の　威力は　あがる。"
+foresight,193,みやぶる,2,Normal,status,selected-pokemon,no-type-immunity,,40,,0,,Resets the target’s evasion to normal and prevents any further boosting until the target leaves the field.  A Ghost under this effect takes normal damage from Normal and Fighting moves.  This move itself ignores accuracy and evasion modifiers.,"ゴーストタイプに　効果がない　技や
+回避率の　高い　相手に
+攻撃が　当たるように　なる。"
+icy-wind,196,こごえるかぜ,2,Ice,special,all-opponents,none,55,15,95,0,100,Inflicts regular damage.  Has a chance to lower the target’s Speed by one stage.,"凍てつく　冷気を
+相手に　吹きつけて　攻撃する。
+相手の　素早さを　さげる。"
+rollout,205,ころがる,2,Rock,physical,selected-pokemon,none,30,20,90,0,,"Inflicts regular damage.  User is forced to use this move for five turns.  Power doubles every time this move is used in succession to a maximum of 16x, and resets to normal after the lock-in ends.  If this move misses or becomes unusable, the lock-in ends.
+
+If the user has used Defense Curl since entering the field, this move has double power.","５ターンの　あいだ　転がり続けて
+攻撃する。技が　当たるたびに
+威力が　あがる。"
+rapid-spin,229,こうそくスピン,2,Normal,physical,selected-pokemon,none,50,40,100,0,100,"Inflicts regular damage.  Removes Leech Seed from the user, frees the user from Bind, Clamp, Fire Spin, Magma Storm, Sand Tomb, Whirlpool, and Wrap, and clears Spikes, Stealth Rock, and Toxic Spikes from the user’s side of the field.  If this move misses or has no effect, its effect doesn’t activate.","回転して　相手を　攻撃する。
+しめつける　まきつく　やどりぎのタネ
+まきびし　なども　吹きとばせる。"
+rain-dance,240,あまごい,2,Water,status,entire-field,none,,5,,0,,"Changes the weather to rain for five turns, during which Water moves inflict 50% extra damage, and Fire moves inflict half damage.
+
+If the user is holding Damp Rock, this effect lasts for eight turns.
+
+Thunder has 100% accuracy.  If the target has used Detect or Protect, Thunder has a (100 - accuracy)% chance to break through the protection.
+
+Solar Beam has half power.
+
+Moonlight, Morning Sun, and Synthesis heal only 1/4 of the user’s max HP.
+
+Pokémon with Swift Swim have doubled original Speed.
+
+Pokémon with Forecast become Water.
+
+Pokémon with Dry Skin heal 1/8 max HP, Pokémon with Hydration are cured of major status effects, and Pokémon with Rain Dish heal 1/16 max HP at the end of each turn.","５ターンの　あいだ　雨を　降らせて
+みずタイプの
+技の　威力を　あげる。"
+mirror-coat,243,ミラーコート,2,Psychic,special,specific-move,none,,20,100,-5,,"Targets the last opposing Pokémon to hit the user with a special move this turn.  Inflicts twice the damage that move did to the user.  If there is no eligible target, this move will fail.  Type immunity applies, but other type effects are ignored.
+
+This move cannot be copied by Mirror Move, nor selected by Assist or Metronome.","相手から　受けた　特殊攻撃の
+ダメージを　２倍に　して
+その相手に　返す。"
+whirlpool,250,うずしお,2,Water,special,selected-pokemon,trap,35,15,85,0,100,"Inflicts regular damage.  For the next 2–5 turns, the target cannot leave the field and is damaged for 1/16 its max HP at the end of each turn.  The user continues to use other moves during this time.  If the user leaves the field, this effect ends.
+
+Has a 3/8 chance each to hit 2 or 3 times, and a 1/8 chance each to hit 4 or 5 times.  Averages to 3 hits per use.
+
+If the target is in the first turn of Dive, this move will hit with double power.","激しく　渦をまく　水の中に
+４ー５ターンの　あいだ
+相手を　閉じこめて　攻撃する。"
+fake-out,252,ねこだまし,3,Normal,physical,selected-pokemon,none,40,10,100,3,100,Inflicts regular damage.  Causes the target to flinch.  Can only be used on the user’s first turn after entering the field.,"先制攻撃で　相手を　ひるませる。
+戦闘に　でたら
+すぐに　ださないと　成功しない。"
+hail,258,あられ,3,Ice,status,entire-field,none,,10,,0,,"Changes the weather to hail for five turns, during which non-Ice Pokémon are damaged for 1/16 their max HP at the end of every turn.
+
+If the user is holding Icy Rock, this effect lasts for eight turns.
+
+Blizzard has 100% accuracy.  If the target has used Detect or Protect, Blizzard has a (100 - accuracy)% chance to break through the protection.
+
+Moonlight, Morning Sun, and Synthesis heal only 1/4 of the user’s max HP.
+
+Pokémon with Snow Cloak are exempt from this effect’s damage.","５ターンの　あいだ　あられを　降らして
+こおりタイプで　ない　ポケモン
+全員に　ダメージを　与える。"
+yawn,281,あくび,3,Normal,status,selected-pokemon,yawn,,10,,0,,"Puts the target to sleep at the end of the next turn.  Ignores accuracy and evasion modifiers.  If the target leaves the field, this effect is canceled.  If the target has a status effect when this move is used, this move will fail.
+
+If the target is protected by Safeguard when this move is used, this move will fail.
+
+Insomnia and Vital Spirit prevent the sleep if the target has either at the end of the next turn, but will not cause this move to fail on use.","大きな　あくびで　眠気を　誘う。
+次の　ターンに
+相手を　眠り状態に　する。"
+refresh,287,リフレッシュ,3,Normal,status,user,none,,20,,0,,"Removes a burn, paralysis, or poison from the user.","体を　やすめて　自分が　おっている
+毒　まひ　やけどの
+状態異常を　治す。"
+dive,291,ダイビング,3,Water,physical,selected-pokemon,none,80,10,100,0,,"Inflicts regular damage.  User dives underwater for one turn, becoming immune to attack, and hits on the second turn.
+
+During the immune turn, Surf, and Whirlpool still hit the user normally, and their power is doubled if appropriate.
+
+The user may be hit during its immune turn if under the effect of Lock-On, Mind Reader, or No Guard.
+
+This move cannot be selected by Sleep Talk.","１ターン目で　潜り　２ターン目に
+浮きあがって　攻撃する。"
+mud-sport,300,どろあそび,3,Ground,status,entire-field,none,,15,,0,,"Electric moves inflict half damage, regardless of target.  If the user leaves the field, this effect ends.","あたりを　泥まみれにする。
+５ターンの　あいだ
+でんきタイプの　技を　弱める。"
+water-spout,323,しおふき,3,Water,special,all-opponents,none,150,5,100,0,,"Inflicts regular damage.  Power increases with the user’s remaining HP and is given by `150 * HP / max HP`, to a maximum of 150 when the user has full HP.","潮を　吹きつけて　攻撃する。
+自分の　ＨＰが　少ないほど
+技の　威力は　さがる。"
+muddy-water,330,だくりゅう,3,Water,special,all-opponents,none,90,10,85,0,30,Inflicts regular damage.  Has a chance to lower the target’s accuracy by one stage.,"濁った　水を
+相手に　発射して　攻撃する。
+命中率を　さげることが　ある。"
+iron-defense,334,てっぺき,3,Steel,status,user,none,,15,,0,,Raises the user’s Defense by two stages.,"皮膚を　鉄のように
+硬くする　ことで
+自分の　防御を　ぐーんと　あげる。"
+mud-shot,341,マッドショット,3,Ground,special,selected-pokemon,none,55,15,95,0,100,Inflicts regular damage.  Has a chance to lower the target’s Speed by one stage.,"泥の　塊を
+相手に　投げつけて　攻撃する。
+同時に　相手の　素早さを　さげる。"
+water-pulse,352,みずのはどう,3,Water,special,selected-pokemon,confusion,60,20,100,0,20,Inflicts regular damage.  Has a chance to confuse the target.,"水の　振動を
+相手に　与えて　攻撃する。
+相手を　混乱させることが　ある。"
+gyro-ball,360,ジャイロボール,4,Steel,physical,selected-pokemon,none,,5,100,0,,"Inflicts regular damage.  Power increases with the target’s current Speed compared to the user, given by `1 + 25 * target Speed / user Speed`, capped at 150.","体を　高速に　回転させて
+体当たりする。相手より　素早さが
+低いほど　強い。"
+brine,362,しおみず,4,Water,special,selected-pokemon,none,65,10,100,0,,"Inflicts regular damage.  If the target has less than half its max HP remaining, this move has double power.","相手が　ＨＰの　半分くらい
+きずを　おっていると　技の　威力が
+２倍に　なる。"
+aqua-ring,392,アクアリング,4,Water,status,user,none,,20,,0,,"Restores 1/16 of the user’s max HP at the end of each turn.  If the user leaves the field, this effect ends.
+
+This effect is passed on by Baton Pass.","自分の　体の　周りを
+水で　つくった　ベールで　おおう。
+毎ターン　ＨＰを　回復する。"
+aura-sphere,396,はどうだん,4,Fighting,special,selected-pokemon,none,80,20,,0,,Inflicts regular damage.  Ignores accuracy and evasion modifiers.,"体の　奥から　波導の　力を
+相手に　うち放つ。
+攻撃は　必ず　命中する。"
+aqua-tail,401,アクアテール,4,Water,physical,selected-pokemon,none,90,10,90,0,,Inflicts regular damage.,"激しく　あれくるう　荒波の　ように
+大きな　しっぽを　ふって
+相手を　攻撃する。"
+zen-headbutt,428,しねんのずつき,4,Psychic,physical,selected-pokemon,none,80,15,90,0,20,Inflicts regular damage.  Has a chance to make the target flinch.,"思念の　力を
+額に　集めて　攻撃する。
+相手を　ひるませることが　ある。"
+aqua-jet,453,アクアジェット,4,Water,physical,selected-pokemon,none,40,20,100,1,,Inflicts regular damage.,"目にも　留まらぬ　ものすごい　速さで
+相手に　つっこむ。
+必ず　先制攻撃　できる。"
+scald,503,ねっとう,5,Water,special,selected-pokemon,burn,80,15,100,0,30,Inflicts regular damage.  Has a chance to burn the target.,"熱く　煮えたぎる　水を
+相手に　発射して　攻撃する。
+やけど状態に　することが　ある。"
+shell-smash,504,からをやぶる,5,Normal,status,user,none,,15,,0,,"Raises the user’s Attack, Special Attack, and Speed by two stages each.  Lowers the user’s Defense and Special Defense by one stage each.","殻を　やぶって　自分の　防御
+特防を　さげるが　攻撃　特攻
+素早さを　ぐーんと　あげる。"
+water-pledge,518,みずのちかい,5,Water,special,selected-pokemon,none,80,10,100,0,,"Inflicts regular damage.  If a friendly Pokémon used Grass Pledge earlier this turn, all opposing Pokémon have halved Speed for four turns (including this one).","水の柱で　攻撃する。
+ほのおと　組みあわせると　威力が
+あがって　空に　にじが　かかる。"
+liquidation,710,アクアブレイク,7,Water,physical,selected-pokemon,none,85,10,100,0,20,Inflicts regular damage.  Has a chance to lower the target’s Defense by one stage.,"水の　力で　相手に
+ぶつかって　攻撃する。
+相手の　防御を　さげる　ことがある。"
+life-dew,791,いのちのしずく,8,Water,status,user-and-allies,none,,10,,0,,"The user scatters mysterious water around and restores
+the HP of itself and its ally Pokémon in the battle.","不思議な　水を　ふりまいて
+自分と　場にいる
+味方の　ＨＰを　回復する。"
+flip-turn,812,クイックターン,8,Water,physical,selected-pokemon,none,60,20,100,0,,Inflicts regular damage.,"攻撃した　あと
+ものすごい　スピードで　戻ってきて
+控えの　ポケモンと　入れ替わる。"
+wave-crash,834,ウェーブタックル,8,Water,physical,selected-pokemon,,120,10,100,0,,The user shrouds itself in water and slams into the target with its whole body to inflict damage. This also damages the user and raises the user’s action speed.,
+ice-spinner,861,アイススピナー,9,Ice,physical,selected-pokemon,,80,15,100,0,,"The user covers its feet in thin ice and twirls around, slamming into the target. This move's spinning motion also destroys the terrain.",
+chilling-water,886,ひやみず,9,Water,special,selected-pokemon,,50,20,100,0,,The user attacks the target by showering it with water that's so cold it saps the target's power. This also lowers the target's Attack stat.,
+hydro-cannon,308,ハイドロカノン,3,Water,special,selected-pokemon,none,150,5,90,0,,"Inflicts regular damage.  User loses its next turn to ""recharge"", and cannot attack or switch out during that turn.","水の　大砲を
+相手に　発射して　攻撃する。
+次の　ターンは　動けなくなる。"
+signal-beam,324,シグナルビーム,3,Bug,special,selected-pokemon,confusion,75,15,100,0,10,Inflicts regular damage.  Has a chance to confuse the target.,"不思議な　光を
+発射して　攻撃する。
+相手を　混乱させることが　ある。"
+dark-pulse,399,あくのはどう,4,Dark,special,selected-pokemon,none,80,15,100,0,20,Inflicts regular damage.  Has a chance to make the target flinch.,"体から　悪意に　みちた
+恐ろしい　オーラを　発する。
+相手を　ひるませることが　ある。"
+avalanche,419,ゆきなだれ,4,Ice,physical,selected-pokemon,none,60,10,100,-4,,"Inflicts regular damage.  If the target damaged the user this turn and was the last to do so, this move has double power.
+
+Pain Split does not count as damaging the user.","相手から　技を　受けていると
+その　相手に　対して
+技の　威力が　２倍に　なる。"
+flash-cannon,430,ラスターカノン,4,Steel,special,selected-pokemon,none,80,10,100,0,10,Inflicts regular damage.  Has a chance to lower the target’s Special Defense by one stage.,"体の　光を　一点に　集めて
+力を　放つ。
+相手の　特防を　さげることが　ある。"
+iron-head,442,アイアンヘッド,4,Steel,physical,selected-pokemon,none,80,15,100,0,30,Inflicts regular damage.  Has a chance to make the target flinch.,"鋼の　ような
+硬い　頭で　攻撃する。
+相手を　ひるませることが　ある。"
+smack-down,479,うちおとす,5,Rock,physical,selected-pokemon,unknown,50,15,100,0,100,"Inflicts regular damage.  Removes the target’s immunity to Ground-type damage.  This effect removes any existing Ground immunity due to Levitate, Magnet Rise, or Telekinesis, and causes the target’s Flying type to be ignored when it takes Ground damage.
+
+If the target isn’t immune to Ground damage, this move will fail.
+
+This move can hit Pokémon under the effect of Bounce, Fly, or Sky Drop, and ends the effect of Bounce or Fly.","石や　弾を　投げて　飛んでいる
+相手を　攻撃する。相手は
+うち落とされて　地面に　落ちる。"
+body-press,776,ボディプレス,8,Fighting,physical,selected-pokemon,none,80,10,100,0,,"The user attacks by slamming its body into the target.
+The higher the user’s Defense, the more damage it can
+inflict on the target.","体を　ぶつけて　攻撃。
+防御が　高いほど
+与える　ダメージが　増える。"
+bug-bite,450,むしくい,4,Bug,physical,selected-pokemon,none,60,20,100,0,,"Inflicts regular damage.  If the target is holding a berry, this move has double power, and the user takes the berry and uses it immediately.
+
+If the target is holding a Jaboca Berry or Rowap Berry, the berry is still removed, but has no effect.
+
+If this move is super effective and the target is holding a berry that can reduce this move’s damage, it will do so, and will not be stolen.","かみついて　攻撃する。
+相手が　きのみを　持っているとき
+食べて　きのみの　効果を　受けられる。"
+electroweb,527,エレキネット,5,Electric,special,all-opponents,none,55,15,95,0,100,Lowers the target’s Speed by one stage.,"電気の　ネットで
+相手を　捕まえて　攻撃する。
+相手の　素早さを　さげる。"

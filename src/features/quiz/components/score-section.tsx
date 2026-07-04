@@ -14,19 +14,31 @@ export default function ScoreSection({
   questionCount,
   onRestart,
 }: ScoreSectionProps) {
+  const percentage = Math.round((score / questionCount) * 100);
+  const message =
+    percentage === 100
+      ? "パーフェクト！ きみこそ タイプマスター！"
+      : percentage >= 80
+        ? "すごい！ あとすこしで タイプマスター！"
+        : percentage >= 50
+          ? "いいちょうし！ どんどん つよくなってる！"
+          : "ナイスチャレンジ！ もういちど ちょうせんだ！";
+
   return (
     <div className={styles.scoreSection}>
-      <h1>クイズ完了！</h1>
+      <span className={styles.resultLabel}>RESULT</span>
+      <h1>チャレンジ クリア！</h1>
       <div className={styles.score}>
         <span className={styles.scoreText}>
           {score} / {questionCount}
         </span>
         <span className={styles.percentage}>
-          {Math.round((score / questionCount) * 100)}%
+          {percentage}%
         </span>
       </div>
+      <p className={styles.scoreMessage}>{message}</p>
       <button type="button" onClick={onRestart} className={styles.button}>
-        もう一度やる
+        もういちど ちょうせん！
       </button>
     </div>
   );

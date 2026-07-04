@@ -1,6 +1,7 @@
-const CACHE_NAME = "pokemon-lab-v3";
+const CACHE_NAME = "pokemon-lab-v4";
 const APP_SHELL = [
   "/",
+  "/quiz",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",

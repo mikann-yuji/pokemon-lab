@@ -1,11 +1,63 @@
 .quizContainer {
+  position: relative;
   width: min(100%, 44rem);
   padding: clamp(1rem, 4vw, 2rem);
-  border-radius: 12px;
+  overflow: hidden;
+  border: 4px solid var(--quiz-navy);
+  border-radius: 24px;
   background: var(--quiz-surface);
   box-shadow: var(--quiz-shadow);
   color: var(--quiz-text);
   animation: slide-in 0.3s ease-out;
+}
+
+.quizContainer::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 8px;
+  background: linear-gradient(
+    90deg,
+    var(--quiz-accent) 0 33%,
+    var(--quiz-yellow) 33% 66%,
+    var(--quiz-blue) 66%
+  );
+  content: "";
+}
+
+.quizOption {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem;
+  border: 2px solid #c7d5ea;
+  border-radius: 14px;
+  background: #eef6ff;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.quizOption input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.1rem;
+  accent-color: var(--quiz-blue);
+}
+
+.quizOption small {
+  display: block;
+  margin-top: 0.2rem;
+  color: #666;
+  font-size: 0.75rem;
+  font-weight: normal;
+}
+
+.quizOption:focus-within {
+  outline: 3px solid var(--quiz-accent);
+  outline-offset: 3px;
 }
 
 @keyframes slide-in {
@@ -25,43 +77,70 @@
 }
 
 .progress {
-  display: block;
+  display: inline-block;
   margin-bottom: 0.5rem;
-  color: #666;
-  font-size: 0.9rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: var(--quiz-navy);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .progressBar {
   width: 100%;
-  height: 6px;
+  height: 10px;
+  border: 2px solid var(--quiz-navy);
   overflow: hidden;
   border-radius: 999px;
-  background: #e0e0e0;
+  background: #dce5f2;
 }
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    var(--quiz-accent) 0%,
-    var(--quiz-accent-dark) 100%
-  );
+  background: linear-gradient(90deg, var(--quiz-yellow), #ff9f1c);
   transition: width 0.3s ease-out;
 }
 
 .question {
   margin-bottom: 1.5rem;
   color: var(--quiz-text);
-  font-size: clamp(1.05rem, 3vw, 1.3rem);
+  font-size: clamp(1.1rem, 3vw, 1.4rem);
+  font-weight: 800;
   line-height: 1.5;
 }
 
 .hint {
   display: block;
   margin-top: 0.5rem;
-  color: #777;
+  color: var(--quiz-blue);
   font-size: 0.8rem;
-  font-weight: normal;
+  font-weight: 700;
+}
+
+.pokemonImage {
+  display: grid;
+  justify-items: center;
+  width: fit-content;
+  margin: -0.5rem auto 1.25rem;
+}
+
+.pokemonImage img {
+  width: 11.25rem;
+  height: 11.25rem;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 8px rgb(23 43 77 / 22%));
+}
+
+.pokemonImage figcaption {
+  margin-top: -0.35rem;
+  padding: 0.2rem 0.7rem;
+  border: 2px solid var(--quiz-navy);
+  border-radius: 999px;
+  background: white;
+  color: var(--quiz-navy);
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .typeGrid {
@@ -74,22 +153,26 @@
 .typeButton {
   min-height: 48px;
   padding: 0.75rem 0.5rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  background: white;
+  border: 2px solid #b8c5d8;
+  border-radius: 12px;
+  background: linear-gradient(180deg, white 0%, #f2f6fb 100%);
   color: var(--quiz-text);
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 600;
   transition:
+    transform 0.2s,
+    box-shadow 0.2s,
     background-color 0.2s,
     border-color 0.2s,
     color 0.2s;
 }
 
 .typeButton:hover:not(:disabled) {
-  border-color: var(--quiz-accent);
-  background: #f5f7ff;
+  border-color: var(--quiz-blue);
+  background: #edf5ff;
+  box-shadow: 0 4px 0 #b7cae5;
+  transform: translateY(-2px);
 }
 
 .typeButton:focus-visible,
@@ -99,9 +182,10 @@
 }
 
 .typeButton.selected {
-  border-color: var(--quiz-accent);
-  background: var(--quiz-accent);
-  color: white;
+  border-color: var(--quiz-navy);
+  background: var(--quiz-yellow);
+  color: var(--quiz-navy);
+  box-shadow: 0 4px 0 var(--quiz-navy);
 }
 
 .typeButton.correct {
@@ -123,8 +207,9 @@
 .explanation {
   margin-top: 1rem;
   padding: 1rem;
-  border-radius: 8px;
-  background: #f5f5f5;
+  border: 2px dashed #b8c5d8;
+  border-radius: 14px;
+  background: #f8fbff;
   animation: fade-in 0.3s ease-out;
 }
 
@@ -150,17 +235,17 @@
   width: 100%;
   min-height: 48px;
   padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 6px;
+  border: 3px solid var(--quiz-navy);
+  border-radius: 999px;
   background: linear-gradient(
     135deg,
-    var(--quiz-accent) 0%,
+    #ef4552 0%,
     var(--quiz-accent-dark) 100%
   );
   color: white;
   cursor: pointer;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 900;
   transition:
     transform 0.2s,
     box-shadow 0.2s,
@@ -169,7 +254,7 @@
 
 .button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgb(102 126 234 / 40%);
+  box-shadow: 0 6px 0 var(--quiz-navy);
 }
 
 .button:active:not(:disabled) {
@@ -191,6 +276,17 @@
   font-size: clamp(1.5rem, 6vw, 2rem);
 }
 
+.resultLabel {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: var(--quiz-yellow);
+  color: var(--quiz-navy);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+}
+
 .score {
   display: flex;
   flex-wrap: wrap;
@@ -198,13 +294,20 @@
   justify-content: center;
   margin-bottom: 2rem;
   padding: clamp(1.25rem, 5vw, 2rem);
-  border-radius: 8px;
+  border: 3px solid var(--quiz-navy);
+  border-radius: 18px;
   background: linear-gradient(
     135deg,
     var(--quiz-accent) 0%,
     var(--quiz-accent-dark) 100%
   );
   color: white;
+}
+
+.scoreMessage {
+  margin: -0.5rem 0 1.5rem;
+  color: var(--quiz-navy);
+  font-weight: 800;
 }
 
 .scoreText {
@@ -217,6 +320,62 @@
   align-items: center;
   font-size: clamp(1.15rem, 5vw, 1.5rem);
   opacity: 0.9;
+}
+
+@media (max-width: 30rem) {
+  .quizContainer {
+    padding: 1rem 0.85rem 1.1rem;
+    border-width: 3px;
+    border-radius: 18px;
+  }
+
+  .quizOption {
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    padding: 0.65rem;
+    font-size: 0.88rem;
+  }
+
+  .questionHeader {
+    margin-bottom: 1rem;
+  }
+
+  .question {
+    margin-bottom: 1.1rem;
+    font-size: 1.05rem;
+  }
+
+  .typeGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .pokemonImage {
+    margin-bottom: 1rem;
+  }
+
+  .pokemonImage img {
+    width: 8.125rem;
+    height: 8.125rem;
+  }
+
+  .typeButton {
+    min-height: 44px;
+    padding: 0.55rem 0.2rem;
+    font-size: 0.78rem;
+  }
+
+  .button {
+    min-height: 46px;
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .score {
+    gap: 0.5rem 1rem;
+    margin-bottom: 1.5rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

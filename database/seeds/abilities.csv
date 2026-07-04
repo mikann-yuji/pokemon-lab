@@ -1,0 +1,31 @@
+id,pokeapi_id,name_ja,generation_id,is_main_series,effect_en,effect_ja
+overgrow,65,しんりょく,3,1,"When this Pokémon has 1/3 or less of its HP remaining, its Grass-type moves inflict 1.5× as much regular damage.","ピンチのとき　くさの
+威力が　あがる。"
+chlorophyll,34,ようりょくそ,3,1,"This Pokémon's Speed is doubled during strong sunlight.
+
+This bonus does not count as a stat modifier.","晴れのとき　素早さが
+あがる。"
+thick-fat,47,あついしぼう,3,1,This Pokémon takes half as much damage from Fire- and Ice-type moves.,"ほのおと　こおりタイプの
+技に　強い。"
+blaze,66,もうか,3,1,"When this Pokémon has 1/3 or less of its HP remaining, its Fire-type moves inflict 1.5× as much regular damage.","ピンチのとき　ほのおの
+威力が　あがる。"
+solar-power,94,サンパワー,4,1,"During strong sunlight, this Pokémon has 1.5× its Special Attack but takes 1/8 of its maximum HP in damage after each turn.","晴れると　ＨＰが　減るが
+特攻が　あがる。"
+tough-claws,181,かたいツメ,6,1,Strengthens moves that make contact to 1.33× their power.,"接触する　技の
+威力が　あがる。"
+drought,70,ひでり,3,1,"The weather changes to strong sunlight when this Pokémon enters battle and does not end unless cancelled by another weather condition.
+
+If multiple Pokémon with this ability, Drizzle, Sand Stream, or Snow Warning are sent out at the same time, the abilities will activate in order of Speed, respecting Trick Room.  Each ability's weather will cancel the previous weather, and only the weather summoned by the slowest of the Pokémon will stay.","戦闘に　でると
+日差しが　強くなる。"
+torrent,67,げきりゅう,3,1,"When this Pokémon has 1/3 or less of its HP remaining, its Water-type moves inflict 1.5× as much regular damage.","ピンチのとき　みずの
+威力が　あがる。"
+rain-dish,44,あめうけざら,3,1,This Pokémon heals for 1/16 of its maximum HP after each turn during rain.,"雨のとき　少しずつ
+ＨＰを　回復する。"
+mega-launcher,178,メガランチャー,6,1,Strengthens aura and pulse moves to 1.5× their power.,"はどうの　技の
+威力が　高い。"
+shield-dust,19,りんぷん,3,1,"This Pokémon is immune to the extra effects of moves used against it.
+
+An extra effect is a move's chance, listed as an ""effect chance"", to inflict a status ailment, cause a stat change, or make the target flinch in addition to the move's main effect.  For example, Thunder Shock's paralysis is an extra effect, but Thunder Wave's is not, nor are Knock Off's item removal and Air Cutter's increased critical hit rate.","技の　追加効果を
+受けない。"
+run-away,50,にげあし,3,1,"This Pokémon is always successful fleeing from wild battles, even if trapped by a move or ability.","野生の　ポケモンから
+必ず　逃げられる。"

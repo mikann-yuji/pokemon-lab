@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { TypeMatchup, TypeName } from "@/domain/type-matchup";
 import { getQuestionText, type Question } from "../quiz-logic";
 import styles from "../styles/quiz-game.module.css";
@@ -28,7 +29,7 @@ export default function QuestionPanel({
     <>
       <div className={styles.questionHeader}>
         <span className={styles.progress}>
-          問題 {questionNumber} / {questionCount}
+          チャレンジ {questionNumber} / {questionCount}
         </span>
         <div className={styles.progressBar}>
           <div
@@ -41,9 +42,22 @@ export default function QuestionPanel({
       <h2 className={styles.question}>
         {getQuestionText(question)}
         <span className={styles.hint}>
-          （{question.correctAnswers.length}個選択）
+          こたえは {question.correctAnswers.length}こ！
         </span>
       </h2>
+
+      {question.pokemonImage ? (
+        <figure className={styles.pokemonImage}>
+          <Image
+            src={question.pokemonImage.url}
+            alt={question.pokemonImage.nameJa}
+            width={180}
+            height={180}
+            sizes="(max-width: 480px) 130px, 180px"
+          />
+          <figcaption>{question.pokemonImage.nameJa}</figcaption>
+        </figure>
+      ) : null}
 
       <div className={styles.typeGrid}>
         {typeMatchups.map((type) => {

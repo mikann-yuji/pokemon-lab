@@ -22,10 +22,10 @@ export default function TypeMatchupMatrix({
 }) {
   return (
     <section className={styles.matrixSection}>
-      <h2>タイプ相性マトリックス</h2>
+      <h2>タイプあいしょう ずかん</h2>
       <p className={styles.matrixNote}>
-        行が攻撃側、列が防御側（2: ばつぐん / ½: いまひとつ / 0:
-        効果なし）
+        たてが こうげき、よこが ぼうぎょ（2: ばつぐん / ½:
+        いまひとつ / 0: こうかなし）
       </p>
       <div className={styles.matrixScroller}>
         <table className={styles.matrix}>
