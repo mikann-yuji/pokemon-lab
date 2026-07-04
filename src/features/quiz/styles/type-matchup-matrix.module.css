@@ -1,3 +1,7 @@
+/*
+ * このファイルの役割: タイプ相性早見表のスクロール表、固定ヘッダー、倍率ごとの色分けを定義するCSS Modules。
+ */
+
 .matrixSection {
   width: min(100%, 80rem);
   margin-top: clamp(1rem, 4vw, 2rem);

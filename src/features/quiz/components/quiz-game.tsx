@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * このファイルの役割: クイズ全体の状態管理、回答判定、問題遷移、リスタートを担当するクライアントコンポーネント。
+ */
+
 import { useEffect, useRef, useState } from "react";
 import QuestionPanel from "./question-panel";
 import type { TypeMatchup, TypeName } from "@/domain/type-matchup";

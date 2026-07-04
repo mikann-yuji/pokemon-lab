@@ -1,3 +1,7 @@
+/*
+ * このファイルの役割: クイズカード、選択肢、ボタン、結果表示などゲームUIのスタイルを定義するCSS Modules。
+ */
+
 .quizContainer {
   position: relative;
   width: min(100%, 44rem);

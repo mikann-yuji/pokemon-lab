@@ -1,12 +1,18 @@
+/**
+ * このファイルの役割: アプリの入口となるトップページ。主要機能へのナビゲーションカードを表示する。
+ */
+
 import Link from "next/link";
 import styles from "./page.module.css";
 
+// トップページ上部に表示する、アプリの状態を短く伝える指標。
 const stats = [
   { label: "Indexed species", value: "151" },
   { label: "Lab notes", value: "24" },
   { label: "Offline ready", value: "PWA" },
 ];
 
+// 機能カードの文言と遷移先をここに集約し、JSX側を読みやすく保つ。
 const researchCards = [
   {
     title: "Type Matchups",
@@ -32,9 +38,11 @@ const researchCards = [
   },
 ];
 
+// App Routerでは、このdefault exportが / のページ本体になる。
 export default function Home() {
   return (
     <main className={styles.page}>
+      {/* アプリ名と研究端末風の装飾を並べるファーストビュー。 */}
       <section className={styles.hero} aria-labelledby="home-title">
         <div className={styles.heroCopy}>
           <p className={styles.kicker}>PokemonLab PWA</p>
@@ -62,6 +70,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 現在は静的なラボ状態表示。将来DB集計に差し替えやすい形にしている。 */}
       <section className={styles.stats} aria-label="Lab status">
         {stats.map((item) => (
           <div className={styles.stat} key={item.label}>
@@ -71,6 +80,7 @@ export default function Home() {
         ))}
       </section>
 
+      {/* 機能ごとのカード。linkがある項目だけクリック可能な導線にする。 */}
       <section className={styles.cards} aria-label="Research tools">
         {researchCards.map((card) => (
           <article className={styles.card} key={card.title}>

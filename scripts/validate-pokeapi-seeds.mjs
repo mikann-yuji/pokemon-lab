@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: PokeAPI由来のCSVシードが、重複キーや外部キー参照の欠落を含まないか検証するためのNode.jsスクリプト。
+ */
+
 import { readFileSync } from "node:fs";
 import path from "node:path";
 

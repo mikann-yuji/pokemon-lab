@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: URLのポケモンIDをもとに詳細データを取得し、存在しない場合は404へ送る詳細ページ。
+ */
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPokemonDetail } from "@/infrastructure/database/pokemon-search-repository";
@@ -9,6 +13,7 @@ type PokemonDetailPageProps = {
   searchParams: Promise<{ q?: string | string[] }>;
 };
 
+// 動的セグメント [id] の値を数値化し、DB上のフォームIDとして詳細を取得する。
 export default async function PokemonDetailPage({
   params,
   searchParams,
@@ -23,6 +28,7 @@ export default async function PokemonDetailPage({
 
   const pokemon = getPokemonDetail(pokemonId);
 
+    // DBに存在しないIDも同様に404扱いにする。
   if (!pokemon) {
     notFound();
   }

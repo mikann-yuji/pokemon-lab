@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: 検索クエリを受け取り、サーバー側でポケモン検索結果を表示するページ。
+ */
+
 import Image from "next/image";
 import Link from "next/link";
 import { searchPokemon } from "@/infrastructure/database/pokemon-search-repository";
@@ -14,7 +18,9 @@ export default async function PokemonSearchPage({
 }: PokemonSearchPageProps) {
   const params = await searchParams;
   const rawQuery = params.q;
+  // URLの ?q= を検索語として扱い、未指定なら空文字で全件寄りの表示にする。
   const query = Array.isArray(rawQuery) ? rawQuery[0] : (rawQuery ?? "");
+  // 検索はサーバー側でSQLiteへ問い合わせ、クライアントへ必要な表示データだけ渡す。
   const results = searchPokemon(query);
 
   return (

@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: SQLiteデータベースを初期化し、マイグレーション適用後にCSVシードを安全な順序で投入するスクリプト。
+ */
+
 import Database from "better-sqlite3";
 import { mkdirSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
@@ -9,6 +13,7 @@ const dataDirectory = path.join(rootDirectory, "data");
 const databasePath =
   process.env.DATABASE_PATH ?? path.join(dataDirectory, "pokemon-lab.db");
 
+// 依存を増やさずにシードCSVを読むための最小限のCSVパーサー。
 function parseCsv(source, filename) {
   const rows = [];
   let row = [];
@@ -77,6 +82,7 @@ function parseCsv(source, filename) {
   return { headers, records };
 }
 
+// 外部キー制約を満たすため、親テーブルから子テーブルへ投入する順番を固定する。
 const seedTableOrder = [
   "types",
   "type_matchups",
@@ -93,6 +99,7 @@ const seedTableOrder = [
   "form_moves",
 ];
 
+// DBスキーマとCSVヘッダーの一致を確認し、SQLiteへ渡す型へ変換する。
 function loadTableSeed(database, tableName) {
   const filename = `${tableName}.csv`;
   const csv = parseCsv(
@@ -129,6 +136,7 @@ function loadTableSeed(database, tableName) {
   );
 }
 
+// タイプ相性はクイズの根幹なので、倍率値と組み合わせ数を厳密に検証する。
 function validateTypeSeeds(seeds) {
   const types = seeds.get("types");
   const matchups = seeds.get("type_matchups");
@@ -155,6 +163,7 @@ function validateTypeSeeds(seeds) {
   }
 }
 
+// 未適用のSQLファイルだけをファイル名順に実行し、適用履歴をDBへ残す。
 function runMigrations(database) {
   database.exec(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -183,6 +192,7 @@ function runMigrations(database) {
   }
 }
 
+// 既存データを削除してから、検証済みシードをトランザクション内で再投入する。
 function seedDatabase(database) {
   const seeds = new Map(
     seedTableOrder.map((tableName) => [

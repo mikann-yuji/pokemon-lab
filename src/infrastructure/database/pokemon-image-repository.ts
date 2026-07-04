@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: SQLiteからクイズ用のポケモン画像をタイプ別に読み出すインフラ層リポジトリ。
+ */
+
 import "server-only";
 
 import Database from "better-sqlite3";
@@ -38,6 +42,7 @@ export function getPokemonImagesByType(): PokemonImagesByType {
         ORDER BY forms.sort_order, form_types.slot
       `)
       .all() as PokemonTypeImageRow[];
+        // JOIN結果はタイプ数ぶん行が増えるため、フォームID単位で画像とタイプ配列にまとめ直す。
     const forms = new Map<
       number,
       { image: PokemonImage; types: TypeName[] }
@@ -49,6 +54,7 @@ export function getPokemonImagesByType(): PokemonImagesByType {
       forms.set(image.formId, form);
     }
 
+        // 単タイプキーと、複合タイプ用の「A|B」キーの両方に同じ画像を登録する。
     const imagesByType: PokemonImagesByType = {};
     for (const { image, types } of forms.values()) {
       for (const type of types) {

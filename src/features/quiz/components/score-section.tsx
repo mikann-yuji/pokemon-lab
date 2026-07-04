@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: クイズ終了時の得点と再挑戦ボタンを表示する結果コンポーネント。
+ */
+
 import styles from "../styles/quiz-game.module.css";
 
 type ScoreSectionProps = {

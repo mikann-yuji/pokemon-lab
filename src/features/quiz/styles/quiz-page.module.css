@@ -1,3 +1,7 @@
+/*
+ * このファイルの役割: クイズページ全体の背景、ヒーロー、戻るリンクを整えるCSS Modules。
+ */
+
 .container {
   --quiz-accent: #e63946;
   --quiz-accent-dark: #b51f2d;

@@ -1,3 +1,7 @@
+/*
+ * このファイルの役割: ポケモン検索画面と詳細画面の共通ビジュアルをまとめたCSS Modules。
+ */
+
 .page {
   min-height: 100vh;
   padding: clamp(1rem, 4vw, 2.5rem);

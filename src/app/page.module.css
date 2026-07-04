@@ -1,3 +1,7 @@
+/*
+ * このファイルの役割: トップページ専用のレイアウト、カード、レスポンシブ表示を整えるCSS Modules。
+ */
+
 .page {
   min-height: 100vh;
   background:

@@ -1,3 +1,7 @@
+/**
+ * このファイルの役割: 全タイプの攻撃側・防御側相性を一覧表として表示するコンポーネント。
+ */
+
 import type { TypeMatchup } from "@/domain/type-matchup";
 import styles from "../styles/type-matchup-matrix.module.css";
 
