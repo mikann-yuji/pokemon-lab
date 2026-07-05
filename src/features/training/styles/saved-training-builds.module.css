@@ -1,0 +1,93 @@
+.savedSection {
+  margin: 1rem 0 1.5rem;
+  padding: clamp(1rem, 3vw, 1.35rem);
+  border: 2px solid #2857a4;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 88%);
+  box-shadow: 0 8px 0 rgb(40 87 164 / 12%);
+}
+
+.savedHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+
+.savedHeader p,
+.savedHeader h2 {
+  margin: 0;
+}
+
+.savedHeader p {
+  color: #2857a4;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.savedHeader h2 {
+  font-size: 1.2rem;
+}
+
+.savedHeader > span {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: #172b4d;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.savedGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.7rem;
+}
+
+.savedCard {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  min-width: 0;
+  padding: 0.65rem;
+  border: 1px solid #cad6e5;
+  border-radius: 13px;
+  background: white;
+  color: #172b4d;
+  text-decoration: none;
+}
+
+.savedCard:hover,
+.savedCard:focus-visible {
+  border-color: #2857a4;
+  outline: 3px solid rgb(40 87 164 / 18%);
+}
+
+.savedCard img {
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.savedCard span {
+  min-width: 0;
+}
+
+.savedCard strong,
+.savedCard small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.savedCard small {
+  margin-top: 0.25rem;
+  color: #6a778a;
+}
+
+.empty {
+  margin: 0;
+  color: #52657e;
+  font-size: 0.85rem;
+}

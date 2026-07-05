@@ -30,11 +30,14 @@
 .matrixScroller {
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
 }
 
 .matrix {
   width: 100%;
+  min-width: 44rem;
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
@@ -120,9 +123,9 @@
 
   .matrix th,
   .matrix td {
-    height: 1.25rem;
-    padding: 0;
-    font-size: clamp(0.42rem, 1.65vw, 0.5rem);
+    height: 1.6rem;
+    padding: 0.05rem;
+    font-size: 0.55rem;
   }
 
   .matrix thead th {

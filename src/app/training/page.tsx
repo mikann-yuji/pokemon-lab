@@ -1,6 +1,8 @@
 import { searchPokemon } from "@/infrastructure/database/pokemon-search-repository";
 import { PokemonSearchForm } from "../pokemon/pokemon-search-form";
 import { PokemonResults } from "../pokemon/pokemon-results";
+import { SavedTrainingBuilds } from "@/features/training/components/saved-training-builds";
+import { getTrainingPokemonCatalog } from "@/features/training/infrastructure/training-repository";
 import styles from "../pokemon/pokemon-search.module.css";
 
 const PAGE_SIZE = 25;
@@ -29,6 +31,10 @@ export default async function TrainingSearchPage({
             championsOnlyLocked
           />
         </div>
+        <SavedTrainingBuilds
+          query={query}
+          pokemonCatalog={getTrainingPokemonCatalog()}
+        />
         <section aria-live="polite" aria-label="育成するポケモンの検索結果">
           <PokemonResults
             key={query}

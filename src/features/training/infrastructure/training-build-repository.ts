@@ -70,6 +70,11 @@ export const loadLatestTrainingBuild = async (pokemonId: number) => {
   return builds[0];
 };
 
+export const loadTrainingBuild = (id: number) => database.builds.get(id);
+
+export const getAllTrainingBuilds = () =>
+  database.builds.orderBy("updatedAt").reverse().toArray();
+
 export const findTrainingBuildByContentKey = (contentKey: string) =>
   database.builds.where("contentKey").equals(contentKey).first();
 

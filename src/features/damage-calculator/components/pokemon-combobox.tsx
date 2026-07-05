@@ -75,13 +75,19 @@ export function PokemonCombobox({
     selectedItem: selectedPokemon,
     inputValue,
     itemToString: (pokemon) => pokemon?.nameJa ?? "",
+    // 入力途中でフォーカスが外れても、選択済み名称へ勝手に巻き戻さない。
+    stateReducer: (state, { type, changes }) =>
+      type === useCombobox.stateChangeTypes.InputBlur
+        ? { ...changes, inputValue: state.inputValue }
+        : changes,
     // 日本語IMEの変換中もDownshift側の入力値を尊重し、検索文字列だけを更新する。
     onInputValueChange: ({ inputValue }) => {
       onInputValueChange(inputValue ?? "");
     },
     // Enter、クリック、タップのいずれでも同じ選択処理を呼ぶ。
     onSelectedItemChange: ({ selectedItem }) => {
-      onSelect(selectedItem ?? null);
+      const nextPokemon = selectedItem ?? null;
+      onSelect(nextPokemon);
     },
   });
 

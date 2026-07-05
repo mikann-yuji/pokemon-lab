@@ -8,8 +8,16 @@ import {
 } from "@/features/training/infrastructure/training-repository";
 import pageStyles from "../../pokemon/pokemon-search.module.css";
 
-export default async function TrainingDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function TrainingDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ build?: string | string[] }>;
+}) {
   const id = Number((await params).id);
+  const rawBuildId = (await searchParams).build;
+  const buildId = Number(Array.isArray(rawBuildId) ? rawBuildId[0] : rawBuildId);
   if (!Number.isInteger(id) || !isChampionsForm(id)) notFound();
   const pokemon = getPokemonDetail(id);
   if (!pokemon) notFound();
@@ -19,6 +27,7 @@ export default async function TrainingDetailPage({ params }: { params: Promise<{
       pokemon={pokemon}
       natures={getNatures()}
       heldItems={getHeldItems()}
+      initialBuildId={Number.isInteger(buildId) && buildId > 0 ? buildId : undefined}
     />
   </div></main>;
 }

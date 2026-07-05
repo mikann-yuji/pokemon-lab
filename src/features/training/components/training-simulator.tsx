@@ -8,6 +8,7 @@ import {
   createTrainingBuildContentKey,
   findTrainingBuildByContentKey,
   loadLatestTrainingBuild,
+  loadTrainingBuild,
   saveTrainingBuild,
 } from "../infrastructure/training-build-repository";
 import type {
@@ -28,10 +29,12 @@ export function TrainingSimulator({
   pokemon,
   natures,
   heldItems,
+  initialBuildId,
 }: {
   pokemon: PokemonDetail;
   natures: Nature[];
   heldItems: HeldItem[];
+  initialBuildId?: number;
 }) {
   const [nature, setNature] = useState("hardy");
   const [abilityPoints, setAbilityPoints] = useState<Record<string, number>>(
@@ -47,8 +50,12 @@ export function TrainingSimulator({
 
   useEffect(() => {
     let active = true;
-    void loadLatestTrainingBuild(pokemon.id).then((build) => {
+    const buildPromise = initialBuildId
+      ? loadTrainingBuild(initialBuildId)
+      : loadLatestTrainingBuild(pokemon.id);
+    void buildPromise.then((build) => {
       if (!active || !build) return;
+      if (build.pokemonId !== pokemon.id) return;
       setNature(build.nature);
       setAbilityPoints(build.abilityPoints ?? initialStats(0));
       setMoveIds([...build.moveIds, "", "", "", ""].slice(0, 4));
@@ -56,7 +63,7 @@ export function TrainingSimulator({
       setBuildName(build.name ?? "");
     });
     return () => { active = false; };
-  }, [pokemon.id]);
+  }, [initialBuildId, pokemon.id]);
 
   const selectedNature =
     natures.find(({ id }) => id === nature) ?? natures[0];
@@ -93,6 +100,7 @@ export function TrainingSimulator({
       setSaveError("保存名を入力してください。");
       return;
     }
+    setSaveDialogOpen(false);
 
     const buildData = {
       pokemonId: pokemon.id,
@@ -120,7 +128,6 @@ export function TrainingSimulator({
       updatedAt: Date.now(),
     });
     setSaved(true);
-    setSaveDialogOpen(false);
   }
 
   return (

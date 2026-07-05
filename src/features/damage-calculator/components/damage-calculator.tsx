@@ -105,6 +105,14 @@ export function DamageCalculator({
     setError(null);
   }
 
+  function changeAttackerQuery(value: string) {
+    setAttackerQuery(value);
+  }
+
+  function changeDefenderQuery(value: string) {
+    setDefenderQuery(value);
+  }
+
   /**
    * 履歴画像からポケモンを復元する。
    * SQLite由来の最新カタログに存在しない古いIDは何もせず無視する。
@@ -195,7 +203,7 @@ export function DamageCalculator({
           pokemonCatalog={pokemonCatalog}
           selectedPokemon={attacker}
           inputValue={attackerQuery}
-          onInputValueChange={setAttackerQuery}
+          onInputValueChange={changeAttackerQuery}
           onSelect={selectAttacker}
         />
         <RecentPokemonList
@@ -236,7 +244,7 @@ export function DamageCalculator({
           pokemonCatalog={pokemonCatalog}
           selectedPokemon={defender}
           inputValue={defenderQuery}
-          onInputValueChange={setDefenderQuery}
+          onInputValueChange={changeDefenderQuery}
           onSelect={selectDefender}
         />
         <RecentPokemonList
