@@ -97,6 +97,7 @@ const seedTableOrder = [
   "form_stats",
   "form_types",
   "form_moves",
+  "champions_forms",
 ];
 
 // DBスキーマとCSVヘッダーの一致を確認し、SQLiteへ渡す型へ変換する。

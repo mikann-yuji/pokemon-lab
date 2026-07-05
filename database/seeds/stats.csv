@@ -1,7 +1,7 @@
 id,pokeapi_id,name_ja,game_index,is_battle_only
-hp,1,,1,0
-attack,2,,2,0
-defense,3,,3,0
-special-attack,4,,5,0
-special-defense,5,,6,0
-speed,6,,4,0
+hp,1,HP,1,0
+attack,2,こうげき,2,0
+defense,3,ぼうぎょ,3,0
+special-attack,4,とくこう,5,0
+special-defense,5,とくぼう,6,0
+speed,6,すばやさ,4,0

@@ -6,7 +6,7 @@ import "server-only";
 
 import Database from "better-sqlite3";
 import path from "node:path";
-import type { TypeName } from "@/domain/type-matchup";
+import { TYPE_NAMES, type TypeName } from "@/domain/type-matchup";
 
 type PokemonSearchRow = {
   id: number;
@@ -14,11 +14,18 @@ type PokemonSearchRow = {
   nameJa: string;
   imageUrl: string | null;
   typeName: TypeName;
+  typeNameJa: string;
 };
 
 type PokemonDetailRow = PokemonSearchRow & {
+  speciesId: number;
+  isMega: number;
   height: number;
   weight: number;
+};
+
+type DefaultFormRow = {
+  id: number;
 };
 
 type PokemonAbilityRow = {
@@ -41,7 +48,10 @@ type PokemonMoveRow = {
   id: string;
   nameJa: string | null;
   typeName: TypeName;
+  typeNameJa: string;
   damageClassName: string | null;
+  effectJa: string | null;
+  effectEn: string | null;
   power: number | null;
   pp: number | null;
   accuracy: number | null;
@@ -62,6 +72,7 @@ export type PokemonSearchResult = {
   nameJa: string;
   imageUrl: string | null;
   types: TypeName[];
+  typeNamesJa: string[];
 };
 
 export type PokemonAbility = {
@@ -81,7 +92,9 @@ export type PokemonMove = {
   id: string;
   name: string;
   typeName: TypeName;
+  typeNameJa: string;
   damageClassName: string | null;
+  description: string | null;
   power: number | null;
   pp: number | null;
   accuracy: number | null;
@@ -99,51 +112,138 @@ export type PokemonDetail = PokemonSearchResult & {
   moveVersionGroup: string | null;
 };
 
+const DAMAGE_CLASS_NAMES_JA: Record<string, string> = {
+  physical: "ぶつり",
+  special: "とくしゅ",
+  status: "へんか",
+};
+
+function toKatakana(value: string) {
+  return value.replace(/[ぁ-ゖ]/g, (character) =>
+    String.fromCharCode(character.charCodeAt(0) + 0x60),
+  );
+}
+
+function toHiragana(value: string) {
+  return value.replace(/[ァ-ヶ]/g, (character) =>
+    String.fromCharCode(character.charCodeAt(0) - 0x60),
+  );
+}
+
+function escapeLikePattern(value: string) {
+  return value.replaceAll(/([%_\\])/g, "\\$1");
+}
+
 /**
  * 日本語名・英語名・フォーム名からポケモンを検索する。
  */
-export function searchPokemon(query: string): PokemonSearchResult[] {
+export function searchPokemon(
+  query: string,
+  {
+    limit = 50,
+    offset = 0,
+    championsOnly = false,
+  }: { limit?: number; offset?: number; championsOnly?: boolean } = {},
+): PokemonSearchResult[] {
   const databasePath =
     process.env.DATABASE_PATH ??
     path.join(process.cwd(), "data", "pokemon-lab.db");
   const database = new Database(databasePath, { readonly: true });
   // 前後の空白は検索意図に含めず、空文字なら一覧の先頭100件を返す。
   const normalizedQuery = query.trim();
-  // LIKEのワイルドカード文字をエスケープし、入力文字そのものとして検索する。
-  const escapedQuery = normalizedQuery.replaceAll(
-    /([%_\\])/g,
-    "\\$1",
-  );
+  // ひらがな・カタカナの両方を検索し、LIKEの記号は入力文字として扱う。
+  const escapedQuery = escapeLikePattern(normalizedQuery);
+  const hiraganaQuery = escapeLikePattern(toHiragana(normalizedQuery));
+  const katakanaQuery = escapeLikePattern(toKatakana(normalizedQuery));
   const searchPattern = `%${escapedQuery}%`;
+  const hiraganaPattern = `%${hiraganaQuery}%`;
+  const katakanaPattern = `%${katakanaQuery}%`;
+  const prefixPattern = `${escapedQuery}%`;
+  const hiraganaPrefix = `${hiraganaQuery}%`;
+  const katakanaPrefix = `${katakanaQuery}%`;
 
   try {
     const rows = database
       .prepare(`
+        WITH matching_forms AS (
+          SELECT
+            forms.id,
+            forms.name,
+            COALESCE(forms.name_ja, forms.form_name_ja, forms.name) AS nameJa,
+            COALESCE(
+              forms.artwork_default_url,
+              forms.sprite_default_url
+            ) AS imageUrl,
+            forms.species_id,
+            forms.is_default,
+            forms.form_order
+          FROM forms
+          WHERE
+            (
+              @query = ''
+              OR forms.name LIKE @pattern ESCAPE '\\'
+              OR forms.name_ja LIKE @pattern ESCAPE '\\'
+              OR forms.name_ja LIKE @hiraganaPattern ESCAPE '\\'
+              OR forms.name_ja LIKE @katakanaPattern ESCAPE '\\'
+              OR forms.form_name LIKE @pattern ESCAPE '\\'
+              OR forms.form_name_ja LIKE @pattern ESCAPE '\\'
+              OR forms.form_name_ja LIKE @hiraganaPattern ESCAPE '\\'
+              OR forms.form_name_ja LIKE @katakanaPattern ESCAPE '\\'
+            )
+            AND (
+              @championsOnly = 0
+              OR EXISTS (
+                SELECT 1
+                FROM champions_forms
+                WHERE champions_forms.form_id = forms.id
+              )
+            )
+          ORDER BY
+            CASE
+              WHEN forms.name LIKE @prefix ESCAPE '\\'
+                OR forms.name_ja LIKE @prefix ESCAPE '\\'
+                OR forms.name_ja LIKE @hiraganaPrefix ESCAPE '\\'
+                OR forms.name_ja LIKE @katakanaPrefix ESCAPE '\\'
+                OR forms.form_name LIKE @prefix ESCAPE '\\'
+                OR forms.form_name_ja LIKE @prefix ESCAPE '\\'
+                OR forms.form_name_ja LIKE @hiraganaPrefix ESCAPE '\\'
+                OR forms.form_name_ja LIKE @katakanaPrefix ESCAPE '\\'
+              THEN 0
+              ELSE 1
+            END,
+            forms.species_id,
+            forms.is_default DESC,
+            forms.form_order
+          LIMIT @limit OFFSET @offset
+        )
         SELECT
-          forms.id,
-          forms.name,
-          COALESCE(forms.name_ja, forms.form_name_ja, forms.name) AS nameJa,
-          COALESCE(
-            forms.artwork_default_url,
-            forms.sprite_default_url
-          ) AS imageUrl,
-          form_types.type_name AS typeName
-        FROM forms
-        JOIN form_types ON form_types.form_id = forms.id
-        WHERE
-          @query = ''
-          OR forms.name LIKE @pattern ESCAPE '\\'
-          OR forms.name_ja LIKE @pattern ESCAPE '\\'
-          OR forms.form_name LIKE @pattern ESCAPE '\\'
-          OR forms.form_name_ja LIKE @pattern ESCAPE '\\'
+          matching_forms.id,
+          matching_forms.name,
+          matching_forms.nameJa,
+          matching_forms.imageUrl,
+          form_types.type_name AS typeName,
+          types.name_ja AS typeNameJa
+        FROM matching_forms
+        JOIN form_types ON form_types.form_id = matching_forms.id
+        JOIN types ON types.name = form_types.type_name
         ORDER BY
-          forms.species_id,
-          forms.is_default DESC,
-          forms.form_order,
+          matching_forms.species_id,
+          matching_forms.is_default DESC,
+          matching_forms.form_order,
           form_types.slot
-        LIMIT 100
       `)
-      .all({ query: normalizedQuery, pattern: searchPattern }) as PokemonSearchRow[];
+      .all({
+        query: normalizedQuery,
+        pattern: searchPattern,
+        hiraganaPattern,
+        katakanaPattern,
+        prefix: prefixPattern,
+        hiraganaPrefix,
+        katakanaPrefix,
+        championsOnly: championsOnly ? 1 : 0,
+        limit: Math.max(1, Math.min(limit, 100)),
+        offset: Math.max(0, offset),
+      }) as PokemonSearchRow[];
     // 複数タイプのJOINで同じフォームが複数行になるため、Mapで1件にまとめる。
     const results = new Map<number, PokemonSearchResult>();
 
@@ -154,8 +254,10 @@ export function searchPokemon(query: string): PokemonSearchResult[] {
         nameJa: row.nameJa,
         imageUrl: row.imageUrl,
         types: [],
+        typeNamesJa: [],
       };
       result.types.push(row.typeName);
+      result.typeNamesJa.push(row.typeNameJa);
       results.set(row.id, result);
     }
 
@@ -185,11 +287,15 @@ export function getPokemonDetail(id: number): PokemonDetail | null {
             forms.artwork_default_url,
             forms.sprite_default_url
           ) AS imageUrl,
+          forms.species_id AS speciesId,
+          forms.is_mega AS isMega,
           forms.height,
           forms.weight,
-          form_types.type_name AS typeName
+          form_types.type_name AS typeName,
+          types.name_ja AS typeNameJa
         FROM forms
         JOIN form_types ON form_types.form_id = forms.id
+        JOIN types ON types.name = form_types.type_name
         WHERE forms.id = @id
         ORDER BY form_types.slot
       `)
@@ -229,16 +335,27 @@ export function getPokemonDetail(id: number): PokemonDetail | null {
         ORDER BY stats.game_index
       `)
       .all({ id }) as PokemonStatRow[];
+    const moveSourceForm = base.isMega
+      ? (database
+          .prepare(`
+            SELECT id
+            FROM forms
+            WHERE species_id = @speciesId AND is_default = 1
+            LIMIT 1
+          `)
+          .get({ speciesId: base.speciesId }) as DefaultFormRow | undefined)
+      : undefined;
+    const moveSourceFormId = moveSourceForm?.id ?? id;
     const latestVersionGroup = database
       .prepare(`
         SELECT version_groups.id, version_groups.name
         FROM form_moves
         JOIN version_groups ON version_groups.id = form_moves.version_group_id
-        WHERE form_moves.form_id = @id
+        WHERE form_moves.form_id = @moveSourceFormId
         ORDER BY version_groups.sort_order DESC
         LIMIT 1
       `)
-      .get({ id }) as LatestVersionGroupRow | undefined;
+      .get({ moveSourceFormId }) as LatestVersionGroupRow | undefined;
     const moves = latestVersionGroup
       ? (database
           .prepare(`
@@ -246,7 +363,10 @@ export function getPokemonDetail(id: number): PokemonDetail | null {
               moves.id,
               moves.name_ja AS nameJa,
               moves.type_name AS typeName,
+              types.name_ja AS typeNameJa,
               moves.damage_class_name AS damageClassName,
+              moves.effect_ja AS effectJa,
+              moves.effect_en AS effectEn,
               moves.power,
               moves.pp,
               moves.accuracy,
@@ -256,9 +376,10 @@ export function getPokemonDetail(id: number): PokemonDetail | null {
               form_moves.move_order AS moveOrder
             FROM form_moves
             JOIN moves ON moves.id = form_moves.move_id
+            JOIN types ON types.name = moves.type_name
             JOIN move_learn_methods ON move_learn_methods.id = form_moves.learn_method_id
             WHERE
-              form_moves.form_id = @id
+              form_moves.form_id = @moveSourceFormId
               AND form_moves.version_group_id = @versionGroupId
             ORDER BY
               move_learn_methods.id,
@@ -266,8 +387,19 @@ export function getPokemonDetail(id: number): PokemonDetail | null {
               form_moves.move_order,
               moves.id
           `)
-          .all({ id, versionGroupId: latestVersionGroup.id }) as PokemonMoveRow[])
+          .all({
+            moveSourceFormId,
+            versionGroupId: latestVersionGroup.id,
+          }) as PokemonMoveRow[])
       : [];
+    const uniqueMoves = [
+      ...new Map(moves.map((move) => [move.id, move])).values(),
+    ].sort(
+      (left, right) =>
+        TYPE_NAMES.indexOf(left.typeName) -
+          TYPE_NAMES.indexOf(right.typeName) ||
+        (left.nameJa ?? left.id).localeCompare(right.nameJa ?? right.id, "ja"),
+    );
 
     return {
       id: base.id,
@@ -275,6 +407,7 @@ export function getPokemonDetail(id: number): PokemonDetail | null {
       nameJa: base.nameJa,
       imageUrl: base.imageUrl,
       types: rows.map((row) => row.typeName),
+      typeNamesJa: rows.map((row) => row.typeNameJa),
       height: base.height,
       weight: base.weight,
       abilities: abilities.map((ability) => ({
@@ -289,11 +422,15 @@ export function getPokemonDetail(id: number): PokemonDetail | null {
         baseStat: stat.baseStat,
       })),
       statTotal: stats.reduce((total, stat) => total + stat.baseStat, 0),
-      moves: moves.map((move) => ({
+      moves: uniqueMoves.map((move) => ({
         id: move.id,
         name: move.nameJa ?? move.id,
         typeName: move.typeName,
-        damageClassName: move.damageClassName,
+        typeNameJa: move.typeNameJa,
+        damageClassName: move.damageClassName
+          ? (DAMAGE_CLASS_NAMES_JA[move.damageClassName] ?? move.damageClassName)
+          : null,
+        description: move.effectJa ?? move.effectEn,
         power: move.power,
         pp: move.pp,
         accuracy: move.accuracy,

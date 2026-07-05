@@ -4,6 +4,7 @@
 
 import Image from "next/image";
 import type { TypeMatchup, TypeName } from "@/domain/type-matchup";
+import { getTypeBadgeStyle } from "@/presentation/pokemon-type-colors";
 import { getQuestionText, type Question } from "../quiz-logic";
 import styles from "../styles/quiz-game.module.css";
 
@@ -16,6 +17,7 @@ type QuestionPanelProps = {
   typeMatchups: TypeMatchup[];
   onTypeClick: (type: TypeName) => void;
   showCorrectCelebration: boolean;
+  showIncorrectCelebration: boolean;
 };
 
 /**
@@ -30,6 +32,7 @@ export default function QuestionPanel({
   typeMatchups,
   onTypeClick,
   showCorrectCelebration,
+  showIncorrectCelebration,
 }: QuestionPanelProps) {
   return (
     <>
@@ -83,6 +86,20 @@ export default function QuestionPanel({
             </span>
           </div>
         ) : null}
+        {showIncorrectCelebration ? (
+          <div
+            className={`${styles.correctCelebration} ${styles.incorrectCelebration}`}
+            aria-live="polite"
+          >
+            <span className={styles.sadFace} aria-hidden="true">
+              😢
+            </span>
+            <strong>ざんねん…</strong>
+            <span className={styles.sadFace} aria-hidden="true">
+              😢
+            </span>
+          </div>
+        ) : null}
         <div className={styles.typeGrid}>
           {typeMatchups.map((type) => {
             // 回答後は、正解とユーザーが誤って選んだタイプを色分けする。
@@ -104,6 +121,7 @@ export default function QuestionPanel({
                 type="button"
                 onClick={() => onTypeClick(type.name)}
                 className={`${styles.typeButton} ${stateClass}`}
+                style={getTypeBadgeStyle(type.name)}
                 disabled={answered}
                 aria-pressed={isSelected}
               >

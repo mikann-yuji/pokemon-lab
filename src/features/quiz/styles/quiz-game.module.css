@@ -161,13 +161,17 @@
 .typeButton {
   min-height: 48px;
   padding: 0.75rem 0.5rem;
-  border: 2px solid #b8c5d8;
+  border: 2px solid color-mix(in srgb, var(--type-color) 72%, #172b4d);
   border-radius: 12px;
-  background: linear-gradient(180deg, white 0%, #f2f6fb 100%);
-  color: var(--quiz-text);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--type-color) 82%, white),
+    var(--type-color)
+  );
+  color: var(--type-foreground);
   cursor: pointer;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 800;
   transition:
     transform 0.2s,
     box-shadow 0.2s,
@@ -177,9 +181,13 @@
 }
 
 .typeButton:hover:not(:disabled) {
-  border-color: var(--quiz-blue);
-  background: #edf5ff;
-  box-shadow: 0 4px 0 #b7cae5;
+  border-color: var(--quiz-navy);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--type-color) 68%, white),
+    var(--type-color)
+  );
+  box-shadow: 0 4px 0 rgb(23 43 77 / 35%);
   transform: translateY(-2px);
 }
 
@@ -229,7 +237,7 @@
   text-shadow: 0 3px 0 white, 0 6px 0 rgb(23 43 77 / 18%);
   pointer-events: none;
   transform: translateY(-50%);
-  animation: celebration-pop 1.2s ease-out both;
+  animation: celebration-pop 1.8s ease-out both;
 }
 
 .partyPopper {
@@ -238,7 +246,7 @@
   --popper-angle: 0deg;
   --popper-scale-x: 1;
   transform-origin: center bottom;
-  animation: popper-burst 1.2s ease-out both;
+  animation: popper-burst 1.8s ease-out both;
 }
 
 .partyPopperLeft {
@@ -250,28 +258,45 @@
   --popper-scale-x: -1;
 }
 
+.incorrectCelebration {
+  border-color: #385b8f;
+  background: rgb(238 246 255 / 94%);
+  color: #385b8f;
+}
+
+.sadFace {
+  display: inline-block;
+  filter: drop-shadow(0 4px 0 rgb(23 43 77 / 12%));
+  animation: sad-face 1.8s ease-out both;
+}
+
 @keyframes celebration-pop {
   0% {
     opacity: 0;
     transform: translateY(calc(-50% + 12px)) scale(0.72);
   }
 
-  28% {
+  20% {
     opacity: 1;
     transform: translateY(calc(-50% - 8px)) scale(1.16);
   }
 
-  52% {
+  38% {
     transform: translateY(-50%) scale(0.96);
   }
 
-  74% {
+  55% {
     transform: translateY(calc(-50% - 3px)) scale(1.04);
   }
 
-  100% {
+  68% {
     opacity: 1;
     transform: translateY(-50%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(calc(-50% - 18px)) scale(0.94);
   }
 }
 
@@ -282,21 +307,53 @@
       scale(0.45);
   }
 
-  26% {
+  20% {
     opacity: 1;
     transform: translateY(-10px) rotate(calc(var(--popper-angle) - 18deg))
       scaleX(var(--popper-scale-x)) scale(1.35);
   }
 
-  58% {
+  42% {
     transform: translateY(2px) rotate(calc(var(--popper-angle) + 12deg))
       scaleX(var(--popper-scale-x)) scale(0.95);
   }
 
-  100% {
+  68% {
     opacity: 1;
     transform: translateY(0) rotate(var(--popper-angle))
       scaleX(var(--popper-scale-x)) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-14px) rotate(var(--popper-angle))
+      scaleX(var(--popper-scale-x)) scale(0.88);
+  }
+}
+
+@keyframes sad-face {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.72);
+  }
+
+  22% {
+    opacity: 1;
+    transform: translateY(5px) scale(1.12);
+  }
+
+  42% {
+    transform: translateY(1px) scale(0.98);
+  }
+
+  68% {
+    opacity: 1;
+    transform: translateY(4px) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.88);
   }
 }
 
@@ -491,7 +548,8 @@
   .quizContainer,
   .explanation,
   .correctCelebration,
-  .partyPopper {
+  .partyPopper,
+  .sadFace {
     animation: none;
   }
 

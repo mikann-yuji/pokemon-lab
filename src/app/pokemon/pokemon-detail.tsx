@@ -4,6 +4,10 @@
 
 import Image from "next/image";
 import type { PokemonDetail } from "@/infrastructure/database/pokemon-search-repository";
+import {
+  getPokemonCardStyle,
+  getTypeBadgeStyle,
+} from "@/presentation/pokemon-type-colors";
 import styles from "./pokemon-search.module.css";
 
 type PokemonDetailViewProps = {
@@ -13,14 +17,22 @@ type PokemonDetailViewProps = {
 export function PokemonDetailView({ pokemon }: PokemonDetailViewProps) {
   return (
     <section className={styles.detailPanel} aria-label={`${pokemon.nameJa}の詳細`}>
-      <div className={styles.detailHero}>
+      <div
+        className={styles.detailHero}
+        style={getPokemonCardStyle(pokemon.types)}
+      >
         <div>
           <p className={styles.kicker}>BATTLE DETAILS</p>
           <h1>{pokemon.nameJa}</h1>
           <p className={styles.englishName}>{pokemon.name}</p>
           <div className={styles.types}>
-            {pokemon.types.map((type) => (
-              <span key={type}>{type}</span>
+            {pokemon.types.map((type, index) => (
+              <span
+                key={type}
+                style={getTypeBadgeStyle(type)}
+              >
+                {pokemon.typeNamesJa[index] ?? type}
+              </span>
             ))}
           </div>
         </div>
@@ -92,23 +104,29 @@ export function PokemonDetailView({ pokemon }: PokemonDetailViewProps) {
                 <th>威力</th>
                 <th>命中</th>
                 <th>PP</th>
-                <th>覚え方</th>
+                <th>説明</th>
               </tr>
             </thead>
             <tbody>
-              {pokemon.moves.map((move, index) => (
+              {pokemon.moves.map((move) => (
                 <tr
-                  key={`${move.id}-${move.learnMethod}-${move.levelLearnedAt}-${index}`}
+                  key={move.id}
                 >
                   <td>{move.name}</td>
-                  <td>{move.typeName}</td>
+                  <td>
+                    <span
+                      className={styles.moveType}
+                      style={getTypeBadgeStyle(move.typeName)}
+                    >
+                      {move.typeNameJa}
+                    </span>
+                  </td>
                   <td>{move.damageClassName ?? "-"}</td>
                   <td>{move.power ?? "-"}</td>
                   <td>{move.accuracy ?? "-"}</td>
                   <td>{move.pp ?? "-"}</td>
-                  <td>
-                    {move.learnMethod}
-                    {move.levelLearnedAt > 0 ? ` Lv.${move.levelLearnedAt}` : ""}
+                  <td className={styles.moveDescription}>
+                    {move.description ?? "-"}
                   </td>
                 </tr>
               ))}

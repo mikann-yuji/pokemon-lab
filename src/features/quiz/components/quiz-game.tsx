@@ -46,6 +46,8 @@ export default function QuizGame({
   const [answered, setAnswered] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [showCorrectCelebration, setShowCorrectCelebration] = useState(false);
+  const [showIncorrectCelebration, setShowIncorrectCelebration] =
+    useState(false);
   const [includeDualTypes, setIncludeDualTypes] = useState(false);
   const questionTopRef = useRef<HTMLDivElement>(null);
   const explanationRef = useRef<HTMLDivElement>(null);
@@ -69,10 +71,21 @@ export default function QuizGame({
 
     const timeoutId = window.setTimeout(() => {
       setShowCorrectCelebration(false);
-    }, 1200);
+    }, 1800);
 
     return () => window.clearTimeout(timeoutId);
   }, [showCorrectCelebration]);
+
+  // 不正解演出も正解演出と同じ余韻を残してから閉じる。
+  useEffect(() => {
+    if (!showIncorrectCelebration) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setShowIncorrectCelebration(false);
+    }, 1800);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [showIncorrectCelebration]);
 
   // 問題を再びシャッフルし、すべての進行状況を初期状態に戻す。
   function restart() {
@@ -94,6 +107,7 @@ export default function QuizGame({
     setAnswered(false);
     setFeedback("");
     setShowCorrectCelebration(false);
+    setShowIncorrectCelebration(false);
   }
 
   // 複合タイプ問題の有無を切り替え、クイズを最初から作り直す。
@@ -135,6 +149,7 @@ export default function QuizGame({
     if (isCorrect) {
       setScore((current) => current + 1);
       setFeedback("せいかい！ やったね！");
+      setShowIncorrectCelebration(false);
       setShowCorrectCelebration(false);
       requestAnimationFrame(() => setShowCorrectCelebration(true));
     } else {
@@ -146,6 +161,9 @@ export default function QuizGame({
         )
         .join("、");
       setFeedback(`ざんねん！ せいかいは「${answer}」だよ！`);
+      setShowCorrectCelebration(false);
+      setShowIncorrectCelebration(false);
+      requestAnimationFrame(() => setShowIncorrectCelebration(true));
     }
     setAnswered(true);
   }
@@ -202,6 +220,7 @@ export default function QuizGame({
               typeMatchups={typeMatchups}
               onTypeClick={toggleType}
               showCorrectCelebration={showCorrectCelebration}
+              showIncorrectCelebration={showIncorrectCelebration}
             />
           </div>
 

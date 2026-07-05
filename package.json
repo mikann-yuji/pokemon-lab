@@ -11,10 +11,12 @@
     "start": "next start",
     "lint": "eslint",
     "seeds:fetch": "node scripts/fetch-pokeapi-seeds.mjs",
-    "seeds:validate": "node scripts/validate-pokeapi-seeds.mjs"
+    "seeds:validate": "node scripts/validate-pokeapi-seeds.mjs",
+    "champions:fetch": "node scripts/fetch-champions-seed.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^12.11.1",
+    "downshift": "^9.4.0",
     "next": "16.2.10",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -25,6 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cheerio": "^1.2.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4.3.2",

@@ -97,6 +97,7 @@ const tables = Object.fromEntries(
     "version_groups",
     "move_learn_methods",
     "form_moves",
+    "champions_forms",
     "types",
   ].map((table) => [table, parseCsv(`${table}.csv`)]),
 );
@@ -107,6 +108,7 @@ unique(tables.abilities.records, ["id"], "abilities.csv");
 unique(tables.stats.records, ["id"], "stats.csv");
 unique(tables.moves.records, ["id"], "moves.csv");
 unique(tables.version_groups.records, ["id"], "version_groups.csv");
+unique(tables.champions_forms.records, ["form_id"], "champions_forms.csv");
 unique(
   tables.move_learn_methods.records,
   ["id"],
@@ -182,6 +184,12 @@ reference(
   "form_id",
   ids("forms"),
   "form_moves.csv",
+);
+reference(
+  tables.champions_forms.records,
+  "form_id",
+  new Set(tables.forms.records.map(({ id }) => id)),
+  "champions_forms.csv",
 );
 reference(
   tables.form_moves.records,
