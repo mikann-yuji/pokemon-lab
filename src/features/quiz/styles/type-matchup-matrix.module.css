@@ -3,6 +3,7 @@
  */
 
 .matrixSection {
+  box-sizing: border-box;
   width: min(100%, 80rem);
   margin-top: clamp(1rem, 4vw, 2rem);
   padding: clamp(1rem, 3vw, 1.5rem);
@@ -126,8 +127,19 @@
   }
 
   .matrix {
+    width: 100%;
     min-width: 0;
     font-size: 0.44rem;
+  }
+
+  .matrix thead th:first-child,
+  .matrix tbody th {
+    width: 10%;
+  }
+
+  .matrix thead th:not(:first-child),
+  .matrix td {
+    width: 5%;
   }
 
   .matrix th,
@@ -142,7 +154,6 @@
   }
 
   .matrix thead th:first-child {
-    width: 1.75rem;
     font-size: 0.4rem;
   }
 }

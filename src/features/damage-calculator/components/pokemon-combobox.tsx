@@ -73,14 +73,15 @@ export function PokemonCombobox({
   } = useCombobox({
     items: suggestions,
     selectedItem: selectedPokemon,
-    inputValue,
+    // 入力値そのものはDownshiftに任せ、IMEの変換途中にReactから書き戻さない。
+    initialInputValue: inputValue,
     itemToString: (pokemon) => pokemon?.nameJa ?? "",
     // 入力途中でフォーカスが外れても、選択済み名称へ勝手に巻き戻さない。
     stateReducer: (state, { type, changes }) =>
       type === useCombobox.stateChangeTypes.InputBlur
         ? { ...changes, inputValue: state.inputValue }
         : changes,
-    // 日本語IMEの変換中もDownshift側の入力値を尊重し、検索文字列だけを更新する。
+    // 候補の絞り込みに使う検索文字列だけを親へ通知する。
     onInputValueChange: ({ inputValue }) => {
       onInputValueChange(inputValue ?? "");
     },
