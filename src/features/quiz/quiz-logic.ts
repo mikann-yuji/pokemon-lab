@@ -45,6 +45,21 @@ export type Question =
       types: [TypeMatchup, TypeMatchup];
     });
 
+/**
+ * シャッフルや出題設定が変わっても同じ問題を識別できるキーを返す。
+ */
+export function getQuestionKey(question: Question): string {
+  const subject =
+    "type" in question
+      ? question.type.name
+      : question.types
+          .map(({ name }) => name)
+          .sort()
+          .join("|");
+
+  return `${question.quizType}:${subject}`;
+}
+
 type CreateQuestionsOptions = {
   includeDualTypes?: boolean;
   pokemonImagesByType?: PokemonImagesByType;

@@ -2,7 +2,6 @@
  * このファイルの役割: 検索クエリを受け取り、サーバー側でポケモン検索結果を表示するページ。
  */
 
-import Link from "next/link";
 import { searchPokemon } from "@/infrastructure/database/pokemon-search-repository";
 import { PokemonResults } from "./pokemon-results";
 import { PokemonSearchForm } from "./pokemon-search-form";
@@ -39,12 +38,6 @@ export default async function PokemonSearchPage({
     <main className={`${styles.page} ${styles.searchPage}`}>
       <div className={styles.container}>
         <div className={styles.searchDock}>
-          <div className={styles.compactHeader}>
-            <Link href="/" className={styles.backLink}>
-              ← ホーム
-            </Link>
-            <h1>ポケモンを さがす</h1>
-          </div>
           <PokemonSearchForm
             key={`${query}:${championsOnly}`}
             initialQuery={query}

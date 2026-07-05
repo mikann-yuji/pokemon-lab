@@ -1,0 +1,7 @@
+{
+  // VS Code内蔵版ではなく、package.jsonで固定したTypeScriptを使う。
+  // 依存パッケージ側のtsconfigを新しすぎるTypeScriptで検査して、
+  // 未対応の非推奨警告が出ることを防ぐ。
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}

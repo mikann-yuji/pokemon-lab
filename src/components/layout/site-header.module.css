@@ -1,0 +1,157 @@
+/*
+ * このファイルの役割:
+ * 全ページ共通ヘッダーの配置、色、スマートフォン表示を定義する。
+ */
+
+.header {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  right: 0;
+  left: 0;
+  flex: 0 0 auto;
+  width: 100%;
+  border-bottom: 1px solid rgb(23 43 77 / 16%);
+  background: rgb(255 255 255 / 94%);
+  box-shadow: 0 4px 18px rgb(23 43 77 / 8%);
+  backdrop-filter: blur(12px);
+}
+
+.inner {
+  position: relative;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  width: min(100%, 75rem);
+  min-height: 4rem;
+  margin: 0 auto;
+  padding: 0.6rem clamp(1rem, 4vw, 2rem);
+}
+
+.menuButton {
+  display: none;
+}
+
+.homeLink {
+  flex: 0 0 auto;
+  color: #172b4d;
+  font-size: 1.15rem;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+}
+
+.navigation {
+  display: flex;
+  gap: clamp(0.35rem, 2vw, 1rem);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.navigation a {
+  min-height: 40px;
+  padding: 0.65rem 0.8rem;
+  border-radius: 999px;
+  color: #405167;
+  font-size: 0.85rem;
+  font-weight: 800;
+  white-space: nowrap;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
+}
+
+.navigation a:hover {
+  background: #eef6ff;
+  color: #2857a4;
+}
+
+.homeLink:focus-visible,
+.navigation a:focus-visible {
+  outline: 3px solid #e63946;
+  outline-offset: 2px;
+}
+
+@media (max-width: 40rem) {
+  .inner {
+    min-height: 4rem;
+    padding-block: 0.5rem;
+  }
+
+  .homeLink {
+    padding-inline: 0.35rem;
+    font-size: 1rem;
+  }
+
+  .menuButton {
+    display: grid;
+    gap: 4px;
+    place-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid #c7d5e7;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+  }
+
+  .menuButton span {
+    display: block;
+    width: 21px;
+    height: 2px;
+    border-radius: 999px;
+    background: #172b4d;
+    transition:
+      opacity 0.2s,
+      transform 0.2s;
+  }
+
+  .menuButton[aria-expanded="true"] span:first-child {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  .menuButton[aria-expanded="true"] span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .menuButton[aria-expanded="true"] span:last-child {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  .menuButton:focus-visible {
+    outline: 3px solid #e63946;
+    outline-offset: 2px;
+  }
+
+  .navigation {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 1rem;
+    display: none;
+    width: min(18rem, calc(100vw - 2rem));
+    padding: 0.5rem;
+    border: 1px solid rgb(23 43 77 / 16%);
+    border-radius: 14px;
+    background: white;
+    box-shadow: 0 14px 35px rgb(23 43 77 / 20%);
+  }
+
+  .navigationOpen {
+    display: grid;
+  }
+
+  .navigation a {
+    min-height: 44px;
+    padding: 0.75rem;
+    border-radius: 9px;
+    font-size: 0.88rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navigation a,
+  .menuButton span {
+    transition: none;
+  }
+}

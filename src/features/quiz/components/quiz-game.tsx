@@ -9,10 +9,16 @@ import QuestionPanel from "./question-panel";
 import type { TypeMatchup, TypeName } from "@/domain/type-matchup";
 import {
   createQuestions,
+  getQuestionKey,
   isExactAnswer,
   type PokemonImagesByType,
   type Question,
 } from "../quiz-logic";
+import {
+  getMistakeKeys,
+  removeMistake,
+  saveMistake,
+} from "../storage/mistake-repository";
 import ScoreSection from "./score-section";
 import styles from "../styles/quiz-game.module.css";
 
@@ -21,6 +27,8 @@ type QuizGameProps = {
   typeMatchups: TypeMatchup[];
   pokemonImagesByType: PokemonImagesByType;
 };
+
+type QuizMode = "all" | "mistakes";
 
 function getScrollBehavior(): ScrollBehavior {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -49,8 +57,47 @@ export default function QuizGame({
   const [showIncorrectCelebration, setShowIncorrectCelebration] =
     useState(false);
   const [includeDualTypes, setIncludeDualTypes] = useState(false);
+  const [quizMode, setQuizMode] = useState<QuizMode>("all");
+  const [mistakeKeys, setMistakeKeys] = useState<Set<string>>(new Set());
+  const [mistakesLoaded, setMistakesLoaded] = useState(false);
   const questionTopRef = useRef<HTMLDivElement>(null);
   const explanationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    getMistakeKeys()
+      .then((keys) => {
+        if (active) setMistakeKeys(new Set(keys));
+      })
+      .catch((error: unknown) => {
+        console.error("間違えた問題を読み込めませんでした。", error);
+      })
+      .finally(() => {
+        if (active) setMistakesLoaded(true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  function createModeQuestions(
+    mode: QuizMode,
+    dualTypes: boolean,
+    savedMistakeKeys = mistakeKeys,
+  ): Question[] {
+    const nextQuestions = createQuestions(typeMatchups, {
+      includeDualTypes: dualTypes,
+      pokemonImagesByType,
+    });
+
+    return mode === "mistakes"
+      ? nextQuestions.filter((question) =>
+          savedMistakeKeys.has(getQuestionKey(question)),
+        )
+      : nextQuestions;
+  }
 
   // 回答結果が表示されたら、次へ進むボタンの下端まで見える位置へ移動する。
   useEffect(() => {
@@ -89,12 +136,7 @@ export default function QuizGame({
 
   // 問題を再びシャッフルし、すべての進行状況を初期状態に戻す。
   function restart() {
-    setQuestions(
-      createQuestions(typeMatchups, {
-        includeDualTypes,
-        pokemonImagesByType,
-      }),
-    );
+    setQuestions(createModeQuestions(quizMode, includeDualTypes));
     setCurrentQuestionIndex(0);
     setScore(0);
     setShowScore(false);
@@ -113,12 +155,16 @@ export default function QuizGame({
   // 複合タイプ問題の有無を切り替え、クイズを最初から作り直す。
   function changeDualTypeSetting(checked: boolean) {
     setIncludeDualTypes(checked);
-    setQuestions(
-      createQuestions(typeMatchups, {
-        includeDualTypes: checked,
-        pokemonImagesByType,
-      }),
-    );
+    setQuestions(createModeQuestions(quizMode, checked));
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setShowScore(false);
+    resetAnswer();
+  }
+
+  function changeQuizMode(mode: QuizMode) {
+    setQuizMode(mode);
+    setQuestions(createModeQuestions(mode, includeDualTypes));
     setCurrentQuestionIndex(0);
     setScore(0);
     setShowScore(false);
@@ -147,12 +193,26 @@ export default function QuizGame({
     );
 
     if (isCorrect) {
+      const questionKey = getQuestionKey(question);
+      if (mistakeKeys.has(questionKey)) {
+        const nextMistakeKeys = new Set(mistakeKeys);
+        nextMistakeKeys.delete(questionKey);
+        setMistakeKeys(nextMistakeKeys);
+        void removeMistake(questionKey).catch((error: unknown) => {
+          console.error("復習済みの問題を更新できませんでした。", error);
+        });
+      }
       setScore((current) => current + 1);
       setFeedback("せいかい！ やったね！");
       setShowIncorrectCelebration(false);
       setShowCorrectCelebration(false);
       requestAnimationFrame(() => setShowCorrectCelebration(true));
     } else {
+      const questionKey = getQuestionKey(question);
+      setMistakeKeys((current) => new Set(current).add(questionKey));
+      void saveMistake(questionKey).catch((error: unknown) => {
+        console.error("間違えた問題を保存できませんでした。", error);
+      });
       const answer = question.correctAnswers
         .map(
           (type) =>
@@ -188,6 +248,30 @@ export default function QuizGame({
 
   return (
     <div className={styles.quizContainer}>
+      <fieldset className={styles.modeSelector}>
+        <legend>出題モード</legend>
+        <label>
+          <input
+            type="radio"
+            name="quiz-mode"
+            checked={quizMode === "all"}
+            onChange={() => changeQuizMode("all")}
+          />
+          すべての問題
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="quiz-mode"
+            checked={quizMode === "mistakes"}
+            disabled={!mistakesLoaded}
+            onChange={() => changeQuizMode("mistakes")}
+          />
+          間違えた問題だけ
+          <span className={styles.mistakeCount}>{mistakeKeys.size}問</span>
+        </label>
+      </fieldset>
+
       <label className={styles.quizOption}>
         <input
           type="checkbox"
@@ -202,7 +286,12 @@ export default function QuizGame({
         </span>
       </label>
 
-      {showScore ? (
+      {questions.length === 0 ? (
+        <div className={styles.emptyMistakes}>
+          <p>復習する問題はありません。</p>
+          <small>通常モードで間違えた問題がここに保存されます。</small>
+        </div>
+      ) : showScore ? (
         <ScoreSection
           score={score}
           questionCount={questions.length}

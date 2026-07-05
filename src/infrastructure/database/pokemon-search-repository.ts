@@ -7,6 +7,10 @@ import "server-only";
 import Database from "better-sqlite3";
 import path from "node:path";
 import { TYPE_NAMES, type TypeName } from "@/domain/type-matchup";
+import {
+  toHiragana,
+  toKatakana,
+} from "@/domain/pokemon-name-search";
 
 type PokemonSearchRow = {
   id: number;
@@ -117,18 +121,6 @@ const DAMAGE_CLASS_NAMES_JA: Record<string, string> = {
   special: "とくしゅ",
   status: "へんか",
 };
-
-function toKatakana(value: string) {
-  return value.replace(/[ぁ-ゖ]/g, (character) =>
-    String.fromCharCode(character.charCodeAt(0) + 0x60),
-  );
-}
-
-function toHiragana(value: string) {
-  return value.replace(/[ァ-ヶ]/g, (character) =>
-    String.fromCharCode(character.charCodeAt(0) - 0x60),
-  );
-}
 
 function escapeLikePattern(value: string) {
   return value.replaceAll(/([%_\\])/g, "\\$1");

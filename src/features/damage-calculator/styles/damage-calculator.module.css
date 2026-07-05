@@ -1,0 +1,288 @@
+.page {
+  min-height: 100vh;
+  padding: clamp(1rem, 4vw, 2.5rem);
+  background:
+    radial-gradient(circle at 10% 10%, rgb(255 213 79 / 25%), transparent 22rem),
+    linear-gradient(145deg, #eef7ff, #e5f0fa 55%, #f7fbff);
+  color: #172b4d;
+}
+
+.hero {
+  width: min(100%, 64rem);
+  margin: 1.5rem auto 2rem;
+  text-align: center;
+}
+
+.hero p {
+  margin: 0 0 0.35rem;
+  color: #e63946;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 7vw, 3.8rem);
+}
+
+.hero span {
+  display: block;
+  margin-top: 0.65rem;
+  color: #536376;
+}
+
+.calculator {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 1.25rem;
+  width: min(100%, 64rem);
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 1px solid rgb(23 43 77 / 14%);
+  border-radius: 24px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 20px 55px rgb(23 43 77 / 14%);
+}
+
+.side {
+  min-width: 0;
+  padding: clamp(0.9rem, 2vw, 1.35rem);
+  border: 2px solid #d7e2f0;
+  border-radius: 18px;
+  background: #f8fbff;
+}
+
+.side h2 {
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+}
+
+.versus {
+  align-self: center;
+  padding: 0.5rem;
+  color: #e63946;
+  font-size: 1.15rem;
+  font-weight: 950;
+}
+
+.combobox {
+  position: relative;
+}
+
+.combobox label,
+.moveField {
+  display: grid;
+  gap: 0.45rem;
+  color: #344760;
+  font-size: 0.8rem;
+  font-weight: 850;
+}
+
+.combobox input,
+.moveField select {
+  width: 100%;
+  min-height: 46px;
+  padding: 0.65rem 0.75rem;
+  border: 2px solid #b9cae0;
+  border-radius: 10px;
+  background: white;
+  color: #172b4d;
+  font: inherit;
+}
+
+.combobox input:focus,
+.moveField select:focus {
+  border-color: #2857a4;
+  outline: 3px solid rgb(40 87 164 / 18%);
+}
+
+.suggestions {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  left: 0;
+  max-height: 16rem;
+  margin: 0;
+  padding: 0.35rem;
+  overflow-y: auto;
+  border: 1px solid #b9cae0;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 12px 30px rgb(23 43 77 / 18%);
+  list-style: none;
+}
+
+.suggestions li {
+  padding: 0.65rem;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.suggestions li > span {
+  display: flex;
+  justify-content: space-between;
+}
+
+.suggestions small {
+  color: #6b778c;
+}
+
+.suggestions .highlighted {
+  background: #e8f2ff;
+}
+
+.pokemonSummary,
+.placeholder {
+  min-height: 8.5rem;
+  margin: 0.8rem 0;
+  border: 1px dashed #c7d5e7;
+  border-radius: 12px;
+}
+
+.placeholder {
+  display: grid;
+  place-items: center;
+  color: #8290a3;
+  font-size: 0.85rem;
+}
+
+.pokemonSummary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.pokemonSummary img {
+  object-fit: contain;
+}
+
+.pokemonSummary strong,
+.pokemonSummary small {
+  display: block;
+}
+
+.pokemonSummary small {
+  margin-top: 0.25rem;
+  color: #6b778c;
+}
+
+.moveSummary {
+  margin: 0.65rem 0 0;
+  color: #536376;
+  font-size: 0.8rem;
+}
+
+.conditions,
+.calculateButton,
+.error,
+.result {
+  grid-column: 1 / -1;
+}
+
+.conditions {
+  padding: 0.7rem;
+  border-radius: 10px;
+  background: #eef6ff;
+  color: #536376;
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.calculateButton {
+  min-height: 50px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ef4552, #b51f2d);
+  box-shadow: 0 5px 0 #172b4d;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.calculateButton:disabled {
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.error {
+  margin: 0;
+  color: #b51f2d;
+  font-weight: 800;
+  text-align: center;
+}
+
+.result {
+  padding: clamp(1rem, 4vw, 1.75rem);
+  border: 3px solid #172b4d;
+  border-radius: 18px;
+  background: #fffdf5;
+  text-align: center;
+}
+
+.resultLabel {
+  width: fit-content;
+  margin: 0 auto 0.5rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: #ffd43b;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.result h2 {
+  margin: 0 0 0.45rem;
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
+}
+
+.result > strong {
+  color: #e63946;
+  font-size: 1.15rem;
+}
+
+.result p {
+  margin-bottom: 0.35rem;
+}
+
+.result small {
+  color: #6b778c;
+}
+
+.hpBar {
+  width: min(100%, 28rem);
+  height: 18px;
+  margin: 1rem auto;
+  overflow: hidden;
+  border: 2px solid #172b4d;
+  border-radius: 999px;
+  background: #eef1f5;
+}
+
+.hpBar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #43a047, #7ccf63);
+}
+
+@media (max-width: 44rem) {
+  .calculator {
+    grid-template-columns: 1fr;
+  }
+
+  .versus {
+    justify-self: center;
+  }
+
+  .conditions,
+  .calculateButton,
+  .error,
+  .result {
+    grid-column: 1;
+  }
+}

@@ -2,13 +2,14 @@
  * このファイルの役割: 静的アセットをキャッシュし、ネットワーク失敗時にキャッシュへフォールバックするPWA用Service Worker。
  */
 
-const CACHE_NAME = "pokemon-lab-v5";
+const CACHE_NAME = "pokemon-lab-v6";
 const IMAGE_CACHE_NAME = "pokemon-lab-images-v1";
 const IMAGE_CACHE_LIMIT = 300;
 const APP_SHELL = [
   "/",
   "/quiz",
   "/pokemon",
+  "/damage-calculator",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
@@ -16,10 +17,36 @@ const APP_SHELL = [
   "/screenshots/mobile.png",
 ];
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)),
+async function cacheAppShell() {
+  const cache = await caches.open(CACHE_NAME);
+  await cache.addAll(APP_SHELL);
+
+  // 各ページのHTMLが参照するビルド済みJS/CSSも保存し、初回キャッシュ後から
+  // ダメージ計算エンジンを含めて完全にオフラインで起動できるようにする。
+  const pageResponses = await Promise.all(
+    APP_SHELL.filter((path) => !path.includes(".")).map((path) =>
+      cache.match(path),
+    ),
   );
+  const assetPaths = new Set();
+
+  for (const response of pageResponses) {
+    if (!response) continue;
+    const html = await response.text();
+    for (const match of html.matchAll(
+      /(?:src|href)="(\/_next\/static\/[^"]+)"/g,
+    )) {
+      assetPaths.add(match[1]);
+    }
+  }
+
+  if (assetPaths.size > 0) {
+    await cache.addAll([...assetPaths]);
+  }
+}
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(cacheAppShell());
   self.skipWaiting();
 });
 

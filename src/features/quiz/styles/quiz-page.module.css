@@ -1,5 +1,5 @@
 /*
- * このファイルの役割: クイズページ全体の背景、ヒーロー、戻るリンクを整えるCSS Modules。
+ * このファイルの役割: クイズページ全体の背景とヒーローを整えるCSS Modules。
  */
 
 .container {
@@ -64,34 +64,6 @@
   transform: rotate(22deg);
 }
 
-.backLink {
-  align-self: flex-start;
-  min-height: 44px;
-  margin-bottom: clamp(1rem, 3vw, 2rem);
-  z-index: 1;
-  padding: 0 1rem;
-  border: 2px solid rgb(255 255 255 / 55%);
-  border-radius: 999px;
-  background: rgb(12 38 82 / 42%);
-  color: white;
-  font-size: 0.85rem;
-  font-weight: 700;
-  line-height: 44px;
-  opacity: 0.9;
-  transition: opacity 0.2s;
-}
-
-.backLink:hover {
-  background: rgb(12 38 82 / 68%);
-  opacity: 1;
-}
-
-.backLink:focus-visible {
-  border-radius: 4px;
-  outline: 3px solid white;
-  outline-offset: 3px;
-}
-
 .hero {
   z-index: 1;
   width: min(100%, 44rem);
@@ -142,13 +114,6 @@
     left: -7rem;
   }
 
-  .backLink {
-    min-height: 40px;
-    margin-bottom: 1rem;
-    padding: 0 0.8rem;
-    line-height: 40px;
-  }
-
   .hero {
     margin-bottom: 1.1rem;
   }
@@ -164,8 +129,3 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .backLink {
-    transition: none;
-  }
-}

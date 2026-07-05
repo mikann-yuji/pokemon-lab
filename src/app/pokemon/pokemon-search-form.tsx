@@ -102,7 +102,8 @@ export function PokemonSearchForm({
             id: "pokemon-query",
             name: "q",
             type: "search",
-            placeholder: "フシギダネ / bulbasaur / mega",
+            placeholder:
+              "ポケモン名を入力（例：フシギダネ、bulbasaur、mega）",
             autoComplete: "off",
           })}
         />

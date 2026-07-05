@@ -2,7 +2,6 @@
  * このファイルの役割: タイプ相性クイズ画面。DBから相性データと画像候補を読み込み、クイズUIへ渡す。
  */
 
-import Link from "next/link";
 import QuizGame from "@/features/quiz/components/quiz-game";
 import TypeMatchupMatrix from "@/features/quiz/components/type-matchup-matrix";
 import { createQuestions } from "@/features/quiz/quiz-logic";
@@ -23,9 +22,6 @@ export default function QuizPage() {
 
   return (
     <main className={styles.container}>
-      <Link href="/" className={styles.backLink}>
-        ← けんきゅうじょへ もどる
-      </Link>
       <header className={styles.hero}>
         <h1>タイプあいしょう チャレンジ！</h1>
         <p>わざの こうかを おぼえて、めざせ タイプマスター！</p>

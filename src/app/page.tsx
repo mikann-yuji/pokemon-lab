@@ -36,6 +36,11 @@ const researchCards = [
     body: "Search registered Pokémon and forms by their Japanese or English names.",
     link: "/pokemon",
   },
+  {
+    title: "Damage Calculator",
+    body: "Choose two Pokémon and a move to calculate the expected damage range.",
+    link: "/damage-calculator",
+  },
 ];
 
 // App Routerでは、このdefault exportが / のページ本体になる。

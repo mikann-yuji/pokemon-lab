@@ -5,6 +5,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
+import { SiteHeader } from "@/components/layout/site-header";
 
 export const metadata: Metadata = {
   title: "PokemonLab",
@@ -37,6 +38,7 @@ export default function RootLayout({
     <html lang="ja">
       <body>
         <ServiceWorkerRegister />
+        <SiteHeader />
         {children}
       </body>
     </html>
