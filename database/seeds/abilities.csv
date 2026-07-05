@@ -1,31 +1,1106 @@
 id,pokeapi_id,name_ja,generation_id,is_main_series,effect_en,effect_ja
-overgrow,65,しんりょく,3,1,"When this Pokémon has 1/3 or less of its HP remaining, its Grass-type moves inflict 1.5× as much regular damage.","ピンチのとき　くさの
-威力が　あがる。"
-chlorophyll,34,ようりょくそ,3,1,"This Pokémon's Speed is doubled during strong sunlight.
+stench,1,あくしゅう,3,1,"This Pokémon's damaging moves have a 10% chance to make the target flinch with each hit if they do not already cause flinching as a secondary effect.
 
-This bonus does not count as a stat modifier.","晴れのとき　素早さが
+This ability does not stack with a held item.
+
+Overworld: The wild encounter rate is halved while this Pokémon is first in the party.","臭くて　相手が
+ひるむ　ことがある。"
+drizzle,2,あめふらし,3,1,"The weather changes to rain when this Pokémon enters battle and does not end unless replaced by another weather condition.
+
+If multiple Pokémon with this ability, Drought, Sand Stream, or Snow Warning are sent out at the same time, the abilities will activate in order of Speed, respecting Trick Room.  Each ability's weather will cancel the previous weather, and only the weather summoned by the slowest of the Pokémon will stay.","戦闘に　でると
+雨を　降らす。"
+speed-boost,3,かそく,3,1,This Pokémon's Speed rises one stage after each turn.,"ちょっとずつ
+素早く　なっていく。"
+battle-armor,4,カブトアーマー,3,1,"Moves cannot score critical hits against this Pokémon.
+
+This ability functions identically to Shell Armor.","相手の　攻撃が
+急所に　当たらない。"
+sturdy,5,がんじょう,3,1,"When this Pokémon is at full HP, any hit that would knock it out will instead leave it with 1 HP.  Regardless of its current HP, it is also immune to the one-hit KO moves: Fissure, Guillotine, Horn Drill, and Sheer Cold.
+
+If this Pokémon is holding a Focus Sash, this ability takes precedence and the item will not be consumed.","一撃で　倒されない。
+"
+damp,6,しめりけ,3,1,"While this Pokémon is in battle, Self-Destruct and Explosion will fail and Aftermath will not take effect.","だれも　爆発が
+できなくなる。"
+limber,7,じゅうなん,3,1,"This Pokémon cannot be paralyzed.
+
+If a Pokémon is paralyzed and acquires this ability, its paralysis is healed; this includes when regaining a lost ability upon leaving battle.","まひ状態に
+ならない。"
+sand-veil,8,すながくれ,3,1,"During a sandstorm, this Pokémon has 1.25× its evasion, and it does not take sandstorm damage regardless of type.
+
+The evasion bonus does not count as a stat modifier.
+
+Overworld: If the lead Pokémon has this ability, the wild encounter rate is halved in a sandstorm.","砂あらしで
+回避率が　あがる。"
+static,9,せいでんき,3,1,"Whenever a move makes contact with this Pokémon, the move's user has a 30% chance of being paralyzed.
+
+Pokémon that are immune to Electric-type moves can still be paralyzed by this ability.
+
+Overworld: If the lead Pokémon has this ability, there is a 50% chance that encounters will be with an Electric Pokémon, if applicable.","触った　相手を
+まひさせる　ことがある。"
+volt-absorb,10,ちくでん,3,1,"Whenever an Electric-type move hits this Pokémon, it heals for 1/4 of its maximum HP, negating any other effect on it.
+
+This ability will not take effect if this Pokémon is Ground-type and thus immune to Electric moves.  Electric moves will ignore this Pokémon's Substitute.
+
+This effect includes non-damaging moves, i.e. Thunder Wave.","でんきを　受けると
+回復する。"
+water-absorb,11,ちょすい,3,1,"Whenever a Water-type move hits this Pokémon, it heals for 1/4 of its maximum HP, negating any other effect on it.
+
+Water moves will ignore this Pokémon's Substitute.","みずを　受けると
+回復する。"
+oblivious,12,どんかん,3,1,"This Pokémon cannot be infatuated and is immune to Captivate.
+
+If a Pokémon is infatuated and acquires this ability, its infatuation is cleared.","メロメロや　ちょうはつ
+状態に　ならない。"
+cloud-nine,13,ノーてんき,3,1,"While this Pokémon is in battle, weather can still be in play, but will not have any of its effects.
+
+This ability functions identically to Air Lock.","天気の　影響が
+なくなる。"
+compound-eyes,14,ふくがん,3,1,"This Pokémon's moves have 1.3× their accuracy.
+
+This ability has no effect on the one-hit KO moves (Fissure, Guillotine, Horn Drill, and Sheer Cold).
+
+Overworld: If the first Pokémon in the party has this ability, the chance of a wild Pokémon holding a particular item is raised from 50%, 5%, or 1% to 60%, 20%, or 5%, respectively.","技の　命中率が
 あがる。"
-thick-fat,47,あついしぼう,3,1,This Pokémon takes half as much damage from Fire- and Ice-type moves.,"ほのおと　こおりタイプの
-技に　強い。"
-blaze,66,もうか,3,1,"When this Pokémon has 1/3 or less of its HP remaining, its Fire-type moves inflict 1.5× as much regular damage.","ピンチのとき　ほのおの
-威力が　あがる。"
-solar-power,94,サンパワー,4,1,"During strong sunlight, this Pokémon has 1.5× its Special Attack but takes 1/8 of its maximum HP in damage after each turn.","晴れると　ＨＰが　減るが
-特攻が　あがる。"
-tough-claws,181,かたいツメ,6,1,Strengthens moves that make contact to 1.33× their power.,"接触する　技の
-威力が　あがる。"
-drought,70,ひでり,3,1,"The weather changes to strong sunlight when this Pokémon enters battle and does not end unless cancelled by another weather condition.
+insomnia,15,ふみん,3,1,"This Pokémon cannot be asleep.
 
-If multiple Pokémon with this ability, Drizzle, Sand Stream, or Snow Warning are sent out at the same time, the abilities will activate in order of Speed, respecting Trick Room.  Each ability's weather will cancel the previous weather, and only the weather summoned by the slowest of the Pokémon will stay.","戦闘に　でると
-日差しが　強くなる。"
-torrent,67,げきりゅう,3,1,"When this Pokémon has 1/3 or less of its HP remaining, its Water-type moves inflict 1.5× as much regular damage.","ピンチのとき　みずの
-威力が　あがる。"
-rain-dish,44,あめうけざら,3,1,This Pokémon heals for 1/16 of its maximum HP after each turn during rain.,"雨のとき　少しずつ
-ＨＰを　回復する。"
-mega-launcher,178,メガランチャー,6,1,Strengthens aura and pulse moves to 1.5× their power.,"はどうの　技の
-威力が　高い。"
+This causes Rest to fail altogether.  If a Pokémon is asleep and acquires this ability, it will immediately wake up; this includes when regaining a lost ability upon leaving battle.
+
+This ability functions identically to Vital Spirit in battle.","ねむり状態に
+ならない。"
+color-change,16,へんしょく,3,1,"Whenever this Pokémon takes damage from a move, the Pokémon's type changes to match the move.
+
+If the Pokémon has two types, both are overridden.  The Pokémon must directly take damage; for example, moves blocked by a Substitute will not trigger this ability, nor will moves that deal damage indirectly, such as Spikes.
+
+This ability takes effect on only the last hit of a multiple-hit attack.
+
+In Pokémon Colosseum and XD: Gale of Darkness, this ability does not take effect on Shadow-type moves.","受けた　技の　タイプに
+変化する。"
+immunity,17,めんえき,3,1,"This Pokémon cannot be poisoned.  This includes bad poison.
+
+If a Pokémon is poisoned and acquires this ability, its poison is healed; this includes when regaining a lost ability upon leaving battle.","どく状態に
+ならない。"
+flash-fire,18,もらいび,3,1,"This Pokémon is immune to Fire-type moves.  Once this Pokémon has been hit by a Fire move, its own Fire moves will inflict 1.5× as much damage until it leaves battle.
+
+This ability has no effect while the Pokémon is frozen.  The Fire damage bonus is retained even if the Pokémon is frozen and thawed or the ability is lost or disabled.  Fire moves will ignore this Pokémon's Substitute.  This ability takes effect even on non-damaging moves, i.e. Will-O-Wisp.","ほのおを　受けると
+ほのお技が　強くなる。"
 shield-dust,19,りんぷん,3,1,"This Pokémon is immune to the extra effects of moves used against it.
 
 An extra effect is a move's chance, listed as an ""effect chance"", to inflict a status ailment, cause a stat change, or make the target flinch in addition to the move's main effect.  For example, Thunder Shock's paralysis is an extra effect, but Thunder Wave's is not, nor are Knock Off's item removal and Air Cutter's increased critical hit rate.","技の　追加効果を
 受けない。"
+own-tempo,20,マイペース,3,1,"This Pokémon cannot be confused.
+
+If a Pokémon is confused and acquires this ability, its confusion will immediately be healed.","混乱状態に
+ならない。"
+suction-cups,21,きゅうばん,3,1,"This Pokémon cannot be forced out of battle by moves such as Whirlwind.
+
+Dragon Tail and Circle Throw still inflict damage against this Pokémon.
+
+Overworld: If the lead Pokémon has this ability, the success rate while fishing is increased.","入れ替えさせる　技や
+道具が　効かない。"
+intimidate,22,いかく,3,1,"When this Pokémon enters battle, the opponent's Attack is lowered by one stage.  In a double battle, both opponents are affected.
+
+This ability also takes effect when acquired during a battle, but will not take effect again if lost and reobtained without leaving battle.
+
+This ability has no effect on an opponent that has a Substitute.
+
+Overworld: If the first Pokémon in the party has this ability, any random encounter with a Pokémon five or more levels lower than it has a 50% chance of being skipped.","相手の　攻撃を
+さげる。"
+shadow-tag,23,かげふみ,3,1,"While this Pokémon is in battle, opposing Pokémon cannot flee or switch out.
+
+Other Pokémon with this ability are unaffected.  Pokémon with Run Away can still flee.  Pokémon can still switch out with the use of a move or item.","相手の　影をふみ
+逃げられなくする。"
+rough-skin,24,さめはだ,3,1,"Whenever a move makes contact with this Pokémon, the move's user takes 1/8 of its maximum HP in damage.
+
+This ability functions identically to Iron Barbs.","触れた　相手を
+キズつける。"
+wonder-guard,25,ふしぎなまもり,3,1,"This Pokémon is immune to damaging moves that are not super effective against it.
+
+Moves that inflict fixed damage, such as Night Shade or Seismic Toss, are considered super effective if their types are.  Damage not directly dealt by moves, such as damage from weather, a status ailment, or Spikes, is not prevented.
+
+This ability cannot be copied with Role Play or traded away with Skill Swap, but it can be copied with Trace, disabled with Gastro Acid, or changed with Worry Seed.  This Pokémon can still use Role Play itself to lose this ability, but not Skill Swap.
+
+If this Pokémon has a Substitute, this ability will block moves as usual and any moves not blocked will react to the Substitute as usual.","効果バツグン　しか
+当たらない。"
+levitate,26,ふゆう,3,1,"This Pokémon is immune to Ground-type moves, Spikes, Toxic Spikes, and Arena Trap.
+
+This ability is disabled during Gravity or Ingrain, or while holding an Iron Ball.  This ability is not disabled during Roost.","じめんタイプの　技を
+受けない。"
+effect-spore,27,ほうし,3,1,"Whenever a move makes contact with this Pokémon, the move's user has a 30% chance of being paralyzed, poisoned, or put to sleep, chosen at random.
+
+Nothing is done to compensate if the move's user is immune to one of these ailments; there is simply a lower chance that the move's user will be affected.","触れると　どく　まひ
+ねむりに　することがある。"
+synchronize,28,シンクロ,3,1,"Whenever this Pokémon is burned, paralyzed, or poisoned, the Pokémon who gave this Pokémon that ailment is also given the ailment.
+
+This ability passes back bad poison when this Pokémon is badly poisoned.  This ability cannot pass on a status ailment that the Pokémon did not directly receive from another Pokémon, such as the poison from Toxic Spikes or the burn from a Flame Orb.
+
+Overworld: If the lead Pokémon has this ability, wild Pokémon have a 50% chance of having the lead Pokémon's nature, and a 50% chance of being given a random nature as usual, including the lead Pokémon's nature.  This does not work on Pokémon received outside of battle or roaming legendaries.","どく　まひ　やけどを
+相手に　うつす。"
+clear-body,29,クリアボディ,3,1,"This Pokémon cannot have its stats lowered by other Pokémon.
+
+This ability does not prevent any stat losses other than stat modifiers, such as the Speed cut from paralysis.  This Pokémon can still be passed negative stat modifiers through Guard Swap, Heart Swap, or Power Swap.
+
+This ability functions identically to White Smoke in battle.","相手に　能力を
+さげられない。"
+natural-cure,30,しぜんかいふく,3,1,"This Pokémon is cured of any major status ailment when it is switched out for another Pokémon.
+
+If this ability is acquired during battle, the Pokémon is cured upon leaving battle before losing the temporary ability.","状態異常が
+ひっこむと　治る。"
+lightning-rod,31,ひらいしん,3,1,"All other Pokémon's single-target Electric-type moves are redirected to this Pokémon if it is an eligible target.  Other Pokémon's Electric moves raise this Pokémon's Special Attack one stage, negating any other effect on it, and cannot miss it.
+
+If the move's intended target also has this ability, the move is not redirected.  When multiple Pokémon with this ability are possible targets for redirection, the move is redirected to the one with the highest Speed stat, or, in the case of a tie, to a random tied Pokémon.  Follow Me takes precedence over this ability.
+
+If the Pokémon is a Ground-type and thus immune to Electric moves, its immunity prevents the Special Attack boost.","でんきを　呼び込んで
+特攻を　あげる。"
+serene-grace,32,てんのめぐみ,3,1,"This Pokémon's moves have twice their usual effect chance.
+
+An effect chance is a move's chance to inflict a status ailment, cause a stat change, or make the target flinch in addition to the move's main effect.  For example, Flamethrower's chance of burning the target is doubled, but Protect's chance of success and Air Cutter's increased critical hit rate are unaffected.
+
+Secret Power is unaffected.","技の　追加効果が
+でやすい。"
+swift-swim,33,すいすい,3,1,"This Pokémon's Speed is doubled during rain.
+
+This bonus does not count as a stat modifier.","雨のとき　素早さが
+あがる。"
+chlorophyll,34,ようりょくそ,3,1,"This Pokémon's Speed is doubled during strong sunlight.
+
+This bonus does not count as a stat modifier.","晴れのとき　素早さが
+あがる。"
+illuminate,35,はっこう,3,1,"Overworld: If the lead Pokémon has this ability, the wild encounter rate is doubled.
+
+This ability has no effect in battle.","野生の　ポケモンに
+遭遇しやすくなる。"
+trace,36,トレース,3,1,"When this Pokémon enters battle, it copies a random opponent's ability.
+
+This ability cannot copy Flower Gift, Forecast, Illusion, Imposter, Multitype, Trace, Wonder Guard, or Zen Mode.","相手と　同じ
+特性に　なる。"
+huge-power,37,ちからもち,3,1,"This Pokémon's Attack is doubled while in battle.
+
+This bonus does not count as a stat modifier.
+
+This ability functions identically to Pure Power.","物理攻撃の
+威力が　あがる。"
+poison-point,38,どくのトゲ,3,1,"Whenever a move makes contact with this Pokémon, the move's user has a 30% chance of being poisoned.","触れた　相手に　どくを
+おわせる　ことがある。"
+inner-focus,39,せいしんりょく,3,1,This Pokémon cannot flinch.,"ひるまない。
+"
+magma-armor,40,マグマのよろい,3,1,"This Pokémon cannot be frozen.
+
+If a Pokémon is frozen and acquires this ability, it will immediately thaw out; this includes when regaining a lost ability upon leaving battle.
+
+Overworld: If any Pokémon in the party has this ability, each egg in the party has its hatch counter decreased by 2 (rather than 1) each step cycle, making eggs hatch roughly twice as quickly.  This effect does not stack if multiple Pokémon have this ability or Flame Body.","こおり状態に
+ならない。"
+water-veil,41,みずのベール,3,1,"This Pokémon cannot be burned.
+
+If a Pokémon is burned and acquires this ability, its burn is healed; this includes when regaining a lost ability upon leaving battle.","やけど状態に
+ならない。"
+magnet-pull,42,じりょく,3,1,"While this Pokémon is in battle, opposing Steel-type Pokémon cannot flee or switch out.
+
+Pokémon with Run Away can still flee.  Pokémon can still switch out with the use of a move or item.
+
+Overworld: If the lead Pokémon has this ability, Steel-type Pokémon have a higher encounter rate.","はがねの　ポケモンを
+逃げられなくする。"
+soundproof,43,ぼうおん,3,1,"This Pokémon is immune to moves flagged as being sound-based.
+
+Heal Bell is unaffected.  Uproar still prevents this Pokémon from sleeping.  This Pokémon can still receive a Perish Song counter through Baton Pass, and will retain a Perish Song counter if it acquires this ability after Perish Song is used.
+
+Howl, Roar of Time, Sonic Boom, and Yawn are not flagged as sound-based.","音の　技を
+受けない。"
+rain-dish,44,あめうけざら,3,1,This Pokémon heals for 1/16 of its maximum HP after each turn during rain.,"雨のとき　少しずつ
+ＨＰを　回復する。"
+sand-stream,45,すなおこし,3,1,"The weather changes to a sandstorm when this Pokémon enters battle and does not end unless cancelled by another weather condition.
+
+If multiple Pokémon with this ability, Drizzle, Drought, or Snow Warning are sent out at the same time, the abilities will activate in order of Speed, respecting Trick Room.  Each ability's weather will cancel the previous weather, and only the weather summoned by the slowest of the Pokémon will stay.
+
+Overworld: If the lead Pokémon has this ability, the wild encounter rate is halved in a sandstorm.","戦闘で　砂あらしを
+おこす。"
+pressure,46,プレッシャー,3,1,"Moves targetting this Pokémon use one extra PP.
+
+This ability stacks if multiple targets have it.  This ability still affects moves that fail or miss.  This ability does not affect ally moves that target either the entire field or just its side, nor this Pokémon's self-targetted moves; it does, however, affect single-targetted ally moves aimed at this Pokémon, ally moves that target all other Pokémon, and opponents' moves that target the entire field.  If this ability raises a move's PP cost above its remaining PP, it will use all remaining PP.
+
+When this Pokémon enters battle, all participating trainers are notified that it has this ability.
+
+Overworld: If the lead Pokémon has this ability, higher-levelled Pokémon have their encounter rate increased.","相手の　使う　技の
+ＰＰを　多く　減らす。"
+thick-fat,47,あついしぼう,3,1,This Pokémon takes half as much damage from Fire- and Ice-type moves.,"ほのおと　こおりタイプの
+技に　強い。"
+early-bird,48,はやおき,3,1,"This Pokémon's remaining sleep turn count falls by 2 rather than 1.
+
+If this Pokémon's sleep counter is at 1, it will fall to 0 and then the Pokémon will wake up.","起きるのが　早くなる。
+"
+flame-body,49,ほのおのからだ,3,1,"Whenever a move makes contact with this Pokémon, the move's user has a 30% chance of being burned.
+
+Overworld: If any Pokémon in the party has this ability, each egg in the party has its hatch counter decreased by 2 (rather than 1) each step cycle, making eggs hatch roughly twice as quickly.  This effect does not stack if multiple Pokémon have this ability or Magma Armor.","触れた　相手を　やけど
+させることがある。"
 run-away,50,にげあし,3,1,"This Pokémon is always successful fleeing from wild battles, even if trapped by a move or ability.","野生の　ポケモンから
 必ず　逃げられる。"
+keen-eye,51,するどいめ,3,1,"This Pokémon cannot have its accuracy lowered.
+
+This ability does not prevent any accuracy losses other than stat modifiers, such as the accuracy cut from fog; nor does it prevent other Pokémon's evasion from making this Pokémon's moves less accurate.  This Pokémon can still be passed negative accuracy modifiers through Heart Swap.
+
+Overworld: If the first Pokémon in the party has this ability, any random encounter with a Pokémon five or more levels lower than it has a 50% chance of being skipped.","命中率を
+さげられない。"
+hyper-cutter,52,かいりきバサミ,3,1,"This Pokémon's Attack cannot be lowered by other Pokémon.
+
+This ability does not prevent any Attack losses other than stat modifiers, such as the Attack cut from a burn.  This Pokémon can still be passed negative Attack modifiers through Heart Swap or Power Swap.","相手に　攻撃を
+さげられない。"
+pickup,53,ものひろい,3,1,"At the end of each turn, if another Pokémon consumed or Flung a held item that turn, this Pokémon picks up the item if it is not already holding one.  After each battle, this Pokémon has a 10% chance of picking up an item if it is not already holding one.
+
+The Air Balloon and Eject Button cannot be picked up.
+
+The items that may be found vary by game, and, since Pokémon Emerald, by the Pokémon's level.  This ability is checked after the battle ends, at which point any temporary ability changes have worn off.","道具を　拾ってくる
+ことが　ある。"
+truant,54,なまけ,3,1,"Every second turn on which this Pokémon should attempt to use a move, it will instead do nothing (""loaf around"").
+
+Loafing around interrupts moves that take multiple turns the same way paralysis, flinching, etc do.  Most such moves, for example Bide or Rollout, are simply cut off upon loafing around.  Attacks with a recharge turn, such as Hyper Beam, do not have to recharge; attacks with a preparation turn, such as Fly, do not end up being used.  Moves that are forced over multiple turns and keep going through failure, such as Outrage, Uproar, or any move forced by Encore, keep going as usual.
+
+If this Pokémon is confused, its confusion is not checked when loafing around; the Pokémon cannot hurt itself, and its confusion does not end or come closer to ending.
+
+If this Pokémon attempts to move but fails, e.g. because of paralysis or Gravity, it still counts as having moved and will loaf around the next turn.  If it does not attempt to move, e.g. because it is asleep or frozen, whatever it would have done will be postponed until its next attempt; that is, it will either loaf around or move as usual, depending on what it last did.
+
+This ability cannot be changed with Worry Seed, but it can be disabled with Gastro Acid, changed with Role Play, or traded away with Skill Swap.","技を　出すと
+つぎの　ターンは　休んでしまう。"
+hustle,55,はりきり,3,1,"This Pokémon's physical moves do 1.5× as much regular damage, but have 0.8× their usual accuracy.
+
+Special moves are unaffected.  Moves that do set damage, such as Seismic Toss, have their accuracy affected, but not their damage.
+
+Overworld: If the lead Pokémon has this ability, higher-levelled Pokémon have their encounter rate increased.","攻撃は　たかいが
+はずれやすい。"
+cute-charm,56,メロメロボディ,3,1,"Whenever a move makes contact with this Pokémon, the move's user has a 30% chance of being infatuated.
+
+Overworld: If the first Pokémon in the party has this ability, any wild Pokémon whose species can be either gender has a 2/3 chance of being set to the opposite gender, and a 1/3 chance of having a random gender as usual.","触れると　メロメロに
+することがある。"
+plus,57,プラス,3,1,"This Pokémon has 1.5× its Special Attack if any friendly Pokémon has Plus or Minus.
+
+This bonus does not count as a stat modifier.  If either ability is disabled by Gastro Acid, both lose their effect.","プラスかマイナスがいると
+特攻が　あがる。"
+minus,58,マイナス,3,1,"This Pokémon has 1.5× its Special Attack if any friendly Pokémon has Plus or Minus.
+
+This bonus does not count as a stat modifier.  If either ability is disabled by Gastro Acid, both lose their effect.","プラスかマイナスがいると
+特攻が　あがる。"
+forecast,59,てんきや,3,1,"During rain, strong sunlight, or hail, this Pokémon's type changes to Water, Fire, or Ice, respectively, and its form changes to match.
+
+This ability has no effect for any Pokémon other than Castform.
+
+If the weather ends or becomes anything that does not trigger this ability, or a Pokémon with Air Lock or Cloud Nine enters battle, this Pokémon's type and form revert to their default.  If this ability is lost or disabled, this Pokémon cannot change its current type and form until it regains its ability.","天気で　ポワルンが
+変化する。"
+sticky-hold,60,ねんちゃく,3,1,"This Pokémon's hold item cannot be removed by other Pokémon.
+
+Damaging moves that would remove this Pokémon's item can still inflict damage against this Pokémon, e.g. Knock Off or Pluck.  This Pokémon can still use moves that involve the loss of its own item, e.g. Fling or Trick.
+
+Overworld: If the lead Pokémon has this ability, the encounter rate while fishing is increased.","ねんちゃくして
+道具を　守る。"
+shed-skin,61,だっぴ,3,1,"After each turn, this Pokémon has a 33% of being cured of any major status ailment.","状態異常を
+治すことが　ある。"
+guts,62,こんじょう,3,1,"Whenever this Pokémon is asleep, burned, paralyzed, or poisoned, it has 1.5× its Attack.  This Pokémon is not affected by the usual Attack cut from a burn.
+
+This bonus does not count as a stat modifier.","状態異常で
+攻撃が　あがる。"
+marvel-scale,63,ふしぎなうろこ,3,1,"Whenever this Pokémon has a major status ailment, it has 1.5× its Defense.
+
+This bonus does not count as a stat modifier.","状態異常で
+防御が　あがる。"
+liquid-ooze,64,ヘドロえき,3,1,"Whenever a Pokémon would heal after hitting this Pokémon with a leeching move like Absorb, it instead loses as many HP as it would usually gain.
+
+Dream Eater is unaffected.","吸いとった　相手の
+ＨＰを　減らす。"
+overgrow,65,しんりょく,3,1,"When this Pokémon has 1/3 or less of its HP remaining, its Grass-type moves inflict 1.5× as much regular damage.","ピンチのとき　くさの
+威力が　あがる。"
+blaze,66,もうか,3,1,"When this Pokémon has 1/3 or less of its HP remaining, its Fire-type moves inflict 1.5× as much regular damage.","ピンチのとき　ほのおの
+威力が　あがる。"
+torrent,67,げきりゅう,3,1,"When this Pokémon has 1/3 or less of its HP remaining, its Water-type moves inflict 1.5× as much regular damage.","ピンチのとき　みずの
+威力が　あがる。"
+swarm,68,むしのしらせ,3,1,"When this Pokémon has 1/3 or less of its HP remaining, its Bug-type moves inflict 1.5× as much regular damage.
+
+Overworld: If the lead Pokémon has this ability, the wild encounter rate is increased.","ピンチのとき　むしの
+威力が　あがる。"
+rock-head,69,いしあたま,3,1,"This Pokémon does not receive recoil damage from its recoil moves.
+
+Struggle's recoil is unaffected.  This ability does not prevent crash damage from missing with Jump Kick or High Jump Kick.","ぶつかっても
+反動を　受けない。"
+drought,70,ひでり,3,1,"The weather changes to strong sunlight when this Pokémon enters battle and does not end unless cancelled by another weather condition.
+
+If multiple Pokémon with this ability, Drizzle, Sand Stream, or Snow Warning are sent out at the same time, the abilities will activate in order of Speed, respecting Trick Room.  Each ability's weather will cancel the previous weather, and only the weather summoned by the slowest of the Pokémon will stay.","戦闘に　でると
+日差しが　強くなる。"
+arena-trap,71,ありじごく,3,1,"While this Pokémon is in battle, opposing Pokémon cannot flee or switch out.  Flying-type Pokémon and Pokémon in the air, e.g. due to Levitate or Magnet Rise, are unaffected.
+
+Pokémon with Run Away can still flee.  Pokémon can still switch out with the use of a move or item.
+
+Overworld: If the lead Pokémon has this ability, the wild encounter rate is doubled.","戦闘で　相手を
+逃げられなくする。"
+vital-spirit,72,やるき,3,1,"This Pokémon cannot be asleep.
+
+This causes Rest to fail altogether.  If a Pokémon is asleep and acquires this ability, it will immediately wake up; this includes when regaining a lost ability upon leaving battle.
+
+This ability functions identically to Insomnia in battle.
+
+Overworld: If the lead Pokémon has this ability, higher-levelled Pokémon have their encounter rate increased.","ねむり状態に
+ならない。"
+white-smoke,73,しろいけむり,3,1,"This Pokémon cannot have its stats lowered by other Pokémon.
+
+This ability does not prevent any stat losses other than stat modifiers, such as the Speed cut from paralysis; nor self-inflicted stat drops, such as the Special Attack drop from Overheat; nor opponent-triggered stat boosts, such as the Attack boost from Swagger.  This Pokémon can still be passed negative stat modifiers through Guard Swap, Heart Swap, or Power Swap.
+
+This ability functions identically to Clear Body in battle.
+
+Overworld: If the lead Pokémon has this ability, the wild encounter rate is halved.","相手に　能力を
+さげられない。"
+pure-power,74,ヨガパワー,3,1,"This Pokémon's Attack is doubled in battle.
+
+This bonus does not count as a stat modifier.
+
+This ability functions identically to Huge Power.","物理攻撃の
+威力が　あがる。"
+shell-armor,75,シェルアーマー,3,1,"Moves cannot score critical hits against this Pokémon.
+
+This ability functions identically to Battle Armor.","相手の　攻撃が
+急所に　当たらない。"
+air-lock,76,エアロック,3,1,"While this Pokémon is in battle, weather can still be in play, but will not have any of its effects.
+
+This ability functions identically to Cloud Nine.","天気の　影響が
+なくなる。"
+tangled-feet,77,ちどりあし,4,1,"When this Pokémon is confused, it has twice its evasion.","混乱していると
+回避しやすくなる。"
+motor-drive,78,でんきエンジン,4,1,"Whenever an Electric-type move hits this Pokémon, its Speed rises one stage, negating any other effect on it.
+
+This ability will not take effect if this Pokémon is immune to Electric moves.  Electric moves will ignore this Pokémon's Substitute.
+
+This effect includes non-damaging moves, i.e. Thunder Wave.","でんきを　受けると
+素早さが　あがる。"
+rivalry,79,とうそうしん,4,1,"This Pokémon inflicts 1.25× as much regular damage against Pokémon of the same gender and 0.75× as much regular damage against Pokémon of the opposite gender.
+
+If either Pokémon is genderless, damage is unaffected.","相手と　性別が
+同じだと　強くなる。"
+steadfast,80,ふくつのこころ,4,1,"Whenever this Pokémon flinches, its Speed rises one stage.","ひるむ　たびに
+素早さが　あがる。"
+snow-cloak,81,ゆきがくれ,4,1,"During hail, this Pokémon has 1.25× its evasion, and it does not take hail damage regardless of type.
+
+The evasion bonus does not count as a stat modifier.
+
+Overworld: If the lead Pokémon has this ability, the wild encounter rate is halved in snow.","天気が　あられのとき
+回避率が　あがる。"
+gluttony,82,くいしんぼう,4,1,"This Pokémon eats any held Berry triggered by low HP when it falls below 50% of its HP, regardless of the Berry's usual threshold.","きのみを　いつもより
+早く　使う。"
+anger-point,83,いかりのつぼ,4,1,"Whenever this Pokémon receives a critical hit, its Attack rises to the maximum of 6 stages.
+
+This ability will still take effect if the critical hit is received by a Substitute.","急所に　受けると
+攻撃が　あがる。"
+unburden,84,かるわざ,4,1,"When this Pokémon uses or loses its held item, its Speed is doubled.  If it gains another item or leaves battle, this bonus is lost.
+
+This includes when the Pokémon drops its item because of Knock Off.  This bonus does not count as a stat modifier.  There is no notification when this ability takes effect.","道具が　なくなると
+素早さが　あがる。"
+heatproof,85,たいねつ,4,1,This Pokémon takes half as much damage from Fire-type moves and burns.,"ほのお技の
+威力を　弱める。"
+simple,86,たんじゅん,4,1,"Each stage of this Pokémon's stat modifiers acts as two stages.  These doubled stages are still limited to a minimum of -6 and a maximum of 6.
+
+This Pokémon can still accumulate less than -3 or more than 3 stages of stat modifiers, even though the extra ones have no effect after doubling.","能力　変化が
+いつもより　はげしい。"
+dry-skin,87,かんそうはだ,4,1,"This Pokémon takes 1/8 of its maximum HP in damage after each turn during strong sunlight, but it heals for 1/8 of its HP each turn during rain.  This Pokémon takes 1.25× as much damage from Fire-type moves, but whenever a Water move hits it, it heals for 1/4 its maximum HP instead.","あついと　ＨＰが　減る。
+みずで　ＨＰを　回復。"
+download,88,ダウンロード,4,1,"When this Pokémon enters battle, its Attack or Special Attack, whichever corresponds to its opponents' weaker total defensive stat, rises one stage.  In the event of a tie, Special Attack is raised.
+
+This ability also takes effect when acquired during a battle.","相手の　能力を　みて
+強さを　変える。"
+iron-fist,89,てつのこぶし,4,1,"Moves flagged as being punch-based have 1.2× their base power for this Pokémon.
+
+Sucker Punch is not flagged as punch-based; its original, Japanese name only means ""surprise attack"".","パンチを　使う　技の
+威力が　あがる。"
+poison-heal,90,ポイズンヒール,4,1,"If this Pokémon is poisoned, it will heal for 1/8 of its maximum HP after each turn rather than taking damage.  This includes bad poison.","どく状態に　なると
+ＨＰを　回復する。"
+adaptability,91,てきおうりょく,4,1,"This Pokémon inflicts twice as much damage with moves whose types match its own, rather than the usual same-type attack bonus of 1.5×.","タイプが　同じ　技の
+威力が　あがる。"
+skill-link,92,スキルリンク,4,1,"This Pokémon always hits five times with two-to-five-hit moves, such as Icicle Spear.  It also bypasses the accuracy checks on Triple Kick's second and third hits.","連続技を
+たくさん　だせる。"
+hydration,93,うるおいボディ,4,1,This Pokémon is cured of any major status ailment after each turn during rain.,"状態異常が
+雨の　とき　治る。"
+solar-power,94,サンパワー,4,1,"During strong sunlight, this Pokémon has 1.5× its Special Attack but takes 1/8 of its maximum HP in damage after each turn.","晴れると　ＨＰが　減るが
+特攻が　あがる。"
+quick-feet,95,はやあし,4,1,"Whenever this Pokémon has a major status ailment, it has 1.5× its Speed.  This Pokémon is not affected by the usual Speed cut from paralysis.
+
+Overworld: If the lead Pokémon has this ability, the wild encounter rate is halved.","状態異常で
+素早さが　あがる。"
+normalize,96,ノーマルスキン,4,1,"This Pokémon's moves all act as if they were Normal-type.
+
+Moves that inflict typeless damage do so as usual.  Moves of variable type, such as Hidden Power, are affected.  They otherwise work as usual, however; Weather Ball, for example, is always forced to be Normal, but it still has doubled power and looks different during weather.
+
+As Thunder Wave is prevented by immunities, unlike most non-damaging moves, it does not affect Ghost-type Pokémon under the effect of this ability.","だした技が　すべて
+ノーマルタイプに　なる。"
+sniper,97,スナイパー,4,1,"This Pokémon inflicts triple damage with critical hits, rather than the usual double damage.","急所に　当てたとき
+威力が　あがる。"
+magic-guard,98,マジックガード,4,1,"This Pokémon is immune to damage not directly caused by a move.
+
+For example, this Pokémon takes no damage from from weather, recoil, status ailments, or Spikes, but it still suffers from the Attack cut when burned, and a Life Orb will still power up this Pokémon's moves without damaging it.  Anything that directly depends on such damage will also not happen; for example, Leech Seed will neither hurt this Pokémon nor heal the opponent, and Pokémon with a Jaboca Berry or Rowap Berry will not consume the berry when hit by this Pokémon.
+
+The following are unaffected: Struggle, Pain Split (whether used by or against this Pokémon), Belly Drum, Substitute, Curse, moves that knock the user out, and damage from confusion.
+
+This Pokémon will neither lose nor regain HP if it drains HP from a Pokémon with Liquid Ooze.
+
+If this Pokémon is badly poisoned, the poison counter is still increased each turn; if the Pokémon loses this ability, it will begin taking as much damage as it would be if it had been taking increasing damage each turn.","攻撃　以外では
+ダメージを　受けない。"
+no-guard,99,ノーガード,4,1,"Moves used by or against this Pokémon never miss.
+
+One-hit KO moves are unaffected.  Moves affected by this ability can hit Pokémon during the preparation turn of moves like Dig or Fly.
+
+Overworld: If the lead Pokémon has this ability, the wild encounter rate is doubled.","お互いの　技が
+必ず　当たる。"
+stall,100,あとだし,4,1,"This Pokémon moves last within its priority bracket.
+
+Multiple Pokémon with this ability move in order of Speed amongst themselves.
+
+The Full Incense and Lagging Tail take precedence over this ability; that is, Pokémon with these items move after Pokémon with this ability.  Pokémon with both this ability and one of these items are delayed as much as if they had only the item.
+
+This ability works as usual during Trick Room: Pokémon with this ability will move in reverse order of Speed after Pokémon without it.","相手より　素早くても
+行動が　遅くなる。"
+technician,101,テクニシャン,4,1,"This Pokémon's moves have 1.5× their power if their base power is 60 or less.
+
+This includes moves of variable power, such as Hidden Power and Magnitude, when their power is 60 or less.  Helping Hand's power boost is taken into account for any move, as is Defense Curl's power boost for Rollout.","弱い　技の
+威力が　あがる。"
+leaf-guard,102,リーフガード,4,1,"This Pokémon cannot be given a major status ailment during strong sunlight.
+
+This ability does not heal prior status ailments.  Rest will fail altogether with this ability in effect.  Yawn will immediately fail if used on this Pokémon during strong sunlight, and an already-used Yawn will fail if the weather turns to strong sunlight in the meantime.","晴れのとき
+状態異常に　ならない。"
+klutz,103,ぶきよう,4,1,"In battle, this Pokémon cannot use its held item, nor will the item have any passive effect on the battle, positive or negative.  This Pokémon also cannot use Fling.
+
+The Speed cut from the Iron Ball and the effort items (the Macho Brace, Power Weight, Power Bracer, Power Belt, Power Lens, Power Band, and Power Anklet) is unaffected.  Items that do not directly affect the battle, such as the Exp. Share, the Amulet Coin, or the Soothe Bell, work as usual.  All held items work as usual out of battle.
+
+Other moves that use the held item, such as Natural Gift and Switcheroo, work as usual.","持っている　道具を
+使うことが　できない。"
+mold-breaker,104,かたやぶり,4,1,"This Pokémon's moves completely ignore abilities that could hinder or prevent their effect on the target.
+
+For example, this Pokémon's moves ignore abilities that would fully negate them, such as Water Absorb; abilities that would prevent any of their effects, such as Clear Body, Shell Armor, or Sticky Hold; and abilities that grant any general protective benefit, such as Simple, Snow Cloak, or Thick Fat.  If an ability could either hinder or help this Pokémon's moves, e.g. Dry Skin or Unaware, the ability is ignored either way.
+
+Abilities that do not fit this description, even if they could hinder moves in some other way, are not affected.  For example, Cursed Body only affects potential future uses of the move, while Liquid Ooze and Shadow Tag can only hinder a move's effect on the user.  This ablity cannot ignore type or form changes granted by abilities, for example Color Change or Forecast; nor effects that were caused by abilities but are no longer tied to an ability, such as the rain from Drizzle.  This ability cannot ignore Multitype at all.
+
+An ability ignored by this ability is only nullified while the move is being used.  For example, this Pokémon's moves can paralyze a Pokémon with Limber, but Limber will activate and heal the paralysis immediately thereafter, and this Pokémon's Spikes are not affected by this ability after they have been placed.
+
+When this Pokémon enters battle, all participating trainers are notified that it has this ability.
+
+This ability functions identically to Teravolt and Turboblaze.","特性に　関係なく
+相手に　技を　だせる。"
+super-luck,105,きょううん,4,1,This Pokémon's moves have critical hit rates one stage higher than normal.,"相手の　急所に
+攻撃が　当たりやすい。"
+aftermath,106,ゆうばく,4,1,"When this Pokémon is knocked out by a move that makes contact, the move's user takes 1/4 its maximum HP in damage.","ひんしの　ときに　触れた
+相手に　ダメージ。"
+anticipation,107,きけんよち,4,1,"When this Pokémon enters battle, if one of its opponents has a move that is super effective against it, Self-Destruct, Explosion, or a one-hit knockout move, all participating trainers are notified.
+
+The move itself is not revealed; only that there is such a move.  Moves that inflict typeless damage, such as Future Sight, and moves of variable type, such as Hidden Power, count as their listed types.  Counter, Metal Burst, Mirror Coat, and one-hit KO moves to which this Pokémon is immune do not trigger this ability.","相手の　持つ　危険な
+技を　察知する。"
+forewarn,108,よちむ,4,1,"When this Pokémon enters battle, it reveals the move with the highest base power known by any opposing Pokémon to all participating trainers.
+
+In the event of a tie, one is chosen at random.
+
+Moves without a listed base power are assigned one as follows:
+
+Power | Moves
+----: | -----
+  160 | One-hit KO moves: Fissure, Guillotine, Horn Drill, and Sheer Cold
+  120 | Counter moves: Counter, Metal Burst, and Mirror Coat
+   80 | Variable power or set damage: Crush Grip, Dragon Rage, Electro Ball, Endeavor, Final Gambit, Flail, Frustration, Grass Knot, Gyro Ball, Heat Crash, Heavy Slam, Hidden Power, Low Kick, Natural Gift, Night Shade, Psywave, Return, Reversal, Seismic Toss, Sonic Boom, Trump Card, and Wring Out
+    0 | Any such move not listed
+","相手の　持つ　技を
+読み取ることが　できる。"
+unaware,109,てんねん,4,1,"This Pokémon ignores other Pokémon's stat modifiers for the purposes of damage and accuracy calculation.
+
+Effectively, this affects modifiers of every stat except Speed.
+
+The power of Punishment and Stored Power is calculated as usual.  When this Pokémon hurts itself in confusion, its stat modifiers affect damage as usual.","相手の　能力の
+変化を　無視する。"
+tinted-lens,110,いろめがね,4,1,This Pokémon deals twice as much damage with moves that are not very effective against the target.,"効果いまひとつ　のとき
+技を　強める。"
+filter,111,フィルター,4,1,"This Pokémon takes 0.75× as much damage from moves that are super effective against it.
+
+This ability functions identically to Solid Rock.","効果バツグン　のとき
+威力を　弱める。"
+slow-start,112,スロースタート,4,1,"This Pokémon's Attack and Speed are halved for five turns upon entering battle.
+
+This ability also takes effect when acquired during battle.  If this Pokémon loses its ability before the five turns are up, its Attack and Speed return to normal; if it then regains this ability without leaving battle, its Attack and Speed are halved again, but the counter keeps counting from where it was.","攻撃と　素早さが
+しばらく　半分になる。"
+scrappy,113,きもったま,4,1,"This Pokémon ignores Ghost-type Pokémon's immunity to Normal- and Fighting-type moves.
+
+Ghost Pokémon's other types affect damage as usual.","ゴーストタイプに
+ノーマル技が　当たる。"
+storm-drain,114,よびみず,4,1,"All other Pokémon's single-target Water-type moves are redirected to this Pokémon, if it is an eligible target.  Other Pokémon's Water moves raise this Pokémon's Special Attack one stage, negating any other effect on it, and cannot miss it.
+
+If the move's intended target also has this ability, the move is not redirected.  When multiple Pokémon with this ability are possible targets for redirection, the move is redirected to the one with the highest Speed stat, or, in the case of a tie, to a random tied Pokémon.  Follow Me takes precedence over this ability.","みずを　呼び込んで
+特攻を　あげる。"
+ice-body,115,アイスボディ,4,1,"This Pokémon heals for 1/16 of its maximum HP after each turn during hail, and it does not take hail damage regardless of type.","あられのとき　ＨＰを
+少しずつ　回復。"
+solid-rock,116,ハードロック,4,1,"This Pokémon takes 0.75× as much damage from moves that are super effective against it.
+
+This ability functions identically to Filter.","効果バツグン　のとき
+威力を　弱める。"
+snow-warning,117,ゆきふらし,4,1,"The weather changes to hail when this Pokémon enters battle and does not end unless cancelled by another weather condition.
+
+If multiple Pokémon with this ability, Drizzle, Drought, or Sand Stream are sent out at the same time, the abilities will activate in order of Speed, respecting Trick Room.  Each ability's weather will cancel the previous weather, and only the weather summoned by the slowest of the Pokémon will stay.","戦闘に　でると
+あられを　降らす。"
+honey-gather,118,みつあつめ,4,1,"This Pokémon has a chance of picking up Honey after each battle.  This chance starts at 5% and rises another 5% after every tenth level: 5% from level 1–10, 10% from 11–20, and so on, up to 50% from 91–100.
+
+This ability is checked after the battle ends, at which point any temporary ability changes have worn off.","あまいミツを　集めて
+くることが　ある。"
+frisk,119,おみとおし,4,1,"When this Pokémon enters battle, it reveals an opposing Pokémon's held item to all participating trainers.
+
+In a double battle, if one opponent has an item, this Pokémon will Frisk that Pokémon; if both have an item, it will Frisk one at random.","相手の　持ち物を
+知ることが　できる。"
+reckless,120,すてみ,4,1,"This Pokémon's recoil moves and crash moves have 1.2× their base power.
+
+Struggle is unaffected.
+
+The ""crash moves"" are the moves that damage the user upon missing: Jump Kick and High Jump Kick.","反動で　ダメージを
+受ける技が　強くなる。"
+multitype,121,マルチタイプ,4,1,"If this Pokémon is holding an elemental Plate, its type and form change to match the Plate.
+
+This Pokémon's held item, whether or not it is a Plate, cannot be taken by Covet or Thief, nor removed by Knock Off, nor traded by Switcheroo or Trick.  Covet, Thief, and Knock Off still inflict damage against this Pokémon.  Unlike with Sticky Hold, this Pokémon cannot use Fling, Switcheroo, or Trick to lose its item itself, nor gain an item through Switcheroo or Trick if it does not have one.
+
+This ability has no effect for any Pokémon other than Arceus.  This ability cannot be traded with Skill Swap, nor copied with Role Play or Trace, nor disabled with Gastro Acid, nor changed with Worry Seed.  This Pokémon cannot use Skill Swap or Role Play to lose its ability itself.  Mold Breaker cannot ignore this ability.
+
+If a Pokémon Transforms into an Arceus with this ability, it will Transform into Arceus's default, Normal-type form.  If the Transforming Pokémon is holding a Plate, this ability will then activate and change the Pokémon into the corresponding form.","持っている　プレートで
+タイプが　変わる。"
+flower-gift,122,フラワーギフト,4,1,"Friendly Pokémon have 1.5× their Attack and Special Defense during strong sunlight if any friendly Pokémon has this ability.
+
+Unlike Forecast, Multitype, and Zen Mode, this ability is not tied to its Pokémon's form change; Cherrim will switch between its forms even if it loses this ability.  As such, this ability also works if obtained by a Pokémon other than Cherrim.","晴れのとき　自分と
+味方が　強くなる。"
+bad-dreams,123,ナイトメア,4,1,Opposing Pokémon take 1/8 of their maximum HP in damage after each turn while they are asleep.,"ねむっている　相手の
+ＨＰを　減らす。"
+pickpocket,124,わるいてぐせ,5,1,"Whenever a move makes contact with this Pokémon, if it does not have a held item, it steals the attacker's held item.
+
+This Pokémon cannot steal upon being knocked out.  It can steal if the attacker has a Substitute, but cannot steal when its own Substitute is hit.  If a move hits multiple times, only the last hit triggers this ability.  If this Pokémon is wild, it cannot steal from a trained Pokémon.","触られた　相手から
+道具を　盗む。"
+sheer-force,125,ちからずく,5,1,"This Pokémon's moves with extra effects have 1.3× their power, but lose their extra effects.
+
+An effect chance is a move's chance to inflict a status ailment, cause a stat change, or make the target flinch in addition to the move's main effect. For example, Thunder Shock's paralysis is an extra effect, but Thunder Wave's is not, nor are Knock Off's item removal and Air Cutter's increased critical hit rate.
+
+Moves that lower the user's stats are unaffected.","力が　強くなるが
+追加効果が　なくなる。"
+contrary,126,あまのじゃく,5,1,"Whenever this Pokémon's stats would be raised, they are instead lowered by the same amount, and vice versa.","能力の　変化が
+逆転する。"
+unnerve,127,きんちょうかん,5,1,"Opposing Pokémon cannot eat held Berries while this Pokémon is in battle.
+
+Affected Pokémon can still use Bug Bite or Pluck to eat a target's Berry.","相手を　緊張させ
+きのみを　食べさせない。"
+defiant,128,まけんき,5,1,"When any of this Pokémon's stats are lowered, its Attack rises by two stages.
+
+If multiple stats are lowered at once, this ability takes effect with each stat lowered.","能力が　さがると
+攻撃が　あがる。"
+defeatist,129,よわき,5,1,This Pokémon's Attack and Special Attack are halved when it has half its HP or less.,"ＨＰが　半分になると
+能力が　さがる。"
+cursed-body,130,のろわれボディ,5,1,Moves that hit this Pokémon have a 30% chance of being Disabled afterward.,"攻撃されると　たまに
+かなしばりにする。"
+healer,131,いやしのこころ,5,1,Friendly Pokémon next to this Pokémon in double and triple battles each have a 30% chance of being cured of any major status ailment after each turn.,"状態異常の
+味方を　たまに　治す。"
+friend-guard,132,フレンドガード,5,1,"All friendly Pokémon take 0.75× as much direct damage from moves while this Pokémon is in battle.
+
+This effect stacks if multiple allied Pokémon have it.","味方の　ダメージを
+減らすことができる。"
+weak-armor,133,くだけるよろい,5,1,"Whenever a physical move hits this Pokémon, its Speed rises one stage and its Defense falls one stage.
+
+This ability triggers on every hit of a multiple-hit move.","物理技で　防御がさがり
+素早さが　あがる。"
+heavy-metal,134,ヘヴィメタル,5,1,This Pokémon has double the usual weight for its species.,"自分の　重さが
+２倍に　なる。"
+light-metal,135,ライトメタル,5,1,This Pokémon has half the usual weight for its species.,"自分の　重さが
+半分に　なる。"
+multiscale,136,マルチスケイル,5,1,This Pokémon takes half as much damage when it is hit having full HP.,"ＨＰが　満タンのときに
+ダメージが　少なくなる。"
+toxic-boost,137,どくぼうそう,5,1,This Pokémon has 1.5× its Attack when poisoned.,"どくのとき　物理の
+威力が　あがる。"
+flare-boost,138,ねつぼうそう,5,1,This Pokémon has 1.5× its Special Attack when burned.,"やけどのとき　特殊の
+威力が　あがる。"
+harvest,139,しゅうかく,5,1,"After each turn, if the last item this Pokémon consumed was a Berry and it is not currently holding an item, it has a 50% chance of regaining that Berry, or a 100% chance during strong sunlight.","使った　きのみを
+何回も　つくりだす。"
+telepathy,140,テレパシー,5,1,"This Pokémon does not take damage from friendly Pokémon's moves, including single-target moves aimed at it.","味方の　攻撃を
+読み取って　受けない。"
+moody,141,ムラっけ,5,1,"After each turn, one of this Pokémon's stats at random rises two stages, and another falls one stage.
+
+If a stat is already at 6 or -6 stages, it will not be chosen to be increased or decreased, respectively.","能力が　あがったり
+さがったりする。"
+overcoat,142,ぼうじん,5,1,This Pokémon does not take damage from weather.,"ちりや　粉を
+防ぐ。"
+poison-touch,143,どくしゅ,5,1,"This Pokémon's contact moves have a 30% chance of poisoning the target with each hit.
+
+This counts as an extra effect for the purposes of Shield Dust.  This ability takes effect before Mummy.","触るだけで　相手を
+どくにすることがある。"
+regenerator,144,さいせいりょく,5,1,"This Pokémon regains 1/3 of its maximum HP when it is switched out for another Pokémon under any circumstances other than having fainted.
+
+This ability does not take effect when a battle ends.","ひっこめると ＨＰが
+少し　回復する。"
+big-pecks,145,はとむね,5,1,"This Pokémon's Defense cannot be lowered by other Pokémon.
+
+This Pokémon can still be passed negative Defense modifiers through Heart Swap or Guard Swap.","防御を　さげる
+攻撃を　受けない。"
+sand-rush,146,すなかき,5,1,"This Pokémon's Speed is doubled during a sandstorm, and it does not take sandstorm damage, regardless of type.","砂あらしで
+素早さが　あがる。"
+wonder-skin,147,ミラクルスキン,5,1,Non-damaging moves have exactly 50% base accuracy against this Pokémon.,"変化技を　受けにくい
+体に　なっている。"
+analytic,148,アナライズ,5,1,"This Pokémon's moves have 1.3× their power when it moves last in a turn.
+
+Future Sight and Doom Desire are unaffected.","一番　最後に
+技をだすと　強くなる。"
+illusion,149,イリュージョン,5,1,"This Pokémon, upon being sent out, appears to have the species, nickname, and Poké Ball of the last Pokémon in the party that is able to battle.  This illusion breaks upon being hit by a damaging move.
+
+Other damage, e.g. from weather or Spikes, does not break the illusion, nor does damage done to a Substitute.
+
+If the party order becomes temporarily shuffled around as Pokémon are switched out in battle, this ability chooses the last Pokémon according to that shuffled order.","後ろの　ポケモンに
+なりきって　でてくる。"
+imposter,150,かわりもの,5,1,This Pokémon transforms into a random opponent upon entering battle.  This effect is identical to the move Transform.,"目の前の　ポケモンに
+変身してしまう。"
+infiltrator,151,すりぬけ,5,1,"This Pokémon's moves ignore Light Screen, Reflect, and Safeguard.","相手の　かべを
+すりぬけて　攻撃。"
+mummy,152,ミイラ,5,1,"Whenever a contact move hits this Pokémon, the attacking Pokémon's ability changes to Mummy.
+
+Multitype is unaffected.  If a Pokémon with Moxie knocks this Pokémon out, the former's ability will change without taking effect.","相手に　触られると
+相手を　ミイラにする。"
+moxie,153,じしんかじょう,5,1,"This Pokémon's Attack rises one stage upon knocking out another Pokémon, even a friendly Pokémon.
+
+This ability does not take effect when the Pokémon indirectly causes another Pokémon to faint, e.g. through poison or Spikes.
+
+If this Pokémon knocks out a Pokémon with Mummy, the former's ability will change without taking effect.","相手を　倒すと
+攻撃が　あがる。"
+justified,154,せいぎのこころ,5,1,"Whenever a Dark-type move hits this Pokémon, its Attack rises one stage.
+
+The move is not negated in any way.","あくを　受けると
+攻撃が　あがる。"
+rattled,155,びびり,5,1,"This Pokémon's Speed rises one stage with each hit from a damaging Dark-, Ghost-, or Bug-type move.","びびって　素早さが
+あがる　タイプがある。"
+magic-bounce,156,マジックミラー,5,1,"When this Pokémon is targeted by a move flagged as being reflectable, the move is redirected to its user.
+
+All reflectable moves are non-damaging, and most non-damaging moves that target other Pokémon are reflectable.
+
+A move reflected by this ability or Magic Coat cannot be reflected back.","変化技を　返す
+ことが　できる。"
+sap-sipper,157,そうしょく,5,1,"Whenever a Grass-type move hits this Pokémon, its Attack rises one stage, negating any other effect on it.","くさの　技を　受けると
+攻撃が　あがる。"
+prankster,158,いたずらごころ,5,1,This Pokémon's non-damaging moves have their priority increased by one stage.,"変化技を　先制で
+だすことが　できる。"
+sand-force,159,すなのちから,5,1,"During a sandstorm, this Pokémon's Rock-, Ground-, and Steel-type moves have 1.3× their base power.  This Pokémon does not take sandstorm damage, regardless of type.","砂あらしで　威力が
+あがる　技がある。"
+iron-barbs,160,てつのトゲ,5,1,"Whenever a move makes contact with this Pokémon, the move's user takes 1/8 of its maximum HP in damage.
+
+This ability functions identically to Rough Skin.","触れた　相手を
+キズつける。"
+zen-mode,161,ダルマモード,5,1,"This Pokémon switches between Standard Mode and Zen Mode after each turn depending on its HP.  Below 50% of its maximum HP, it switches to Zen Mode, and at 50% or above, it switches to Standard Mode.
+
+This Pokémon returns to Standard Mode upon leaving battle or losing this ability.  This ability has no effect if this Pokémon is not a Darmanitan.","ピンチに　なると
+姿が　変化する。"
+victory-star,162,しょうりのほし,5,1,"All friendly Pokémon's moves, including this Pokémon's own moves, have 1.1× their usual accuracy while this Pokémon is in battle.","自分や　味方の
+命中が　あがる。"
+turboblaze,163,ターボブレイズ,5,1,"This Pokémon's moves completely ignore abilities that could hinder or prevent their effect on the target.
+
+For example, this Pokémon's moves ignore abilities that would fully negate them, such as Water Absorb; abilities that would prevent any of their effects, such as Clear Body, Shell Armor, or Sticky Hold; and abilities that grant any general protective benefit, such as Simple, Snow Cloak, or Thick Fat.  If an ability could either hinder or help this Pokémon's moves, e.g. Dry Skin or Unaware, the ability is ignored either way.
+
+Abilities that do not fit this description, even if they could hinder moves in some other way, are not affected.  For example, Cursed Body only affects potential future uses of the move, while Liquid Ooze and Shadow Tag can only hinder a move's effect on the user.  This ablity cannot ignore type or form changes granted by abilities, for example Color Change or Forecast; nor effects that were caused by abilities but are no longer tied to an ability, such as the rain from Drizzle.  This ability cannot ignore Multitype at all.
+
+An ability ignored by this ability is only nullified while the move is being used.  For example, this Pokémon's moves can paralyze a Pokémon with Limber, but Limber will activate and heal the paralysis immediately thereafter, and this Pokémon's Spikes are not affected by this ability after they have been placed.
+
+When this Pokémon enters battle, all participating trainers are notified that it has this ability.
+
+This ability functions identically to Mold Breaker and Teravolt.","特性に　関係なく
+相手に　技を　だせる。"
+teravolt,164,テラボルテージ,5,1,"This Pokémon's moves completely ignore abilities that could hinder or prevent their effect on the target.
+
+For example, this Pokémon's moves ignore abilities that would fully negate them, such as Water Absorb; abilities that would prevent any of their effects, such as Clear Body, Shell Armor, or Sticky Hold; and abilities that grant any general protective benefit, such as Simple, Snow Cloak, or Thick Fat.  If an ability could either hinder or help this Pokémon's moves, e.g. Dry Skin or Unaware, the ability is ignored either way.
+
+Abilities that do not fit this description, even if they could hinder moves in some other way, are not affected.  For example, Cursed Body only affects potential future uses of the move, while Liquid Ooze and Shadow Tag can only hinder a move's effect on the user.  This ablity cannot ignore type or form changes granted by abilities, for example Color Change or Forecast; nor effects that were caused by abilities but are no longer tied to an ability, such as the rain from Drizzle.  This ability cannot ignore Multitype at all.
+
+An ability ignored by this ability is only nullified while the move is being used.  For example, this Pokémon's moves can paralyze a Pokémon with Limber, but Limber will activate and heal the paralysis immediately thereafter, and this Pokémon's Spikes are not affected by this ability after they have been placed.
+
+When this Pokémon enters battle, all participating trainers are notified that it has this ability.
+
+This ability functions identically to Mold Breaker and Turboblaze.","特性に　関係なく
+相手に　技を　だせる。"
+aroma-veil,165,アロマベール,6,1,Protects allies against moves that affect their mental state.,"味方への　メンタル
+攻撃を　防ぐ。"
+flower-veil,166,フラワーベール,6,1,Protects friendly Grass Pokémon from having their stats lowered by other Pokémon.,"味方の　草ポケモンは
+能力が　さがらない。"
+cheek-pouch,167,ほおぶくろ,6,1,"Restores HP upon eating a Berry, in addition to the Berry's effect.","きのみを　食べると
+ＨＰも　回復する。"
+protean,168,へんげんじざい,6,1,"Changes the bearer's type to match each move it uses.
+
+The type change takes place just before the move is used.","だした　技と　同じ
+タイプに　変化する。"
+fur-coat,169,ファーコート,6,1,Halves damage from physical attacks.,"物理技の　ダメージが
+半分になる。"
+magician,170,マジシャン,6,1,Steals the target's held item when the bearer uses a damaging move.,"技を　当てた　相手の
+道具を　奪ってしまう。"
+bulletproof,171,ぼうだん,6,1,"Protects against bullet, ball, and bomb-based moves.","たまや　ばくだんに
+当たらない。"
+competitive,172,かちき,6,1,Raises Special Attack by two stages upon having any stat lowered.,"能力が　さがると
+特攻が　あがる。"
+strong-jaw,173,がんじょうあご,6,1,Strengthens biting moves to 1.5× their power.,"あごが　頑丈で
+かむ　力が　強い。"
+refrigerate,174,フリーズスキン,6,1,Turns the bearer's Normal-type moves into Ice-type moves.  Moves changed by this ability have 1.3× their power.,"ノーマルタイプの　技が
+こおりタイプに　なる。"
+sweet-veil,175,スイートベール,6,1,Prevents friendly Pokémon from sleeping.,"味方の　ポケモンは
+眠らなくなる。"
+stance-change,176,バトルスイッチ,6,1,"Changes Aegislash to Blade Forme before using a damaging move, or Shield Forme before using King’s Shield.","戦闘モードで
+姿が　変わる。"
+gale-wings,177,はやてのつばさ,6,1,Raises Flying moves' priority by one stage.,"ひこうタイプの　技が
+先制で　だせる。"
+mega-launcher,178,メガランチャー,6,1,Strengthens aura and pulse moves to 1.5× their power.,"はどうの　技の
+威力が　高い。"
+grass-pelt,179,くさのけがわ,6,1,Boosts Defense while Grassy Terrain is in effect.,"グラスフィールドの時
+防御が　あがる。"
+symbiosis,180,きょうせい,6,1,Passes the bearer's held item to an ally when the ally uses up its item.,"味方に　道具を
+渡せるように　なる。"
+tough-claws,181,かたいツメ,6,1,Strengthens moves that make contact to 1.33× their power.,"接触する　技の
+威力が　あがる。"
+pixilate,182,フェアリースキン,6,1,Turns the bearer's Normal-type moves into Fairy moves.  Moves changed by this ability have 1.3× their power.,"ノーマルタイプの　技が
+フェアリータイプになる。"
+gooey,183,ぬめぬめ,6,1,Lowers attacking Pokémon's Speed by one stage on contact.,"触れた　相手の
+素早さを　さげる。"
+aerilate,184,スカイスキン,6,1,Turns the bearer's Normal-type moves into Flying-type moves.  Moves changed by this ability have 1.3× their power.,"ノーマルタイプの　技が
+ひこうタイプになる。"
+parental-bond,185,おやこあい,6,1,Lets the bearer hit twice with damaging moves.  The second hit has half power.,"親子　２匹で
+攻撃する。"
+dark-aura,186,ダークオーラ,6,1,Strengthens Dark moves for all friendly and opposing Pokémon.,"全員の　あくタイプの
+技が　強くなる。"
+fairy-aura,187,フェアリーオーラ,6,1,Strengthens Fairy moves for all friendly and opposing Pokémon.,"全員の　フェアリー
+技が　強くなる。"
+aura-break,188,オーラブレイク,6,1,"While this Pokémon is on the field, Dark Aura and Fairy Aura weaken moves of their respective types to 2/3 their power, rather than strengthening them.","オーラの　効果が
+逆に　なる。"
+primordial-sea,189,はじまりのうみ,6,1,"When this Pokémon enters battle or gains this ability, the weather becomes heavy rain.  Heavy rain has all the properties of Rain Dance and also causes damaging Fire moves to fail.
+
+Heavy rain ends when this Pokémon leaves battle or loses this ability, or when this ability is nullified.  The weather cannot otherwise be changed except by the effects of Delta Stream and Desolate Land.
+
+Air Lock and Cloud Nine will prevent the effects of heavy rain, including allowing Fire moves to work, but will not allow the weather to be changed.","ほのおタイプの　攻撃を
+受けない　天気にする。"
+desolate-land,190,おわりのだいち,6,1,"When this Pokémon enters battle or gains this ability, the weather becomes extremely harsh sunlight.  Extremely harsh sunlight has all the properties of Sunny Day and also causes damaging Water moves to fail.
+
+Extremely harsh sunlight ends when this Pokémon leaves battle or loses this ability, or when this ability is nullified.  The weather cannot otherwise be changed except by the effects of Delta Stream and Primordial Sea.
+
+Air Lock and Cloud Nine will prevent the effects of extremely harsh sunlight, including allowing Water moves to work, but will not allow the weather to be changed."," ずタイプの　攻撃を
+受けない　天気にする。"
+delta-stream,191,デルタストリーム,6,1,"When this Pokémon enters battle or gains this ability, the weather becomes a mysterious air current.  A mysterious air current causes moves to not be super effective against Flying; they do neutral damage instead.  Anticipation and Stealth Rock are not affected.
+
+The mysterious air current ends when this Pokémon leaves battle or loses this ability, or when this ability is nullified.  The weather cannot otherwise be changed except by the effects of Desolate Land and Primordial Sea.
+
+Air Lock and Cloud Nine will prevent the effect of a mysterious air current, but will not allow the weather to be changed.","ひこうタイプの　弱点が
+なくなる　天気にする。"
+stamina,192,じきゅうりょく,7,1,Raises this Pokémon's Defense by one stage when it takes damage from a move.,"攻撃を　受けると
+防御が　上がる。"
+wimp-out,193,にげごし,7,1,"After this Pokémon is hit by a move, if that move caused this Pokémon's HP to drop below half, it switches out.","ＨＰが　半分に　なると
+あわてて　逃げ出して
+手持ちに　引っ込んで　しまう。"
+emergency-exit,194,ききかいひ,7,1,"After this Pokémon is hit by a move, if that move caused this Pokémon's HP to drop below half, it switches out.","ＨＰが　半分に　なると
+危険を　回避するため
+手持ちに　引っ込んで　しまう。"
+water-compaction,195,みずがため,7,1,Raises this Pokémon's Defense by two stages when it's hit by a Water move.,"みずタイプの　技を　受けると
+防御が　ぐーんと　上がる。"
+merciless,196,ひとでなし,7,1,This Pokémon's moves critical hit against poisoned targets.,"どく状態の
+相手を　攻撃すると
+かならず　急所に　当たる。"
+shields-down,197,リミットシールド,7,1,"When this Pokémon enters battle and at the end of each turn, if its HP is 50% or above, it changes into Meteor Form; otherwise, it changes into Core Form.  In Meteor Form, it cannot be given a major status ailment (though existing ones are not cured), cannot become drowsy from Yawn, and cannot use Rest (which will simply fail).
+
+This ability cannot be copied, replaced, or nullified.  This ability only takes effect for Minior.","ＨＰが　半分に　なると
+殻が　壊れて
+攻撃的に　なる。"
+stakeout,198,はりこみ,7,1,This Pokémon's moves have double power against Pokémon that switched in this turn.,"交代で　出てきた　相手に
+２倍の　ダメージで　攻撃　できる。"
+water-bubble,199,すいほう,7,1,"When this Pokémon is hit by a Fire move, the damage is halved.  When this Pokémon uses a Water move, the power is doubled. This Pokémon cannot be burned, and if it becomes burned, the burn is immediately cured.","自分に　対する　ほのおタイプの
+技の　威力を　下げる。
+やけど　しない。"
+steelworker,200,はがねつかい,7,1,This Pokémon's Steel moves have 1.5× power.,"はがねタイプの　技の
+威力が　上がる。"
+berserk,201,ぎゃくじょう,7,1,"Whenever this Pokémon takes damage from a move that causes its HP to drop below 50%, its Special Attack rises by one stage.","相手の　攻撃で
+ＨＰが　半分に　なると
+特攻が　上がる。"
+slush-rush,202,ゆきかき,7,1,"During Hail, this Pokémon has double Speed.","天気が　あられ　のとき
+素早さが　上がる。"
+long-reach,203,えんかく,7,1,A move used by this Pokémon will not make contact.,"すべての　技を
+相手に　接触　しないで
+出すことが　できる。"
+liquid-voice,204,うるおいボイス,7,1,"When this Pokémon uses a move that is sound-based, that move's type is Water.","すべての　音技が
+みずタイプに　なる。"
+triage,205,ヒーリングシフト,7,1,This Pokémon's healing moves have their priority increased by 3.,"回復技を　先制で
+出すことが　できる。"
+galvanize,206,エレキスキン,7,1,"When this Pokémon uses a Normal moves, that move is Electric its power is 1.2×.","ノーマルタイプの　技が
+でんきタイプになる。
+威力が　少し　上がる。"
+surge-surfer,207,サーフテール,7,1,Doubles this Pokémon's Speed on Electric Terrain.,"エレキフィールド　のとき
+素早さが　２倍に　なる。"
+schooling,208,ぎょぐん,7,1,"If this Pokémon is a Wishiwashi and level 20 or above, then when it enters battle and at the start of each turn, it becomes Schooling Form if its HP is 25% or higher and Solo Form otherwise.
+
+This ability cannot be replaced, copied, or nullified.","ＨＰが　多いときは　群れて　強くなる。
+ＨＰの　残りが　少なくなると
+群れは　散り散りに　なってしまう。"
+disguise,209,ばけのかわ,7,1,"If this Pokémon is in its Disguised Form and takes damage from a move, it switches to its Busted Form and the damage is prevented.  Other effects are not prevented.
+
+This ability cannot be copied or replaced.  This ability only takes effect for Mimikyu.","体を　被う　化けの皮で　
+１回　攻撃を　防ぐことが　できる。"
+battle-bond,210,きずなへんげ,7,1,"Transforms this Pokémon into Ash-Greninja after fainting an opponent.  Water Shuriken's power is 20 and always hits three times.
+
+This ability cannot be copied or replaced.  This ability only takes effect for Greninja.","相手を　倒すと　トレーナーとの
+キズナが　深まり　サトシゲッコウガに
+変化する。みずしゅりけんが　強くなる。"
+power-construct,211,スワームチェンジ,7,1,"Transforms 10% or 50% Zygarde into Complete Forme when its HP is below 50%.
+
+This ability cannot be copied or replaced.  This ability only takes effect for Zygarde.","ＨＰが　半分に　なると
+セルたちが　応援に　駆けつけ
+パーフェクトフォルムに　姿を　変える。"
+corrosion,212,ふしょく,7,1,This Pokémon's moves and item ignore the usual immunity of Poison and Steel Pokémon when attempting to inflict poison.,"はがねタイプや　どくタイプも
+どく状態に　することが　できる。"
+comatose,213,ぜったいねむり,7,1,This Pokémon always acts as though it were Asleep.  It cannot be given another status ailment; it's unaffected by Yawn; it can use Sleep Talk; and so on.,"つねに　夢うつつの　状態で
+絶対に　目覚めない。
+眠ったまま　攻撃が　できる。"
+queenly-majesty,214,じょおうのいげん,7,1,"When an opposing Pokémon attempts to use a move that targets this Pokémon or an ally, and that move has priority, it will fail.","相手に　威圧感を　あたえ
+こちらに　むかって　先制技を
+出せない　ようにする。"
+innards-out,215,とびだすなかみ,7,1,"When this Pokémon faints from an opponent's move, that opponent takes damage equal to the HP this Pokémon had remaining.","相手に　倒されたとき
+ＨＰの　残りの　ぶんだけ
+相手に　ダメージを　あたえる。"
+dancer,216,おどりこ,7,1,"Whenever another Pokémon uses a dance move, this Pokémon will use the same move immediately afterwards.","だれかが　踊り技を　使うと
+自分も　それに　続いて
+踊り技を　出すことが　できる。"
+battery,217,バッテリー,7,1,Ally Pokémon's moves have their power increased to 1.3×.,"味方の　特殊技の
+威力を　上げる。"
+fluffy,218,もふもふ,7,1,Damage from contact moves is halved.  Damage from Fire moves is doubled.,"相手から　受けた　接触する　技の
+ダメージを　半減するが　ほのおタイプの
+技の　ダメージは　２倍になる。"
+dazzling,219,ビビッドボディ,7,1,"When an opposing Pokémon attempts to use a move that targets this Pokémon or an ally, and that move has priority, it will fail.","相手を　びっくり　させて
+こちらに　むかって　先制技を
+出せない　ようにする。"
+soul-heart,220,ソウルハート,7,1,This Pokémon's Special Attack rises by one stage every time any Pokémon faints.,"ポケモンが　ひんしに　なるたびに
+特攻が　上がる。"
+tangling-hair,221,カーリーヘアー,7,1,"When this Pokémon takes regular damage from a contact move, the attacking Pokémon's Speed lowers by one stage.","攻撃で　自分に　触れた　相手の
+素早さを　下げる。"
+receiver,222,レシーバー,7,1,"When an ally faints, this Pokémon gains its Ability.","倒された　味方の　特性を
+受け継いで　同じ　特性に　なる。"
+power-of-alchemy,223,かがくのちから,7,1,"When an ally faints, this Pokémon gains its Ability.","倒された　味方の　特性を　受け継ぎ
+同じ　特性に　変わる。"
+beast-boost,224,ビーストブースト,7,1,Raises this Pokémon's highest stat by one stage when it faints another Pokémon.,"相手を　倒したとき
+自分の　いちばん　高い
+能力が　上がる。　"
+rks-system,225,ＡＲシステム,7,1,"Changes this Pokémon's type to match its held Memory.
+
+This ability cannot be copied, replaced, or nullified.  This ability only takes effect for Silvally.","持っている　メモリで
+自分の　タイプが　変わる。"
+electric-surge,226,エレキメイカー,7,1,"When this Pokémon enters battle, it changes the terrain to Electric Terrain.","登場　したときに
+エレキフィールドを　はりめぐらせる。"
+psychic-surge,227,サイコメイカー,7,1,"When this Pokémon enters battle, it changes the terrain to Psychic Terrain.","登場　したときに
+サイコフィールドを　はりめぐらせる。"
+misty-surge,228,ミストメイカー,7,1,"When this Pokémon enters battle, it changes the terrain to Misty Terrain.","登場　したときに
+ミストフィールドを　はりめぐらせる。"
+grassy-surge,229,グラスメイカー,7,1,"When this Pokémon enters battle, it changes the terrain to Grassy Terrain.","登場　したときに
+グラスフィールドを　はりめぐらせる。"
+full-metal-body,230,メタルプロテクト,7,1,"This Pokémon's stats cannot be lowered by other Pokémon's moves or abilities.  This effect only applies to normal stat modifications and not more exotic effects such as Topsy-Turvy or Power Swap.
+
+This Ability is not bypassed by Mold Breaker, Teravolt, or Turboblaze.","相手の　技や　特性で
+能力を　下げられない。"
+shadow-shield,231,ファントムガード,7,1,"When this Pokémon has full HP, regular damage (not fixed damage!) from moves is halved.
+
+This ability cannot be nullified.","ＨＰが　満タンの　ときに
+受ける　ダメージが　少なくなる。"
+prism-armor,232,プリズムアーマー,7,1,"Super-effective damage this Pokémon takes is reduced to 0.75×.
+
+This Ability is not bypassed by Mold Breaker, Teravolt, or Turboblaze.","効果バツグンに　なってしまう
+攻撃の　威力を
+弱める　ことが　できる。"
+neuroforce,233,ブレインフォース,7,1,Increases super-effective damage dealt to 1.25×.,"効果バツグンの　攻撃で
+威力が　さらに　上がる。"
+intrepid-sword,234,ふとうのけん,8,1,Boosts the Pokémon’s Attack stat the first time the Pokémon enters a battle.,"登場　したときに
+攻撃が　上がる。"
+dauntless-shield,235,ふくつのたて,8,1,Boosts the Pokémon’s Defense stat the first time the Pokémon enters a battle.,"登場　したときに
+防御が　上がる。"
+libero,236,リベロ,8,1,Changes the Pokémon’s type to the type of the move it’s about to use. This works only once each time the Pokémon enters battle.,"自分が　出す　技と
+同じ　タイプに　変化する。"
+ball-fetch,237,たまひろい,8,1,"At any time after the first Poké Ball is thrown and fails to catch a Pokémon, at the end of a turn, if a Pokémon with Ball Fetch is on the field and not holding another item, it will pick up the same type of ball as the first one thrown.","道具を　持っていない　場合
+１回目に　投げて　失敗　した
+モンスターボールを　拾ってくる。"
+cotton-down,238,わたげ,8,1,"When the Pokémon is hit by an attack, it scatters cotton fluff around and lowers the Speed stats of all Pokémon except itself.","攻撃を　受けると　わたげを　ばらまいて
+自分以外の　ポケモン　すべての
+素早さを　下げる。"
+propeller-tail,239,スクリューおびれ,8,1,Ignores the effects of opposing Pokémon’s Abilities and moves that draw in moves.,"相手の　技を　引き受ける
+特性や　技の
+影響を　無視　できる。"
+mirror-armor,240,ミラーアーマー,8,1,Bounces back only the stat-lowering effects that the Pokémon receives.,"自分が　受けた
+能力　ダウンの
+効果　だけを　跳ね返す。"
+gulp-missile,241,うのミサイル,8,1,"When the Pokémon uses Surf or Dive, it will come back with prey. When it takes damage, it will spit out the prey to attack.","なみのりか　ダイビングを　すると
+獲物を　くわえてくる。　ダメージを
+受けると　獲物を　吐きだして　攻撃。"
+stalwart,242,すじがねいり,8,1,Ignores the effects of opposing Pokémon’s Abilities and moves that draw in moves.,"相手の　技を　引き受ける
+特性や　技の
+影響を　無視　できる。"
+steam-engine,243,じょうききかん,8,1,Raises the user's Speed by three stages when it is hit by a Fire- or Water-type attack. The attack still deals damage.,"みずタイプ　ほのおタイプの
+技を　受けると
+素早さが　ぐぐーんと　上がる。"
+punk-rock,244,パンクロック,8,1,Boosts the power of sound-based moves. The Pokémon also takes half the damage from these kinds of moves.,"音技の　威力が　上がる。
+受けた　音技の
+ダメージは　半分に　なる。"
+sand-spit,245,すなはき,8,1,The Pokémon creates a sandstorm when it’s hit by an attack.,"攻撃を　受けると
+砂あらしを　起こす。"
+ice-scales,246,こおりのりんぷん,8,1,"The Pokémon is protected by ice scales, which halve the damage taken from special moves.","こおりのりんぷんに　守られて
+特殊攻撃で　受ける
+ダメージが　半減　する。"
+ripen,247,じゅくせい,8,1,Ripens Berries and doubles their effect.,"熟成　させることで
+きのみの　効果が
+倍に　なる。"
+ice-face,248,アイスフェイス,8,1,"When an Eiscue that's in its Ice Face form is hit by a physical move, it takes no damage and changes into its Noice Face form. If a hailstorm or snowstorm begins while Eiscue is in its Noice Face form, or if it is sent out in its Noice Face form during hail, it will immediately revert to its Ice Face form.","物理攻撃は　頭の　氷が
+みがわりに　なるが　姿も　変わる。
+氷は　あられが　降ると　元に戻る。"
+power-spot,249,パワースポット,8,1," ""The power of moves used by the allies of the Pokémon with Power Spot is increased by 30%.""","隣に　いるだけで
+技の　威力が　上がる。"
+mimicry,250,ぎたい,8,1,Changes the Pokémon’s type depending on the terrain.,"フィールドの　状態に　あわせて
+ポケモンの　タイプが　変わる。"
+screen-cleaner,251,バリアフリー,8,1,"When the Pokémon enters a battle, the effects of Light Screen, Reflect, and Aurora Veil are nullified for both opposing and ally Pokémon.","登場　したときに　敵と　味方の
+ひかりのかべ　リフレクター
+オーロラベールの　効果が　消える。"
+steely-spirit,252,はがねのせいしん,8,1,Powers up the Steel-type moves of the Pokémon and its allies.,"味方の　はがねタイプの
+攻撃の　威力が　上がる。"
+perish-body,253,ほろびのボディ,8,1,"When the Pokémon with Perish Body is hit with a contact move, both the attacker and the Pokémon with Perish Body will faint in three turns.","接触する　技を　受けると
+お互い　３ターン　たつと　ひんしになる。
+交代すると　効果は　なくなる。"
+wandering-spirit,254,さまようたましい,8,1,The Pokémon exchanges Abilities with a Pokémon that hits it with a move that makes direct contact.,"接触する　技で
+攻撃　してきた　ポケモンと
+特性を　入れ替える。"
+gorilla-tactics,255,ごりむちゅう,8,1,Boosts the Pokémon’s Attack stat but only allows the use of the first selected move.,"攻撃は　上がるが
+最初に　選んだ
+技しか　出せなくなる。"
+neutralizing-gas,256,かがくへんかガス,8,1,"While the Pokémon is in the battle, the effects of all other Pokémon’s Abilities will be nullified or will not be triggered.","かがくへんかガスの　ポケモンが　場にいると
+すべての　ポケモンの　特性の
+効果が　消えたり　発動　しなくなる。"
+pastel-veil,257,パステルベール,8,1,Prevents the Pokémon and its teammates from being poisoned. It also cures teammates of poisoning when it enters the battlefield.,"自分も　味方も
+どくの　状態異常を
+受けなくなる。"
+hunger-switch,258,はらぺこスイッチ,8,1,"The Pokémon changes its form, alternating between its Full Belly Mode and Hangry Mode after the end of every turn.","ターンの　終わりに　まんぷくもよう
+はらぺこもよう　まんぷくもよう……と
+交互に　姿を　変える。"
+quick-draw,259,クイックドロウ,8,1,"If a Pokémon with this Ability selects a damaging move, it has a 30% chance of going first in its priority bracket.","相手より　先に
+行動できることが　ある。"
+unseen-fist,260,ふかしのこぶし,8,1,"If the Pokémon uses moves that make direct contact, it can attack the target even if the target protects itself.","相手に　接触する　技なら
+守りの　効果を
+無視して　攻撃することが　できる。"
+curious-medicine,261,きみょうなくすり,8,1,"When the Pokémon enters a battle, it scatters medicine from its shell, which removes all stat changes from allies.","登場　したときに
+貝がらから　薬を　振りまいて
+味方の　能力変化を　元に戻す。"
+transistor,262,トランジスタ,8,1,Increases the power of Electric-type moves used by this Pokémon by 50%.,"でんきタイプの　技の
+威力が　上がる。"
+dragons-maw,263,りゅうのあぎと,8,1,Increases the power of Dragon-type moves used by this Pokémon by 50%.,"ドラゴンタイプの　技の
+威力が　上がる。"
+chilling-neigh,264,しろのいななき,8,1,"When the Pokémon knocks out a target, it utters a chilling neigh, which boosts its Attack stat.","相手を　倒すと
+冷たい　声で　いなないて
+攻撃が　上がる。"
+grim-neigh,265,くろのいななき,8,1,"When the Pokémon knocks out a target, it utters a terrifying neigh, which boosts its Sp. Atk stat.","相手を　倒すと
+恐ろしい　声で　いなないて
+特攻が　上がる。"
+as-one-glastrier,266,じんばいったい,8,1,"This Ability combines the effects of both Calyrex’s
+Unnerve Ability and Glastrier’s Chilling Neigh Ability.","バドレックスの　きんちょうかんと
+ブリザポスの　しろのいななきの
+二つの　特性を　あわせ持つ。"
+as-one-spectrier,267,じんばいったい,8,1,"This Ability combines the effects of both Calyrex’s
+Unnerve Ability and Spectrier’s Grim Neigh Ability.","バドレックスの　きんちょうかんと
+レイスポスの　くろのいななきの
+二つの　特性を　あわせ持つ。"
+lingering-aroma,268,とれないにおい,9,1,Contact with the Pokémon changes the attacker’s Ability to Lingering Aroma.,"相手に　触られると
+とれないにおいが
+相手に　うつってしまう。"
+seed-sower,269,こぼれダネ,9,1,Turns the ground into Grassy Terrain when the Pokémon is hit by an attack.,"攻撃を　受けると
+グラスフィールドに　する。"
+thermal-exchange,270,ねつこうかん,9,1,Boosts the Attack stat when the Pokémon is hit by a Fire-type move. The Pokémon also cannot be burned.,"ほのおタイプの　技を　受けると
+攻撃が　上がる。
+やけど状態に　ならない。"
+anger-shell,271,いかりのこうら,9,1,"When an attack causes its HP to drop to half or less, the Pokémon gets angry. This lowers its Defense and Sp. Def stats but boosts its Attack, Sp. Atk, and Speed stats.","相手の攻撃で　HPが　半分に　なると
+怒りで　防御と　特防が　下がるが
+攻撃　特攻　素早さが　上がる。"
+purifying-salt,272,きよめのしお,9,1,The Pokémon’s pure salt protects it from status conditions and halves the damage taken from Ghost-type moves.,"清らかな塩で　状態異常に　ならない。
+ゴーストタイプの　技の
+ダメージを　半減させる。"
+well-baked-body,273,こんがりボディ,9,1,"The Pokémon takes no damage when hit by Fire-type moves. Instead, its Defense stat is sharply boosted.","ほのおタイプの　技を　受けると
+ダメージを　受けずに
+防御が　ぐーんと　上がる。"
+wind-rider,274,かぜのり,9,1,Boosts the Pokémon’s Attack stat if Tailwind takes effect or if the Pokémon is hit by a wind move. The Pokémon also takes no damage from wind moves.,"おいかぜが　吹いたり　風技を　受けると
+ダメージを　受けずに
+攻撃が　上がる。"
+guard-dog,275,ばんけん,9,1,Boosts the Pokémon’s Attack stat if intimidated. Moves and items that would force the Pokémon to switch out also fail to work.,"いかく　されると　攻撃が　上がる。
+ポケモンを　入れ替えさせる
+技や　道具が　効かない。"
+rocky-payload,276,いわはこび,9,1,Increases the power of Rock-type moves used by this Pokémon by 50%.,"いわタイプの　技の
+威力が　上がる。"
+wind-power,277,ふうりょくでんき,9,1,"The Pokémon becomes charged when it is hit by a wind move, boosting the power of the next Electric-type move the Pokémon uses.","風技を　受けると
+じゅうでん　状態に　なる。"
+zero-to-hero,278,マイティチェンジ,9,1,The Pokémon transforms into its Hero Form when it switches out.,"手持ちに　ひっこむと
+マイティフォルムに　変化する。"
+commander,279,しれいとう,9,1,"When the Pokémon enters a battle, it goes inside the mouth of an ally Dondozo if one is on the field. The Pokémon then issues commands from there.","登場したとき　味方に
+ヘイラッシャが　いると　口の中に
+入って　そこから　指令を　だす。"
+electromorphosis,280,でんきにかえる,9,1,"The Pokémon becomes charged when it takes damage, boosting the power of the next Electric-type move the Pokémon uses.","ダメージを　受けると
+じゅうでん　状態に　なる。"
+protosynthesis,281,こだいかっせい,9,1,Boosts the Pokémon’s most proficient stat in harsh sunlight or if the Pokémon is holding Booster Energy.,"ブーストエナジーを　持たせるか
+天気が　晴れのとき
+いちばん　高い能力が　上がる。"
+quark-drive,282,クォークチャージ,9,1,Boosts the Pokémon’s most proficient stat on Electric Terrain or if the Pokémon is holding Booster Energy.,"ブーストエナジーを　持たせるか
+エレキフィールドのとき
+いちばん　高い能力が　上がる。"
+good-as-gold,283,おうごんのからだ,9,1,"A body of pure, solid gold gives the Pokémon full immunity to other Pokémon’s status moves.","酸化せず　丈夫な　黄金の体は
+相手からの　変化技を　受けない。"
+vessel-of-ruin,284,わざわいのうつわ,9,1,The power of the Pokémon’s ruinous vessel lowers the Sp. Atk stats of all Pokémon except itself.,"災厄を　呼ぶ　器の力で
+自分以外の　特攻が　弱くなる。"
+sword-of-ruin,285,わざわいのつるぎ,9,1,The power of the Pokémon’s ruinous sword lowers the Defense stats of all Pokémon except itself.,"災厄を　呼ぶ　剣の力で
+自分以外の　防御が　弱くなる。"
+tablets-of-ruin,286,わざわいのおふだ,9,1,The power of the Pokémon’s ruinous wooden tablets lowers the Attack stats of all Pokémon except itself.,"災厄を　呼ぶ　木札の力で
+自分以外の　攻撃が　弱くなる。"
+beads-of-ruin,287,わざわいのたま,9,1,The power of the Pokémon’s ruinous beads lowers the Sp. Def stats of all Pokémon except itself.,"災厄を　呼ぶ　勾玉の力で
+自分以外の　特防が　弱くなる。"
+orichalcum-pulse,288,ひひいろのこどう,9,1,Turns the sunlight harsh when the Pokémon enters a battle. The ancient pulse thrumming through the Pokémon also boosts its Attack stat in harsh sunlight.,"登場したとき　天気を　晴れにする。
+日差しが　強いと　古代の
+鼓動により　攻撃が　高まる。"
+hadron-engine,289,ハドロンエンジン,9,1,Turns the ground into Electric Terrain when the Pokémon enters a battle. The futuristic engine within the Pokémon also boosts its Sp. Atk stat on Electric Terrain.,"登場したとき　エレキフィールドを　はる。
+エレキフィールドだと　未来の
+機関により　特攻が　高まる。"
+opportunist,290,びんじょう,9,1,"If an opponent’s stat is boosted, the Pokémon seizes the opportunity to boost the same stat for itself.","相手の　能力が　上がったとき
+自分も　便乗して
+同じように　能力を　上げる。"
+cud-chew,291,はんすう,9,1,"When the Pokémon eats a Berry, it will regurgitate that Berry at the end of the next turn and eat it one more time.","きのみを　食べると
+次のターンの　終わりに　胃から
+出して　もう1回だけ　食べる。"
+sharpness,292,きれあじ,9,1,Increases the power of all 'slicing' moves by 50%.,"相手を　切る技の
+威力が　上がる。"
+supreme-overlord,293,そうだいしょう,9,1,"When the Pokémon enters a battle, its Attack and Sp. Atk stats are slightly boosted for each of the allies in its party that have already been defeated.","登場したとき　今まで　倒された
+味方の　数が　多いほど
+少しずつ　攻撃と　特攻が　上がる。"
+costar,294,きょうえん,9,1,"When the Pokémon enters a battle, it copies an ally’s stat changes.","登場　したときに
+味方の　能力変化を　コピーする。"
+toxic-debris,295,どくげしょう,9,1,Scatters poison spikes at the feet of the opposing team when the Pokémon takes damage from physical moves.,"物理技で　ダメージを　受けると
+相手の　足下に
+どくびしが　ちらばる。"
+armor-tail,296,テイルアーマー,9,1,The mysterious tail covering the Pokémon’s head makes opponents unable to use priority moves against the Pokémon or its allies.,"頭を包む　謎のしっぽが
+こちらに　むかって　先制技を
+出せない　ようにする。"
+earth-eater,297,どしょく,9,1,"If hit by a Ground-type move, the Pokémon has its HP restored instead of taking damage.","じめんタイプの　技を　受けると
+ダメージを　受けずに　回復する。"
+mycelium-might,298,きんしのちから,9,1,"The Pokémon will always act more slowly when using status moves, but these moves will be unimpeded by the Ability of the target.","変化技を　出すとき
+必ず　行動が　遅くなるが
+相手の　特性に　ジャマされない。"
+minds-eye,299,しんがん,9,1,Mind's Eye enables the Pokémon with this Ability to hit Ghost-type Pokémon with damage-dealing Normal- and Fighting-type moves. It also prevents other Pokémon from lowering the Pokémon's accuracy and ignores changes to the opponents' evasion.,"ノーマル　かくとうタイプの技を　ゴーストタイプに
+当てることが　できる。　相手の　回避率の
+変化を　無視し　命中率も　下げられない。"
+supersweet-syrup,300,かんろなミツ,9,1,"A sickly sweet scent spreads across the field the first time the Pokémon enters a battle, lowering the evasiveness of opposing Pokémon.","最初に　登場　したとき
+甘ったるい　蜜の香りを　ふりまいて
+相手の　回避率を　下げる。"
+hospitality,301,おもてなし,9,1,"When the Pokémon enters a battle, it showers its ally with hospitality, restoring a small amount of the ally's HP.","登場したとき　味方を　もてなして
+HPを　少しだけ　回復してあげる。"
+toxic-chain,302,どくのくさり,9,1,The power of the Pokémon's toxic chain may badly poison any target the Pokémon hits with a move.,"毒素を　ふくんだ　鎖の力で
+技を　当てた　相手を
+猛毒の状態に　することが　ある。"
+tera-shift,304,テラスチェンジ,9,1,"When the Pokémon enters a battle, it absorbs the energy around itself and transforms into its Terastal Form.","登場したとき　周囲の
+エネルギーを　吸収し
+テラスタルフォルムに　変化する。"
+tera-shell,305,テラスシェル,9,1,The Pokémon’s shell contains the powers of each type. All damage-dealing moves that hit the Pokémon when its HP is full will not be very effective.,"全タイプの力を　秘めた甲羅は
+HPが　満タンの　ときに　受ける
+ダメージを　すべて　今ひとつに　する。"
+teraform-zero,306,ゼロフォーミング,9,1,"When Terapagos changes into its Stellar Form, it uses its hidden powers to eliminate all effects of weather and terrain, reducing them to zero.","テラパゴスが　ステラフォルムに　なったとき
+秘められた力で　天気と　フィールドの
+影響を　すべて　ゼロにする。"
+poison-puppeteer,307,どくくぐつ,9,1,"When a Pokémon is poisoned by any of Pecharunt's moves, it will also become confused.","モモワロウの　技によって
+どく状態に　なった　相手は
+こんらん状態にも　なってしまう。"
+piercing-drill,308,かんつうドリル,9,1,"When the Pokémon uses contact moves, it can hit even targets that are protecting themselves, dealing 1/4 of the damage that the move would otherwise deal. Everything aside from the target's protective effects is still triggered.","接触技を使う時
+相手の守りの効果を無視して
+本来の1/4のダメージを与える。
+相手の守りの効果以外は発動される。"
+dragonize,309,ドラゴンスキン,9,1,The Pokémon's Normal-type moves become Dragon-type moves and their power is boosted by 20%.,"ノーマルタイプの技がドラゴンタイプになり
+威力が1.2倍になる。"
+mega-sol,310,メガソーラー,9,1,"Even when the sunlight has not turned harsh, the Pokémon can use its moves as if the weather were harsh sunlight.","天気が　にほんばれ状態でなくても
+にほんばれ状態として
+技を使うことができる。"
+spicy-spray,311,とびだすハバネロ,9,1,"When the Pokémon takes damage from a move, it burns the attacker.","技のダメージを受けると
+相手をやけど状態にする。"
+eelevate,312,,9,1,"The Pokémon floats off the ground, making it immune to Ground-type moves, as well as the Spikes, Toxic Spikes, and Sticky Web statuses. When the Pokémon knocks out a target with an attack, its highest stat is boosted by 1 stage.",
+fire-mane,313,,9,1,Boosts the power of the Pokémon's Fire-type moves by 50%.,

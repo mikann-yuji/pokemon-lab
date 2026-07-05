@@ -14,6 +14,13 @@ const maxAttempts = 3;
 // 同じURLを何度も取得しないよう、Promise自体をキャッシュする。
 const responseCache = new Map();
 
+if (
+  speciesLimit !== null &&
+  (!Number.isInteger(speciesLimit) || speciesLimit <= 0)
+) {
+  throw new Error("POKEAPI_SPECIES_LIMIT must be a positive integer.");
+}
+
 function resourceId(resource) {
   if (!resource?.url) return null;
   const match = resource.url.match(/\/(\d+)\/?$/);
@@ -87,15 +94,23 @@ async function getJson(url) {
 }
 
 // APIへ負荷をかけすぎないよう、同時実行数を制限して配列を非同期処理する。
-async function mapWithConcurrency(items, concurrency, mapper) {
+async function mapWithConcurrency(items, concurrency, mapper, label) {
   const results = new Array(items.length);
   let nextIndex = 0;
+  let completed = 0;
 
   async function worker() {
     while (nextIndex < items.length) {
       const index = nextIndex;
       nextIndex += 1;
       results[index] = await mapper(items[index], index);
+      completed += 1;
+      if (
+        label &&
+        (completed === items.length || completed % 100 === 0)
+      ) {
+        console.log(`${label}: ${completed}/${items.length}`);
+      }
     }
   }
 
@@ -140,7 +155,12 @@ const speciesList = await getJson(
   `${apiBaseUrl}/pokemon-species?limit=${speciesLimit ?? 100000}&offset=0`,
 );
 const speciesResources = (
-  await mapWithConcurrency(speciesList.results, 12, ({ url }) => getJson(url))
+  await mapWithConcurrency(
+    speciesList.results,
+    12,
+    ({ url }) => getJson(url),
+    "species",
+  )
 ).sort((left, right) => left.id - right.id);
 const pokemonReferences = uniqueResources(
   speciesResources.flatMap((species) =>
@@ -151,7 +171,9 @@ const pokemonResources = await mapWithConcurrency(
   pokemonReferences,
   12,
   ({ url }) => getJson(url),
+  "pokemon varieties",
 );
+pokemonResources.sort((left, right) => left.id - right.id);
 const pokemonFormReferences = uniqueResources(
   pokemonResources.flatMap((pokemon) => pokemon.forms),
 );
@@ -159,10 +181,15 @@ const pokemonFormResources = await mapWithConcurrency(
   pokemonFormReferences,
   6,
   ({ url }) => getJson(url),
+  "pokemon forms",
 );
-const pokemonFormByPokemonName = new Map(
-  pokemonFormResources.map((form) => [form.pokemon.name, form]),
-);
+const pokemonFormByPokemonName = new Map();
+for (const form of pokemonFormResources) {
+  const current = pokemonFormByPokemonName.get(form.pokemon.name);
+  if (!current || form.is_default) {
+    pokemonFormByPokemonName.set(form.pokemon.name, form);
+  }
+}
 
 const abilityReferences = uniqueResources(
   pokemonResources.flatMap((pokemon) =>
@@ -176,10 +203,18 @@ const moveReferences = uniqueResources(
   pokemonResources.flatMap((pokemon) => pokemon.moves.map(({ move }) => move)),
 );
 const [abilityResources, statResources, moveResources] = await Promise.all([
-  mapWithConcurrency(abilityReferences, 6, ({ url }) => getJson(url)),
-  mapWithConcurrency(statReferences, 6, ({ url }) => getJson(url)),
-  mapWithConcurrency(moveReferences, 6, ({ url }) => getJson(url)),
+  mapWithConcurrency(
+    abilityReferences,
+    6,
+    ({ url }) => getJson(url),
+    "abilities",
+  ),
+  mapWithConcurrency(statReferences, 6, ({ url }) => getJson(url), "stats"),
+  mapWithConcurrency(moveReferences, 6, ({ url }) => getJson(url), "moves"),
 ]);
+abilityResources.sort((left, right) => left.id - right.id);
+statResources.sort((left, right) => left.id - right.id);
+moveResources.sort((left, right) => left.id - right.id);
 
 const versionGroupReferences = uniqueResources(
   pokemonResources.flatMap((pokemon) =>
@@ -196,8 +231,18 @@ const learnMethodReferences = uniqueResources(
   ),
 );
 const [versionGroupResources, learnMethodResources] = await Promise.all([
-  mapWithConcurrency(versionGroupReferences, 6, ({ url }) => getJson(url)),
-  mapWithConcurrency(learnMethodReferences, 6, ({ url }) => getJson(url)),
+  mapWithConcurrency(
+    versionGroupReferences,
+    6,
+    ({ url }) => getJson(url),
+    "version groups",
+  ),
+  mapWithConcurrency(
+    learnMethodReferences,
+    6,
+    ({ url }) => getJson(url),
+    "move learn methods",
+  ),
 ]);
 
 const speciesRows = speciesResources.map((species) => ({
@@ -233,11 +278,16 @@ const formRows = pokemonResources.map((pokemon) => {
   const speciesId = resourceId(pokemon.species);
   const speciesNameJa = speciesNameById.get(speciesId);
   const formNameJa = localizedName(form?.form_names);
+  const localizedFullName = localizedName(form?.names);
   const nameJa = form?.is_mega
     ? formNameJa
     : form?.form_name === "gmax" && formNameJa
       ? `${speciesNameJa} ${formNameJa}`
-      : localizedName(form?.names, speciesNameJa);
+      : form?.form_name && formNameJa
+        ? formNameJa.includes(speciesNameJa)
+          ? formNameJa
+          : `${speciesNameJa} ${formNameJa}`
+        : (localizedFullName ?? speciesNameJa);
 
   return {
     id: pokemon.id,
