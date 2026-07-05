@@ -187,15 +187,98 @@
 
 .typeButton.selected {
   border-color: var(--quiz-navy);
-  background: var(--quiz-yellow);
+  background: linear-gradient(180deg, #ffe970 0%, var(--quiz-yellow) 100%);
   color: var(--quiz-navy);
-  box-shadow: 0 4px 0 var(--quiz-navy);
+  box-shadow: 0 5px 0 var(--quiz-navy), 0 0 0 4px rgb(255 212 59 / 35%);
+  transform: translateY(-2px) scale(1.03);
 }
 
 .typeButton.correct {
   border-color: #4caf50;
   background: #e8f5e9;
   color: #2e7d32;
+}
+
+.correctCelebration {
+  display: flex;
+  gap: clamp(0.65rem, 3vw, 1.1rem);
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  color: var(--quiz-accent-dark);
+  font-size: clamp(1.6rem, 8vw, 2.6rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-shadow: 0 3px 0 white, 0 6px 0 rgb(23 43 77 / 18%);
+  animation: celebration-pop 1.2s ease-out both;
+}
+
+.partyPopper {
+  display: inline-block;
+  filter: drop-shadow(0 4px 0 rgb(23 43 77 / 18%));
+  --popper-angle: 0deg;
+  --popper-scale-x: 1;
+  transform-origin: center bottom;
+  animation: popper-burst 1.2s ease-out both;
+}
+
+.partyPopperLeft {
+  --popper-angle: -24deg;
+}
+
+.partyPopperRight {
+  --popper-angle: 24deg;
+  --popper-scale-x: -1;
+}
+
+@keyframes celebration-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.72);
+  }
+
+  28% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1.16);
+  }
+
+  52% {
+    transform: translateY(0) scale(0.96);
+  }
+
+  74% {
+    transform: translateY(-3px) scale(1.04);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes popper-burst {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) rotate(0deg) scaleX(var(--popper-scale-x))
+      scale(0.45);
+  }
+
+  26% {
+    opacity: 1;
+    transform: translateY(-10px) rotate(calc(var(--popper-angle) - 18deg))
+      scaleX(var(--popper-scale-x)) scale(1.35);
+  }
+
+  58% {
+    transform: translateY(2px) rotate(calc(var(--popper-angle) + 12deg))
+      scaleX(var(--popper-scale-x)) scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--popper-angle))
+      scaleX(var(--popper-scale-x)) scale(1);
+  }
 }
 
 .typeButton.incorrect {
@@ -384,7 +467,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .quizContainer,
-  .explanation {
+  .explanation,
+  .correctCelebration,
+  .partyPopper {
     animation: none;
   }
 
