@@ -123,6 +123,12 @@
   font-size: 0.85rem;
 }
 
+.loadError {
+  margin: 0;
+  color: #b42318;
+  font-weight: 800;
+}
+
 .trainingLink {
   display: inline-block;
   margin-top: 1rem;

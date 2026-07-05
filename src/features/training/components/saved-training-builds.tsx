@@ -44,6 +44,7 @@ export function SavedTrainingBuilds({
   const [teamError, setTeamError] = useState("");
   const [teamSaved, setTeamSaved] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState("");
   const pokemonById = useMemo(
     () => new Map(pokemonCatalog.map((pokemon) => [pokemon.id, pokemon])),
     [pokemonCatalog],
@@ -64,14 +65,16 @@ export function SavedTrainingBuilds({
 
   useEffect(() => {
     let active = true;
-    void Promise.all([getAllTrainingBuilds(), getAllBattleTeams()])
-      .then(([savedBuilds, savedTeams]) => {
+    void getAllTrainingBuilds()
+      .then((savedBuilds) => {
         if (!active) return;
         setBuilds(savedBuilds);
-        setTeams(savedTeams);
       })
       .catch((error: unknown) => {
         console.error("保存した育成案を読み込めませんでした。", error);
+        if (active) {
+          setLoadError("保存した育成案を読み込めませんでした。");
+        }
       })
       .finally(() => {
         if (active) setLoaded(true);
@@ -80,6 +83,25 @@ export function SavedTrainingBuilds({
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!teamBuilder) return;
+
+    let active = true;
+    void getAllBattleTeams()
+      .then((savedTeams) => {
+        if (active) setTeams(savedTeams);
+      })
+      .catch((error: unknown) => {
+        console.error("保存したバトルチームを読み込めませんでした。", error);
+        if (active) {
+          setTeamError("保存したバトルチームを読み込めませんでした。");
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [teamBuilder]);
 
   function toggleBuild(build: TrainingBuild) {
     if (build.id === undefined) return;
@@ -140,6 +162,15 @@ export function SavedTrainingBuilds({
   });
 
   if (!loaded) return null;
+  if (loadError) {
+    return (
+      <section className={styles.savedSection}>
+        <p className={styles.loadError} role="alert">
+          {loadError}
+        </p>
+      </section>
+    );
+  }
   if (builds.length === 0) {
     return teamBuilder || showEmptyState ? (
       <section className={styles.savedSection}>
