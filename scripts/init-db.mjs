@@ -91,6 +91,7 @@ const seedTableOrder = [
   "abilities",
   "stats",
   "natures",
+  "items",
   "moves",
   "version_groups",
   "move_learn_methods",
@@ -99,6 +100,7 @@ const seedTableOrder = [
   "form_types",
   "form_moves",
   "champions_forms",
+  "champions_items",
 ];
 
 // DBスキーマとCSVヘッダーの一致を確認し、SQLiteへ渡す型へ変換する。

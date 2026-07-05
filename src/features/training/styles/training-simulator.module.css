@@ -3,7 +3,7 @@
 .hero p { font-size:.72rem; font-weight:900; letter-spacing:.15em; }
 .hero h1 { margin:.35rem 0; font-size:clamp(1.8rem,6vw,3.5rem); }
 .hero img { width:min(42%,190px); height:auto; object-fit:contain; }
-.settings { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+.settings { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
 .settings p { align-self:end; min-height:42px; padding:.7rem; border-radius:9px; background:#eef6ff; font-size:.82rem; font-weight:800; }
 .settings label,.moves label { display:grid; gap:.4rem; font-size:.82rem; font-weight:800; }
 .settings input,.settings select,.moves select,.statRow input { min-width:0; min-height:42px; padding:.55rem; border:2px solid #b9c7da; border-radius:9px; background:white; color:#172b4d; }
@@ -24,6 +24,16 @@
 .moves { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.8rem; }
 .moves h2 { grid-column:1/-1; }
 .saveButton { min-height:50px; border:0; border-radius:999px; background:#2857a4; color:white; cursor:pointer; font-weight:900; }
+.saveOverlay { position:fixed; z-index:60; inset:0; display:grid; place-items:center; padding:1rem; }
+.saveBackdrop { position:absolute; inset:0; border:0; background:rgb(10 20 35 / 58%); cursor:pointer; }
+.saveDialog { position:relative; display:grid; gap:1rem; width:min(28rem,100%); padding:1.4rem; border-radius:18px; background:white; box-shadow:0 24px 80px rgb(0 0 0 / 35%); }
+.saveDialog h2 { margin:0; }
+.saveDialog label { display:grid; gap:.4rem; font-size:.82rem; font-weight:800; }
+.saveDialog input { min-height:44px; padding:.65rem .75rem; border:2px solid #b9c7da; border-radius:9px; color:#172b4d; font:inherit; }
+.saveDialog p { margin:0; color:#b42318; font-size:.82rem; font-weight:800; }
+.saveDialogActions { display:flex; justify-content:flex-end; gap:.65rem; }
+.saveDialogActions button { min-height:42px; padding:.55rem 1rem; border:1px solid #9aabc0; border-radius:999px; background:white; color:#172b4d; cursor:pointer; font-weight:900; }
+.saveDialogActions button[type="submit"] { border-color:#2857a4; background:#2857a4; color:white; }
 .natureMatrix { display:grid; gap:.65rem; }
 .natureTableWrap { max-height:24rem; overflow:auto; border:1px solid #cad6e5; border-radius:14px; }
 .natureMatrix table { width:100%; border-collapse:collapse; text-align:center; }

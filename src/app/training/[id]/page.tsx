@@ -2,7 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPokemonDetail, isChampionsForm } from "@/infrastructure/database/pokemon-search-repository";
 import { TrainingSimulator } from "@/features/training/components/training-simulator";
-import { getNatures } from "@/features/training/infrastructure/training-repository";
+import {
+  getHeldItems,
+  getNatures,
+} from "@/features/training/infrastructure/training-repository";
 import pageStyles from "../../pokemon/pokemon-search.module.css";
 
 export default async function TrainingDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -12,6 +15,10 @@ export default async function TrainingDetailPage({ params }: { params: Promise<{
   if (!pokemon) notFound();
   return <main className={pageStyles.page}><div className={pageStyles.container}>
     <Link href="/training" className={pageStyles.backLink}>← 育成ポケモン選択へ戻る</Link>
-    <TrainingSimulator pokemon={pokemon} natures={getNatures()} />
+    <TrainingSimulator
+      pokemon={pokemon}
+      natures={getNatures()}
+      heldItems={getHeldItems()}
+    />
   </div></main>;
 }

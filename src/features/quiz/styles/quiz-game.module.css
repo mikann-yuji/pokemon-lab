@@ -114,7 +114,7 @@
   line-height: 1.5;
 }
 
-.hint {
+.answerCountHint {
   display: block;
   margin-top: 0.5rem;
   color: var(--quiz-blue);
@@ -189,6 +189,131 @@
   );
   box-shadow: 0 4px 0 rgb(23 43 77 / 35%);
   transform: translateY(-2px);
+}
+
+.hintButton {
+  display: block;
+  min-height: 42px;
+  margin: -0.75rem 0 1.25rem auto;
+  padding: 0.5rem 0.9rem;
+  border: 2px solid var(--quiz-navy);
+  border-radius: 999px;
+  background: #fff7c2;
+  color: var(--quiz-navy);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.hintButton:hover,
+.hintButton:focus-visible {
+  outline: 3px solid var(--quiz-accent);
+  outline-offset: 2px;
+}
+
+.hintOverlay {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.hintBackdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgb(10 20 35 / 58%);
+  cursor: pointer;
+}
+
+.hintDialog {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  width: min(30rem, 100%);
+  padding: 1.4rem;
+  border: 3px solid var(--quiz-navy);
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 35%);
+}
+
+.hintDialog p,
+.hintDialog h3 {
+  margin: 0;
+}
+
+.hintDialog > div:first-child p {
+  color: #667085;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.hintDialog h3 {
+  font-size: 1.35rem;
+}
+
+.hintDialog label {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.hintDialog textarea {
+  width: 100%;
+  padding: 0.75rem;
+  resize: vertical;
+  border: 2px solid #b9c7da;
+  border-radius: 10px;
+  color: var(--quiz-text);
+  font: inherit;
+  line-height: 1.6;
+}
+
+.hintDialog textarea:focus {
+  border-color: var(--quiz-blue);
+  outline: 3px solid rgb(44 123 229 / 20%);
+}
+
+.hintDialog small,
+.hintStatus {
+  color: #667085;
+  font-size: 0.75rem;
+}
+
+.hintError {
+  color: #b42318;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.hintActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.hintActions button {
+  min-height: 42px;
+  padding: 0.55rem 1rem;
+  border: 2px solid var(--quiz-navy);
+  border-radius: 999px;
+  background: white;
+  color: var(--quiz-navy);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.hintActions button[type="submit"] {
+  background: var(--quiz-blue);
+  color: white;
+}
+
+.hintActions button:disabled {
+  cursor: wait;
+  opacity: 0.55;
 }
 
 .modeSelector {

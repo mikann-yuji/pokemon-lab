@@ -2,10 +2,18 @@
  * このファイルの役割: 現在のクイズ問題、選択肢、解説、進捗を表示するプレゼンテーションコンポーネント。
  */
 
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
 import type { TypeMatchup, TypeName } from "@/domain/type-matchup";
 import { getTypeBadgeStyle } from "@/presentation/pokemon-type-colors";
-import { getQuestionText, type Question } from "../quiz-logic";
+import {
+  getQuestionKey,
+  getQuestionText,
+  type Question,
+} from "../quiz-logic";
+import { getHint, saveHint } from "../storage/mistake-repository";
 import styles from "../styles/quiz-game.module.css";
 
 type QuestionPanelProps = {
@@ -34,6 +42,41 @@ export default function QuestionPanel({
   showCorrectCelebration,
   showIncorrectCelebration,
 }: QuestionPanelProps) {
+  const [isHintDialogOpen, setHintDialogOpen] = useState(false);
+  const [hintText, setHintText] = useState("");
+  const [isHintLoading, setHintLoading] = useState(false);
+  const [isHintSaving, setHintSaving] = useState(false);
+  const [hintError, setHintError] = useState("");
+
+  async function openHintDialog() {
+    setHintDialogOpen(true);
+    setHintLoading(true);
+    setHintError("");
+    try {
+      setHintText(await getHint(getQuestionKey(question)));
+    } catch (error: unknown) {
+      console.error("ヒントを読み込めませんでした。", error);
+      setHintError("ヒントを読み込めませんでした。");
+    } finally {
+      setHintLoading(false);
+    }
+  }
+
+  async function persistHint() {
+    setHintSaving(true);
+    setHintError("");
+    try {
+      await saveHint(getQuestionKey(question), hintText);
+      setHintText(hintText.trim());
+      setHintDialogOpen(false);
+    } catch (error: unknown) {
+      console.error("ヒントを保存できませんでした。", error);
+      setHintError("ヒントを保存できませんでした。");
+    } finally {
+      setHintSaving(false);
+    }
+  }
+
   return (
     <>
       <div className={styles.questionHeader}>
@@ -50,10 +93,70 @@ export default function QuestionPanel({
 
       <h2 className={styles.question}>
         {getQuestionText(question)}
-        <span className={styles.hint}>
+        <span className={styles.answerCountHint}>
           こたえは {question.correctAnswers.length}こ！
         </span>
       </h2>
+      <button
+        className={styles.hintButton}
+        type="button"
+        onClick={() => void openHintDialog()}
+      >
+        💡 ヒント
+      </button>
+
+      {isHintDialogOpen ? (
+        <div
+          className={styles.hintOverlay}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="hint-dialog-title"
+        >
+          <button
+            className={styles.hintBackdrop}
+            type="button"
+            aria-label="ヒントを閉じる"
+            onClick={() => setHintDialogOpen(false)}
+          />
+          <form
+            className={styles.hintDialog}
+            onSubmit={(event) => {
+              event.preventDefault();
+              void persistHint();
+            }}
+          >
+            <div>
+              <p>この問題だけのメモ</p>
+              <h3 id="hint-dialog-title">ヒント</h3>
+            </div>
+            {isHintLoading ? (
+              <p className={styles.hintStatus}>読み込み中...</p>
+            ) : (
+              <label>
+                ヒントの内容
+                <textarea
+                  autoFocus
+                  maxLength={500}
+                  rows={5}
+                  placeholder="覚え方や考え方を書いてください"
+                  value={hintText}
+                  onChange={(event) => setHintText(event.target.value)}
+                />
+              </label>
+            )}
+            {hintError ? <p className={styles.hintError} role="alert">{hintError}</p> : null}
+            <small>空欄で保存すると、この問題のヒントを削除します。</small>
+            <div className={styles.hintActions}>
+              <button type="button" onClick={() => setHintDialogOpen(false)}>
+                キャンセル
+              </button>
+              <button type="submit" disabled={isHintLoading || isHintSaving}>
+                {isHintSaving ? "保存中..." : "保存"}
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
 
       {question.pokemonImage ? (
         <figure className={styles.pokemonImage}>

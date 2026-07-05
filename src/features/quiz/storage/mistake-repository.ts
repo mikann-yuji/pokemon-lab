@@ -9,12 +9,23 @@ type MistakeRecord = {
   updatedAt: number;
 };
 
+type HintRecord = {
+  questionKey: string;
+  text: string;
+  updatedAt: number;
+};
+
 const database = new Dexie("pokemon-lab-quiz") as Dexie & {
   mistakes: EntityTable<MistakeRecord, "questionKey">;
+  hints: EntityTable<HintRecord, "questionKey">;
 };
 
 database.version(1).stores({
   mistakes: "&questionKey, updatedAt",
+});
+database.version(2).stores({
+  mistakes: "&questionKey, updatedAt",
+  hints: "&questionKey, updatedAt",
 });
 
 export async function getMistakeKeys(): Promise<string[]> {
@@ -31,4 +42,25 @@ export async function saveMistake(questionKey: string): Promise<void> {
 
 export async function removeMistake(questionKey: string): Promise<void> {
   await database.mistakes.delete(questionKey);
+}
+
+export async function getHint(questionKey: string): Promise<string> {
+  return (await database.hints.get(questionKey))?.text ?? "";
+}
+
+export async function saveHint(
+  questionKey: string,
+  text: string,
+): Promise<void> {
+  const normalizedText = text.trim();
+  if (!normalizedText) {
+    await database.hints.delete(questionKey);
+    return;
+  }
+
+  await database.hints.put({
+    questionKey,
+    text: normalizedText,
+    updatedAt: Date.now(),
+  });
 }

@@ -5,10 +5,15 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import type { PokemonDetail } from "@/infrastructure/database/pokemon-search-repository";
 import { getPokemonCardStyle } from "@/presentation/pokemon-type-colors";
 import {
-  loadTrainingBuild,
+  createTrainingBuildContentKey,
+  findTrainingBuildByContentKey,
+  loadLatestTrainingBuild,
   saveTrainingBuild,
 } from "../infrastructure/training-build-repository";
-import type { Nature } from "../infrastructure/training-repository";
+import type {
+  HeldItem,
+  Nature,
+} from "../infrastructure/training-repository";
 import styles from "../styles/training-simulator.module.css";
 
 const STAT_IDS = ["hp", "attack", "defense", "special-attack", "special-defense", "speed"];
@@ -22,25 +27,33 @@ const initialStats = (value: number) =>
 export function TrainingSimulator({
   pokemon,
   natures,
+  heldItems,
 }: {
   pokemon: PokemonDetail;
   natures: Nature[];
+  heldItems: HeldItem[];
 }) {
   const [nature, setNature] = useState("hardy");
   const [abilityPoints, setAbilityPoints] = useState<Record<string, number>>(
     () => initialStats(0),
   );
   const [moveIds, setMoveIds] = useState<string[]>(["", "", "", ""]);
+  const [itemId, setItemId] = useState("");
   const [saved, setSaved] = useState(false);
   const [isNatureMatrixOpen, setNatureMatrixOpen] = useState(false);
+  const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [buildName, setBuildName] = useState("");
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     let active = true;
-    void loadTrainingBuild(pokemon.id).then((build) => {
+    void loadLatestTrainingBuild(pokemon.id).then((build) => {
       if (!active || !build) return;
       setNature(build.nature);
       setAbilityPoints(build.abilityPoints ?? initialStats(0));
       setMoveIds([...build.moveIds, "", "", "", ""].slice(0, 4));
+      setItemId(build.itemId ?? "");
+      setBuildName(build.name ?? "");
     });
     return () => { active = false; };
   }, [pokemon.id]);
@@ -68,11 +81,46 @@ export function TrainingSimulator({
     setSaved(false);
   }
 
+  function openSaveDialog() {
+    setBuildName((current) => current.trim() || `${pokemon.nameJa}の育成案`);
+    setSaveError("");
+    setSaveDialogOpen(true);
+  }
+
   async function save() {
+    const normalizedName = buildName.trim();
+    if (!normalizedName) {
+      setSaveError("保存名を入力してください。");
+      return;
+    }
+
+    const buildData = {
+      pokemonId: pokemon.id,
+      nature,
+      itemId,
+      abilityPoints,
+      moveIds,
+    };
+    const contentKey = createTrainingBuildContentKey(buildData);
+    const existing = await findTrainingBuildByContentKey(contentKey);
+    if (
+      existing &&
+      !window.confirm(
+        `同じ内容の「${existing.name}」が保存されています。上書きしますか？`,
+      )
+    ) {
+      return;
+    }
+
     await saveTrainingBuild({
-      pokemonId: pokemon.id, nature, abilityPoints, moveIds, updatedAt: Date.now(),
+      ...buildData,
+      id: existing?.id,
+      name: normalizedName,
+      contentKey,
+      updatedAt: Date.now(),
     });
     setSaved(true);
+    setSaveDialogOpen(false);
   }
 
   return (
@@ -93,6 +141,23 @@ export function TrainingSimulator({
             <small>マトリックス表から選ぶ</small>
           </button>
         </div>
+        <label>
+          持ち物
+          <select
+            value={itemId}
+            onChange={(event) => {
+              setItemId(event.target.value);
+              setSaved(false);
+            }}
+          >
+            <option value="">持ち物なし</option>
+            {heldItems.map((item) => (
+              <option value={item.id} key={item.id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </label>
         <p>レベル50・個体値31（6V）固定</p>
       </div>
       <div className={styles.statHeader}><h2>能力値</h2><span>能力ポイント {pointTotal} / 66</span></div>
@@ -126,7 +191,50 @@ export function TrainingSimulator({
         const selectableMoves = pokemon.moves.filter((move) => !selectedMoveIds.has(move.id));
         return <label key={index}>技 {index + 1}<select value={moveId} onChange={(e) => { setMoveIds((current) => current.map((value, i) => i === index ? e.target.value : value)); setSaved(false); }}><option value="">未選択</option>{selectableMoves.map((move) => <option value={move.id} key={move.id}>{move.name}</option>)}</select></label>;
       })}</section>
-      <button className={styles.saveButton} type="button" onClick={() => void save()}>{saved ? "保存しました" : "この育成案を保存"}</button>
+      <button className={styles.saveButton} type="button" onClick={openSaveDialog}>{saved ? "保存しました" : "この育成案を保存"}</button>
+      {isSaveDialogOpen ? (
+        <div
+          className={styles.saveOverlay}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="save-dialog-title"
+        >
+          <button
+            className={styles.saveBackdrop}
+            type="button"
+            aria-label="保存ダイアログを閉じる"
+            onClick={() => setSaveDialogOpen(false)}
+          />
+          <form
+            className={styles.saveDialog}
+            onSubmit={(event) => {
+              event.preventDefault();
+              void save();
+            }}
+          >
+            <h2 id="save-dialog-title">育成案を保存</h2>
+            <label>
+              保存名
+              <input
+                autoFocus
+                maxLength={80}
+                value={buildName}
+                onChange={(event) => {
+                  setBuildName(event.target.value);
+                  setSaveError("");
+                }}
+              />
+            </label>
+            {saveError ? <p role="alert">{saveError}</p> : null}
+            <div className={styles.saveDialogActions}>
+              <button type="button" onClick={() => setSaveDialogOpen(false)}>
+                キャンセル
+              </button>
+              <button type="submit">保存</button>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </section>
   );
 }
