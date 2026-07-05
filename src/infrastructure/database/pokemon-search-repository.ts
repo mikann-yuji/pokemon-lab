@@ -435,3 +435,20 @@ export function getPokemonDetail(id: number): PokemonDetail | null {
     database.close();
   }
 }
+
+/** 指定したフォームがPokémon Championsの対象に含まれるか確認する。 */
+export function isChampionsForm(id: number): boolean {
+  const databasePath =
+    process.env.DATABASE_PATH ??
+    path.join(process.cwd(), "data", "pokemon-lab.db");
+  const database = new Database(databasePath, { readonly: true });
+  try {
+    return Boolean(
+      database
+        .prepare("SELECT 1 FROM champions_forms WHERE form_id = ?")
+        .get(id),
+    );
+  } finally {
+    database.close();
+  }
+}

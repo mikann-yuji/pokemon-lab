@@ -9,11 +9,17 @@ import styles from "./pokemon-search.module.css";
 type PokemonSearchFormProps = {
   initialQuery: string;
   initialChampionsOnly: boolean;
+  action?: string;
+  resultBasePath?: string;
+  championsOnlyLocked?: boolean;
 };
 
 export function PokemonSearchForm({
   initialQuery,
   initialChampionsOnly,
+  action = "/pokemon",
+  resultBasePath = "/pokemon",
+  championsOnlyLocked = false,
 }: PokemonSearchFormProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
@@ -44,7 +50,7 @@ export function PokemonSearchForm({
     },
     onSelectedItemChange: ({ selectedItem }) => {
       if (selectedItem) {
-        router.push(`/pokemon/${selectedItem.id}`);
+        router.push(`${resultBasePath}/${selectedItem.id}`);
       }
     },
   });
@@ -90,7 +96,7 @@ export function PokemonSearchForm({
   return (
     <form
       className={styles.searchForm}
-      action="/pokemon"
+      action={action}
       method="get"
     >
       <label className={styles.visuallyHidden} htmlFor="pokemon-query">
@@ -108,7 +114,7 @@ export function PokemonSearchForm({
           })}
         />
         <button type="submit">けんさく</button>
-        <button
+        {!championsOnlyLocked ? <button
           type="button"
           className={styles.detailSearchButton}
           aria-expanded={showDetails}
@@ -116,10 +122,10 @@ export function PokemonSearchForm({
           onClick={() => setShowDetails((current) => !current)}
         >
           詳細検索
-        </button>
+        </button> : null}
       </div>
 
-      {showDetails ? (
+      {!championsOnlyLocked && showDetails ? (
         <div
           id="pokemon-detail-search"
           className={styles.detailSearchPanel}

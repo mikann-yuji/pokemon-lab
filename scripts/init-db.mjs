@@ -90,6 +90,7 @@ const seedTableOrder = [
   "forms",
   "abilities",
   "stats",
+  "natures",
   "moves",
   "version_groups",
   "move_learn_methods",

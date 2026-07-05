@@ -91,6 +91,7 @@ const tables = Object.fromEntries(
     "abilities",
     "form_abilities",
     "stats",
+    "natures",
     "form_stats",
     "form_types",
     "moves",
@@ -106,6 +107,8 @@ unique(tables.species.records, ["id"], "species.csv");
 unique(tables.forms.records, ["id"], "forms.csv");
 unique(tables.abilities.records, ["id"], "abilities.csv");
 unique(tables.stats.records, ["id"], "stats.csv");
+unique(tables.natures.records, ["id"], "natures.csv");
+unique(tables.natures.records, ["sort_order"], "natures.csv");
 unique(tables.moves.records, ["id"], "moves.csv");
 unique(tables.version_groups.records, ["id"], "version_groups.csv");
 unique(tables.champions_forms.records, ["form_id"], "champions_forms.csv");

@@ -24,6 +24,7 @@ type PokemonResultsProps = {
   championsOnly: boolean;
   initialItems: PokemonSearchResult[];
   initialHasMore: boolean;
+  resultBasePath?: string;
 };
 
 async function fetchPage(
@@ -55,6 +56,7 @@ export function PokemonResults({
   championsOnly,
   initialItems,
   initialHasMore,
+  resultBasePath = "/pokemon",
 }: PokemonResultsProps) {
   const [pages, setPages] = useState<ResultPage[]>([
     { offset: 0, items: initialItems, hasMore: initialHasMore },
@@ -180,7 +182,7 @@ export function PokemonResults({
               className={styles.card}
               style={getPokemonCardStyle(pokemon.types)}
               href={{
-                pathname: `/pokemon/${pokemon.id}`,
+                pathname: `${resultBasePath}/${pokemon.id}`,
                 query:
                   query || championsOnly
                     ? {

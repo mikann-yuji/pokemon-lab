@@ -9,7 +9,7 @@
  */
 
 import { useCombobox } from "downshift";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   normalizePokemonSearchText,
   pokemonNameIncludes,
@@ -26,6 +26,10 @@ type PokemonComboboxProps = {
   pokemonCatalog: DamageCalculatorPokemon[];
   /** 親コンポーネントで現在選ばれているポケモン。 */
   selectedPokemon: DamageCalculatorPokemon | null;
+  /** 検索欄へ現在表示する文字列。 */
+  inputValue: string;
+  /** 入力中の文字列が変わったときに親へ通知する。 */
+  onInputValueChange: (value: string) => void;
   /** 新しい候補が確定したときに親へ通知する。 */
   onSelect: (pokemon: DamageCalculatorPokemon | null) => void;
 };
@@ -35,13 +39,14 @@ export function PokemonCombobox({
   label,
   pokemonCatalog,
   selectedPokemon,
+  inputValue,
+  onInputValueChange,
   onSelect,
 }: PokemonComboboxProps) {
-  const [query, setQuery] = useState("");
   // 入力またはカタログが変わった場合だけ候補を再計算する。
   // 共通関数を使うことで「ふしぎだね」と「フシギダネ」を同一視する。
   const suggestions = useMemo(() => {
-    const normalizedQuery = normalizePokemonSearchText(query);
+    const normalizedQuery = normalizePokemonSearchText(inputValue);
     if (
       !normalizedQuery ||
       normalizedQuery ===
@@ -57,7 +62,7 @@ export function PokemonCombobox({
           pokemonNameIncludes(nameJa, normalizedQuery),
       )
       .slice(0, 8);
-  }, [pokemonCatalog, query, selectedPokemon?.nameJa]);
+  }, [inputValue, pokemonCatalog, selectedPokemon?.nameJa]);
   const {
     isOpen,
     highlightedIndex,
@@ -68,11 +73,11 @@ export function PokemonCombobox({
   } = useCombobox({
     items: suggestions,
     selectedItem: selectedPokemon,
+    inputValue,
     itemToString: (pokemon) => pokemon?.nameJa ?? "",
     // 日本語IMEの変換中もDownshift側の入力値を尊重し、検索文字列だけを更新する。
     onInputValueChange: ({ inputValue }) => {
-      const nextQuery = inputValue ?? "";
-      setQuery(nextQuery);
+      onInputValueChange(inputValue ?? "");
     },
     // Enter、クリック、タップのいずれでも同じ選択処理を呼ぶ。
     onSelectedItemChange: ({ selectedItem }) => {

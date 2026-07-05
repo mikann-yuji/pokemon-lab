@@ -134,6 +134,64 @@
   background: #e8f2ff;
 }
 
+.recentPokemon {
+  margin-top: 0.65rem;
+}
+
+.recentPokemon > small {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #6b778c;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.recentPokemonList {
+  display: flex;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.recentPokemonList button {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 2px;
+  overflow: hidden;
+  border: 1px solid #b9cae0;
+  border-radius: 10px;
+  background: white;
+  color: #172b4d;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 900;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    transform 0.2s;
+}
+
+.recentPokemonList button:hover {
+  border-color: #2857a4;
+  box-shadow: 0 3px 8px rgb(23 43 77 / 18%);
+  transform: translateY(-1px);
+}
+
+.recentPokemonList button:focus-visible {
+  outline: 3px solid #e63946;
+  outline-offset: 2px;
+}
+
+.recentPokemonList img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
 .pokemonSummary,
 .placeholder {
   min-height: 8.5rem;
@@ -236,24 +294,71 @@
 }
 
 .result h2 {
-  margin: 0 0 0.45rem;
-  font-size: clamp(1.5rem, 5vw, 2.2rem);
+  margin: 0 0 1rem;
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
 }
 
-.result > strong {
+.outcomeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.outcome {
+  min-width: 0;
+  padding: clamp(1rem, 3vw, 1.4rem);
+  border: 2px solid #c7d5e7;
+  border-radius: 14px;
+  background: white;
+}
+
+.outcome h3 {
+  margin: 0 0 0.65rem;
+  color: #405167;
+  font-size: 0.85rem;
+}
+
+.outcome h4 {
+  margin: 0.75rem 0 0.35rem;
+  color: #172b4d;
+  font-size: clamp(1.15rem, 4vw, 1.55rem);
+}
+
+.outcome > strong {
   color: #e63946;
   font-size: 1.15rem;
 }
 
-.result p {
+.outcome p {
   margin-bottom: 0.35rem;
 }
 
-.result small {
-  color: #6b778c;
+.koLabel {
+  width: fit-content;
+  margin: 0 auto;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: #172b4d;
+  color: white;
+  font-size: 1rem;
+  font-weight: 950;
 }
 
-.hpBar {
+.criticalOutcome {
+  border-color: #e63946;
+  background: #fff6f6;
+}
+
+.criticalOutcome h3 {
+  color: #b51f2d;
+}
+
+.criticalOutcome .koLabel {
+  background: #e63946;
+}
+
+.remainingHpBar {
+  position: relative;
   width: min(100%, 28rem);
   height: 18px;
   margin: 1rem auto;
@@ -263,11 +368,69 @@
   background: #eef1f5;
 }
 
-.hpBar span {
+.remainingHpBar span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
   display: block;
-  height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #43a047, #7ccf63);
+}
+
+.maximumRemainingHp {
+  background: #9bd88a;
+}
+
+.minimumRemainingHp {
+  background: #2f9445;
+}
+
+.criticalOutcome .maximumRemainingHp {
+  background: #ffaaa0;
+}
+
+.criticalOutcome .minimumRemainingHp {
+  background: #e4473c;
+}
+
+.remainingHpLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  justify-content: center;
+  margin: -0.35rem 0 0.75rem;
+  color: #536376;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.remainingHpLegend span {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.remainingHpLegend span::before {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 3px;
+  content: "";
+}
+
+.maximumRemainingLegend::before {
+  background: #9bd88a;
+}
+
+.minimumRemainingLegend::before {
+  background: #2f9445;
+}
+
+.criticalOutcome .maximumRemainingLegend::before {
+  background: #ffaaa0;
+}
+
+.criticalOutcome .minimumRemainingLegend::before {
+  background: #e4473c;
 }
 
 @media (max-width: 44rem) {
@@ -284,5 +447,9 @@
   .error,
   .result {
     grid-column: 1;
+  }
+
+  .outcomeGrid {
+    grid-template-columns: 1fr;
   }
 }

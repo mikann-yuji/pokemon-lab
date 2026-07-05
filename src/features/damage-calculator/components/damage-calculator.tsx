@@ -9,25 +9,28 @@
  */
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CHAMPIONS_DAMAGE_RULESET,
   championsDamageCalculator,
 } from "../config/champions-damage-ruleset";
+import type { DamageCalculation } from "../application/smogon-damage-calculator";
 import type {
   DamageCalculatorMove,
   DamageCalculatorPokemon,
 } from "../domain/damage-calculator-types";
 import { PokemonCombobox } from "./pokemon-combobox";
+import {
+  getDamageHistory,
+  saveDamageHistory,
+  type DamageHistoryRecord,
+  type DamageHistorySide,
+} from "../infrastructure/damage-history-repository";
 import styles from "../styles/damage-calculator.module.css";
 
 type CalculationResult = {
-  minimum: number;
-  maximum: number;
-  defenderHp: number;
-  minimumPercent: number;
-  maximumPercent: number;
-  koChance: string;
+  normal: DamageCalculation;
+  critical: DamageCalculation;
   attackerName: string;
   defenderName: string;
   moveName: string;
@@ -51,13 +54,44 @@ export function DamageCalculator({
     null,
   );
   const [moveId, setMoveId] = useState("");
+  const [attackerQuery, setAttackerQuery] = useState("");
+  const [defenderQuery, setDefenderQuery] = useState("");
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [calculating, setCalculating] = useState(false);
+  const [attackerHistory, setAttackerHistory] = useState<
+    DamageHistoryRecord[]
+  >([]);
+  const [defenderHistory, setDefenderHistory] = useState<
+    DamageHistoryRecord[]
+  >([]);
+
+  // IndexedDBはブラウザ専用なので、初回表示後に最近使った履歴を読み込む。
+  useEffect(() => {
+    let active = true;
+
+    Promise.all([
+      getDamageHistory("attacker"),
+      getDamageHistory("defender"),
+    ])
+      .then(([savedAttackers, savedDefenders]) => {
+        if (!active) return;
+        setAttackerHistory(savedAttackers);
+        setDefenderHistory(savedDefenders);
+      })
+      .catch((caught: unknown) => {
+        console.error("ダメージ計算履歴を読み込めませんでした。", caught);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // 攻撃側を変更したら、前のポケモンの技や計算結果を残さない。
   function selectAttacker(pokemon: DamageCalculatorPokemon | null) {
     setAttacker(pokemon);
+    setAttackerQuery(pokemon?.nameJa ?? "");
     setMoveId("");
     setResult(null);
     setError(null);
@@ -66,6 +100,35 @@ export function DamageCalculator({
   // 防御側を変更した場合も、古い相手に対する結果を消す。
   function selectDefender(pokemon: DamageCalculatorPokemon | null) {
     setDefender(pokemon);
+    setDefenderQuery(pokemon?.nameJa ?? "");
+    setResult(null);
+    setError(null);
+  }
+
+  /**
+   * 履歴画像からポケモンを復元する。
+   * SQLite由来の最新カタログに存在しない古いIDは何もせず無視する。
+   */
+  function restoreHistory(
+    side: DamageHistorySide,
+    history: DamageHistoryRecord,
+  ) {
+    const pokemon =
+      pokemonCatalog.find(({ id }) => id === history.pokemonId) ?? null;
+    if (!pokemon) return;
+
+    if (side === "attacker") {
+      setAttacker(pokemon);
+      setAttackerQuery(pokemon.nameJa);
+      setMoveId(
+        pokemon.moves.some(({ id }) => id === history.moveId)
+          ? (history.moveId ?? "")
+          : "",
+      );
+    } else {
+      setDefender(pokemon);
+      setDefenderQuery(pokemon.nameJa);
+    }
     setResult(null);
     setError(null);
   }
@@ -85,15 +148,33 @@ export function DamageCalculator({
     setError(null);
     try {
       setResult({
-        ...championsDamageCalculator.calculate({
+        normal: championsDamageCalculator.calculate({
           attacker,
           defender,
           move,
+        }),
+        critical: championsDamageCalculator.calculate({
+          attacker,
+          defender,
+          move,
+          isCritical: true,
         }),
         attackerName: attacker.nameJa,
         defenderName: defender.nameJa,
         moveName: move.name,
       });
+      // 計算に成功した組み合わせだけを履歴へ残す。
+      void Promise.all([
+        saveDamageHistory("attacker", attacker.id, move.id),
+        saveDamageHistory("defender", defender.id),
+      ])
+        .then(([savedAttackers, savedDefenders]) => {
+          setAttackerHistory(savedAttackers);
+          setDefenderHistory(savedDefenders);
+        })
+        .catch((caught: unknown) => {
+          console.error("ダメージ計算履歴を保存できませんでした。", caught);
+        });
     } catch (caught) {
       setResult(null);
       setError(caught instanceof Error ? caught.message : "計算に失敗しました。");
@@ -113,7 +194,15 @@ export function DamageCalculator({
           label="攻撃するポケモン"
           pokemonCatalog={pokemonCatalog}
           selectedPokemon={attacker}
+          inputValue={attackerQuery}
+          onInputValueChange={setAttackerQuery}
           onSelect={selectAttacker}
+        />
+        <RecentPokemonList
+          side="attacker"
+          history={attackerHistory}
+          pokemonCatalog={pokemonCatalog}
+          onRestore={restoreHistory}
         />
         <PokemonSummary pokemon={attacker} />
         <label className={styles.moveField}>
@@ -146,7 +235,15 @@ export function DamageCalculator({
           label="攻撃を受けるポケモン"
           pokemonCatalog={pokemonCatalog}
           selectedPokemon={defender}
+          inputValue={defenderQuery}
+          onInputValueChange={setDefenderQuery}
           onSelect={selectDefender}
+        />
+        <RecentPokemonList
+          side="defender"
+          history={defenderHistory}
+          pokemonCatalog={pokemonCatalog}
+          onRestore={restoreHistory}
         />
         <PokemonSummary pokemon={defender} />
       </section>
@@ -168,6 +265,56 @@ export function DamageCalculator({
       {error ? <p className={styles.error}>{error}</p> : null}
       {result ? <DamageResult result={result} /> : null}
     </form>
+  );
+}
+
+function RecentPokemonList({
+  side,
+  history,
+  pokemonCatalog,
+  onRestore,
+}: {
+  side: DamageHistorySide;
+  history: DamageHistoryRecord[];
+  pokemonCatalog: DamageCalculatorPokemon[];
+  onRestore: (
+    side: DamageHistorySide,
+    history: DamageHistoryRecord,
+  ) => void;
+}) {
+  const availableHistory = history.flatMap((record) => {
+    const pokemon = pokemonCatalog.find(({ id }) => id === record.pokemonId);
+    return pokemon ? [{ record, pokemon }] : [];
+  });
+
+  if (availableHistory.length === 0) return null;
+
+  return (
+    <div className={styles.recentPokemon}>
+      <small>最近使ったポケモン</small>
+      <div className={styles.recentPokemonList}>
+        {availableHistory.map(({ record, pokemon }) => (
+          <button
+            type="button"
+            title={`${pokemon.nameJa}を選択`}
+            aria-label={`${pokemon.nameJa}を選択`}
+            onClick={() => onRestore(side, record)}
+            key={record.id}
+          >
+            {pokemon.imageUrl ? (
+              <Image
+                src={pokemon.imageUrl}
+                alt=""
+                width={48}
+                height={48}
+              />
+            ) : (
+              <span>{pokemon.nameJa.slice(0, 1)}</span>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -207,28 +354,83 @@ function MoveSummary({ move }: { move: DamageCalculatorMove }) {
 }
 
 function DamageResult({ result }: { result: CalculationResult }) {
-  // ダメージが大きいほど残りHPは小さいため、最小・最大の対応が逆になる。
-  const remainingMinimum = Math.max(0, 100 - result.maximumPercent);
-  const remainingMaximum = Math.max(0, 100 - result.minimumPercent);
-
   return (
     <section className={styles.result} aria-live="polite">
       <p className={styles.resultLabel}>計算結果</p>
       <h2>
-        {result.minimum}〜{result.maximum} ダメージ
+        {result.attackerName}の{result.moveName}
       </h2>
+      <div className={styles.outcomeGrid}>
+        <DamageOutcome
+          title="通常ダメージ"
+          calculation={result.normal}
+          defenderName={result.defenderName}
+        />
+        <DamageOutcome
+          title="急所に当たった場合"
+          calculation={result.critical}
+          defenderName={result.defenderName}
+          critical
+        />
+      </div>
+    </section>
+  );
+}
+
+function DamageOutcome({
+  title,
+  calculation,
+  defenderName,
+  critical = false,
+}: {
+  title: string;
+  calculation: DamageCalculation;
+  defenderName: string;
+  critical?: boolean;
+}) {
+  // ダメージが大きいほど残りHPは小さいため、最小・最大の対応が逆になる。
+  const remainingMinimum = Math.max(0, 100 - calculation.maximumPercent);
+  const remainingMaximum = Math.max(0, 100 - calculation.minimumPercent);
+
+  return (
+    <article
+      className={`${styles.outcome} ${critical ? styles.criticalOutcome : ""}`}
+    >
+      <h3>{title}</h3>
+      <p className={styles.koLabel}>{calculation.koLabel}</p>
+      <h4>
+        {calculation.minimum}〜{calculation.maximum} ダメージ
+      </h4>
       <strong>
-        HPの {result.minimumPercent.toFixed(1)}〜
-        {result.maximumPercent.toFixed(1)}%
+        HPの {calculation.minimumPercent.toFixed(1)}〜
+        {calculation.maximumPercent.toFixed(1)}%
       </strong>
-      <div className={styles.hpBar} aria-label="攻撃後の残りHP">
-        <span style={{ width: `${remainingMaximum}%` }} />
+      <div
+        className={styles.remainingHpBar}
+        role="img"
+        aria-label={`防御側の残りHPは、最低乱数時 ${remainingMaximum.toFixed(1)}%、最高乱数時 ${remainingMinimum.toFixed(1)}%`}
+      >
+        <span
+          className={styles.maximumRemainingHp}
+          style={{ width: `${remainingMaximum}%` }}
+        />
+        <span
+          className={styles.minimumRemainingHp}
+          style={{ width: `${remainingMinimum}%` }}
+        />
+      </div>
+      <div className={styles.remainingHpLegend}>
+        <span className={styles.maximumRemainingLegend}>
+          最低乱数時 {remainingMaximum.toFixed(1)}%
+        </span>
+        <span className={styles.minimumRemainingLegend}>
+          最高乱数時 {remainingMinimum.toFixed(1)}%
+        </span>
       </div>
       <p>
-        {result.defenderName}の残りHP：
+        {defenderName}の残りHP：
         {remainingMinimum.toFixed(1)}〜{remainingMaximum.toFixed(1)}%
       </p>
-      <small>{result.koChance}</small>
-    </section>
+    </article>
   );
 }

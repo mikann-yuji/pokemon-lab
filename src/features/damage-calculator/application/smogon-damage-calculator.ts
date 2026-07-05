@@ -33,13 +33,22 @@ export type DamageCalculation = {
   defenderHp: number;
   minimumPercent: number;
   maximumPercent: number;
+  /** @smogon/calcが返す、デバッグにも利用できる元の確定数テキスト。 */
   koChance: string;
+  /** 「確定2発」「乱数1発（62.5%）」のような画面表示用テキスト。 */
+  koLabel: string;
+  /** 相手を倒すまでに必要な攻撃回数。 */
+  koHits: number;
+  /** その回数で倒せる確率。計算不能な場合はundefined。 */
+  koProbability?: number;
 };
 
 export type DamageCalculationInput = {
   attacker: DamageCalculatorPokemon;
   defender: DamageCalculatorPokemon;
   move: DamageCalculatorMove;
+  /** trueの場合、技を急所に当たったものとして計算する。 */
+  isCritical?: boolean;
   field?: FieldOptions;
 };
 
@@ -99,6 +108,21 @@ function toBaseStats(pokemon: DamageCalculatorPokemon): StatsTable {
   ) as StatsTable;
 }
 
+function formatKoLabel({
+  chance,
+  n,
+}: {
+  chance: number | undefined;
+  n: number;
+}) {
+  if (n <= 0 || chance === 0) return "この技では倒せません";
+  if (chance === 1) return `確定${n}発`;
+  if (chance === undefined) return `乱数${n}発`;
+
+  const percentage = Math.round(chance * 1000) / 10;
+  return `乱数${n}発（${percentage}%）`;
+}
+
 /**
  * DB側の名前・タイプ・種族値を正とし、@smogon/calcの計算モデルへ変換する。
  * ゲーム固有仕様はrulesetのフックで上書きできる。
@@ -114,7 +138,7 @@ export class SmogonDamageCalculator {
     const generation = Generations.get(this.ruleset.generation);
     const attacker = this.toPokemon("attacker", input.attacker);
     const defender = this.toPokemon("defender", input.defender);
-    const move = this.toMove(input.move);
+    const move = this.toMove(input.move, input.isCritical ?? false);
     const field = new Field({
       ...this.ruleset.createField?.(input),
       ...input.field,
@@ -124,13 +148,17 @@ export class SmogonDamageCalculator {
       : calculate(generation, attacker, defender, move, field);
     const [minimum, maximum] = sourceResult.range();
     const defenderHp = sourceResult.defender.maxHP();
+    const koChance = sourceResult.kochance();
     const result: DamageCalculation = {
       minimum,
       maximum,
       defenderHp,
       minimumPercent: (minimum / defenderHp) * 100,
       maximumPercent: (maximum / defenderHp) * 100,
-      koChance: sourceResult.kochance().text,
+      koChance: koChance.text,
+      koLabel: formatKoLabel(koChance),
+      koHits: koChance.n,
+      koProbability: koChance.chance,
     };
 
     return this.ruleset.transformResult?.(result, sourceResult, input) ?? result;
@@ -172,7 +200,7 @@ export class SmogonDamageCalculator {
     );
   }
 
-  private toMove(move: DamageCalculatorMove): Move {
+  private toMove(move: DamageCalculatorMove, isCritical: boolean): Move {
     // 技名がSmogon側に存在すれば固有効果を利用し、存在しない場合でも
     // DBの威力・タイプ・分類を上書きして基本ダメージを計算する。
     const generation = Generations.get(this.ruleset.generation);
@@ -181,6 +209,7 @@ export class SmogonDamageCalculator {
     const calculatorMove =
       generation.moves.get(sourceId as never)?.name ?? "Pound";
     const options: MoveOptions = {
+      isCrit: isCritical,
       overrides: {
         basePower: move.power,
         type: move.typeName,

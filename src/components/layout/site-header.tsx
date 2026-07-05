@@ -12,6 +12,7 @@ import styles from "./site-header.module.css";
 const navigationItems = [
   { href: "/pokemon", label: "ポケモン検索" },
   { href: "/damage-calculator", label: "ダメージ計算" },
+  { href: "/training", label: "育成シミュレーター" },
   { href: "/quiz", label: "タイプ相性クイズ" },
 ] as const;
 

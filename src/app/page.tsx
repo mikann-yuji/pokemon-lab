@@ -41,6 +41,11 @@ const researchCards = [
     body: "Choose two Pokémon and a move to calculate the expected damage range.",
     link: "/damage-calculator",
   },
+  {
+    title: "Training Simulator",
+    body: "Build and save Pokémon Champions stat spreads and move sets.",
+    link: "/training",
+  },
 ];
 
 // App Routerでは、このdefault exportが / のページ本体になる。
