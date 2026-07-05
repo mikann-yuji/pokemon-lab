@@ -121,19 +121,28 @@
     font-size: 0.8rem;
   }
 
+  .matrixScroller {
+    overflow-x: visible;
+  }
+
+  .matrix {
+    min-width: 0;
+    font-size: 0.44rem;
+  }
+
   .matrix th,
   .matrix td {
-    height: 1.6rem;
-    padding: 0.05rem;
-    font-size: 0.55rem;
+    height: 1.15rem;
+    padding: 0;
+    font-size: 0.44rem;
   }
 
   .matrix thead th {
-    height: 3.25rem;
+    height: 3rem;
   }
 
   .matrix thead th:first-child {
-    width: 2rem;
-    font-size: 0.45rem;
+    width: 1.75rem;
+    font-size: 0.4rem;
   }
 }

@@ -13,8 +13,16 @@ export type TrainingBuild = {
   updatedAt: number;
 };
 
+export type BattleTeam = {
+  id?: number;
+  name: string;
+  buildIds: number[];
+  updatedAt: number;
+};
+
 const database = new Dexie("pokemon-lab-training") as Dexie & {
   builds: EntityTable<TrainingBuild, "id">;
+  teams: EntityTable<BattleTeam, "id">;
 };
 
 database.version(1).stores({ builds: "&pokemonId, updatedAt" });
@@ -33,6 +41,10 @@ database
         build.contentKey ||= createTrainingBuildContentKey(build);
       });
   });
+database.version(4).stores({
+  builds: "++id, &contentKey, pokemonId, updatedAt",
+  teams: "++id, updatedAt",
+});
 
 export function createTrainingBuildContentKey(
   build: Pick<
@@ -80,3 +92,59 @@ export const findTrainingBuildByContentKey = (contentKey: string) =>
 
 export const saveTrainingBuild = (build: TrainingBuild) =>
   database.builds.put(build);
+
+export function validateBattleTeamBuilds(builds: TrainingBuild[]) {
+  if (builds.length < 1 || builds.length > 6) {
+    throw new Error("バトルチームは1〜6体で編成してください。");
+  }
+
+  const pokemonIds = new Set<number>();
+  const itemIds = new Set<string>();
+  for (const build of builds) {
+    if (pokemonIds.has(build.pokemonId)) {
+      throw new Error("同じポケモンを同じチームには登録できません。");
+    }
+    pokemonIds.add(build.pokemonId);
+
+    if (build.itemId) {
+      if (itemIds.has(build.itemId)) {
+        throw new Error("同じ持ち物を同じチームには登録できません。");
+      }
+      itemIds.add(build.itemId);
+    }
+  }
+}
+
+export const getAllBattleTeams = () =>
+  database.teams.orderBy("updatedAt").reverse().toArray();
+
+export async function saveBattleTeam(name: string, buildIds: number[]) {
+  const normalizedName = name.trim();
+  if (!normalizedName) throw new Error("チーム名を入力してください。");
+  const uniqueBuildIds = [...new Set(buildIds)];
+  if (uniqueBuildIds.length !== buildIds.length) {
+    throw new Error("同じ育成案を重複して登録できません。");
+  }
+
+  return database.transaction(
+    "rw",
+    database.builds,
+    database.teams,
+    async () => {
+      const builds = (await database.builds.bulkGet(uniqueBuildIds)).filter(
+        (build): build is TrainingBuild => Boolean(build),
+      );
+      if (builds.length !== uniqueBuildIds.length) {
+        throw new Error("選択した育成案が見つかりません。");
+      }
+      validateBattleTeamBuilds(builds);
+      return database.teams.add({
+        name: normalizedName,
+        buildIds: uniqueBuildIds,
+        updatedAt: Date.now(),
+      });
+    },
+  );
+}
+
+export const deleteBattleTeam = (id: number) => database.teams.delete(id);

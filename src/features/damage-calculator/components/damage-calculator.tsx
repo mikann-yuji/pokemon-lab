@@ -36,6 +36,18 @@ type CalculationResult = {
   moveName: string;
 };
 
+function usePokemonSelection() {
+  const [pokemon, setPokemon] = useState<DamageCalculatorPokemon | null>(null);
+  const [query, setQuery] = useState("");
+
+  function select(nextPokemon: DamageCalculatorPokemon | null) {
+    setPokemon(nextPokemon);
+    setQuery(nextPokemon?.nameJa ?? "");
+  }
+
+  return { pokemon, query, setQuery, select };
+}
+
 /**
  * ダメージ計算画面の本体。
  *
@@ -47,15 +59,11 @@ export function DamageCalculator({
 }: {
   pokemonCatalog: DamageCalculatorPokemon[];
 }) {
-  const [attacker, setAttacker] = useState<DamageCalculatorPokemon | null>(
-    null,
-  );
-  const [defender, setDefender] = useState<DamageCalculatorPokemon | null>(
-    null,
-  );
+  const attackerSelection = usePokemonSelection();
+  const defenderSelection = usePokemonSelection();
+  const attacker = attackerSelection.pokemon;
+  const defender = defenderSelection.pokemon;
   const [moveId, setMoveId] = useState("");
-  const [attackerQuery, setAttackerQuery] = useState("");
-  const [defenderQuery, setDefenderQuery] = useState("");
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [calculating, setCalculating] = useState(false);
@@ -90,8 +98,7 @@ export function DamageCalculator({
 
   // 攻撃側を変更したら、前のポケモンの技や計算結果を残さない。
   function selectAttacker(pokemon: DamageCalculatorPokemon | null) {
-    setAttacker(pokemon);
-    setAttackerQuery(pokemon?.nameJa ?? "");
+    attackerSelection.select(pokemon);
     setMoveId("");
     setResult(null);
     setError(null);
@@ -99,18 +106,9 @@ export function DamageCalculator({
 
   // 防御側を変更した場合も、古い相手に対する結果を消す。
   function selectDefender(pokemon: DamageCalculatorPokemon | null) {
-    setDefender(pokemon);
-    setDefenderQuery(pokemon?.nameJa ?? "");
+    defenderSelection.select(pokemon);
     setResult(null);
     setError(null);
-  }
-
-  function changeAttackerQuery(value: string) {
-    setAttackerQuery(value);
-  }
-
-  function changeDefenderQuery(value: string) {
-    setDefenderQuery(value);
   }
 
   /**
@@ -126,16 +124,14 @@ export function DamageCalculator({
     if (!pokemon) return;
 
     if (side === "attacker") {
-      setAttacker(pokemon);
-      setAttackerQuery(pokemon.nameJa);
+      attackerSelection.select(pokemon);
       setMoveId(
         pokemon.moves.some(({ id }) => id === history.moveId)
           ? (history.moveId ?? "")
           : "",
       );
     } else {
-      setDefender(pokemon);
-      setDefenderQuery(pokemon.nameJa);
+      defenderSelection.select(pokemon);
     }
     setResult(null);
     setError(null);
@@ -202,8 +198,8 @@ export function DamageCalculator({
           label="攻撃するポケモン"
           pokemonCatalog={pokemonCatalog}
           selectedPokemon={attacker}
-          inputValue={attackerQuery}
-          onInputValueChange={changeAttackerQuery}
+          inputValue={attackerSelection.query}
+          onInputValueChange={attackerSelection.setQuery}
           onSelect={selectAttacker}
         />
         <RecentPokemonList
@@ -243,8 +239,8 @@ export function DamageCalculator({
           label="攻撃を受けるポケモン"
           pokemonCatalog={pokemonCatalog}
           selectedPokemon={defender}
-          inputValue={defenderQuery}
-          onInputValueChange={changeDefenderQuery}
+          inputValue={defenderSelection.query}
+          onInputValueChange={defenderSelection.setQuery}
           onSelect={selectDefender}
         />
         <RecentPokemonList
