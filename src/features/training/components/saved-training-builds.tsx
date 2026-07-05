@@ -26,10 +26,12 @@ export function SavedTrainingBuilds({
   query,
   pokemonCatalog,
   heldItems,
+  teamBuilder = false,
 }: {
   query: string;
   pokemonCatalog: TrainingPokemon[];
   heldItems: HeldItem[];
+  teamBuilder?: boolean;
 }) {
   const [builds, setBuilds] = useState<TrainingBuild[]>([]);
   const [teams, setTeams] = useState<BattleTeam[]>([]);
@@ -135,18 +137,40 @@ export function SavedTrainingBuilds({
     );
   });
 
-  if (!loaded || builds.length === 0) return null;
+  if (!loaded) return null;
+  if (builds.length === 0) {
+    return teamBuilder ? (
+      <section className={styles.savedSection}>
+        <div className={styles.savedHeader}>
+          <div>
+            <p>BATTLE TEAMS</p>
+            <h1>バトルチーム編成</h1>
+          </div>
+        </div>
+        <p className={styles.empty}>
+          チームを編成するには、先に育成シミュレーターで育成案を保存してください。
+        </p>
+        <Link className={styles.trainingLink} href="/training">
+          育成シミュレーターへ
+        </Link>
+      </section>
+    ) : null;
+  }
 
   return (
     <section className={styles.savedSection} aria-labelledby="saved-builds-title">
       <div className={styles.savedHeader}>
         <div>
-          <p>SAVED BUILDS</p>
-          <h2 id="saved-builds-title">保存した育成案</h2>
+          <p>{teamBuilder ? "BATTLE TEAMS" : "SAVED BUILDS"}</p>
+          {teamBuilder ? (
+            <h1 id="saved-builds-title">バトルチーム編成</h1>
+          ) : (
+            <h2 id="saved-builds-title">保存した育成案</h2>
+          )}
         </div>
         <span>{filteredBuilds.length}件</span>
       </div>
-      {teams.length > 0 ? (
+      {teamBuilder && teams.length > 0 ? (
         <div className={styles.teamList}>
           {teams.map((team) => (
             <article className={styles.teamCard} key={team.id}>
@@ -184,35 +208,37 @@ export function SavedTrainingBuilds({
           ))}
         </div>
       ) : null}
-      <div className={styles.teamBuilder}>
-        <div>
-          <strong>バトルチームを作る</strong>
-          <small>
-            育成案を最大6体選択。同じポケモン・持ち物は登録できません。
-          </small>
+      {teamBuilder ? (
+        <div className={styles.teamBuilder}>
+          <div>
+            <strong>バトルチームを作る</strong>
+            <small>
+              育成案を最大6体選択。同じポケモン・持ち物は登録できません。
+            </small>
+          </div>
+          <span>{selectedBuildIds.size} / 6</span>
+          <input
+            aria-label="チーム名"
+            maxLength={80}
+            placeholder="チーム名"
+            value={teamName}
+            onChange={(event) => {
+              setTeamName(event.target.value);
+              setTeamError("");
+              setTeamSaved(false);
+            }}
+          />
+          <button
+            type="button"
+            disabled={selectedBuildIds.size === 0}
+            onClick={() => void createTeam()}
+          >
+            チームを保存
+          </button>
+          {teamError ? <p role="alert">{teamError}</p> : null}
+          {teamSaved ? <p className={styles.success}>保存しました。</p> : null}
         </div>
-        <span>{selectedBuildIds.size} / 6</span>
-        <input
-          aria-label="チーム名"
-          maxLength={80}
-          placeholder="チーム名"
-          value={teamName}
-          onChange={(event) => {
-            setTeamName(event.target.value);
-            setTeamError("");
-            setTeamSaved(false);
-          }}
-        />
-        <button
-          type="button"
-          disabled={selectedBuildIds.size === 0}
-          onClick={() => void createTeam()}
-        >
-          チームを保存
-        </button>
-        {teamError ? <p role="alert">{teamError}</p> : null}
-        {teamSaved ? <p className={styles.success}>保存しました。</p> : null}
-      </div>
+      ) : null}
       {filteredBuilds.length === 0 ? (
         <p className={styles.empty}>検索に一致する保存済み育成案はありません。</p>
       ) : (
@@ -228,16 +254,18 @@ export function SavedTrainingBuilds({
                 }`}
                 key={build.id}
               >
-                <label className={styles.buildSelector}>
-                  <input
-                    type="checkbox"
-                    checked={
-                      build.id !== undefined && selectedBuildIds.has(build.id)
-                    }
-                    onChange={() => toggleBuild(build)}
-                  />
-                  <span>チームに追加</span>
-                </label>
+                {teamBuilder ? (
+                  <label className={styles.buildSelector}>
+                    <input
+                      type="checkbox"
+                      checked={
+                        build.id !== undefined && selectedBuildIds.has(build.id)
+                      }
+                      onChange={() => toggleBuild(build)}
+                    />
+                    <span>チームに追加</span>
+                  </label>
+                ) : null}
                 <Link href={`/training/${build.pokemonId}?build=${build.id}`}>
                   {pokemon?.imageUrl ? (
                     <Image

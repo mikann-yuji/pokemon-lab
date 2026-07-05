@@ -25,6 +25,7 @@ const researchCards = [
   {
     title: "Team Builder",
     body: "Sketch balanced parties for raids, gyms, and friendly experiments in the lab.",
+    link: "/battle-team",
   },
   {
     title: "Type Quiz",
