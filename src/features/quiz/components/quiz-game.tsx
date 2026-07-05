@@ -45,6 +45,7 @@ export default function QuizGame({
   );
   const [answered, setAnswered] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [answerWasCorrect, setAnswerWasCorrect] = useState(false);
   const [includeDualTypes, setIncludeDualTypes] = useState(false);
   const questionTopRef = useRef<HTMLDivElement>(null);
   const explanationRef = useRef<HTMLDivElement>(null);
@@ -81,6 +82,7 @@ export default function QuizGame({
     setSelectedAnswers(new Set());
     setAnswered(false);
     setFeedback("");
+    setAnswerWasCorrect(false);
   }
 
   // 複合タイプ問題の有無を切り替え、クイズを最初から作り直す。
@@ -122,6 +124,7 @@ export default function QuizGame({
     if (isCorrect) {
       setScore((current) => current + 1);
       setFeedback("せいかい！ やったね！");
+      setAnswerWasCorrect(true);
     } else {
       const answer = question.correctAnswers
         .map(
@@ -131,6 +134,7 @@ export default function QuizGame({
         )
         .join("、");
       setFeedback(`ざんねん！ せいかいは「${answer}」だよ！`);
+      setAnswerWasCorrect(false);
     }
     setAnswered(true);
   }
@@ -200,6 +204,23 @@ export default function QuizGame({
             </button>
           ) : (
             <div ref={explanationRef} className={styles.explanation}>
+              {answerWasCorrect ? (
+                <div className={styles.correctCelebration} aria-live="polite">
+                  <span
+                    className={`${styles.partyPopper} ${styles.partyPopperLeft}`}
+                    aria-hidden="true"
+                  >
+                    🎉
+                  </span>
+                  <strong>せいかい！</strong>
+                  <span
+                    className={`${styles.partyPopper} ${styles.partyPopperRight}`}
+                    aria-hidden="true"
+                  >
+                    🎉
+                  </span>
+                </div>
+              ) : null}
               <p className={styles.feedbackText}>{feedback}</p>
               <button
                 type="button"
