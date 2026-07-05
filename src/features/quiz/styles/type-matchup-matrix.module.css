@@ -37,12 +37,21 @@
 }
 
 .matrix {
+  box-sizing: border-box;
   width: 100%;
-  min-width: 44rem;
+  max-width: 100%;
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   font-size: clamp(0.58rem, 0.8vw, 0.7rem);
+}
+
+.rowHeaderColumn {
+  width: 10%;
+}
+
+.typeColumn {
+  width: 5%;
 }
 
 .matrix th,
@@ -87,7 +96,6 @@
 .matrix thead th:first-child {
   left: 0;
   z-index: 3;
-  width: clamp(2.5rem, 5vw, 4rem);
   writing-mode: horizontal-tb;
   letter-spacing: normal;
 }
@@ -127,19 +135,7 @@
   }
 
   .matrix {
-    width: 100%;
-    min-width: 0;
     font-size: 0.44rem;
-  }
-
-  .matrix thead th:first-child,
-  .matrix tbody th {
-    width: 10%;
-  }
-
-  .matrix thead th:not(:first-child),
-  .matrix td {
-    width: 5%;
   }
 
   .matrix th,

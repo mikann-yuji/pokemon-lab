@@ -33,6 +33,12 @@ export default function TypeMatchupMatrix({
       </p>
       <div className={styles.matrixScroller}>
         <table className={styles.matrix}>
+          <colgroup>
+            <col className={styles.rowHeaderColumn} />
+            {typeMatchups.map((type) => (
+              <col className={styles.typeColumn} key={type.name} />
+            ))}
+          </colgroup>
           <thead>
             <tr>
               <th scope="col">攻＼防</th>
