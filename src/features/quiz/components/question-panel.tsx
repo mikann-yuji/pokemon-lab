@@ -15,6 +15,7 @@ type QuestionPanelProps = {
   answered: boolean;
   typeMatchups: TypeMatchup[];
   onTypeClick: (type: TypeName) => void;
+  showCorrectCelebration: boolean;
 };
 
 /**
@@ -28,6 +29,7 @@ export default function QuestionPanel({
   answered,
   typeMatchups,
   onTypeClick,
+  showCorrectCelebration,
 }: QuestionPanelProps) {
   return (
     <>
@@ -63,34 +65,53 @@ export default function QuestionPanel({
         </figure>
       ) : null}
 
-      <div className={styles.typeGrid}>
-        {typeMatchups.map((type) => {
-          // 回答後は、正解とユーザーが誤って選んだタイプを色分けする。
-          const isSelected = selectedAnswers.has(type.name);
-          const isCorrect = question.correctAnswers.includes(type.name);
-          const stateClass = answered
-            ? isCorrect
-              ? styles.correct
-              : isSelected
-                ? styles.incorrect
-                : ""
-            : isSelected
-              ? styles.selected
-              : "";
-
-          return (
-            <button
-              key={type.name}
-              type="button"
-              onClick={() => onTypeClick(type.name)}
-              className={`${styles.typeButton} ${stateClass}`}
-              disabled={answered}
-              aria-pressed={isSelected}
+      <div className={styles.typeButtonArea}>
+        {showCorrectCelebration ? (
+          <div className={styles.correctCelebration} aria-live="polite">
+            <span
+              className={`${styles.partyPopper} ${styles.partyPopperLeft}`}
+              aria-hidden="true"
             >
-              {type.nameJa}
-            </button>
-          );
-        })}
+              🎉
+            </span>
+            <strong>せいかい！</strong>
+            <span
+              className={`${styles.partyPopper} ${styles.partyPopperRight}`}
+              aria-hidden="true"
+            >
+              🎉
+            </span>
+          </div>
+        ) : null}
+        <div className={styles.typeGrid}>
+          {typeMatchups.map((type) => {
+            // 回答後は、正解とユーザーが誤って選んだタイプを色分けする。
+            const isSelected = selectedAnswers.has(type.name);
+            const isCorrect = question.correctAnswers.includes(type.name);
+            const stateClass = answered
+              ? isCorrect
+                ? styles.correct
+                : isSelected
+                  ? styles.incorrect
+                  : ""
+              : isSelected
+                ? styles.selected
+                : "";
+
+            return (
+              <button
+                key={type.name}
+                type="button"
+                onClick={() => onTypeClick(type.name)}
+                className={`${styles.typeButton} ${stateClass}`}
+                disabled={answered}
+                aria-pressed={isSelected}
+              >
+                {type.nameJa}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </>
   );
