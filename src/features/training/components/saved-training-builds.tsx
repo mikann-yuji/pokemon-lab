@@ -27,11 +27,13 @@ export function SavedTrainingBuilds({
   pokemonCatalog,
   heldItems,
   teamBuilder = false,
+  showEmptyState = false,
 }: {
   query: string;
   pokemonCatalog: TrainingPokemon[];
   heldItems: HeldItem[];
   teamBuilder?: boolean;
+  showEmptyState?: boolean;
 }) {
   const [builds, setBuilds] = useState<TrainingBuild[]>([]);
   const [teams, setTeams] = useState<BattleTeam[]>([]);
@@ -139,16 +141,18 @@ export function SavedTrainingBuilds({
 
   if (!loaded) return null;
   if (builds.length === 0) {
-    return teamBuilder ? (
+    return teamBuilder || showEmptyState ? (
       <section className={styles.savedSection}>
         <div className={styles.savedHeader}>
           <div>
-            <p>BATTLE TEAMS</p>
-            <h1>バトルチーム編成</h1>
+            <p>{teamBuilder ? "BATTLE TEAMS" : "SAVED BUILDS"}</p>
+            <h1>
+              {teamBuilder ? "バトルチーム編成" : "保存した育成案"}
+            </h1>
           </div>
         </div>
         <p className={styles.empty}>
-          チームを編成するには、先に育成シミュレーターで育成案を保存してください。
+          保存した育成案はまだありません。育成シミュレーターで育成案を作成してください。
         </p>
         <Link className={styles.trainingLink} href="/training">
           育成シミュレーターへ

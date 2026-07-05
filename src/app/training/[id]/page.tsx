@@ -22,7 +22,10 @@ export default async function TrainingDetailPage({
   const pokemon = getPokemonDetail(id);
   if (!pokemon) notFound();
   return <main className={pageStyles.page}><div className={pageStyles.container}>
-    <Link href="/training" className={pageStyles.backLink}>← 育成ポケモン選択へ戻る</Link>
+    <nav className={pageStyles.trainingNavigation} aria-label="育成メニュー">
+      <Link href="/training">← 育成ポケモン選択へ戻る</Link>
+      <Link href="/training-builds">保存した育成案の一覧を見る</Link>
+    </nav>
     <TrainingSimulator
       pokemon={pokemon}
       natures={getNatures()}
