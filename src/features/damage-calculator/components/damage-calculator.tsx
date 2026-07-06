@@ -9,7 +9,7 @@
  */
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CHAMPIONS_DAMAGE_RULESET,
   championsDamageCalculator,
@@ -26,6 +26,16 @@ import {
   type DamageHistoryRecord,
   type DamageHistorySide,
 } from "../infrastructure/damage-history-repository";
+import {
+  getAllBattleTeams,
+  getAllTrainingBuilds,
+  type BattleTeam,
+  type TrainingBuild,
+} from "@/features/training/infrastructure/training-build-repository";
+import {
+  getNatures,
+  type Nature,
+} from "@/features/training/infrastructure/training-catalog-repository";
 import styles from "../styles/damage-calculator.module.css";
 
 type CalculationResult = {
@@ -38,6 +48,72 @@ type CalculationResult = {
   defenderName: string;
   moveName: string;
 };
+
+const STAT_IDS = [
+  "hp",
+  "attack",
+  "defense",
+  "special-attack",
+  "special-defense",
+  "speed",
+] as const;
+
+const DEFAULT_NATURE: Nature = {
+  id: "serious",
+  name: "まじめ",
+  increasedStatId: "attack",
+  decreasedStatId: "attack",
+};
+
+function toActualStats(
+  pokemon: DamageCalculatorPokemon,
+  build: TrainingBuild,
+  natures: Nature[],
+) {
+  const selectedNature =
+    natures.find(({ id }) => id === build.nature) ??
+    natures.find(({ id }) => id === "serious") ??
+    DEFAULT_NATURE;
+  const hasNatureModifier =
+    selectedNature.increasedStatId !== selectedNature.decreasedStatId;
+
+  return Object.fromEntries(
+    STAT_IDS.map((id) => {
+      const baseStat = pokemon.stats[id] ?? 1;
+      const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
+      const point = build.abilityPoints[id] ?? 0;
+      if (id === "hp") {
+        return [id, baseStat === 1 ? 1 : base + 50 + 10 + point];
+      }
+      const modifier =
+        hasNatureModifier && selectedNature.increasedStatId === id
+          ? 1.1
+          : hasNatureModifier && selectedNature.decreasedStatId === id
+            ? 0.9
+            : 1;
+      return [id, Math.floor((base + 5 + point) * modifier)];
+    }),
+  );
+}
+
+function applyTrainingBuildToPokemon(
+  pokemon: DamageCalculatorPokemon,
+  build: TrainingBuild,
+  natures: Nature[],
+): DamageCalculatorPokemon {
+  const learnedMoveIds = new Set(build.moveIds.filter(Boolean));
+  const learnedDamageMoves =
+    learnedMoveIds.size === 0
+      ? []
+      : pokemon.moves.filter((move) => learnedMoveIds.has(move.id));
+
+  return {
+    ...pokemon,
+    nameJa: build.name || pokemon.nameJa,
+    actualStats: toActualStats(pokemon, build, natures),
+    moves: learnedDamageMoves,
+  };
+}
 
 /**
  * ポケモン選択欄1つ分の状態をまとめる小さなhook。
@@ -81,6 +157,38 @@ export function DamageCalculator({
   const [defenderHistory, setDefenderHistory] = useState<
     DamageHistoryRecord[]
   >([]);
+  const [battleTeams, setBattleTeams] = useState<BattleTeam[]>([]);
+  const [trainingBuilds, setTrainingBuilds] = useState<TrainingBuild[]>([]);
+  const [natures, setNatures] = useState<Nature[]>([]);
+  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+  const [teamModalOpen, setTeamModalOpen] = useState(false);
+  const [teamLoadError, setTeamLoadError] = useState("");
+  const buildById = useMemo(
+    () =>
+      new Map(
+        trainingBuilds.flatMap((build) =>
+          build.id === undefined ? [] : [[build.id, build] as const],
+        ),
+      ),
+    [trainingBuilds],
+  );
+  const selectedTeam =
+    battleTeams.find((team) => team.id === selectedTeamId) ?? null;
+  const selectedTeamBuilds = useMemo(
+    () =>
+      selectedTeam?.buildIds
+        .map((buildId) => buildById.get(buildId))
+        .filter((build): build is TrainingBuild => Boolean(build)) ?? [],
+    [buildById, selectedTeam],
+  );
+  const selectedTeamMembers = useMemo(
+    () =>
+      selectedTeamBuilds.flatMap((build) => {
+        const pokemon = pokemonCatalog.find(({ id }) => id === build.pokemonId);
+        return pokemon ? [{ build, pokemon }] : [];
+      }),
+    [pokemonCatalog, selectedTeamBuilds],
+  );
 
   // user.dbはブラウザ専用なので、初回表示後に最近使った履歴を読み込む。
   useEffect(() => {
@@ -104,6 +212,27 @@ export function DamageCalculator({
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    void Promise.all([getAllBattleTeams(), getAllTrainingBuilds(), getNatures()])
+      .then(([teams, builds, loadedNatures]) => {
+        if (!active) return;
+        setBattleTeams(teams);
+        setTrainingBuilds(builds);
+        setNatures(loadedNatures);
+      })
+      .catch((caught: unknown) => {
+        console.error("バトルチームを読み込めませんでした。", caught);
+        if (active) {
+          setTeamLoadError("バトルチームを読み込めませんでした。");
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   // 攻撃側を変更したら、前のポケモンの技や計算結果を残さない。
   function selectAttacker(pokemon: DamageCalculatorPokemon | null) {
     attackerSelection.select(pokemon);
@@ -115,6 +244,24 @@ export function DamageCalculator({
   // 防御側を変更した場合も、古い相手に対する結果を消す。
   function selectDefender(pokemon: DamageCalculatorPokemon | null) {
     defenderSelection.select(pokemon);
+    setResult(null);
+    setError(null);
+  }
+
+  function selectBattleTeam(team: BattleTeam) {
+    setSelectedTeamId(team.id ?? null);
+    setTeamModalOpen(false);
+    setResult(null);
+    setError(null);
+  }
+
+  function selectTeamMember(build: TrainingBuild) {
+    const pokemon = pokemonCatalog.find(({ id }) => id === build.pokemonId);
+    if (!pokemon) return;
+
+    const trainedPokemon = applyTrainingBuildToPokemon(pokemon, build, natures);
+    attackerSelection.select(trainedPokemon);
+    setMoveId(trainedPokemon.moves[0]?.id ?? "");
     setResult(null);
     setError(null);
   }
@@ -201,6 +348,41 @@ export function DamageCalculator({
     <form className={styles.calculator} onSubmit={submit}>
       <section className={styles.side}>
         <h2>攻撃側</h2>
+        <div className={styles.teamPicker}>
+          <button type="button" onClick={() => setTeamModalOpen(true)}>
+            バトルチームを選択
+          </button>
+          <span>{selectedTeam?.name ?? "未選択"}</span>
+        </div>
+        {teamLoadError ? (
+          <p className={styles.teamError} role="alert">
+            {teamLoadError}
+          </p>
+        ) : null}
+        {selectedTeamMembers.length > 0 ? (
+          <div className={styles.teamPokemon}>
+            {selectedTeamMembers.map(({ build, pokemon }) => (
+              <button
+                type="button"
+                title={`${build.name || pokemon.nameJa}を攻撃側に反映`}
+                aria-label={`${build.name || pokemon.nameJa}を攻撃側に反映`}
+                onClick={() => selectTeamMember(build)}
+                key={build.id}
+              >
+                {pokemon.imageUrl ? (
+                  <Image
+                    src={pokemon.imageUrl}
+                    alt=""
+                    width={48}
+                    height={48}
+                  />
+                ) : (
+                  <span>{pokemon.nameJa.slice(0, 1)}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        ) : null}
         <PokemonCombobox
           id="attacker"
           label="攻撃するポケモン"
@@ -276,7 +458,75 @@ export function DamageCalculator({
 
       {error ? <p className={styles.error}>{error}</p> : null}
       {result ? <DamageResult result={result} /> : null}
+      {teamModalOpen ? (
+        <BattleTeamModal
+          teams={battleTeams}
+          selectedTeamId={selectedTeamId}
+          onSelect={selectBattleTeam}
+          onClose={() => setTeamModalOpen(false)}
+        />
+      ) : null}
     </form>
+  );
+}
+
+function BattleTeamModal({
+  teams,
+  selectedTeamId,
+  onSelect,
+  onClose,
+}: {
+  teams: BattleTeam[];
+  selectedTeamId: number | null;
+  onSelect: (team: BattleTeam) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className={styles.teamModalOverlay}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="battle-team-modal-title"
+    >
+      <button
+        className={styles.teamModalBackdrop}
+        type="button"
+        aria-label="バトルチーム一覧を閉じる"
+        onClick={onClose}
+      />
+      <section className={styles.teamModalPanel}>
+        <div className={styles.teamModalHeader}>
+          <div>
+            <p>BATTLE TEAMS</p>
+            <h2 id="battle-team-modal-title">バトルチーム一覧</h2>
+          </div>
+          <button type="button" onClick={onClose}>
+            閉じる
+          </button>
+        </div>
+        {teams.length === 0 ? (
+          <p className={styles.teamModalEmpty}>
+            保存したバトルチームはありません。
+          </p>
+        ) : (
+          <div className={styles.teamModalList}>
+            {teams.map((team) => (
+              <button
+                className={
+                  team.id === selectedTeamId ? styles.selectedTeamButton : ""
+                }
+                type="button"
+                onClick={() => onSelect(team)}
+                key={team.id}
+              >
+                <strong>{team.name}</strong>
+                <small>{team.buildIds.length}体</small>
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
   );
 }
 

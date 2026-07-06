@@ -44,6 +44,8 @@ export type DamageCalculatorPokemon = {
   types: TypeName[];
   /** hp、attackなど、SQLiteのstat_idをキーにした種族値。 */
   stats: Record<string, number>;
+  /** 育成案から復元した実数値。指定時はダメージ計算で種族値計算より優先する。 */
+  actualStats?: Record<string, number>;
   /** このフォームが利用できるダメージ技。 */
   moves: DamageCalculatorMove[];
 };

@@ -72,6 +72,82 @@
   font-size: 1.15rem;
 }
 
+.teamPicker {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.teamPicker button {
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #2857a4;
+  border-radius: 9px;
+  background: #2857a4;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.teamPicker span {
+  min-width: 0;
+  overflow: hidden;
+  color: #536376;
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teamError {
+  margin: 0 0 0.6rem;
+  color: #b51f2d;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.teamPokemon {
+  display: flex;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  margin-bottom: 0.8rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.teamPokemon button {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 2px;
+  overflow: hidden;
+  border: 1px solid #b9cae0;
+  border-radius: 10px;
+  background: white;
+  color: #172b4d;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.teamPokemon button:hover,
+.teamPokemon button:focus-visible {
+  border-color: #2857a4;
+  outline: 3px solid rgb(40 87 164 / 18%);
+}
+
+.teamPokemon img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
 .versus {
   align-self: center;
   padding: 0.5rem;
@@ -444,6 +520,119 @@
 
 .criticalOutcome .minimumRemainingLegend::before {
   background: #e4473c;
+}
+
+.teamModalOverlay {
+  position: fixed;
+  z-index: 260;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.75rem, 3vw, 2rem);
+}
+
+.teamModalBackdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgb(10 28 58 / 58%);
+  cursor: pointer;
+}
+
+.teamModalPanel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 1rem;
+  width: min(100%, 34rem);
+  max-height: min(88vh, 38rem);
+  overflow: auto;
+  padding: clamp(1rem, 3vw, 1.35rem);
+  border: 1px solid rgb(255 255 255 / 54%);
+  border-radius: 12px;
+  background: #f8fbff;
+  box-shadow: 0 30px 90px rgb(10 28 58 / 34%);
+}
+
+.teamModalHeader {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.teamModalHeader p {
+  margin: 0 0 0.15rem;
+  color: #2857a4;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.teamModalHeader h2 {
+  margin: 0;
+  color: #172b4d;
+  font-size: 1.25rem;
+}
+
+.teamModalHeader button {
+  min-height: 38px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #c7d5e7;
+  border-radius: 8px;
+  background: white;
+  color: #172b4d;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 850;
+}
+
+.teamModalList {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.teamModalList button {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 0.7rem;
+  border: 1px solid #b8c8dc;
+  border-radius: 10px;
+  background: white;
+  color: #172b4d;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.teamModalList button:hover,
+.teamModalList button:focus-visible,
+.teamModalList .selectedTeamButton {
+  border-color: #2857a4;
+  background: #eef6ff;
+  outline: none;
+}
+
+.teamModalList strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teamModalList small {
+  flex: 0 0 auto;
+  color: #536376;
+  font-weight: 850;
+}
+
+.teamModalEmpty {
+  margin: 0;
+  color: #536376;
+  font-weight: 800;
 }
 
 @media (max-width: 44rem) {
