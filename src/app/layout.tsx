@@ -5,6 +5,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
+import { BackButton } from "@/components/layout/back-button";
 import { SiteHeader } from "@/components/layout/site-header";
 
 export const metadata: Metadata = {
@@ -43,6 +44,7 @@ export default function RootLayout({
       <body>
         <ServiceWorkerRegister />
         <SiteHeader />
+        <BackButton />
         {children}
       </body>
     </html>

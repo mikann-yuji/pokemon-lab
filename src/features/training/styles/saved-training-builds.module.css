@@ -207,7 +207,7 @@
   margin-bottom: 0.75rem;
 }
 
-.teamActions button {
+.teamActions a {
   min-height: 40px;
   padding: 0.55rem 0.8rem;
   border: 2px solid #2857a4;
@@ -215,6 +215,8 @@
   background: #2857a4;
   color: white;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
   font: inherit;
   font-weight: 900;
 }
@@ -226,6 +228,7 @@
 }
 
 .teamCard {
+  position: relative;
   padding: 0.7rem;
   border: 1px solid #b8c8dc;
   border-radius: 13px;
@@ -236,29 +239,34 @@
   border-color: #2857a4;
 }
 
+.teamCardLink {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.teamCardLink:focus-visible {
+  outline: 3px solid rgb(40 87 164 / 24%);
+  outline-offset: 2px;
+}
+
 .teamCardHeader {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0.5rem;
 }
 
-.teamEditButton {
+.teamCardHeader strong {
   min-width: 0;
-  border: 0;
-  background: transparent;
   color: #172b4d;
-  cursor: pointer;
-  font: inherit;
-  font-weight: 900;
-  text-align: left;
-}
-
-.teamEditButton:hover {
-  color: #2857a4;
 }
 
 .teamDeleteButton {
+  position: relative;
+  z-index: 3;
   border: 0;
   background: transparent;
   color: #b42318;
@@ -267,14 +275,14 @@
   font-weight: 800;
 }
 
-.teamEditButton:focus-visible,
 .teamDeleteButton:focus-visible,
-.teamActions button:focus-visible {
+.teamActions a:focus-visible {
   outline: 3px solid rgb(40 87 164 / 24%);
   outline-offset: 2px;
 }
 
 .teamMembers {
+  position: relative;
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
@@ -311,7 +319,8 @@
     justify-content: stretch;
   }
 
-  .teamActions button {
+  .teamActions a {
     width: 100%;
+    justify-content: center;
   }
 }
