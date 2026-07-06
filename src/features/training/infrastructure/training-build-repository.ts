@@ -302,6 +302,63 @@ export async function saveBattleTeam(name: string, buildIds: number[]) {
   return teamResult.lastInsertRowId;
 }
 
+/**
+ * 既存チームの名前とメンバーを置き換える。
+ * メンバーはpositionを維持するため、子テーブルを作り直す。
+ */
+export async function updateBattleTeam(
+  id: number,
+  name: string,
+  buildIds: number[],
+) {
+  const normalizedName = name.trim();
+  if (!normalizedName) throw new Error("チーム名を入力してください。");
+  const uniqueBuildIds = [...new Set(buildIds)];
+  if (uniqueBuildIds.length !== buildIds.length) {
+    throw new Error("同じ育成案を重複して登録できません。");
+  }
+
+  const placeholders = uniqueBuildIds.map(() => "?").join(",");
+  const rows =
+    uniqueBuildIds.length === 0
+      ? []
+      : await sqliteWorkerClient.query<TrainingBuildRow>(
+          `SELECT ${BUILD_COLUMNS}
+           FROM training_builds
+           WHERE id IN (${placeholders})`,
+          uniqueBuildIds,
+        );
+  const builds = rows.map(toTrainingBuild);
+  if (builds.length !== uniqueBuildIds.length) {
+    throw new Error("選択した育成案が見つかりません。");
+  }
+  validateBattleTeamBuilds(builds);
+
+  const now = Date.now();
+  const statements: SqliteStatement[] = [
+    {
+      sql: "UPDATE battle_teams SET name = ?, updated_at = ? WHERE id = ?",
+      bind: [normalizedName, now, id],
+    },
+    {
+      sql: "DELETE FROM battle_team_members WHERE team_id = ?",
+      bind: [id],
+    },
+    ...uniqueBuildIds.map(
+      (buildId, position): SqliteStatement => ({
+        sql: `INSERT INTO battle_team_members (team_id, build_id, position)
+              VALUES (?, ?, ?)`,
+        bind: [id, buildId, position],
+      }),
+    ),
+  ];
+
+  const [teamResult] = await sqliteWorkerClient.transaction(statements);
+  if (teamResult.changes !== 1) {
+    throw new Error("更新するバトルチームが見つかりませんでした。");
+  }
+}
+
 /** battle_team_membersは外部キーON DELETE CASCADEで一緒に消える。 */
 export async function deleteBattleTeam(id: number) {
   await sqliteWorkerClient.execute("DELETE FROM battle_teams WHERE id = ?", [

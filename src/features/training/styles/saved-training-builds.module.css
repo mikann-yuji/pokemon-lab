@@ -142,7 +142,7 @@
 
 .teamBuilder {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(10rem, 0.65fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(10rem, 0.65fr) auto auto;
   gap: 0.65rem;
   align-items: center;
   margin-bottom: 1rem;
@@ -183,6 +183,12 @@
   opacity: 0.5;
 }
 
+.teamBuilder .secondaryButton {
+  border-color: #cad6e5;
+  background: white;
+  color: #172b4d;
+}
+
 .teamBuilder p {
   grid-column: 1 / -1;
   margin: 0;
@@ -193,6 +199,24 @@
 
 .teamBuilder .success {
   color: #18743a;
+}
+
+.teamActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.teamActions button {
+  min-height: 40px;
+  padding: 0.55rem 0.8rem;
+  border: 2px solid #2857a4;
+  border-radius: 9px;
+  background: #2857a4;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
 }
 
 .teamList {
@@ -208,6 +232,10 @@
   background: #f8fbff;
 }
 
+.teamCard:hover {
+  border-color: #2857a4;
+}
+
 .teamCardHeader {
   display: flex;
   align-items: center;
@@ -215,12 +243,35 @@
   margin-bottom: 0.5rem;
 }
 
-.teamCardHeader button {
+.teamEditButton {
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #172b4d;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+  text-align: left;
+}
+
+.teamEditButton:hover {
+  color: #2857a4;
+}
+
+.teamDeleteButton {
   border: 0;
   background: transparent;
   color: #b42318;
   cursor: pointer;
+  font: inherit;
   font-weight: 800;
+}
+
+.teamEditButton:focus-visible,
+.teamDeleteButton:focus-visible,
+.teamActions button:focus-visible {
+  outline: 3px solid rgb(40 87 164 / 24%);
+  outline-offset: 2px;
 }
 
 .teamMembers {
@@ -254,5 +305,13 @@
   .teamBuilder input,
   .teamBuilder button {
     grid-column: 1 / -1;
+  }
+
+  .teamActions {
+    justify-content: stretch;
+  }
+
+  .teamActions button {
+    width: 100%;
   }
 }

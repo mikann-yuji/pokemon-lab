@@ -12,6 +12,7 @@ import {
   getAllTrainingBuilds,
   getAllBattleTeams,
   saveBattleTeam,
+  updateBattleTeam,
   validateBattleTeamBuilds,
   type BattleTeam,
   type TrainingBuild,
@@ -62,6 +63,8 @@ export function SavedTrainingBuilds({
   const [teamName, setTeamName] = useState("");
   const [teamError, setTeamError] = useState("");
   const [teamSaved, setTeamSaved] = useState(false);
+  const [teamView, setTeamView] = useState<"list" | "form">("list");
+  const [editingTeamId, setEditingTeamId] = useState<number | undefined>();
   const [loaded, setLoaded] = useState(false);
   const [catalogLoaded, setCatalogLoaded] = useState(
     initialPokemonCatalog !== undefined && initialHeldItems !== undefined,
@@ -136,7 +139,9 @@ export function SavedTrainingBuilds({
     let active = true;
     void getAllBattleTeams()
       .then((savedTeams) => {
-        if (active) setTeams(savedTeams);
+        if (!active) return;
+        setTeams(savedTeams);
+        setTeamView(savedTeams.length > 0 ? "list" : "form");
       })
       .catch((error: unknown) => {
         console.error("保存したバトルチームを読み込めませんでした。", error);
@@ -148,6 +153,33 @@ export function SavedTrainingBuilds({
       active = false;
     };
   }, [teamBuilder]);
+
+  function resetTeamForm() {
+    setSelectedBuildIds(new Set());
+    setTeamName("");
+    setTeamError("");
+    setTeamSaved(false);
+    setEditingTeamId(undefined);
+  }
+
+  function showTeamList(nextTeams = teams) {
+    resetTeamForm();
+    setTeamView(nextTeams.length > 0 ? "list" : "form");
+  }
+
+  function startCreatingTeam() {
+    resetTeamForm();
+    setTeamView("form");
+  }
+
+  function startEditingTeam(team: BattleTeam) {
+    setTeamName(team.name);
+    setSelectedBuildIds(new Set(team.buildIds));
+    setTeamError("");
+    setTeamSaved(false);
+    setEditingTeamId(team.id);
+    setTeamView("form");
+  }
 
   /** チームへ育成案を追加/解除する。追加時は重複ポケモン・重複持ち物を検証する。 */
   function toggleBuild(build: TrainingBuild) {
@@ -176,15 +208,19 @@ export function SavedTrainingBuilds({
     });
   }
 
-  /** 選択中の育成案IDから新しいバトルチームを保存し、一覧を再取得する。 */
-  async function createTeam() {
+  /** 選択中の育成案IDからバトルチームを保存し、一覧を再取得する。 */
+  async function persistTeam() {
     setTeamError("");
     setTeamSaved(false);
     try {
-      await saveBattleTeam(teamName, [...selectedBuildIds]);
-      setTeams(await getAllBattleTeams());
-      setSelectedBuildIds(new Set());
-      setTeamName("");
+      if (editingTeamId === undefined) {
+        await saveBattleTeam(teamName, [...selectedBuildIds]);
+      } else {
+        await updateBattleTeam(editingTeamId, teamName, [...selectedBuildIds]);
+      }
+      const nextTeams = await getAllBattleTeams();
+      setTeams(nextTeams);
+      showTeamList(nextTeams);
       setTeamSaved(true);
     } catch (error: unknown) {
       setTeamError(
@@ -196,7 +232,9 @@ export function SavedTrainingBuilds({
   /** チームを削除し、削除後の一覧をuser.dbから読み直す。 */
   async function removeTeam(id: number) {
     await deleteBattleTeam(id);
-    setTeams(await getAllBattleTeams());
+    const nextTeams = await getAllBattleTeams();
+    setTeams(nextTeams);
+    if (editingTeamId === id) showTeamList(nextTeams);
   }
 
   // 表示上の検索はDBへ再問い合わせせず、読み込み済みの育成案とカタログ名で絞り込む。
@@ -210,6 +248,9 @@ export function SavedTrainingBuilds({
       pokemonNameIncludes(pokemon?.nameJa ?? "", normalizedQuery)
     );
   });
+  const teamListVisible = teamBuilder && teamView === "list" && teams.length > 0;
+  const teamFormVisible = teamBuilder && teamView === "form";
+  const headerCount = teamBuilder ? teams.length : filteredBuilds.length;
 
   if (loadError) {
     return (
@@ -253,15 +294,28 @@ export function SavedTrainingBuilds({
             <h2 id="saved-builds-title">保存した育成案</h2>
           )}
         </div>
-        <span>{filteredBuilds.length}件</span>
+        <span>{headerCount}件</span>
       </div>
-      {teamBuilder && teams.length > 0 ? (
-        <div className={styles.teamList}>
+      {teamListVisible ? (
+        <>
+          <div className={styles.teamActions}>
+            <button type="button" onClick={startCreatingTeam}>
+              バトルチーム追加
+            </button>
+          </div>
+          <div className={styles.teamList}>
           {teams.map((team) => (
             <article className={styles.teamCard} key={team.id}>
               <div className={styles.teamCardHeader}>
-                <strong>{team.name}</strong>
                 <button
+                  className={styles.teamEditButton}
+                  type="button"
+                  onClick={() => startEditingTeam(team)}
+                >
+                  {team.name}
+                </button>
+                <button
+                  className={styles.teamDeleteButton}
                   type="button"
                   onClick={() => team.id !== undefined && void removeTeam(team.id)}
                 >
@@ -291,12 +345,17 @@ export function SavedTrainingBuilds({
               </div>
             </article>
           ))}
-        </div>
+          </div>
+        </>
       ) : null}
-      {teamBuilder ? (
+      {teamFormVisible ? (
         <div className={styles.teamBuilder}>
           <div>
-            <strong>バトルチームを作る</strong>
+            <strong>
+              {editingTeamId === undefined
+                ? "バトルチームを作る"
+                : "バトルチームを編集"}
+            </strong>
             <small>
               育成案を最大6体選択。同じポケモン・持ち物は登録できません。
             </small>
@@ -316,17 +375,26 @@ export function SavedTrainingBuilds({
           <button
             type="button"
             disabled={selectedBuildIds.size === 0}
-            onClick={() => void createTeam()}
+            onClick={() => void persistTeam()}
           >
             チームを保存
           </button>
+          {teams.length > 0 ? (
+            <button
+              className={styles.secondaryButton}
+              type="button"
+              onClick={() => showTeamList()}
+            >
+              一覧に戻る
+            </button>
+          ) : null}
           {teamError ? <p role="alert">{teamError}</p> : null}
           {teamSaved ? <p className={styles.success}>保存しました。</p> : null}
         </div>
       ) : null}
-      {filteredBuilds.length === 0 ? (
+      {!teamBuilder && filteredBuilds.length === 0 ? (
         <p className={styles.empty}>検索に一致する保存済み育成案はありません。</p>
-      ) : (
+      ) : !teamBuilder || teamFormVisible ? (
         <div className={styles.savedGrid}>
           {filteredBuilds.map((build) => {
             const pokemon = pokemonById.get(build.pokemonId);
@@ -376,7 +444,7 @@ export function SavedTrainingBuilds({
             );
           })}
         </div>
-      )}
+      ) : null}
     </section>
   );
 }
