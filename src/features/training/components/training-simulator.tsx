@@ -36,7 +36,7 @@ export function TrainingSimulator({
   heldItems: HeldItem[];
   initialBuildId?: number;
 }) {
-  const [nature, setNature] = useState("hardy");
+  const [nature, setNature] = useState("serious");
   const [abilityPoints, setAbilityPoints] = useState<Record<string, number>>(
     () => initialStats(0),
   );
@@ -68,7 +68,11 @@ export function TrainingSimulator({
     void buildPromise.then((build) => {
       if (!active || !build) return;
       if (build.pokemonId !== pokemon.id) return;
-      setNature(build.nature);
+      setNature(
+        natures.some(({ id }) => id === build.nature)
+          ? build.nature
+          : "serious",
+      );
       setAbilityPoints(build.abilityPoints ?? initialStats(0));
       setMoveIds([...build.moveIds, "", "", "", ""].slice(0, 4));
       setItemId(build.itemId ?? "");
@@ -76,20 +80,29 @@ export function TrainingSimulator({
       setSavedBuildName(build.name ?? "");
     });
     return () => { active = false; };
-  }, [initialBuildId, pokemon.id]);
+  }, [initialBuildId, natures, pokemon.id]);
 
   const selectedNature =
-    natures.find(({ id }) => id === nature) ?? natures[0];
+    natures.find(({ id }) => id === nature) ??
+    natures.find(({ id }) => id === "serious") ??
+    natures[0];
+  const hasNatureModifier =
+    selectedNature.increasedStatId !== selectedNature.decreasedStatId;
   // ChampionsではLv.50・個体値31固定。能力ポイントは性格補正の内側へ直接加算する。
   const actualStats = useMemo(() => Object.fromEntries(
     pokemon.stats.map(({ id, baseStat }) => {
       const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
       const point = abilityPoints[id] ?? 0;
       if (id === "hp") return [id, baseStat === 1 ? 1 : base + 50 + 10 + point];
-      const modifier = selectedNature.increasedStatId === id ? 1.1 : selectedNature.decreasedStatId === id ? 0.9 : 1;
+      const modifier =
+        hasNatureModifier && selectedNature.increasedStatId === id
+          ? 1.1
+          : hasNatureModifier && selectedNature.decreasedStatId === id
+            ? 0.9
+            : 1;
       return [id, Math.floor((base + 5 + point) * modifier)];
     }),
-  ), [abilityPoints, pokemon.stats, selectedNature]);
+  ), [abilityPoints, hasNatureModifier, pokemon.stats, selectedNature]);
   const pointTotal = Object.values(abilityPoints).reduce((sum, value) => sum + value, 0);
 
   function changeAbilityPoint(id: string, requested: number) {
@@ -207,7 +220,7 @@ export function TrainingSimulator({
       <div className={styles.statTable}>
         <div className={styles.statLabels}><b>能力</b><b>種族値</b><b>能力P</b><b>実数値</b></div>
         {pokemon.stats.map((stat) => <div className={styles.statRow} key={stat.id}>
-          <strong>{STAT_NAMES[stat.id] ?? stat.name}{selectedNature.increasedStatId === stat.id ? <NatureCaret direction="up" /> : selectedNature.decreasedStatId === stat.id ? <NatureCaret direction="down" /> : null}</strong><span>{stat.baseStat}</span>
+          <strong>{STAT_NAMES[stat.id] ?? stat.name}{hasNatureModifier && selectedNature.increasedStatId === stat.id ? <NatureCaret direction="up" /> : hasNatureModifier && selectedNature.decreasedStatId === stat.id ? <NatureCaret direction="down" /> : null}</strong><span>{stat.baseStat}</span>
           <div className={styles.pointControl}><input aria-label={`${stat.name}の能力ポイント`} type="number" min="0" max="32" value={abilityPoints[stat.id] ?? 0} onChange={(e) => changeAbilityPoint(stat.id, Number(e.target.value))} /><input aria-label={`${stat.name}の能力ポイントスライダー`} type="range" min="0" max="32" value={abilityPoints[stat.id] ?? 0} onChange={(e) => changeAbilityPoint(stat.id, Number(e.target.value))} /></div>
           <b>{actualStats[stat.id]}</b>
         </div>)}
@@ -323,14 +336,7 @@ function NatureMatrixOverlay({
   onClose: () => void;
 }) {
   const stats = STAT_IDS.filter((id) => id !== "hp");
-  const neutralNatures = natures.filter(
-    (item) => !item.increasedStatId && !item.decreasedStatId,
-  );
-
   function natureFor(increasedStatId: string, decreasedStatId: string) {
-    if (increasedStatId === decreasedStatId) {
-      return neutralNatures[stats.indexOf(increasedStatId)] ?? neutralNatures[0];
-    }
     return natures.find(
       (item) => item.increasedStatId === increasedStatId && item.decreasedStatId === decreasedStatId,
     );

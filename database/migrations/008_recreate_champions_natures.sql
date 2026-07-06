@@ -1,4 +1,6 @@
--- このファイルの役割: 性格名と能力補正を全機能で共有するマスタを作成する。
+-- Pokémon Championsの21性格に合わせ、まじめの同一能力UP/DOWNを許可する。
+
+DROP TABLE natures;
 
 CREATE TABLE natures (
   id TEXT PRIMARY KEY,
