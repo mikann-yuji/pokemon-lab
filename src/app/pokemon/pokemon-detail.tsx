@@ -11,9 +11,11 @@ import {
 import styles from "./pokemon-search.module.css";
 
 type PokemonDetailViewProps = {
+  /** リポジトリでSQL都合を吸収済みの、画面表示用ポケモン詳細。 */
   pokemon: PokemonDetail;
 };
 
+/** ポケモン詳細を表示する純粋なプレゼンテーションコンポーネント。 */
 export function PokemonDetailView({ pokemon }: PokemonDetailViewProps) {
   return (
     <section className={styles.detailPanel} aria-label={`${pokemon.nameJa}の詳細`}>

@@ -36,9 +36,14 @@ type PokemonMoveRow = SqliteRow & {
   power: number;
 };
 
+/**
+ * ダメージ計算に必要なChampions対象ポケモンだけをcatalog.dbから読み込む。
+ * 画面側で検索・選択を即時に行えるよう、種族値・タイプ・物理/特殊技をまとめた配列へ変換する。
+ */
 export async function getChampionsDamageCalculatorPokemon(): Promise<
   DamageCalculatorPokemon[]
 > {
+  // ベース情報、タイプ、種族値、技は行の粒度が違うため、別々に取得してフォームIDで結合する。
   const [baseRows, typeRows, statRows, moveRows] = await Promise.all([
     sqliteWorkerClient.catalogQuery<PokemonBaseRow>(`
       SELECT
@@ -120,6 +125,7 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
     `),
   ]);
 
+  // フォームIDごとにタイプ配列を作る。複合タイプはslot順のまま保持する。
   const typesByFormId = new Map<number, TypeName[]>();
   for (const row of typeRows) {
     const types = typesByFormId.get(row.id) ?? [];
@@ -127,6 +133,7 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
     typesByFormId.set(row.id, types);
   }
 
+  // Smogon計算に渡すため、stat_idをキーにした種族値オブジェクトへ変換する。
   const statsByFormId = new Map<number, Record<string, number>>();
   for (const row of statRows) {
     const stats = statsByFormId.get(row.id) ?? {};
@@ -134,6 +141,7 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
     statsByFormId.set(row.id, stats);
   }
 
+  // ダメージ計算に使える「威力ありの物理/特殊技」だけをフォームIDごとに束ねる。
   const movesByFormId = new Map<number, DamageCalculatorMove[]>();
   for (const { formId, ...move } of moveRows) {
     const moves = movesByFormId.get(formId) ?? [];
@@ -141,6 +149,7 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
     movesByFormId.set(formId, moves);
   }
 
+  // DBのweightはhectogramなので、@smogon/calcが期待するkgへ変換する。
   return baseRows.map((row) => ({
     id: row.id,
     name: row.name,

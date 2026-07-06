@@ -118,10 +118,19 @@ const DAMAGE_CLASS_NAMES_JA: Record<string, string> = {
   status: "へんか",
 };
 
+/** LIKE検索のワイルドカードを文字として扱うため、ユーザー入力の %, _, \ をエスケープする。 */
 function escapeLikePattern(value: string) {
   return value.replaceAll(/([%_\\])/g, "\\$1");
 }
 
+/**
+ * catalog.dbからポケモンフォームを検索する。
+ *
+ * @param query 日本語名、英語名、フォーム名に対する部分一致文字列。
+ * @param limit 1回に返す最大件数。UIの過大取得を避けるため100件に丸める。
+ * @param offset ページング用の開始位置。
+ * @param championsOnly trueならPokémon Champions対象フォームだけへ絞り込む。
+ */
 export async function searchPokemon(
   query: string,
   {
@@ -131,10 +140,12 @@ export async function searchPokemon(
   }: { limit?: number; offset?: number; championsOnly?: boolean } = {},
 ): Promise<PokemonSearchResult[]> {
   const normalizedQuery = query.trim();
+  // 日本語名はひらがな/カタカナ表記ゆれを吸収して同じSQLで検索する。
   const escapedQuery = escapeLikePattern(normalizedQuery);
   const hiraganaQuery = escapeLikePattern(toHiragana(normalizedQuery));
   const katakanaQuery = escapeLikePattern(toKatakana(normalizedQuery));
 
+  // form_types JOINでタイプ数ぶん行が増えるため、後段でフォーム単位に畳み込む。
   const rows = await sqliteWorkerClient.catalogQuery<PokemonSearchRow>(
     `
       WITH matching_forms AS (
@@ -218,6 +229,7 @@ export async function searchPokemon(
     },
   );
 
+  // SQL結果は「フォーム x タイプ」の行なので、Mapでフォームごとのtypes配列へ戻す。
   const results = new Map<number, PokemonSearchResult>();
   for (const row of rows) {
     const result = results.get(row.id) ?? {
@@ -236,6 +248,10 @@ export async function searchPokemon(
   return [...results.values()];
 }
 
+/**
+ * 検索結果や詳細ページから使う、1フォーム分の詳細情報をcatalog.dbから組み立てる。
+ * 能力、種族値、技は別クエリで取得し、UIがそのまま描画できるDTOへ変換する。
+ */
 export async function getPokemonDetail(
   id: number,
 ): Promise<PokemonDetail | null> {
@@ -267,6 +283,7 @@ export async function getPokemonDetail(
   if (rows.length === 0) return null;
 
   const base = rows[0];
+  // 詳細画面の独立した表示セクションに必要なデータは並列に読む。
   const [abilities, stats, defaultForms] = await Promise.all([
     sqliteWorkerClient.catalogQuery<PokemonAbilityRow>(
       `
@@ -311,6 +328,7 @@ export async function getPokemonDetail(
       : Promise.resolve([]),
   ]);
 
+  // メガシンカフォームは技データを持たないことがあるため、同じ種の通常フォームを技の参照元にする。
   const moveSourceFormId = defaultForms[0]?.id ?? id;
   const latestVersionGroups =
     await sqliteWorkerClient.catalogQuery<LatestVersionGroupRow>(
@@ -325,6 +343,7 @@ export async function getPokemonDetail(
       { moveSourceFormId },
     );
   const latestVersionGroup = latestVersionGroups[0];
+  // 技は最も新しいversion_groupだけを採用し、同じ技が複数習得方法で出る場合は1件へまとめる。
   const moves = latestVersionGroup
     ? await sqliteWorkerClient.catalogQuery<PokemonMoveRow>(
         `
@@ -370,6 +389,7 @@ export async function getPokemonDetail(
       (left.nameJa ?? left.id).localeCompare(right.nameJa ?? right.id, "ja"),
   );
 
+  // DB列名やnullフォールバックをここで吸収し、コンポーネントからSQL都合を隠す。
   return {
     id: base.id,
     name: base.name,
@@ -410,6 +430,7 @@ export async function getPokemonDetail(
   };
 }
 
+/** 指定フォームがPokémon Champions対象かどうかを1件存在確認で返す。 */
 export async function isChampionsForm(id: number): Promise<boolean> {
   const rows = await sqliteWorkerClient.catalogQuery(
     "SELECT 1 AS found FROM champions_forms WHERE form_id = @id LIMIT 1",

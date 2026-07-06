@@ -16,12 +16,20 @@ import type {
 const DEFAULT_TIMEOUT_MS = 20_000;
 const STORAGE_API_TIMEOUT_MS = 3_000;
 
+/**
+ * Workerへ送ったリクエストの待ち受け情報。
+ * idごとにresolve/rejectを保持し、Workerから同じidの応答が戻った時だけ完了させる。
+ */
 type PendingRequest = {
   resolve: (value: unknown) => void;
   reject: (reason: Error) => void;
   timer: number;
 };
 
+/**
+ * SQLite WASMをブラウザで動かすための最低限の機能検出結果。
+ * 診断画面では、どの要件が足りないかをこの値から表示する。
+ */
 export type BrowserStorageCapabilities = {
   secureContext: boolean;
   webAssembly: boolean;
@@ -29,6 +37,10 @@ export type BrowserStorageCapabilities = {
   opfs: boolean;
 };
 
+/**
+ * Storage APIから見える永続化と容量の状態。
+ * OPFS自体の利用可否とは別に、ブラウザが永続ストレージを許可したかを確認する。
+ */
 export type BrowserStorageSnapshot = {
   capabilities: BrowserStorageCapabilities;
   persisted: boolean;
@@ -41,6 +53,10 @@ export type SqlitePhaseTwoDiagnostics = BrowserStorageSnapshot & {
   worker: SqliteWorkerInitialization;
 };
 
+/**
+ * Storage API呼び出しがブラウザ都合で長く止まることがあるため、
+ * 診断UIを固めないよう短いタイムアウトでフォールバック値へ倒す。
+ */
 function settleWithin<Value>(promise: Promise<Value>, fallback: Value) {
   return Promise.race([
     promise,
@@ -50,6 +66,10 @@ function settleWithin<Value>(promise: Promise<Value>, fallback: Value) {
   ]);
 }
 
+/**
+ * public配下へコピーしたSQLite専用Workerをmodule workerとして起動する。
+ * Next.jsのClient ComponentからはこのWorkerだけがSQLite WASMへ直接触る。
+ */
 function createWorker() {
   return new Worker("/sqlite-runtime-worker.mjs", {
     type: "module",
@@ -57,6 +77,7 @@ function createWorker() {
   });
 }
 
+/** ブラウザがSQLite WASM + OPFS構成を実行できるかを同期的に判定する。 */
 export function detectBrowserStorageCapabilities(): BrowserStorageCapabilities {
   return {
     secureContext: window.isSecureContext,
@@ -68,6 +89,10 @@ export function detectBrowserStorageCapabilities(): BrowserStorageCapabilities {
   };
 }
 
+/**
+ * Storage APIの診断値を集める。
+ * requestPersistence=trueの時だけ、ユーザーDBを消されにくくするためpersist()も試す。
+ */
 export async function getBrowserStorageSnapshot(
   requestPersistence = false,
 ): Promise<BrowserStorageSnapshot> {
@@ -97,11 +122,16 @@ export async function getBrowserStorageSnapshot(
   };
 }
 
+/**
+ * UIスレッドからSQLite専用Workerへ型付きメッセージを送るクライアント。
+ * catalogQueryは配布カタログDB、query/execute/transactionはユーザーDBを対象にする。
+ */
 class SqliteWorkerClient {
   private worker: Worker | null = null;
   private nextRequestId = 1;
   private pending = new Map<number, PendingRequest>();
 
+  /** 初回アクセス時にだけWorkerを作り、以降は同じOPFS接続を再利用する。 */
   private ensureWorker() {
     if (this.worker) return this.worker;
     const worker = createWorker();
@@ -127,6 +157,7 @@ class SqliteWorkerClient {
     }
   };
 
+  /** Workerで構文エラーや初期化失敗が起きた時、待機中の全リクエストへ同じ失敗を返す。 */
   private handleWorkerError = (event: ErrorEvent) => {
     this.rejectAll(
       new Error(event.message || "SQLite Worker でエラーが発生しました。"),
@@ -142,6 +173,10 @@ class SqliteWorkerClient {
     this.pending.clear();
   }
 
+  /**
+   * Workerプロトコルの共通送信口。
+   * タイムアウトを置くことで、Worker初期化失敗時にUIが永久待ちにならないようにする。
+   */
   private request<Type extends keyof SqliteWorkerRequestMap>(
     type: Type,
     payload: SqliteWorkerRequestMap[Type],
@@ -181,6 +216,7 @@ class SqliteWorkerClient {
     return this.request("ping", undefined);
   }
 
+  /** catalog.dbではなく、OPFS上のuser.dbへSELECT系クエリを投げる。 */
   query<Row extends SqliteRow = SqliteRow>(
     sql: string,
     bind?: SqliteBind,
@@ -188,6 +224,7 @@ class SqliteWorkerClient {
     return this.request("query", { sql, bind }) as Promise<Row[]>;
   }
 
+  /** 配布カタログ用のcatalog.dbへ読み取り専用クエリを投げる。 */
   catalogQuery<Row extends SqliteRow = SqliteRow>(
     sql: string,
     bind?: SqliteBind,
@@ -195,16 +232,19 @@ class SqliteWorkerClient {
     return this.request("catalogQuery", { sql, bind }) as Promise<Row[]>;
   }
 
+  /** user.dbへ単一のINSERT/UPDATE/DELETEを実行し、変更件数とlast_insert_rowidを返す。 */
   execute(sql: string, bind?: SqliteBind): Promise<SqliteExecuteResult> {
     return this.request("execute", { sql, bind });
   }
 
+  /** 複数のuser.db更新をBEGIN/COMMITでまとめ、途中失敗時はWorker側でROLLBACKする。 */
   transaction(
     statements: SqliteStatement[],
   ): Promise<SqliteExecuteResult[]> {
     return this.request("transaction", { statements });
   }
 
+  /** 診断画面からSQLite/OPFS/スキーマ/CRUDの状態をまとめて確認する。 */
   diagnose(): Promise<SqliteDatabaseDiagnostics> {
     return this.request("diagnose", undefined);
   }
@@ -225,6 +265,10 @@ class SqliteWorkerClient {
 
 export const sqliteWorkerClient = new SqliteWorkerClient();
 
+/**
+ * 診断画面用の統合チェック。
+ * ブラウザ能力、Storage API、SQLite Worker初期化を並列に確認して表示用の形にまとめる。
+ */
 export async function runSqlitePhaseTwoDiagnostics(
   requestPersistence = true,
 ): Promise<SqlitePhaseTwoDiagnostics> {

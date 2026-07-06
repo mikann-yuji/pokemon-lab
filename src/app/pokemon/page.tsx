@@ -2,6 +2,7 @@ import { PokemonResults } from "./pokemon-results";
 import { PokemonSearchForm } from "./pokemon-search-form";
 import styles from "./pokemon-search.module.css";
 
+/** /pokemon のURLクエリ。Next.js 16ではsearchParamsがPromiseとして渡る。 */
 type PokemonSearchPageProps = {
   searchParams: Promise<{
     q?: string | string[];
@@ -9,10 +10,15 @@ type PokemonSearchPageProps = {
   }>;
 };
 
+/**
+ * ポケモン検索ページ。
+ * URLクエリをServer Componentで正規化し、検索フォームと結果一覧の初期値として渡す。
+ */
 export default async function PokemonSearchPage({
   searchParams,
 }: PokemonSearchPageProps) {
   const params = await searchParams;
+  // q/championsは配列で来る可能性があるため、先頭値だけを採用する。
   const rawQuery = params.q;
   const query = Array.isArray(rawQuery) ? rawQuery[0] : (rawQuery ?? "");
   const rawChampions = params.champions;

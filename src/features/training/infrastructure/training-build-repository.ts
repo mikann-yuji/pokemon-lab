@@ -19,6 +19,7 @@ export type TrainingBuild = {
   updatedAt: number;
 };
 
+/** バトルチームはuser.dbに保存した育成案IDの並びだけを保持する。 */
 export type BattleTeam = {
   id?: number;
   name: string;
@@ -45,6 +46,7 @@ type BattleTeamRow = SqliteRow & {
   build_ids: string | null;
 };
 
+/** user.db内のJSON列が壊れていても画面全体を落とさず、空値で復旧する。 */
 function parseJson<Value>(value: string, fallback: Value): Value {
   try {
     return JSON.parse(value) as Value;
@@ -53,6 +55,7 @@ function parseJson<Value>(value: string, fallback: Value): Value {
   }
 }
 
+/** SQLiteのsnake_case行を、UI層が扱うcamelCaseの育成案へ変換する。 */
 function toTrainingBuild(row: TrainingBuildRow): TrainingBuild {
   return {
     id: Number(row.id),
@@ -75,6 +78,10 @@ const BUILD_COLUMNS = `
   ability_points_json, move_ids_json, updated_at
 `;
 
+/**
+ * 育成案の内容から重複判定用キーを作る。
+ * 名前や保存日時は含めず、同じポケモン・性格・持ち物・能力ポイント・技構成なら同じキーにする。
+ */
 export function createTrainingBuildContentKey(
   build: Pick<
     TrainingBuild,
@@ -102,6 +109,7 @@ export function createTrainingBuildContentKey(
   ].join("|");
 }
 
+/** 指定ポケモンで最後に保存した育成案を、シミュレーター初期表示へ復元する。 */
 export async function loadLatestTrainingBuild(pokemonId: number) {
   const rows = await sqliteWorkerClient.query<TrainingBuildRow>(
     `SELECT ${BUILD_COLUMNS}
@@ -114,6 +122,7 @@ export async function loadLatestTrainingBuild(pokemonId: number) {
   return rows[0] ? toTrainingBuild(rows[0]) : undefined;
 }
 
+/** URLの[id]やチーム表示から、特定の育成案を1件読み込む。 */
 export async function loadTrainingBuild(id: number) {
   const rows = await sqliteWorkerClient.query<TrainingBuildRow>(
     `SELECT ${BUILD_COLUMNS} FROM training_builds WHERE id = ?`,
@@ -122,6 +131,7 @@ export async function loadTrainingBuild(id: number) {
   return rows[0] ? toTrainingBuild(rows[0]) : undefined;
 }
 
+/** 保存済み育成案一覧画面とチーム編成画面で使う全件取得。 */
 export async function getAllTrainingBuilds() {
   const rows = await sqliteWorkerClient.query<TrainingBuildRow>(
     `SELECT ${BUILD_COLUMNS}
@@ -131,6 +141,7 @@ export async function getAllTrainingBuilds() {
   return rows.map(toTrainingBuild);
 }
 
+/** 保存前に、同じ内容の育成案が既にあるかを確認する。 */
 export async function findTrainingBuildByContentKey(contentKey: string) {
   const rows = await sqliteWorkerClient.query<TrainingBuildRow>(
     `SELECT ${BUILD_COLUMNS}
@@ -142,6 +153,10 @@ export async function findTrainingBuildByContentKey(contentKey: string) {
   return rows[0] ? toTrainingBuild(rows[0]) : undefined;
 }
 
+/**
+ * 育成案をuser.dbへINSERTまたはUPDATEする。
+ * 能力ポイントと技ID配列は小さな構造体なのでJSON列として保存する。
+ */
 export async function saveTrainingBuild(build: TrainingBuild) {
   const bind = [
     build.name,
@@ -184,6 +199,10 @@ export async function saveTrainingBuild(build: TrainingBuild) {
   return savedBuild;
 }
 
+/**
+ * Pokémon Championsのチーム制約を保存前に検証する。
+ * 同一ポケモンと同一持ち物の重複をここで止め、UI側の入力経路に依存しないようにする。
+ */
 export function validateBattleTeamBuilds(builds: TrainingBuild[]) {
   if (builds.length < 1 || builds.length > 6) {
     throw new Error("バトルチームは1〜6体で編成してください。");
@@ -206,6 +225,7 @@ export function validateBattleTeamBuilds(builds: TrainingBuild[]) {
   }
 }
 
+/** チーム一覧用に、battle_team_membersをposition順のbuildIdsへ畳み込んで返す。 */
 export async function getAllBattleTeams(): Promise<BattleTeam[]> {
   const rows = await sqliteWorkerClient.query<BattleTeamRow>(
     `SELECT
@@ -234,6 +254,10 @@ export async function getAllBattleTeams(): Promise<BattleTeam[]> {
   }));
 }
 
+/**
+ * チーム名と育成案ID配列から新しいチームを保存する。
+ * 親テーブルINSERT後のidをbindReferencesで子テーブルへ渡し、1トランザクションで作成する。
+ */
 export async function saveBattleTeam(name: string, buildIds: number[]) {
   const normalizedName = name.trim();
   if (!normalizedName) throw new Error("チーム名を入力してください。");
@@ -278,6 +302,7 @@ export async function saveBattleTeam(name: string, buildIds: number[]) {
   return teamResult.lastInsertRowId;
 }
 
+/** battle_team_membersは外部キーON DELETE CASCADEで一緒に消える。 */
 export async function deleteBattleTeam(id: number) {
   await sqliteWorkerClient.execute("DELETE FROM battle_teams WHERE id = ?", [
     id,

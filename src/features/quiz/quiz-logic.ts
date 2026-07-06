@@ -22,19 +22,25 @@ type SingleTypeQuizType = (typeof SINGLE_TYPE_QUIZ_TYPES)[number];
 type DualTypeQuizType = "doubleVulnerableTo" | "doubleResistantTo";
 
 type QuestionBase = {
+  /** 画面上のkeyや進捗表示に使う、生成後の一時的な連番。 */
   id: number;
+  /** 完全一致判定に使う正解タイプ一覧。複数選択問題では複数入る。 */
   correctAnswers: TypeName[];
+  /** 問題に添える任意のポケモン画像。正解判定には使わない。 */
   pokemonImage?: PokemonImage;
 };
 
+/** クイズカードに添える、catalog.db由来のフォーム画像情報。 */
 export type PokemonImage = {
   formId: number;
   nameJa: string;
   url: string;
 };
 
+/** 単タイプ名、または複合タイプキー "typeA|typeB" ごとの画像候補。 */
 export type PokemonImagesByType = Record<string, PokemonImage[]>;
 
+/** クイズは単タイプ問題と複合タイプ問題の判別共用体として扱う。 */
 export type Question =
   | (QuestionBase & {
       quizType: SingleTypeQuizType;
@@ -61,7 +67,9 @@ export function getQuestionKey(question: Question): string {
 }
 
 type CreateQuestionsOptions = {
+  /** trueなら4倍/1/4倍になる複合タイプ問題も出題する。 */
   includeDualTypes?: boolean;
+  /** タイプごとの画像候補。指定がない場合は画像なしで問題を作る。 */
   pokemonImagesByType?: PokemonImagesByType;
 };
 
@@ -103,6 +111,7 @@ function pickPokemonImage(
     | { types: [TypeMatchup, TypeMatchup] },
   pokemonImagesByType: PokemonImagesByType,
 ): PokemonImage | undefined {
+  // 複合タイプは順序で別キーにならないよう、タイプ名をsortしてから連結する。
   const key =
     "type" in question
       ? question.type.name
@@ -170,6 +179,7 @@ function getEffectiveness(
   attacker: TypeMatchup,
   defender: TypeName,
 ): 0 | 0.5 | 1 | 2 {
+  // TypeMatchupは「特殊な倍率の一覧」だけを持つため、該当しなければ等倍として扱う。
   if (attacker.noEffectAgainst.includes(defender)) return 0;
   if (attacker.superEffectiveAgainst.includes(defender)) return 2;
   if (attacker.notVeryEffectiveAgainst.includes(defender)) return 0.5;

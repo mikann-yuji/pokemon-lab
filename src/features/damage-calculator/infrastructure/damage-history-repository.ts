@@ -3,6 +3,7 @@ import type { SqliteRow } from "@/infrastructure/sqlite-wasm/worker-protocol";
 
 export type DamageHistorySide = "attacker" | "defender";
 
+/** ダメージ計算画面の「最近使ったポケモン」に表示する1件分の保存データ。 */
 export type DamageHistoryRecord = {
   id: string;
   side: DamageHistorySide;
@@ -20,6 +21,7 @@ type DamageHistoryRow = SqliteRow & {
 
 const HISTORY_LIMIT = 6;
 
+/** DB行をUIで扱いやすい履歴レコードへ変換し、sideとpokemonIdから安定した表示keyを作る。 */
 function toDamageHistory(row: DamageHistoryRow): DamageHistoryRecord {
   const side = String(row.side) as DamageHistorySide;
   const pokemonId = Number(row.pokemon_id);
@@ -32,6 +34,7 @@ function toDamageHistory(row: DamageHistoryRow): DamageHistoryRecord {
   };
 }
 
+/** 攻撃側または防御側の最近使ったポケモンを新しい順に取得する。 */
 export async function getDamageHistory(
   side: DamageHistorySide,
 ): Promise<DamageHistoryRecord[]> {
@@ -46,6 +49,10 @@ export async function getDamageHistory(
   return rows.map(toDamageHistory);
 }
 
+/**
+ * 計算に成功した組み合わせを履歴へ保存する。
+ * 同じside/pokemonは一度削除してから入れ直し、最新順に並ぶようにする。
+ */
 export async function saveDamageHistory(
   side: DamageHistorySide,
   pokemonId: number,

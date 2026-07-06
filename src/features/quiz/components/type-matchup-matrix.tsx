@@ -22,6 +22,7 @@ function getEffectiveness(
 export default function TypeMatchupMatrix({
   typeMatchups,
 }: {
+  /** getTypeMatchupsで攻撃側/防御側の両観点に整形済みのタイプ一覧。 */
   typeMatchups: TypeMatchup[];
 }) {
   return (

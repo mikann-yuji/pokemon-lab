@@ -6,6 +6,10 @@ import type { DamageCalculatorPokemon } from "../domain/damage-calculator-types"
 import { getChampionsDamageCalculatorPokemon } from "../infrastructure/damage-calculator-catalog-repository";
 import styles from "../styles/damage-calculator.module.css";
 
+/**
+ * ダメージ計算画面のClient Loader。
+ * catalog.dbから計算対象ポケモンを読み、読み込み状態とエラーを画面へ反映する。
+ */
 export function DamageCalculatorCatalogLoader() {
   const [pokemonCatalog, setPokemonCatalog] = useState<
     DamageCalculatorPokemon[]
@@ -13,6 +17,7 @@ export function DamageCalculatorCatalogLoader() {
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState("");
 
+  // ダメージ計算に必要な全カタログを1回だけ読み、以降の検索と計算はローカル配列で行う。
   useEffect(() => {
     let active = true;
     void getChampionsDamageCalculatorPokemon()

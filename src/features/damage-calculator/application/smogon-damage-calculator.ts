@@ -23,8 +23,11 @@ import type {
 } from "../domain/damage-calculator-types";
 
 type BattleSide = "attacker" | "defender";
+/** @smogon/calcのPokemonコンストラクター第3引数。rulesetのフックで部分上書きする。 */
 type PokemonOptions = ConstructorParameters<typeof Pokemon>[2];
+/** @smogon/calcのMoveコンストラクター第3引数。技威力や急所指定を入れる。 */
 type MoveOptions = ConstructorParameters<typeof Move>[2];
+/** @smogon/calcのFieldコンストラクター第1引数。天候やフィールドなどの条件を入れる。 */
 type FieldOptions = ConstructorParameters<typeof Field>[0];
 
 export type DamageCalculation = {
@@ -49,29 +52,42 @@ export type DamageCalculationInput = {
   move: DamageCalculatorMove;
   /** trueの場合、技を急所に当たったものとして計算する。 */
   isCritical?: boolean;
+  /** 画面から一時的な場の条件を追加したい時に渡す。 */
   field?: FieldOptions;
 };
 
+/**
+ * ダメージ計算のゲーム別ルール。
+ * DB由来の標準データを、Pokémon Champions仕様やSmogon側のID差分に合わせて補正する。
+ */
 export type DamageCalculatorRuleset = {
   id: string;
   generation: GenerationNum;
   level: number;
   nature: string;
   ability?: string;
+  /** 全ポケモン共通で使う個体値。Championsでは31固定として扱う。 */
   ivs: Partial<StatsTable>;
+  /** 全ポケモン共通で使う努力値。Championsでは0固定として扱う。 */
   evs: Partial<StatsTable>;
+  /** DBのフォーム名とSmogonのspecies IDがずれる場合の変換口。 */
   resolveSpeciesId?: (pokemon: DamageCalculatorPokemon) => string;
+  /** DBの技IDとSmogonのmove IDがずれる場合の変換口。 */
   resolveMoveId?: (move: DamageCalculatorMove) => string;
+  /** 攻撃側/防御側ごとに、能力や特性などPokemonオプションを補正する。 */
   customizePokemon?: (
     side: BattleSide,
     source: DamageCalculatorPokemon,
     options: PokemonOptions,
   ) => PokemonOptions;
+  /** 技ごとに、威力・分類・特殊効果などMoveオプションを補正する。 */
   customizeMove?: (
     source: DamageCalculatorMove,
     options: MoveOptions,
   ) => MoveOptions;
+  /** 天候、壁、フィールドなど、場の条件を入力から作る。 */
   createField?: (input: DamageCalculationInput) => FieldOptions;
+  /** @smogon/calcのcalculate自体を差し替えるための最終フック。 */
   calculate?: (
     generation: ReturnType<typeof Generations.get>,
     attacker: Pokemon,
@@ -79,6 +95,7 @@ export type DamageCalculatorRuleset = {
     move: Move,
     field: Field,
   ) => Result;
+  /** Smogonの生結果から、画面用のDamageCalculationを最後に補正する。 */
   transformResult?: (
     result: DamageCalculation,
     source: Result,
@@ -95,10 +112,12 @@ const STAT_IDS = {
   speed: "spe",
 } as const;
 
+/** PokeAPI/DB由来のIDを、Smogon lookup用の小文字英数字IDへ寄せる。 */
 function normalizeId(value: string) {
   return value.toLowerCase().replaceAll(/[^a-z0-9]/g, "");
 }
 
+/** DBのstat_idキーを、@smogon/calcが期待するatk/def/spa形式へ変換する。 */
 function toBaseStats(pokemon: DamageCalculatorPokemon): StatsTable {
   return Object.fromEntries(
     Object.entries(STAT_IDS).map(([databaseId, calculatorId]) => [
@@ -108,6 +127,7 @@ function toBaseStats(pokemon: DamageCalculatorPokemon): StatsTable {
   ) as StatsTable;
 }
 
+/** SmogonのKO chanceから、日本語の「確定n発/乱数n発」表示を作る。 */
 function formatKoLabel({
   chance,
   n,

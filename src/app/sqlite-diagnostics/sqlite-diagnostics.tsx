@@ -32,6 +32,10 @@ type RepositoryDiagnostics = {
   damageHistory: boolean;
 };
 
+/**
+ * user.dbを使う各リポジトリを、実際の保存・取得・削除で検査する。
+ * catalog.dbではなくユーザー保存領域の疎通確認が目的。
+ */
 async function runRepositoryDiagnostics(): Promise<RepositoryDiagnostics> {
   const token = crypto.randomUUID();
   const contentKey = `diagnostic:${token}`;
@@ -41,6 +45,7 @@ async function runRepositoryDiagnostics(): Promise<RepositoryDiagnostics> {
   let teamId: number | undefined;
 
   try {
+    // 通常データと衝突しない診断専用キーで、各保存経路を一通り通す。
     const savedBuild = await saveTrainingBuild({
       name: "SQLite診断用育成案",
       contentKey,
@@ -84,6 +89,7 @@ async function runRepositoryDiagnostics(): Promise<RepositoryDiagnostics> {
       ),
     };
   } finally {
+    // 診断ページを繰り返し実行してもuser.dbへ検査データを残さない。
     if (teamId !== undefined) await deleteBattleTeam(teamId);
     await removeMistake(questionKey);
     await saveHint(questionKey, "");
@@ -100,6 +106,7 @@ async function runRepositoryDiagnostics(): Promise<RepositoryDiagnostics> {
   }
 }
 
+/** SQLite WASM、OPFS、Storage API、リポジトリ疎通をまとめて表示する診断UI。 */
 export function SqliteDiagnostics() {
   const [diagnostics, setDiagnostics] =
     useState<SqlitePhaseTwoDiagnostics | null>(null);
@@ -108,6 +115,7 @@ export function SqliteDiagnostics() {
   const [error, setError] = useState("");
   const [running, setRunning] = useState(false);
 
+  // ボタン押下でブラウザ能力診断とリポジトリ診断を並列実行する。
   const runDiagnostics = useCallback(() => {
     setRunning(true);
     setError("");
@@ -125,6 +133,7 @@ export function SqliteDiagnostics() {
       .finally(() => setRunning(false));
   }, []);
 
+  // 自動テストや手動確認用に /sqlite-diagnostics?auto=1 で即実行できるようにする。
   useEffect(() => {
     if (!window.location.search.includes("auto=1")) return;
     queueMicrotask(runDiagnostics);

@@ -17,6 +17,7 @@ const outputPath = path.join(publicDirectory, "sqlite-catalog.db.gz");
 
 const seedVersion = 2;
 
+// publicへ配布するcatalog.dbにも、通常DBと同じ親子関係順でCSVを投入する。
 const seedTableOrder = [
   "types",
   "type_matchups",
@@ -106,6 +107,7 @@ const numericColumns = new Map([
   ["champions_forms", new Set(["form_id", "normally_available"])],
 ]);
 
+/** CSVを読み、catalog.db投入用に空文字をnull、数値列をNumberへ変換する。 */
 function parseCsv(source, filename) {
   const rows = [];
   let row = [];
@@ -178,10 +180,12 @@ const tables = Object.fromEntries(
   ]),
 );
 
+/** テーブルごとに列番号を名前で引けるようにする小ヘルパー。 */
 function columnIndex(tableName, columnName) {
   return tables[tableName].columns.indexOf(columnName);
 }
 
+/** 依存関係に合わせて、不要になった行をテーブル単位で間引く。 */
 function filterRows(tableName, predicate) {
   tables[tableName].rows = tables[tableName].rows.filter(predicate);
 }

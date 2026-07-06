@@ -11,11 +11,13 @@ const SUPPORTED_SCHEMA_VERSION = 1;
 const CATALOG_DATABASE_URL = "/sqlite-catalog.db.gz";
 const CATALOG_SEED_VERSION = "2";
 
+// OPFS上のSQLite接続はWorker内でだけ保持し、UIスレッドへDBオブジェクトを渡さない。
 let database = null;
 let catalogDatabase = null;
 let sahPool = null;
 let initialization;
 
+// 旧user.dbにカタログ同梱テーブルが残っていた場合に削除するための一覧。
 const catalogTableNames = [
   "champions_items",
   "items",
@@ -36,12 +38,17 @@ const catalogTableNames = [
   "types",
 ];
 
+/** postMessageできるプレーンなエラー情報へ変換する。 */
 function toError(error) {
   return error instanceof Error
     ? { name: error.name, message: error.message }
     : { name: "Error", message: String(error) };
 }
 
+/**
+ * user.dbへ更新SQLを1本実行する。
+ * changesは更新件数、lastInsertRowIdは関連テーブルを続けて作る時の参照値として返す。
+ */
 function executeStatement(statement) {
   database.exec({ sql: statement.sql, bind: statement.bind });
   return {
@@ -50,6 +57,7 @@ function executeStatement(statement) {
   };
 }
 
+/** user.dbからアプリ固有の保存データを読む。 */
 function queryRows({ sql, bind }) {
   return database.exec({
     sql,
@@ -59,6 +67,7 @@ function queryRows({ sql, bind }) {
   });
 }
 
+/** catalog.dbから配布済みの読み取り専用カタログを読む。 */
 function queryCatalogRows({ sql, bind }) {
   return catalogDatabase.exec({
     sql,
@@ -68,6 +77,10 @@ function queryCatalogRows({ sql, bind }) {
   });
 }
 
+/**
+ * 複数のuser.db更新を不可分に実行する。
+ * bindReferencesで前のINSERT結果を後続SQLへ渡し、チーム作成などの親子保存を1往復で完了させる。
+ */
 function runTransaction(statements) {
   database.exec("BEGIN IMMEDIATE");
   try {
@@ -100,6 +113,10 @@ function runTransaction(statements) {
   }
 }
 
+/**
+ * user.dbのスキーマを現在のアプリが読める形へそろえる。
+ * user_versionが新しすぎる場合は、過去にuser.dbへ混在していたカタログテーブルだけを掃除する。
+ */
 function migrateSchema() {
   database.exec("PRAGMA foreign_keys = ON");
   const currentVersion = Number(database.selectValue("PRAGMA user_version"));
@@ -195,6 +212,10 @@ function migrateSchema() {
 
 }
 
+/**
+ * publicに置いたgzip圧縮済みcatalog.dbを取得し、ブラウザ標準のDecompressionStreamで展開する。
+ * カタログは配布物なので、ユーザーDBとは別ファイルとしてOPFSへimportする。
+ */
 async function fetchCompressedCatalogDatabase() {
   const response = await fetch(CATALOG_DATABASE_URL, { cache: "no-store" });
   if (!response.ok) {
@@ -214,6 +235,10 @@ async function fetchCompressedCatalogDatabase() {
   );
 }
 
+/**
+ * OPFS上のcatalog.dbを準備する。
+ * catalog_seed_versionが一致していれば既存DBを使い、一致しなければ配布DBで入れ替える。
+ */
 async function ensureCatalogDatabase() {
   if (catalogDatabase) return false;
 
@@ -237,6 +262,10 @@ async function ensureCatalogDatabase() {
   return true;
 }
 
+/**
+ * 診断画面用の自己検査。
+ * 実際にBEGIN/ROLLBACKを行い、CRUDとロールバックがOPFS上で成立することを確認する。
+ */
 function runDiagnostics() {
   const diagnosticKey = `diagnostic_${crypto.randomUUID()}`;
   let rollbackVerified = false;
@@ -311,6 +340,10 @@ function runDiagnostics() {
   };
 }
 
+/**
+ * SQLite WASMとOPFS SAH Pool VFSを初期化する。
+ * initialization Promiseを共有し、同時に複数メッセージが来ても初期化を1回にまとめる。
+ */
 async function initializeSqlite() {
   if (initialization) return initialization;
 
@@ -346,6 +379,10 @@ async function initializeSqlite() {
   }
 }
 
+/**
+ * UIスレッドからの要求をDB操作へ振り分ける。
+ * initialize以外は必ずDB初期化後に実行し、query系の対象DBをここで分離する。
+ */
 async function handleRequest(request) {
   if (request.type !== "initialize") await initializeSqlite();
 
@@ -377,6 +414,7 @@ async function handleRequest(request) {
   }
 }
 
+// Workerプロトコルはid付きのrequest/response形式。UI側はidでPromiseを解決する。
 self.addEventListener("message", (event) => {
   const request = event.data;
   void handleRequest(request)

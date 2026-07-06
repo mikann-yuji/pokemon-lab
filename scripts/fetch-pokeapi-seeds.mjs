@@ -21,20 +21,24 @@ if (
   throw new Error("POKEAPI_SPECIES_LIMIT must be a positive integer.");
 }
 
+/** PokeAPIリソースURL末尾の数値IDを取り出し、CSVの外部キーとして使う。 */
 function resourceId(resource) {
   if (!resource?.url) return null;
   const match = resource.url.match(/\/(\d+)\/?$/);
   return match ? Number(match[1]) : null;
 }
 
+/** SQLiteへBOOLEANを持ち込まないため、true/falseを1/0へ変換する。 */
 function booleanToInteger(value) {
   return value ? 1 : 0;
 }
 
+/** PokeAPIの小文字タイプ名を、アプリ内TypeNameの表記へ合わせる。 */
 function typeName(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+/** 日本語名はja-Hrktを優先し、なければja、それもなければfallbackを使う。 */
 function localizedName(names, fallback = null) {
   return (
     names?.find(({ language }) => language.name === "ja-Hrkt")?.name ??
@@ -43,6 +47,7 @@ function localizedName(names, fallback = null) {
   );
 }
 
+/** effect_entriesやflavor_text_entriesから指定言語の本文を取り出す。 */
 function localizedText(entries, language, property) {
   return (
     entries?.find((entry) => entry.language.name === language)?.[property] ??
@@ -50,6 +55,7 @@ function localizedText(entries, language, property) {
   );
 }
 
+/** 技や特性の説明文は、効果説明を優先し、なければフレーバーテキストへ落とす。 */
 function masterText(resource, language) {
   return (
     localizedText(resource.effect_entries, language, "effect") ??
@@ -120,6 +126,7 @@ async function mapWithConcurrency(items, concurrency, mapper, label) {
   return results;
 }
 
+/** 同じURLを指すPokeAPIリソースを1件にまとめ、重複fetchを避ける。 */
 function uniqueResources(resources) {
   return [
     ...new Map(
@@ -128,6 +135,7 @@ function uniqueResources(resources) {
   ];
 }
 
+/** CSVの1セルとして安全に書けるよう、改行とダブルクォートをエスケープする。 */
 function csvValue(value) {
   if (value === null || value === undefined) return "";
   const text = String(value).replaceAll("\r\n", "\n").replaceAll("\r", "\n");

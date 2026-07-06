@@ -29,6 +29,10 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+/**
+ * すべてのroute segmentを包むRoot Layout。
+ * App Routerの規約上、ここだけがhtml/bodyを返し、共通ヘッダーとPWA登録を配置する。
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

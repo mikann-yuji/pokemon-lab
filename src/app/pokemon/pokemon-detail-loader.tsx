@@ -9,17 +9,24 @@ import {
 import { PokemonDetailView } from "./pokemon-detail";
 import styles from "./pokemon-search.module.css";
 
+/**
+ * ポケモン詳細のClient Loader。
+ * catalog.dbへのアクセスはSQLite Worker経由でブラウザ側から行い、結果を表示コンポーネントへ渡す。
+ */
 export function PokemonDetailLoader({
   pokemonId,
   backHref,
 }: {
+  /** URL paramsから数値化したフォームID。 */
   pokemonId: number;
+  /** 検索結果へ戻るリンク。検索語があればURLに含める。 */
   backHref: string;
 }) {
   const [pokemon, setPokemon] = useState<PokemonDetail | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
 
+  // pokemonIdが変わるたびに詳細を読み直し、古いPromiseの結果はactiveで破棄する。
   useEffect(() => {
     if (!Number.isInteger(pokemonId)) return;
 

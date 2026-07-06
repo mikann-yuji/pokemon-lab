@@ -26,6 +26,10 @@ import {
 } from "../infrastructure/training-catalog-repository";
 import styles from "../styles/saved-training-builds.module.css";
 
+/**
+ * 保存済み育成案の一覧と、必要に応じたバトルチーム編成UI。
+ * user.dbの育成案/チームと、catalog.dbのポケモン名/持ち物名を結合して表示する。
+ */
 export function SavedTrainingBuilds({
   query,
   pokemonCatalog: initialPokemonCatalog,
@@ -33,10 +37,15 @@ export function SavedTrainingBuilds({
   teamBuilder = false,
   showEmptyState = false,
 }: {
+  /** 一覧をポケモン名・育成案名で絞り込む検索語。 */
   query: string;
+  /** Server Componentで先読み済みのChampions対象ポケモン一覧。未指定ならClient側で読む。 */
   pokemonCatalog?: TrainingPokemon[];
+  /** Server Componentで先読み済みの持ち物一覧。未指定ならClient側で読む。 */
   heldItems?: HeldItem[];
+  /** trueなら育成案を選択してチーム保存できるUIも表示する。 */
   teamBuilder?: boolean;
+  /** trueなら育成案が0件でも空状態セクションを表示する。 */
   showEmptyState?: boolean;
 }) {
   const [builds, setBuilds] = useState<TrainingBuild[]>([]);
@@ -67,6 +76,7 @@ export function SavedTrainingBuilds({
     [heldItems],
   );
 
+  // 一覧表示に必要なカタログ名は、未指定の場合だけcatalog.dbから後読みする。
   useEffect(() => {
     if (initialPokemonCatalog && initialHeldItems) return;
     let active = true;
@@ -97,6 +107,7 @@ export function SavedTrainingBuilds({
     [builds],
   );
 
+  // user.dbに保存済みの育成案を初回表示時に読み込む。
   useEffect(() => {
     let active = true;
     void getAllTrainingBuilds()
@@ -118,6 +129,7 @@ export function SavedTrainingBuilds({
     };
   }, []);
 
+  // チーム編成画面でだけ、既存チーム一覧も読み込む。
   useEffect(() => {
     if (!teamBuilder) return;
 
@@ -137,6 +149,7 @@ export function SavedTrainingBuilds({
     };
   }, [teamBuilder]);
 
+  /** チームへ育成案を追加/解除する。追加時は重複ポケモン・重複持ち物を検証する。 */
   function toggleBuild(build: TrainingBuild) {
     if (build.id === undefined) return;
     setTeamError("");
@@ -163,6 +176,7 @@ export function SavedTrainingBuilds({
     });
   }
 
+  /** 選択中の育成案IDから新しいバトルチームを保存し、一覧を再取得する。 */
   async function createTeam() {
     setTeamError("");
     setTeamSaved(false);
@@ -179,11 +193,13 @@ export function SavedTrainingBuilds({
     }
   }
 
+  /** チームを削除し、削除後の一覧をuser.dbから読み直す。 */
   async function removeTeam(id: number) {
     await deleteBattleTeam(id);
     setTeams(await getAllBattleTeams());
   }
 
+  // 表示上の検索はDBへ再問い合わせせず、読み込み済みの育成案とカタログ名で絞り込む。
   const normalizedQuery = normalizePokemonSearchText(query.trim());
   const filteredBuilds = builds.filter((build) => {
     if (!normalizedQuery) return true;

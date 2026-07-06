@@ -24,6 +24,7 @@ import styles from "./pokemon-search.module.css";
 const PAGE_SIZE = 25;
 const MAX_PAGES = 2;
 
+/** 無限スクロールで保持する1ページ分の検索結果。 */
 type ResultPage = {
   offset: number;
   items: PokemonSearchResult[];
@@ -31,14 +32,20 @@ type ResultPage = {
 };
 
 type PokemonResultsProps = {
+  /** 検索語。空文字の場合は先頭から一覧表示する。 */
   query: string;
+  /** trueならChampions対象フォームだけへ絞り込む。 */
   championsOnly: boolean;
+  /** Server Componentなどで先読み済みの初期結果。未指定ならマウント後に読む。 */
   initialItems?: PokemonSearchResult[];
   initialHasMore?: boolean;
+  /** 結果カードをクリックした時の遷移先ベースパス。検索画面と育成画面で切り替える。 */
   resultBasePath?: string;
+  /** trueなら保存済み育成案を結果カードへ統合して表示する。 */
   includeTrainingBuilds?: boolean;
 };
 
+/** catalog.dbから1ページぶんを取得し、+1件取得で次ページ有無を判定する。 */
 async function fetchPage(
   query: string,
   championsOnly: boolean,
@@ -57,6 +64,10 @@ async function fetchPage(
   };
 }
 
+/**
+ * ポケモン検索結果リスト。
+ * 最大2ページだけDOMに残し、上下スクロールで前後ページを読み替える。
+ */
 export function PokemonResults({
   query,
   championsOnly,
@@ -79,6 +90,7 @@ export function PokemonResults({
   const bottomSentinelRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
 
+  // queryや絞り込みが変わったら、先頭ページから検索し直す。
   useEffect(() => {
     let active = true;
     void fetchPage(query, championsOnly, 0)
@@ -97,6 +109,7 @@ export function PokemonResults({
     };
   }, [championsOnly, query]);
 
+  // 育成画面では保存済み育成案へのショートカットを表示するため、必要な時だけ動的importする。
   useEffect(() => {
     if (!includeTrainingBuilds) return;
 
@@ -114,6 +127,7 @@ export function PokemonResults({
     };
   }, [includeTrainingBuilds]);
 
+  /** 上端sentinelに近づいた時、現在保持している最初のページより前を読み込む。 */
   const loadPrevious = useCallback(async () => {
     const firstPage = pages[0];
     if (!firstPage || firstPage.offset === 0 || loadingRef.current) return;
@@ -147,6 +161,7 @@ export function PokemonResults({
     }
   }, [championsOnly, pages, query]);
 
+  /** 下端sentinelに近づいた時、次ページを読み込む。古いページを捨てた分だけスクロール位置を補正する。 */
   const loadNext = useCallback(async () => {
     const lastPage = pages.at(-1);
     if (!lastPage?.hasMore || loadingRef.current) return;

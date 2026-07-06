@@ -49,6 +49,7 @@ const championsOnlyItemIds = new Map([
   ["ルチャブルナイト", "hawluchanite"],
 ]);
 
+/** 既存items.csvを読み、スクレイピングした日本語名との照合に使う。 */
 function parseCsv(filename) {
   const source = readFileSync(path.join(seedDirectory, filename), "utf8");
   const rows = [];
@@ -92,10 +93,12 @@ function parseCsv(filename) {
     );
 }
 
+/** 日本語名の全角/半角や空白差を吸収して、持ち物名の照合キーにする。 */
 function normalize(value) {
   return value.normalize("NFKC").replaceAll(/\s+/g, "").toLowerCase();
 }
 
+/** champions_items.csvへ安全に書くため、CSVセルをエスケープする。 */
 function csvValue(value) {
   const text = String(value).replaceAll("\r\n", "\n").replaceAll("\r", "\n");
   return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;

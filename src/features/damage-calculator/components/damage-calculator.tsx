@@ -29,13 +29,20 @@ import {
 import styles from "../styles/damage-calculator.module.css";
 
 type CalculationResult = {
+  /** 通常ヒット時のダメージ範囲。 */
   normal: DamageCalculation;
+  /** 急所ヒット時のダメージ範囲。通常結果と並べて比較表示する。 */
   critical: DamageCalculation;
+  /** 計算後に選択を変えても結果見出しがぶれないよう、表示名をスナップショットする。 */
   attackerName: string;
   defenderName: string;
   moveName: string;
 };
 
+/**
+ * ポケモン選択欄1つ分の状態をまとめる小さなhook。
+ * 選択済みポケモンと入力中テキストを常に同期させる。
+ */
 function usePokemonSelection() {
   const [pokemon, setPokemon] = useState<DamageCalculatorPokemon | null>(null);
   const [query, setQuery] = useState("");
@@ -57,6 +64,7 @@ function usePokemonSelection() {
 export function DamageCalculator({
   pokemonCatalog,
 }: {
+  /** Server Component側でcatalog.dbから読み込んだ、計算対象ポケモンの全データ。 */
   pokemonCatalog: DamageCalculatorPokemon[];
 }) {
   const attackerSelection = usePokemonSelection();
@@ -278,14 +286,19 @@ function RecentPokemonList({
   pokemonCatalog,
   onRestore,
 }: {
+  /** 攻撃側/防御側のどちらの履歴を復元するか。 */
   side: DamageHistorySide;
+  /** user.dbから読み込んだ最近使った履歴。 */
   history: DamageHistoryRecord[];
+  /** 履歴のpokemonIdを現在のカタログ情報へ解決するために使う。 */
   pokemonCatalog: DamageCalculatorPokemon[];
+  /** 履歴ボタンを押した時、親コンポーネントの選択状態へ反映する。 */
   onRestore: (
     side: DamageHistorySide,
     history: DamageHistoryRecord,
   ) => void;
 }) {
+  // 履歴に残っていても現在のcatalog.dbに存在しないフォームは表示しない。
   const availableHistory = history.flatMap((record) => {
     const pokemon = pokemonCatalog.find(({ id }) => id === record.pokemonId);
     return pokemon ? [{ record, pokemon }] : [];
@@ -322,6 +335,7 @@ function RecentPokemonList({
   );
 }
 
+/** 選択中ポケモンの画像と名前を表示し、未選択時は同じ高さのプレースホルダーを出す。 */
 function PokemonSummary({
   pokemon,
 }: {
@@ -348,6 +362,7 @@ function PokemonSummary({
   );
 }
 
+/** 技のタイプ、分類、威力を選択欄の直下に確認用として表示する。 */
 function MoveSummary({ move }: { move: DamageCalculatorMove }) {
   return (
     <p className={styles.moveSummary}>
@@ -357,6 +372,7 @@ function MoveSummary({ move }: { move: DamageCalculatorMove }) {
   );
 }
 
+/** 通常ダメージと急所ダメージをまとめて表示する結果パネル。 */
 function DamageResult({ result }: { result: CalculationResult }) {
   return (
     <section className={styles.result} aria-live="polite">
@@ -381,6 +397,10 @@ function DamageResult({ result }: { result: CalculationResult }) {
   );
 }
 
+/**
+ * 1種類のダメージ結果を表示する。
+ * 残りHPバーは最小乱数/最大乱数の両端を重ねて、乱数幅が見えるようにする。
+ */
 function DamageOutcome({
   title,
   calculation,

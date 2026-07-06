@@ -7,6 +7,7 @@ import path from "node:path";
 
 const seedDirectory = path.join(process.cwd(), "database", "seeds");
 
+/** 検証対象CSVを読み、ヘッダーと行オブジェクトに分ける。 */
 function parseCsv(filename) {
   const source = readFileSync(path.join(seedDirectory, filename), "utf8");
   const rows = [];
@@ -63,6 +64,7 @@ function parseCsv(filename) {
   return { headers, records };
 }
 
+/** 指定列の組み合わせが重複していないことを確認する。 */
 function unique(records, columns, filename) {
   const keys = new Set();
   for (const record of records) {
@@ -74,6 +76,7 @@ function unique(records, columns, filename) {
   }
 }
 
+/** 外部キーに相当する列が、参照先テーブルの値集合に存在することを確認する。 */
 function reference(records, column, targetValues, filename) {
   for (const record of records) {
     if (!targetValues.has(record[column])) {

@@ -8,6 +8,7 @@ export type HeldItem = {
   name: string;
 };
 
+/** 性格は上昇補正と下降補正の能力IDを持つ。補正なし性格は同じIDが入る。 */
 export type Nature = {
   id: string;
   name: string;
@@ -15,6 +16,7 @@ export type Nature = {
   decreasedStatId: string | null;
 };
 
+/** 育成対象の一覧表示に必要な最小限のフォーム情報。 */
 export type TrainingPokemon = {
   id: number;
   name: string;
@@ -41,7 +43,7 @@ type HeldItemRow = SqliteRow & {
   name: string;
 };
 
-/** 保存済み育成案の表示・検索に使うChampions対象ポケモン一覧をcatalog.dbから取得する。 */
+/** 性格マトリクスと能力値計算に使う性格一覧をcatalog.dbから取得する。 */
 export async function getNatures(): Promise<Nature[]> {
   const rows = await sqliteWorkerClient.catalogQuery<NatureRow>(`
     SELECT
@@ -60,6 +62,7 @@ export async function getNatures(): Promise<Nature[]> {
   }));
 }
 
+/** 保存済み育成案の表示・検索に使うChampions対象ポケモン一覧をcatalog.dbから取得する。 */
 export async function getTrainingPokemonCatalog(): Promise<TrainingPokemon[]> {
   const rows = await sqliteWorkerClient.catalogQuery<TrainingPokemonRow>(`
     SELECT

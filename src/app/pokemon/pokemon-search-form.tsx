@@ -10,13 +10,22 @@ import {
 import styles from "./pokemon-search.module.css";
 
 type PokemonSearchFormProps = {
+  /** URLクエリから復元した初期検索語。 */
   initialQuery: string;
+  /** 初期状態でChampions対象だけに絞るか。 */
   initialChampionsOnly: boolean;
+  /** form submit時の遷移先。通常検索と育成検索で切り替える。 */
   action?: string;
+  /** 候補を選択した時の詳細ページベースパス。 */
   resultBasePath?: string;
+  /** trueならChampions絞り込みを固定し、チェックボックスを表示しない。 */
   championsOnlyLocked?: boolean;
 };
 
+/**
+ * ポケモン検索フォーム。
+ * Downshiftで候補リストを制御し、submit時はURLクエリとして検索条件を残す。
+ */
 export function PokemonSearchForm({
   initialQuery,
   initialChampionsOnly,
@@ -30,6 +39,7 @@ export function PokemonSearchForm({
   const [championsOnly, setChampionsOnly] = useState(initialChampionsOnly);
   const [showDetails, setShowDetails] = useState(initialChampionsOnly);
 
+  // Downshiftはキーボード操作・aria属性・候補選択をまとめて扱う。
   const {
     isOpen,
     highlightedIndex,
@@ -58,6 +68,7 @@ export function PokemonSearchForm({
     },
   });
 
+  // 入力中は短いdebounceを挟んで候補だけを取得し、確定検索はform submitへ任せる。
   useEffect(() => {
     const normalizedQuery = query.trim();
     if (!normalizedQuery || normalizedQuery === initialQuery.trim()) {

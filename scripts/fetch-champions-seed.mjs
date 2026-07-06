@@ -11,6 +11,7 @@ const SOURCE_URL =
   "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_in_Pok%C3%A9mon_Champions";
 const seedDirectory = path.join(process.cwd(), "database", "seeds");
 
+/** 既存のPokeAPIシードCSVを読み、Bulbapediaの表と照合できるオブジェクト配列へ変換する。 */
 function parseCsv(filename) {
   const source = readFileSync(path.join(seedDirectory, filename), "utf8");
   const rows = [];
@@ -59,6 +60,7 @@ function parseCsv(filename) {
     );
 }
 
+/** 表記差、性別記号、forme/styleなどの差を吸収して照合用キーにする。 */
 function normalize(value) {
   return value
     .normalize("NFKD")
@@ -69,6 +71,7 @@ function normalize(value) {
     .replaceAll(/[^a-z0-9]/g, "");
 }
 
+/** champions_forms.csvへ安全に書けるよう、CSVセルをエスケープする。 */
 function csvEscape(value) {
   const stringValue = String(value);
   return /[",\n\r]/.test(stringValue)
@@ -76,6 +79,7 @@ function csvEscape(value) {
     : stringValue;
 }
 
+/** Bulbapedia側の候補とPokeAPI側フォームのタイプ構成が一致するかを確認する。 */
 function sameTypes(left, right) {
   return (
     left.length === right.length &&

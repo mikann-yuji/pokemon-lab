@@ -9,17 +9,24 @@ import {
 import { TrainingSimulator } from "./training-simulator";
 import pageStyles from "@/app/pokemon/pokemon-search.module.css";
 
+/**
+ * 育成シミュレーターのClient Loader。
+ * 指定フォームがChampions対象かを確認してから、編集画面へPokemonDetailを渡す。
+ */
 export function TrainingSimulatorLoader({
   pokemonId,
   initialBuildId,
 }: {
+  /** URL paramsから数値化したフォームID。 */
   pokemonId: number;
+  /** 保存済み育成案から開いた場合に復元するID。 */
   initialBuildId?: number;
 }) {
   const [pokemon, setPokemon] = useState<PokemonDetail | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
 
+  // 対象外フォームを弾くため、詳細取得とChampions対象判定を同時に行う。
   useEffect(() => {
     if (!Number.isInteger(pokemonId)) return;
 

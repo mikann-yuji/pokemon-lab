@@ -28,6 +28,10 @@ type PokemonTypeImageRow = SqliteRow &
     typeName: TypeName;
   };
 
+/**
+ * タイプ相性表をcatalog.dbから読み、クイズロジックが扱うTypeMatchup配列へ変換する。
+ * SQL上は攻撃タイプ x 防御タイプの行なので、攻撃側・防御側それぞれの観点に畳み込む。
+ */
 export async function getTypeMatchups(): Promise<TypeMatchup[]> {
   const [types, rows] = await Promise.all([
     sqliteWorkerClient.catalogQuery<TypeRow>(`
@@ -46,6 +50,7 @@ export async function getTypeMatchups(): Promise<TypeMatchup[]> {
     `),
   ]);
 
+  // 攻撃タイプから防御タイプへの倍率を高速に引ける二重Mapへ変換する。
   const byAttacker = new Map<TypeName, Map<TypeName, number>>();
   for (const row of rows) {
     const matchups =
@@ -56,6 +61,7 @@ export async function getTypeMatchups(): Promise<TypeMatchup[]> {
 
   return types.map(({ name, nameJa }) => {
     const attack = byAttacker.get(name);
+    // 単タイプの「攻撃した時」と「攻撃された時」の両方を事前に配列化しておく。
     const targetsWith = (effectiveness: number) =>
       TYPE_NAMES.filter((defender) => attack?.get(defender) === effectiveness);
     const attackersWith = (effectiveness: number) =>
@@ -76,6 +82,10 @@ export async function getTypeMatchups(): Promise<TypeMatchup[]> {
   });
 }
 
+/**
+ * クイズ問題に添えるポケモン画像候補をタイプ別に集める。
+ * 単タイプキーだけでなく、複合タイプ問題用に "typeA|typeB" のキーも作る。
+ */
 export async function getPokemonImagesByType(): Promise<PokemonImagesByType> {
   const rows = await sqliteWorkerClient.catalogQuery<PokemonTypeImageRow>(`
     SELECT
@@ -93,6 +103,7 @@ export async function getPokemonImagesByType(): Promise<PokemonImagesByType> {
     ORDER BY forms.sort_order, form_types.slot
   `);
 
+  // SQL結果はフォーム x タイプの行なので、まずフォームごとに画像とタイプ一覧へまとめる。
   const forms = new Map<number, { image: PokemonImage; types: TypeName[] }>();
 
   for (const { typeName, ...image } of rows) {
@@ -101,6 +112,7 @@ export async function getPokemonImagesByType(): Promise<PokemonImagesByType> {
     forms.set(image.formId, form);
   }
 
+  // 1つのフォーム画像を、該当する単タイプと複合タイプの候補リストへ登録する。
   const imagesByType: PokemonImagesByType = {};
   for (const { image, types } of forms.values()) {
     for (const type of types) {

@@ -23,13 +23,17 @@ import ScoreSection from "./score-section";
 import styles from "../styles/quiz-game.module.css";
 
 type QuizGameProps = {
+  /** Server Componentで生成した初回出題リスト。 */
   initialQuestions: Question[];
+  /** 正解表示やタイプ名変換に使うタイプ相性データ。 */
   typeMatchups: TypeMatchup[];
+  /** 問題に添える画像候補。クイズ生成時にタイプキーで引く。 */
   pokemonImagesByType: PokemonImagesByType;
 };
 
 type QuizMode = "all" | "mistakes";
 
+/** ユーザーが視差軽減を指定している場合は、スクロールアニメーションを無効にする。 */
 function getScrollBehavior(): ScrollBehavior {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ? "auto"
@@ -63,6 +67,7 @@ export default function QuizGame({
   const questionTopRef = useRef<HTMLDivElement>(null);
   const explanationRef = useRef<HTMLDivElement>(null);
 
+  // 復習モードの対象になる間違いキーはuser.dbから後読みする。
   useEffect(() => {
     let active = true;
 
@@ -82,6 +87,10 @@ export default function QuizGame({
     };
   }, []);
 
+  /**
+   * 現在の出題モードと複合タイプ設定から問題リストを作り直す。
+   * mistakesモードでは、保存済みの間違いキーに一致する問題だけを残す。
+   */
   function createModeQuestions(
     mode: QuizMode,
     dualTypes: boolean,

@@ -5,8 +5,11 @@
 import styles from "../styles/quiz-game.module.css";
 
 type ScoreSectionProps = {
+  /** 正解数。 */
   score: number;
+  /** 出題された問題数。正答率計算に使う。 */
   questionCount: number;
+  /** 再挑戦ボタンでQuizGameの状態を初期化するコールバック。 */
   onRestart: () => void;
 };
 
@@ -18,6 +21,7 @@ export default function ScoreSection({
   questionCount,
   onRestart,
 }: ScoreSectionProps) {
+  // 表示メッセージは正答率だけで決め、保存状態や出題モードには依存させない。
   const percentage = Math.round((score / questionCount) * 100);
   const message =
     percentage === 100

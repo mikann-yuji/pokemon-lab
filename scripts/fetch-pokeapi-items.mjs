@@ -9,10 +9,12 @@ const API_URL = "https://pokeapi.co/api/v2";
 const outputDirectory = path.join(process.cwd(), "database", "seeds");
 const maxAttempts = 3;
 
+/** リトライ間隔を空けるための小さなsleep。 */
 function wait(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+/** PokeAPIの一時失敗に備えて、最大maxAttempts回までJSON取得を試す。 */
 async function fetchJson(url) {
   let lastError;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
@@ -35,6 +37,7 @@ async function fetchJson(url) {
   throw lastError;
 }
 
+/** 大量のitem詳細取得でPokeAPIへ負荷をかけすぎないよう、同時実行数を制限する。 */
 async function mapWithConcurrency(items, concurrency, mapper) {
   const output = new Array(items.length);
   let nextIndex = 0;
@@ -58,6 +61,7 @@ async function mapWithConcurrency(items, concurrency, mapper) {
   return output;
 }
 
+/** 指定言語の名前や説明文をPokeAPIの多言語配列から取り出す。 */
 function localized(entries, language, property) {
   return (
     entries?.find((entry) => entry.language.name === language)?.[property] ??
@@ -65,6 +69,7 @@ function localized(entries, language, property) {
   );
 }
 
+/** 日本語名はja-Hrktを優先し、なければjaへフォールバックする。 */
 function localizedName(item) {
   return (
     localized(item.names, "ja-Hrkt", "name") ??
@@ -72,6 +77,7 @@ function localizedName(item) {
   );
 }
 
+/** 効果説明を優先し、なければフレーバーテキストを使う。 */
 function effectText(item, language) {
   return (
     localized(item.effect_entries, language, "effect") ??
@@ -79,6 +85,7 @@ function effectText(item, language) {
   );
 }
 
+/** CSVの1セルとして安全に書けるよう、改行とダブルクォートをエスケープする。 */
 function csvValue(value) {
   if (value === null || value === undefined) return "";
   const text = String(value).replaceAll("\r\n", "\n").replaceAll("\r", "\n");

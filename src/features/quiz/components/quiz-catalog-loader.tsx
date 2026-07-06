@@ -11,6 +11,10 @@ import {
 import { createQuestions, type PokemonImagesByType } from "../quiz-logic";
 import styles from "../styles/quiz-page.module.css";
 
+/**
+ * クイズ画面のClient Loader。
+ * catalog.dbからタイプ相性と画像候補を読み、クイズ本体と相性表へ同じデータを渡す。
+ */
 export default function QuizCatalogLoader() {
   const [typeMatchups, setTypeMatchups] = useState<TypeMatchup[]>([]);
   const [pokemonImagesByType, setPokemonImagesByType] =
@@ -18,6 +22,7 @@ export default function QuizCatalogLoader() {
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState("");
 
+  // クイズ本体に必要な読み取り専用カタログを初回マウント後にまとめて取得する。
   useEffect(() => {
     let active = true;
     void Promise.all([getTypeMatchups(), getPokemonImagesByType()])

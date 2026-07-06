@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { TypeName } from "@/domain/type-matchup";
 
+// タイプバッジとカード背景で共有する色定義。CSS変数へ変換して各CSS Modulesから利用する。
 const TYPE_COLORS: Record<
   TypeName,
   { background: string; foreground: string }
@@ -35,6 +36,7 @@ type PokemonCardStyle = CSSProperties & {
   "--secondary-type-color": string;
 };
 
+/** タイプバッジ用のCSS変数を返す。 */
 export function getTypeBadgeStyle(type: TypeName): TypeBadgeStyle {
   const colors = TYPE_COLORS[type];
 
@@ -44,6 +46,7 @@ export function getTypeBadgeStyle(type: TypeName): TypeBadgeStyle {
   };
 }
 
+/** ポケモンカード背景用に、第1タイプと第2タイプのCSS変数を返す。 */
 export function getPokemonCardStyle(types: TypeName[]): PokemonCardStyle {
   const primaryColor = TYPE_COLORS[types[0]]?.background ?? "#9299a1";
   const secondaryColor = TYPE_COLORS[types[1]]?.background ?? primaryColor;

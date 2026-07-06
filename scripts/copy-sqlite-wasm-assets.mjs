@@ -6,6 +6,7 @@
 import { cp, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
 
+// 公式パッケージのdistをそのまま静的配信し、Worker内の /sqlite-wasm/index.mjs から読む。
 const source = path.join(
   process.cwd(),
   "node_modules",
@@ -14,6 +15,7 @@ const source = path.join(
   "dist",
 );
 const destination = path.join(process.cwd(), "public", "sqlite-wasm");
+// アプリ固有のWorker本体もpublicへ置き、new Worker("/sqlite-runtime-worker.mjs")で起動する。
 const workerSource = path.join(
   process.cwd(),
   "scripts",
@@ -24,6 +26,7 @@ const workerDestination = path.join(
   "public",
   "sqlite-runtime-worker.mjs",
 );
+// Next.jsを介さずWorker単体を切り分け検証するための静的診断ページ。
 const diagnosticSource = path.join(
   process.cwd(),
   "scripts",

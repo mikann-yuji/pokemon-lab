@@ -33,18 +33,27 @@ const DEFAULT_NATURE: Nature = {
   decreasedStatId: "attack",
 };
 
+/** 6能力すべてに同じ初期値を入れた能力ポイント表を作る。 */
 const initialStats = (value: number) =>
   Object.fromEntries(STAT_IDS.map((id) => [id, value]));
 
+/**
+ * Pokémon Champions向けの育成案編集画面。
+ * 種族値、性格、能力ポイント、持ち物、技構成を編集し、user.dbへ保存する。
+ */
 export function TrainingSimulator({
   pokemon,
   natures: initialNatures,
   heldItems: initialHeldItems,
   initialBuildId,
 }: {
+  /** 詳細ページや一覧から渡される、育成対象のポケモン詳細。 */
   pokemon: PokemonDetail;
+  /** Server Componentで先読み済みなら渡される性格一覧。未指定ならブラウザ側でcatalog.dbから読む。 */
   natures?: Nature[];
+  /** Server Componentで先読み済みなら渡される持ち物一覧。未指定ならブラウザ側でcatalog.dbから読む。 */
   heldItems?: HeldItem[];
+  /** 保存済み育成案ページから開いた場合に復元するbuild ID。 */
   initialBuildId?: number;
 }) {
   const [natures, setNatures] = useState<Nature[]>(initialNatures ?? []);
@@ -68,12 +77,14 @@ export function TrainingSimulator({
     message: string;
   } | null>(null);
 
+  // 保存完了/失敗の一時メッセージは短時間だけ表示する。
   useEffect(() => {
     if (!toast) return;
     const timer = window.setTimeout(() => setToast(null), 3000);
     return () => window.clearTimeout(timer);
   }, [toast]);
 
+  // 先読みされていないカタログだけをブラウザ側で取得する。画面単体でも動けるようにする。
   useEffect(() => {
     if (initialNatures && initialHeldItems) return;
     let active = true;
@@ -94,6 +105,7 @@ export function TrainingSimulator({
     };
   }, [initialHeldItems, initialNatures]);
 
+  // URLで指定された育成案、または同じポケモンの最新育成案を画面状態へ復元する。
   useEffect(() => {
     if (natures.length === 0) return;
     let active = true;
@@ -117,6 +129,7 @@ export function TrainingSimulator({
     return () => { active = false; };
   }, [initialBuildId, natures, pokemon.id]);
 
+  // 性格IDが古い保存データなどで見つからない場合は、まじめ/先頭性格へフォールバックする。
   const selectedNature =
     natures.find(({ id }) => id === nature) ??
     natures.find(({ id }) => id === "serious") ??
@@ -141,6 +154,10 @@ export function TrainingSimulator({
   ), [abilityPoints, hasNatureModifier, pokemon.stats, selectedNature]);
   const pointTotal = Object.values(abilityPoints).reduce((sum, value) => sum + value, 0);
 
+  /**
+   * 能力ポイントを変更する。
+   * 1能力32、合計66の上限をここで丸め、入力欄とスライダーのどちらから来ても同じ制約にする。
+   */
   function changeAbilityPoint(id: string, requested: number) {
     const otherTotal = pointTotal - (abilityPoints[id] ?? 0);
     setAbilityPoints((current) => ({
@@ -150,12 +167,17 @@ export function TrainingSimulator({
     setSaved(false);
   }
 
+  /** 保存ダイアログを開く前に、空の保存名へポケモン名ベースの初期値を入れる。 */
   function openSaveDialog() {
     setBuildName((current) => current.trim() || `${pokemon.nameJa}の育成案`);
     setSaveError("");
     setSaveDialogOpen(true);
   }
 
+  /**
+   * 編集中の育成案をuser.dbへ保存する。
+   * 同じ内容の育成案が既にある場合は、ユーザー確認後にそのレコードを更新する。
+   */
   async function save() {
     const normalizedName = buildName.trim();
     if (!normalizedName) {
@@ -350,6 +372,7 @@ export function TrainingSimulator({
 }
 
 
+/** 性格補正の上昇/下降を小さな矢印アイコンとして表示する。 */
 function NatureCaret({ direction }: { direction: "up" | "down" }) {
   return (
     <i className={direction === "up" ? styles.statUp : styles.statDown} aria-label={direction === "up" ? "上昇補正" : "下降補正"}>
@@ -361,6 +384,10 @@ function NatureCaret({ direction }: { direction: "up" | "down" }) {
   );
 }
 
+/**
+ * 性格を「上がる能力 x 下がる能力」の表で選ぶモーダル。
+ * naturesから該当する組み合わせを探し、存在しないマスはdisabledにする。
+ */
 function NatureMatrixOverlay({
   natures,
   selectedNatureId,
@@ -373,6 +400,7 @@ function NatureMatrixOverlay({
   onClose: () => void;
 }) {
   const stats = STAT_IDS.filter((id) => id !== "hp");
+  /** 上昇能力と下降能力の組み合わせから性格を1件探す。 */
   function natureFor(increasedStatId: string, decreasedStatId: string) {
     return natures.find(
       (item) => item.increasedStatId === increasedStatId && item.decreasedStatId === decreasedStatId,

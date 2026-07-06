@@ -17,6 +17,7 @@ const navigationItems = [
   { href: "/quiz", label: "タイプ相性クイズ" },
 ] as const;
 
+/** モバイルでは開閉式、デスクトップでは常時表示の共通ヘッダー。 */
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
 

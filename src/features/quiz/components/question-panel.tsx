@@ -17,14 +17,23 @@ import { getHint, saveHint } from "../storage/mistake-repository";
 import styles from "../styles/quiz-game.module.css";
 
 type QuestionPanelProps = {
+  /** 現在表示する1問分のデータ。 */
   question: Question;
+  /** 1始まりの現在問題番号。 */
   questionNumber: number;
+  /** 出題リスト全体の問題数。 */
   questionCount: number;
+  /** 現在選択されているタイプ。親のQuizGameが正解判定に使う。 */
   selectedAnswers: Set<TypeName>;
+  /** trueなら選択肢を結果表示状態にする。 */
   answered: boolean;
+  /** タイプボタンの表示名と色を作るための相性一覧。 */
   typeMatchups: TypeMatchup[];
+  /** タイプボタンを押した時、親の選択状態を切り替える。 */
   onTypeClick: (type: TypeName) => void;
+  /** 正解演出を表示するか。 */
   showCorrectCelebration: boolean;
+  /** 不正解演出を表示するか。 */
   showIncorrectCelebration: boolean;
 };
 
@@ -48,6 +57,7 @@ export default function QuestionPanel({
   const [isHintSaving, setHintSaving] = useState(false);
   const [hintError, setHintError] = useState("");
 
+  /** ヒントダイアログを開き、問題キーに紐づく保存済みメモをuser.dbから読む。 */
   async function openHintDialog() {
     setHintDialogOpen(true);
     setHintLoading(true);
@@ -62,6 +72,7 @@ export default function QuestionPanel({
     }
   }
 
+  /** ヒント入力欄の内容をuser.dbへ保存する。空文字ならrepository側で削除される。 */
   async function persistHint() {
     setHintSaving(true);
     setHintError("");
