@@ -48,6 +48,16 @@ export function TrainingSimulator({
   const [buildName, setBuildName] = useState("");
   const [saveError, setSaveError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(null), 3000);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
 
   useEffect(() => {
     let active = true;
@@ -109,6 +119,7 @@ export function TrainingSimulator({
       moveIds,
     };
     const contentKey = createTrainingBuildContentKey(buildData);
+    setToast(null);
     setIsSaving(true);
     try {
       const existing = await findTrainingBuildByContentKey(contentKey);
@@ -130,6 +141,7 @@ export function TrainingSimulator({
       });
       setSaved(true);
       setSaveDialogOpen(false);
+      setToast({ type: "success", message: "保存しました" });
     } catch (error: unknown) {
       console.error("育成案を保存できませんでした。", error);
       setSaveError(
@@ -137,6 +149,7 @@ export function TrainingSimulator({
           ? error.message
           : "育成案を保存できませんでした。",
       );
+      setToast({ type: "error", message: "保存に失敗しました" });
     } finally {
       setIsSaving(false);
     }
@@ -211,6 +224,17 @@ export function TrainingSimulator({
         return <label key={index}>技 {index + 1}<select value={moveId} onChange={(e) => { setMoveIds((current) => current.map((value, i) => i === index ? e.target.value : value)); setSaved(false); }}><option value="">未選択</option>{selectableMoves.map((move) => <option value={move.id} key={move.id}>{move.name}</option>)}</select></label>;
       })}</section>
       <button className={styles.saveButton} type="button" onClick={openSaveDialog}>{saved ? "保存しました" : "この育成案を保存"}</button>
+      {toast ? (
+        <div
+          className={`${styles.toast} ${
+            toast.type === "success" ? styles.toastSuccess : styles.toastError
+          }`}
+          role={toast.type === "error" ? "alert" : "status"}
+          aria-live={toast.type === "error" ? "assertive" : "polite"}
+        >
+          {toast.message}
+        </div>
+      ) : null}
       {isSaveDialogOpen ? (
         <div
           className={styles.saveOverlay}

@@ -20,28 +20,16 @@ export type BattleTeam = {
   updatedAt: number;
 };
 
-const database = new Dexie("pokemon-lab-training") as Dexie & {
+/**
+ * 旧DBではversion 3で主キーをpokemonIdから自動採番IDへ変更していたため、
+ * IndexedDBがUpgradeErrorとなる。主キーを最初から固定した新DBを使用する。
+ */
+const database = new Dexie("pokemon-lab-training-v2") as Dexie & {
   builds: EntityTable<TrainingBuild, "id">;
   teams: EntityTable<BattleTeam, "id">;
 };
 
-database.version(1).stores({ builds: "&pokemonId, updatedAt" });
-// 保存済みの初版データと同じ主キーを保ちつつ、内容を能力ポイント方式へ更新する。
-database.version(2).stores({ builds: "&pokemonId, updatedAt" });
-database
-  .version(3)
-  .stores({ builds: "++id, &contentKey, pokemonId, updatedAt" })
-  .upgrade(async (transaction) => {
-    await transaction
-      .table<TrainingBuild, number>("builds")
-      .toCollection()
-      .modify((build) => {
-        build.name ||= `ポケモン #${build.pokemonId} の育成案`;
-        build.itemId ||= "";
-        build.contentKey ||= createTrainingBuildContentKey(build);
-      });
-  });
-database.version(4).stores({
+database.version(1).stores({
   builds: "++id, &contentKey, pokemonId, updatedAt",
   teams: "++id, updatedAt",
 });
