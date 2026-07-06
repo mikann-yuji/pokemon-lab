@@ -84,14 +84,22 @@ export const loadLatestTrainingBuild = async (pokemonId: number) => {
 
 export const loadTrainingBuild = (id: number) => database.builds.get(id);
 
-export const getAllTrainingBuilds = () =>
-  database.builds.orderBy("updatedAt").reverse().toArray();
+export const getAllTrainingBuilds = async () => {
+  const builds = await database.builds.toArray();
+  return builds.sort((left, right) => right.updatedAt - left.updatedAt);
+};
 
 export const findTrainingBuildByContentKey = (contentKey: string) =>
   database.builds.where("contentKey").equals(contentKey).first();
 
-export const saveTrainingBuild = (build: TrainingBuild) =>
-  database.builds.put(build);
+export async function saveTrainingBuild(build: TrainingBuild) {
+  const id = await database.builds.put(build);
+  const savedBuild = await database.builds.get(id);
+  if (!savedBuild) {
+    throw new Error("保存した育成案を確認できませんでした。");
+  }
+  return savedBuild;
+}
 
 export function validateBattleTeamBuilds(builds: TrainingBuild[]) {
   if (builds.length < 1 || builds.length > 6) {

@@ -47,6 +47,7 @@ export function TrainingSimulator({
   const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
   const [buildName, setBuildName] = useState("");
   const [saveError, setSaveError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -100,8 +101,6 @@ export function TrainingSimulator({
       setSaveError("保存名を入力してください。");
       return;
     }
-    setSaveDialogOpen(false);
-
     const buildData = {
       pokemonId: pokemon.id,
       nature,
@@ -110,24 +109,37 @@ export function TrainingSimulator({
       moveIds,
     };
     const contentKey = createTrainingBuildContentKey(buildData);
-    const existing = await findTrainingBuildByContentKey(contentKey);
-    if (
-      existing &&
-      !window.confirm(
-        `同じ内容の「${existing.name}」が保存されています。上書きしますか？`,
-      )
-    ) {
-      return;
-    }
+    setIsSaving(true);
+    try {
+      const existing = await findTrainingBuildByContentKey(contentKey);
+      if (
+        existing &&
+        !window.confirm(
+          `同じ内容の「${existing.name}」が保存されています。上書きしますか？`,
+        )
+      ) {
+        return;
+      }
 
-    await saveTrainingBuild({
-      ...buildData,
-      id: existing?.id,
-      name: normalizedName,
-      contentKey,
-      updatedAt: Date.now(),
-    });
-    setSaved(true);
+      await saveTrainingBuild({
+        ...buildData,
+        id: existing?.id,
+        name: normalizedName,
+        contentKey,
+        updatedAt: Date.now(),
+      });
+      setSaved(true);
+      setSaveDialogOpen(false);
+    } catch (error: unknown) {
+      console.error("育成案を保存できませんでした。", error);
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : "育成案を保存できませんでした。",
+      );
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -234,10 +246,16 @@ export function TrainingSimulator({
             </label>
             {saveError ? <p role="alert">{saveError}</p> : null}
             <div className={styles.saveDialogActions}>
-              <button type="button" onClick={() => setSaveDialogOpen(false)}>
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={() => setSaveDialogOpen(false)}
+              >
                 キャンセル
               </button>
-              <button type="submit">保存</button>
+              <button type="submit" disabled={isSaving}>
+                {isSaving ? "保存中…" : "保存"}
+              </button>
             </div>
           </form>
         </div>
