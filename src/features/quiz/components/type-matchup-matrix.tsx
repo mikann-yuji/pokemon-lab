@@ -27,11 +27,6 @@ export default function TypeMatchupMatrix({
 }) {
   return (
     <section className={styles.matrixSection}>
-      <h2>タイプあいしょう ずかん</h2>
-      <p className={styles.matrixNote}>
-        たてが こうげき、よこが ぼうぎょ（2: ばつぐん / ½:
-        いまひとつ / 0: こうかなし）
-      </p>
       <div className={styles.matrixScroller}>
         <table className={styles.matrix}>
           <colgroup>

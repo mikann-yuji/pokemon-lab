@@ -38,19 +38,6 @@ export function SiteHeader() {
           PokemonLab
         </Link>
 
-        <button
-          type="button"
-          className={styles.menuButton}
-          aria-label={menuOpen ? "メニューを閉じる" : "メニューを開く"}
-          aria-expanded={menuOpen}
-          aria-controls="site-navigation"
-          onClick={() => setMenuOpen((current) => !current)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-
         <nav
           id="site-navigation"
           className={`${styles.navigation} ${
@@ -67,8 +54,23 @@ export function SiteHeader() {
               {label}
             </Link>
           ))}
-          <TypeMatchupModalButton onOpen={() => setMenuOpen(false)} />
         </nav>
+
+        <div className={styles.headerActions}>
+          <TypeMatchupModalButton onOpen={() => setMenuOpen(false)} />
+          <button
+            type="button"
+            className={styles.menuButton}
+            aria-label={menuOpen ? "メニューを閉じる" : "メニューを開く"}
+            aria-expanded={menuOpen}
+            aria-controls="site-navigation"
+            onClick={() => setMenuOpen((current) => !current)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
       </div>
     </header>
   );

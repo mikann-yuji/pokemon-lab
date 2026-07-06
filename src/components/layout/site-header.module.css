@@ -20,7 +20,7 @@
 .inner {
   position: relative;
   display: flex;
-  gap: 1.5rem;
+  gap: clamp(0.5rem, 2vw, 1.5rem);
   align-items: center;
   justify-content: space-between;
   width: min(100%, 75rem);
@@ -33,6 +33,13 @@
   display: none;
 }
 
+.headerActions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .homeLink {
   flex: 0 0 auto;
   color: #172b4d;
@@ -43,6 +50,7 @@
 
 .navigation {
   display: flex;
+  margin-left: auto;
   gap: clamp(0.35rem, 2vw, 1rem);
   align-items: center;
   justify-content: flex-end;
@@ -81,6 +89,10 @@
   .homeLink {
     padding-inline: 0.35rem;
     font-size: 1rem;
+  }
+
+  .headerActions {
+    gap: 0.4rem;
   }
 
   .menuButton {
