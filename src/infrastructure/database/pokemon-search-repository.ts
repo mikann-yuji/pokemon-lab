@@ -216,16 +216,16 @@ export async function searchPokemon(
         form_types.slot
     `,
     {
-      query: normalizedQuery,
-      pattern: `%${escapedQuery}%`,
-      hiraganaPattern: `%${hiraganaQuery}%`,
-      katakanaPattern: `%${katakanaQuery}%`,
-      prefix: `${escapedQuery}%`,
-      hiraganaPrefix: `${hiraganaQuery}%`,
-      katakanaPrefix: `${katakanaQuery}%`,
-      championsOnly: championsOnly ? 1 : 0,
-      limit: Math.max(1, Math.min(limit, 100)),
-      offset: Math.max(0, offset),
+      "@query": normalizedQuery,
+      "@pattern": `%${escapedQuery}%`,
+      "@hiraganaPattern": `%${hiraganaQuery}%`,
+      "@katakanaPattern": `%${katakanaQuery}%`,
+      "@prefix": `${escapedQuery}%`,
+      "@hiraganaPrefix": `${hiraganaQuery}%`,
+      "@katakanaPrefix": `${katakanaQuery}%`,
+      "@championsOnly": championsOnly ? 1 : 0,
+      "@limit": Math.max(1, Math.min(limit, 100)),
+      "@offset": Math.max(0, offset),
     },
   );
 
@@ -277,7 +277,7 @@ export async function getPokemonDetail(
       WHERE forms.id = @id
       ORDER BY form_types.slot
     `,
-    { id },
+    { "@id": id },
   );
 
   if (rows.length === 0) return null;
@@ -299,7 +299,7 @@ export async function getPokemonDetail(
         WHERE form_abilities.form_id = @id
         ORDER BY form_abilities.is_hidden, form_abilities.slot
       `,
-      { id },
+      { "@id": id },
     ),
     sqliteWorkerClient.catalogQuery<PokemonStatRow>(
       `
@@ -313,7 +313,7 @@ export async function getPokemonDetail(
         WHERE form_stats.form_id = @id AND stats.is_battle_only = 0
         ORDER BY stats.game_index
       `,
-      { id },
+      { "@id": id },
     ),
     base.isMega
       ? sqliteWorkerClient.catalogQuery<DefaultFormRow>(
@@ -323,7 +323,7 @@ export async function getPokemonDetail(
             WHERE species_id = @speciesId AND is_default = 1
             LIMIT 1
           `,
-          { speciesId: base.speciesId },
+          { "@speciesId": base.speciesId },
         )
       : Promise.resolve([]),
   ]);
@@ -340,7 +340,7 @@ export async function getPokemonDetail(
         ORDER BY version_groups.sort_order DESC
         LIMIT 1
       `,
-      { moveSourceFormId },
+      { "@moveSourceFormId": moveSourceFormId },
     );
   const latestVersionGroup = latestVersionGroups[0];
   // 技は最も新しいversion_groupだけを採用し、同じ技が複数習得方法で出る場合は1件へまとめる。
@@ -376,8 +376,8 @@ export async function getPokemonDetail(
             moves.id
         `,
         {
-          moveSourceFormId,
-          versionGroupId: latestVersionGroup.id,
+          "@moveSourceFormId": moveSourceFormId,
+          "@versionGroupId": latestVersionGroup.id,
         },
       )
     : [];
@@ -434,7 +434,7 @@ export async function getPokemonDetail(
 export async function isChampionsForm(id: number): Promise<boolean> {
   const rows = await sqliteWorkerClient.catalogQuery(
     "SELECT 1 AS found FROM champions_forms WHERE form_id = @id LIMIT 1",
-    { id },
+    { "@id": id },
   );
   return rows.length > 0;
 }

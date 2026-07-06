@@ -7,6 +7,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { TypeMatchupModalButton } from "./type-matchup-modal-button";
 import styles from "./site-header.module.css";
 
 const navigationItems = [
@@ -66,6 +67,7 @@ export function SiteHeader() {
               {label}
             </Link>
           ))}
+          <TypeMatchupModalButton onOpen={() => setMenuOpen(false)} />
         </nav>
       </div>
     </header>

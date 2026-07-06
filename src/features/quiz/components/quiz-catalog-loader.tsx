@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import type { TypeMatchup } from "@/domain/type-matchup";
-import TypeMatchupMatrix from "./type-matchup-matrix";
 import QuizGame from "./quiz-game";
 import {
   getPokemonImagesByType,
@@ -13,7 +12,7 @@ import styles from "../styles/quiz-page.module.css";
 
 /**
  * クイズ画面のClient Loader。
- * catalog.dbからタイプ相性と画像候補を読み、クイズ本体と相性表へ同じデータを渡す。
+ * catalog.dbからタイプ相性と画像候補を読み、クイズ本体へ渡す。
  */
 export default function QuizCatalogLoader() {
   const [typeMatchups, setTypeMatchups] = useState<TypeMatchup[]>([]);
@@ -62,13 +61,10 @@ export default function QuizCatalogLoader() {
   });
 
   return (
-    <>
-      <QuizGame
-        initialQuestions={initialQuestions}
-        typeMatchups={typeMatchups}
-        pokemonImagesByType={pokemonImagesByType}
-      />
-      <TypeMatchupMatrix typeMatchups={typeMatchups} />
-    </>
+    <QuizGame
+      initialQuestions={initialQuestions}
+      typeMatchups={typeMatchups}
+      pokemonImagesByType={pokemonImagesByType}
+    />
   );
 }
