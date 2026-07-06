@@ -2,8 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { PokemonSearchResult } from "@/infrastructure/database/pokemon-search-repository";
+import type { TrainingBuild } from "@/features/training/infrastructure/training-build-repository";
 import {
   getPokemonCardStyle,
   getTypeBadgeStyle,
@@ -25,6 +33,7 @@ type PokemonResultsProps = {
   initialItems: PokemonSearchResult[];
   initialHasMore: boolean;
   resultBasePath?: string;
+  includeTrainingBuilds?: boolean;
 };
 
 async function fetchPage(
@@ -57,14 +66,33 @@ export function PokemonResults({
   initialItems,
   initialHasMore,
   resultBasePath = "/pokemon",
+  includeTrainingBuilds = false,
 }: PokemonResultsProps) {
   const [pages, setPages] = useState<ResultPage[]>([
     { offset: 0, items: initialItems, hasMore: initialHasMore },
   ]);
   const [error, setError] = useState<string | null>(null);
+  const [trainingBuilds, setTrainingBuilds] = useState<TrainingBuild[]>([]);
   const topSentinelRef = useRef<HTMLDivElement>(null);
   const bottomSentinelRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
+
+  useEffect(() => {
+    if (!includeTrainingBuilds) return;
+
+    let active = true;
+    void import("@/features/training/infrastructure/training-build-repository")
+      .then(({ getAllTrainingBuilds }) => getAllTrainingBuilds())
+      .then((savedBuilds) => {
+        if (active) setTrainingBuilds(savedBuilds);
+      })
+      .catch((caught: unknown) => {
+        console.error("保存した育成案を一覧へ統合できませんでした。", caught);
+      });
+    return () => {
+      active = false;
+    };
+  }, [includeTrainingBuilds]);
 
   const loadPrevious = useCallback(async () => {
     const firstPage = pages[0];
@@ -150,10 +178,26 @@ export function PokemonResults({
     return () => observer.disconnect();
   }, [loadNext, loadPrevious]);
 
+  const visiblePokemonIds = useMemo(
+    () => new Set(pages.flatMap((page) => page.items.map(({ id }) => id))),
+    [pages],
+  );
+  const visibleTrainingBuildCount = trainingBuilds.filter((build) =>
+    visiblePokemonIds.has(build.pokemonId),
+  ).length;
+  const trainingBuildsByPokemonId = useMemo(() => {
+    const buildsByPokemonId = new Map<number, TrainingBuild[]>();
+    for (const build of trainingBuilds) {
+      const builds = buildsByPokemonId.get(build.pokemonId) ?? [];
+      builds.push(build);
+      buildsByPokemonId.set(build.pokemonId, builds);
+    }
+    return buildsByPokemonId;
+  }, [trainingBuilds]);
   const visibleCount = pages.reduce(
     (count, page) => count + page.items.length,
     0,
-  );
+  ) + visibleTrainingBuildCount;
 
   if (initialItems.length === 0) {
     return (
@@ -178,44 +222,73 @@ export function PokemonResults({
           key={page.offset}
         >
           {page.items.map((pokemon) => (
-            <Link
-              className={styles.card}
-              style={getPokemonCardStyle(pokemon.types)}
-              href={{
-                pathname: `${resultBasePath}/${pokemon.id}`,
-                query:
-                  query || championsOnly
-                    ? {
-                        ...(query ? { q: query } : {}),
-                        ...(championsOnly ? { champions: "1" } : {}),
-                      }
-                    : undefined,
-              }}
-              key={pokemon.id}
-            >
-              <div className={styles.imageArea}>
-                {pokemon.imageUrl ? (
-                  <Image
-                    src={pokemon.imageUrl}
-                    alt={pokemon.nameJa}
-                    width={200}
-                    height={200}
-                    sizes="(max-width: 560px) 42vw, 200px"
-                  />
-                ) : null}
-              </div>
-              <div className={styles.cardBody}>
-                <h3>{pokemon.nameJa}</h3>
-                <p>{pokemon.name}</p>
-                <div className={styles.types}>
-                  {pokemon.types.map((type, index) => (
-                    <span key={type} style={getTypeBadgeStyle(type)}>
-                      {pokemon.typeNamesJa[index] ?? type}
-                    </span>
-                  ))}
+            <Fragment key={pokemon.id}>
+              <Link
+                className={styles.card}
+                style={getPokemonCardStyle(pokemon.types)}
+                href={{
+                  pathname: `${resultBasePath}/${pokemon.id}`,
+                  query:
+                    query || championsOnly
+                      ? {
+                          ...(query ? { q: query } : {}),
+                          ...(championsOnly ? { champions: "1" } : {}),
+                        }
+                      : undefined,
+                }}
+              >
+                <div className={styles.imageArea}>
+                  {pokemon.imageUrl ? (
+                    <Image
+                      src={pokemon.imageUrl}
+                      alt={pokemon.nameJa}
+                      width={200}
+                      height={200}
+                      sizes="(max-width: 560px) 42vw, 200px"
+                    />
+                  ) : null}
                 </div>
-              </div>
-            </Link>
+                <div className={styles.cardBody}>
+                  <h3>{pokemon.nameJa}</h3>
+                  <p>{pokemon.name}</p>
+                  <div className={styles.types}>
+                    {pokemon.types.map((type, index) => (
+                      <span key={type} style={getTypeBadgeStyle(type)}>
+                        {pokemon.typeNamesJa[index] ?? type}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </Link>
+              {(trainingBuildsByPokemonId.get(pokemon.id) ?? []).map(
+                (build) =>
+                  build.id !== undefined ? (
+                    <Link
+                      className={`${styles.card} ${styles.savedBuildCard}`}
+                      style={getPokemonCardStyle(pokemon.types)}
+                      href={`${resultBasePath}/${pokemon.id}?build=${build.id}`}
+                      key={`build-${build.id}`}
+                    >
+                      <div className={styles.imageArea}>
+                        {pokemon.imageUrl ? (
+                          <Image
+                            src={pokemon.imageUrl}
+                            alt=""
+                            width={200}
+                            height={200}
+                            sizes="(max-width: 560px) 42vw, 200px"
+                          />
+                        ) : null}
+                        <span className={styles.savedBuildBadge}>保存済み</span>
+                      </div>
+                      <div className={styles.cardBody}>
+                        <h3>{build.name}</h3>
+                        <p>{pokemon.nameJa}の育成案</p>
+                      </div>
+                    </Link>
+                  ) : null,
+              )}
+            </Fragment>
           ))}
         </div>
       ))}

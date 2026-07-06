@@ -46,6 +46,7 @@ export function TrainingSimulator({
   const [isNatureMatrixOpen, setNatureMatrixOpen] = useState(false);
   const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
   const [buildName, setBuildName] = useState("");
+  const [savedBuildName, setSavedBuildName] = useState<string | null>(null);
   const [saveError, setSaveError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [toast, setToast] = useState<{
@@ -72,6 +73,7 @@ export function TrainingSimulator({
       setMoveIds([...build.moveIds, "", "", "", ""].slice(0, 4));
       setItemId(build.itemId ?? "");
       setBuildName(build.name ?? "");
+      setSavedBuildName(build.name ?? "");
     });
     return () => { active = false; };
   }, [initialBuildId, pokemon.id]);
@@ -140,6 +142,7 @@ export function TrainingSimulator({
         updatedAt: Date.now(),
       });
       setSaved(true);
+      setSavedBuildName(normalizedName);
       setSaveDialogOpen(false);
       setToast({ type: "success", message: "保存しました" });
     } catch (error: unknown) {
@@ -158,7 +161,15 @@ export function TrainingSimulator({
   return (
     <section className={styles.simulator}>
       <div className={styles.hero} style={getPokemonCardStyle(pokemon.types)}>
-        <div><p>CHAMPIONS TRAINING</p><h1>{pokemon.nameJa}</h1><span>{pokemon.name}</span></div>
+        <div>
+          <p>CHAMPIONS TRAINING</p>
+          <h1>{savedBuildName || pokemon.nameJa}</h1>
+          <span>
+            {savedBuildName
+              ? `元のポケモン: ${pokemon.nameJa} / ${pokemon.name}`
+              : pokemon.name}
+          </span>
+        </div>
         {pokemon.imageUrl ? <Image src={pokemon.imageUrl} alt={pokemon.nameJa} width={190} height={190} /> : null}
       </div>
       <div className={styles.settings}>

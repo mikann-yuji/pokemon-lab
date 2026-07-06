@@ -41,6 +41,7 @@ export default async function TrainingSearchPage({
             initialItems={results.slice(0, PAGE_SIZE)}
             initialHasMore={results.length > PAGE_SIZE}
             resultBasePath="/training"
+            includeTrainingBuilds
           />
         </section>
       </div>

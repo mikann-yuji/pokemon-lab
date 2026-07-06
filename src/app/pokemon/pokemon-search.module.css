@@ -256,6 +256,7 @@
 }
 
 .imageArea {
+  position: relative;
   display: grid;
   min-height: 12rem;
   place-items: center;
@@ -499,6 +500,22 @@
   gap: 0.55rem;
   align-items: center;
   margin: 0;
+  font-weight: 900;
+}
+
+.savedBuildCard {
+  border-style: dashed;
+}
+
+.savedBuildBadge {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: #2857a4;
+  color: white;
+  font-size: 0.7rem;
   font-weight: 900;
 }
 
