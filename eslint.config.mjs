@@ -13,8 +13,13 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    ".next-sqlite-*/**",
     "out/**",
     "build/**",
+    "public/sqlite-wasm/**",
+    "public/sqlite-runtime-worker.mjs",
+    "public/sqlite-runtime-diagnostic.html",
+    "public/sqlite-catalog.db.gz",
     "next-env.d.ts",
   ]),
 ]);

@@ -74,7 +74,7 @@ export function DamageCalculator({
     DamageHistoryRecord[]
   >([]);
 
-  // IndexedDBはブラウザ専用なので、初回表示後に最近使った履歴を読み込む。
+  // user.dbはブラウザ専用なので、初回表示後に最近使った履歴を読み込む。
   useEffect(() => {
     let active = true;
 

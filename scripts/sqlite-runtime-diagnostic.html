@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>SQLite WASM Runtime Diagnostic</title>
+  </head>
+  <body>
+    <main id="result">SQLite WASM を初期化しています…</main>
+    <script type="module">
+      const result = document.querySelector("#result");
+      if (location.search.includes("reset=1")) {
+        const root = await navigator.storage.getDirectory();
+        await root.removeEntry(".pokemon-lab-sahpool", { recursive: true }).catch(() => {});
+      }
+      const worker = new Worker("/sqlite-runtime-worker.mjs", {
+        type: "module",
+        name: "pokemon-lab-sqlite-diagnostic",
+      });
+      let nextRequestId = 1;
+      let timeoutId = 0;
+      const pending = new Map();
+
+      function request(type, payload) {
+        const id = nextRequestId++;
+        return new Promise((resolve, reject) => {
+          const timer = window.setTimeout(() => {
+            pending.delete(id);
+            reject(new Error(`SQLite Worker の ${type} 処理がタイムアウトしました。`));
+          }, 20000);
+          pending.set(id, { resolve, reject, timer });
+          worker.postMessage({ id, type, payload });
+        });
+      }
+
+      worker.addEventListener("message", (event) => {
+        const response = event.data;
+        const current = pending.get(response.id);
+        if (!current) return;
+        window.clearTimeout(current.timer);
+        pending.delete(response.id);
+        if (response.ok) current.resolve(response.result);
+        else current.reject(new Error(`${response.error.name}: ${response.error.message}`));
+      });
+      worker.addEventListener("error", (event) => {
+        window.clearTimeout(timeoutId);
+        result.textContent = `失敗: ${event.message}`;
+        worker.terminate();
+      });
+
+      async function runRepositoryDiagnostics() {
+        const token = crypto.randomUUID();
+        const pokemonId = -Math.floor(Date.now() / 1000);
+        const contentKey = `diagnostic:${token}`;
+        const questionKey = `diagnostic:${token}`;
+        let buildId;
+        let teamId;
+
+        try {
+          const insertedBuild = await request("execute", {
+            sql: "INSERT INTO training_builds (name, content_key, pokemon_id, nature, item_id, ability_points_json, move_ids_json, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            bind: [
+              "SQLite診断用育成案",
+              contentKey,
+              pokemonId,
+              "serious",
+              "",
+              JSON.stringify({ hp: 1 }),
+              JSON.stringify(["diagnostic-move"]),
+              Date.now(),
+            ],
+          });
+          buildId = Number(insertedBuild.lastInsertRowId);
+
+          const builds = await request("query", {
+            sql: "SELECT id, name FROM training_builds WHERE content_key = ?",
+            bind: [contentKey],
+          });
+
+          const teamResults = await request("transaction", {
+            statements: [
+              {
+                sql: "INSERT INTO battle_teams (name, updated_at) VALUES (?, ?)",
+                bind: ["SQLite診断用チーム", Date.now()],
+              },
+              {
+                sql: "INSERT INTO battle_team_members (team_id, build_id, position) VALUES (?, ?, ?)",
+                bind: [null, buildId, 0],
+                bindReferences: [
+                  { bindIndex: 0, resultIndex: 0, field: "lastInsertRowId" },
+                ],
+              },
+            ],
+          });
+          teamId = Number(teamResults[0].lastInsertRowId);
+          const teamMembers = await request("query", {
+            sql: "SELECT build_id FROM battle_team_members WHERE team_id = ?",
+            bind: [teamId],
+          });
+
+          await request("execute", {
+            sql: "INSERT INTO quiz_mistakes (question_key, updated_at) VALUES (?, ?) ON CONFLICT(question_key) DO UPDATE SET updated_at = excluded.updated_at",
+            bind: [questionKey, Date.now()],
+          });
+          await request("execute", {
+            sql: "INSERT INTO quiz_hints (question_key, text, updated_at) VALUES (?, ?, ?) ON CONFLICT(question_key) DO UPDATE SET text = excluded.text, updated_at = excluded.updated_at",
+            bind: [questionKey, "SQLite診断用ヒント", Date.now()],
+          });
+          const quizRows = await request("query", {
+            sql: "SELECT text FROM quiz_hints WHERE question_key = ?",
+            bind: [questionKey],
+          });
+
+          await request("transaction", {
+            statements: [
+              {
+                sql: "DELETE FROM damage_history WHERE side = ? AND pokemon_id = ?",
+                bind: ["attacker", pokemonId],
+              },
+              {
+                sql: "INSERT INTO damage_history (side, pokemon_id, move_id, updated_at) VALUES (?, ?, ?, ?)",
+                bind: ["attacker", pokemonId, "diagnostic-move", Date.now()],
+              },
+            ],
+          });
+          const damageRows = await request("query", {
+            sql: "SELECT move_id FROM damage_history WHERE side = ? AND pokemon_id = ?",
+            bind: ["attacker", pokemonId],
+          });
+
+          return {
+            trainingBuild:
+              builds.length === 1 &&
+              builds[0].id === buildId &&
+              builds[0].name === "SQLite診断用育成案",
+            battleTeam:
+              teamMembers.length === 1 && teamMembers[0].build_id === buildId,
+            quiz:
+              quizRows.length === 1 &&
+              quizRows[0].text === "SQLite診断用ヒント",
+            damageHistory:
+              damageRows.length === 1 &&
+              damageRows[0].move_id === "diagnostic-move",
+          };
+        } finally {
+          if (teamId !== undefined) {
+            await request("execute", {
+              sql: "DELETE FROM battle_teams WHERE id = ?",
+              bind: [teamId],
+            });
+          }
+          await request("execute", {
+            sql: "DELETE FROM quiz_mistakes WHERE question_key = ?",
+            bind: [questionKey],
+          });
+          await request("execute", {
+            sql: "DELETE FROM quiz_hints WHERE question_key = ?",
+            bind: [questionKey],
+          });
+          await request("execute", {
+            sql: "DELETE FROM damage_history WHERE side = ? AND pokemon_id = ?",
+            bind: ["attacker", pokemonId],
+          });
+          if (buildId !== undefined) {
+            await request("execute", {
+              sql: "DELETE FROM training_builds WHERE id = ?",
+              bind: [buildId],
+            });
+          }
+        }
+      }
+
+      try {
+        timeoutId = window.setTimeout(() => {
+          result.textContent = "失敗: SQLite Worker がタイムアウトしました。";
+          worker.terminate();
+        }, 30000);
+        const initialization = await request("initialize");
+        const repositories = await runRepositoryDiagnostics();
+        window.clearTimeout(timeoutId);
+        result.textContent =
+          `成功: SQLite ${initialization.sqliteVersion}, ${initialization.vfs}, ` +
+          `userDb=${initialization.databaseFilename}, schema=${initialization.schemaVersion}, ` +
+          `userTables=${initialization.tableCount}, userRecords=${initialization.userRecordCount}, ` +
+          `catalogDb=${initialization.catalogDatabaseFilename}, ` +
+          `foreignKeys=${initialization.foreignKeysEnabled}, ` +
+          `crud=${initialization.crudVerified}, rollback=${initialization.transactionRollbackVerified}, ` +
+          `catalogSeed=${initialization.catalogSeedVersion}, ` +
+          `championsForms=${initialization.championsFormCount}, typeMatchups=${initialization.typeMatchupCount}, ` +
+          `trainingBuild=${repositories.trainingBuild}, battleTeam=${repositories.battleTeam}, ` +
+          `quiz=${repositories.quiz}, damageHistory=${repositories.damageHistory}, ` +
+          `createdAt=${initialization.databaseCreatedAt}`;
+      } catch (error) {
+        window.clearTimeout(timeoutId);
+        result.textContent =
+          error instanceof Error ? `失敗: ${error.message}` : `失敗: ${String(error)}`;
+      } finally {
+        worker.terminate();
+      }
+    </script>
+  </body>
+</html>

@@ -15,7 +15,13 @@
 
 # next.js
 /.next/
+/.next-sqlite-*/
 /out/
+/public/sqlite-wasm/
+/public/sqlite-runtime-worker.mjs
+/public/sqlite-runtime-diagnostic.html
+/public/sqlite-catalog.db.gz
+/.tmp/
 
 # production
 /build

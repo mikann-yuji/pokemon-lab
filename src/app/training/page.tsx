@@ -1,10 +1,7 @@
 import Link from "next/link";
-import { searchPokemon } from "@/infrastructure/database/pokemon-search-repository";
 import { PokemonSearchForm } from "../pokemon/pokemon-search-form";
 import { PokemonResults } from "../pokemon/pokemon-results";
 import styles from "../pokemon/pokemon-search.module.css";
-
-const PAGE_SIZE = 25;
 
 export default async function TrainingSearchPage({
   searchParams,
@@ -13,10 +10,6 @@ export default async function TrainingSearchPage({
 }) {
   const rawQuery = (await searchParams).q;
   const query = Array.isArray(rawQuery) ? rawQuery[0] : (rawQuery ?? "");
-  const results = searchPokemon(query, {
-    limit: PAGE_SIZE + 1,
-    championsOnly: true,
-  });
 
   return (
     <main className={`${styles.page} ${styles.searchPage}`}>
@@ -38,8 +31,6 @@ export default async function TrainingSearchPage({
             key={query}
             query={query}
             championsOnly
-            initialItems={results.slice(0, PAGE_SIZE)}
-            initialHasMore={results.length > PAGE_SIZE}
             resultBasePath="/training"
             includeTrainingBuilds
           />

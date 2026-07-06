@@ -1,51 +1,45 @@
-/**
- * このファイルの役割: 間違えたクイズ問題のキーをIndexedDBへ永続保存する。
- */
+import { sqliteWorkerClient } from "@/infrastructure/sqlite-wasm/sqlite-client";
+import type { SqliteRow } from "@/infrastructure/sqlite-wasm/worker-protocol";
 
-import Dexie, { type EntityTable } from "dexie";
-
-type MistakeRecord = {
-  questionKey: string;
-  updatedAt: number;
+type MistakeRow = SqliteRow & {
+  question_key: string;
 };
 
-type HintRecord = {
-  questionKey: string;
+type HintRow = SqliteRow & {
   text: string;
-  updatedAt: number;
 };
-
-const database = new Dexie("pokemon-lab-quiz") as Dexie & {
-  mistakes: EntityTable<MistakeRecord, "questionKey">;
-  hints: EntityTable<HintRecord, "questionKey">;
-};
-
-database.version(1).stores({
-  mistakes: "&questionKey, updatedAt",
-});
-database.version(2).stores({
-  mistakes: "&questionKey, updatedAt",
-  hints: "&questionKey, updatedAt",
-});
 
 export async function getMistakeKeys(): Promise<string[]> {
-  const records = await database.mistakes.orderBy("updatedAt").reverse().toArray();
-  return records.map(({ questionKey }) => questionKey);
+  const rows = await sqliteWorkerClient.query<MistakeRow>(
+    `SELECT question_key
+     FROM quiz_mistakes
+     ORDER BY updated_at DESC`,
+  );
+  return rows.map(({ question_key }) => String(question_key));
 }
 
 export async function saveMistake(questionKey: string): Promise<void> {
-  await database.mistakes.put({
-    questionKey,
-    updatedAt: Date.now(),
-  });
+  await sqliteWorkerClient.execute(
+    `INSERT INTO quiz_mistakes (question_key, updated_at)
+     VALUES (?, ?)
+     ON CONFLICT(question_key) DO UPDATE SET updated_at = excluded.updated_at`,
+    [questionKey, Date.now()],
+  );
 }
 
 export async function removeMistake(questionKey: string): Promise<void> {
-  await database.mistakes.delete(questionKey);
+  await sqliteWorkerClient.execute(
+    "DELETE FROM quiz_mistakes WHERE question_key = ?",
+    [questionKey],
+  );
 }
 
 export async function getHint(questionKey: string): Promise<string> {
-  return (await database.hints.get(questionKey))?.text ?? "";
+  const rows = await sqliteWorkerClient.query<HintRow>(
+    "SELECT text FROM quiz_hints WHERE question_key = ?",
+    [questionKey],
+  );
+  return rows[0] ? String(rows[0].text) : "";
 }
 
 export async function saveHint(
@@ -54,13 +48,19 @@ export async function saveHint(
 ): Promise<void> {
   const normalizedText = text.trim();
   if (!normalizedText) {
-    await database.hints.delete(questionKey);
+    await sqliteWorkerClient.execute(
+      "DELETE FROM quiz_hints WHERE question_key = ?",
+      [questionKey],
+    );
     return;
   }
 
-  await database.hints.put({
-    questionKey,
-    text: normalizedText,
-    updatedAt: Date.now(),
-  });
+  await sqliteWorkerClient.execute(
+    `INSERT INTO quiz_hints (question_key, text, updated_at)
+     VALUES (?, ?, ?)
+     ON CONFLICT(question_key) DO UPDATE SET
+       text = excluded.text,
+       updated_at = excluded.updated_at`,
+    [questionKey, normalizedText, Date.now()],
+  );
 }

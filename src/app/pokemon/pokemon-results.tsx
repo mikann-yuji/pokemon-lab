@@ -10,7 +10,10 @@ import {
   useRef,
   useState,
 } from "react";
-import type { PokemonSearchResult } from "@/infrastructure/database/pokemon-search-repository";
+import {
+  searchPokemon,
+  type PokemonSearchResult,
+} from "@/infrastructure/database/pokemon-search-repository";
 import type { TrainingBuild } from "@/features/training/infrastructure/training-build-repository";
 import {
   getPokemonCardStyle,
@@ -30,8 +33,8 @@ type ResultPage = {
 type PokemonResultsProps = {
   query: string;
   championsOnly: boolean;
-  initialItems: PokemonSearchResult[];
-  initialHasMore: boolean;
+  initialItems?: PokemonSearchResult[];
+  initialHasMore?: boolean;
   resultBasePath?: string;
   includeTrainingBuilds?: boolean;
 };
@@ -41,41 +44,58 @@ async function fetchPage(
   championsOnly: boolean,
   offset: number,
 ): Promise<ResultPage> {
-  const searchParams = new URLSearchParams({
-    q: query,
-    offset: String(offset),
+  const results = await searchPokemon(query, {
+    limit: PAGE_SIZE + 1,
+    offset,
+    championsOnly,
   });
-  if (championsOnly) searchParams.set("champions", "1");
-  const response = await fetch(`/api/pokemon?${searchParams}`);
 
-  if (!response.ok) {
-    throw new Error("ポケモンの読み込みに失敗しました。");
-  }
-
-  const data = (await response.json()) as {
-    items: PokemonSearchResult[];
-    hasMore: boolean;
+  return {
+    offset,
+    items: results.slice(0, PAGE_SIZE),
+    hasMore: results.length > PAGE_SIZE,
   };
-
-  return { offset, ...data };
 }
 
 export function PokemonResults({
   query,
   championsOnly,
   initialItems,
-  initialHasMore,
+  initialHasMore = false,
   resultBasePath = "/pokemon",
   includeTrainingBuilds = false,
 }: PokemonResultsProps) {
   const [pages, setPages] = useState<ResultPage[]>([
-    { offset: 0, items: initialItems, hasMore: initialHasMore },
+    {
+      offset: 0,
+      items: initialItems ?? [],
+      hasMore: initialHasMore,
+    },
   ]);
+  const [loaded, setLoaded] = useState(initialItems !== undefined);
   const [error, setError] = useState<string | null>(null);
   const [trainingBuilds, setTrainingBuilds] = useState<TrainingBuild[]>([]);
   const topSentinelRef = useRef<HTMLDivElement>(null);
   const bottomSentinelRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
+
+  useEffect(() => {
+    let active = true;
+    void fetchPage(query, championsOnly, 0)
+      .then((page) => {
+        if (!active) return;
+        setPages([page]);
+      })
+      .catch(() => {
+        if (active) setError("ポケモンを読み込めませんでした。");
+      })
+      .finally(() => {
+        if (active) setLoaded(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [championsOnly, query]);
 
   useEffect(() => {
     if (!includeTrainingBuilds) return;
@@ -159,6 +179,7 @@ export function PokemonResults({
   }, [championsOnly, pages, query]);
 
   useEffect(() => {
+    if (!loaded) return;
     const topSentinel = topSentinelRef.current;
     const bottomSentinel = bottomSentinelRef.current;
     const observer = new IntersectionObserver(
@@ -176,7 +197,7 @@ export function PokemonResults({
     if (bottomSentinel) observer.observe(bottomSentinel);
 
     return () => observer.disconnect();
-  }, [loadNext, loadPrevious]);
+  }, [loadNext, loadPrevious, loaded]);
 
   const visiblePokemonIds = useMemo(
     () => new Set(pages.flatMap((page) => page.items.map(({ id }) => id))),
@@ -199,7 +220,11 @@ export function PokemonResults({
     0,
   ) + visibleTrainingBuildCount;
 
-  if (initialItems.length === 0) {
+  if (!loaded) {
+    return <p className={styles.empty}>ポケモンを読み込んでいます…</p>;
+  }
+
+  if (pages.every((page) => page.items.length === 0)) {
     return (
       <p className={styles.empty}>
         条件に合うポケモンが見つかりませんでした。

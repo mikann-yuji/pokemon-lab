@@ -33,6 +33,19 @@
   color: #536376;
 }
 
+.statusMessage {
+  width: min(100%, 64rem);
+  margin: 0 auto;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgb(23 43 77 / 14%);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 92%);
+  color: #172b4d;
+  font-weight: 850;
+  text-align: center;
+  box-shadow: 0 12px 30px rgb(23 43 77 / 12%);
+}
+
 .calculator {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);

@@ -1,8 +1,4 @@
 import { SavedTrainingBuilds } from "@/features/training/components/saved-training-builds";
-import {
-  getHeldItems,
-  getTrainingPokemonCatalog,
-} from "@/features/training/infrastructure/training-repository";
 import styles from "../pokemon/pokemon-search.module.css";
 
 /**
@@ -14,8 +10,6 @@ export default function BattleTeamPage() {
       <div className={styles.container}>
         <SavedTrainingBuilds
           query=""
-          pokemonCatalog={getTrainingPokemonCatalog()}
-          heldItems={getHeldItems()}
           teamBuilder
         />
       </div>

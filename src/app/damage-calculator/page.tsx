@@ -1,5 +1,4 @@
-import { DamageCalculator } from "@/features/damage-calculator/components/damage-calculator";
-import { getChampionsDamageCalculatorPokemon } from "@/features/damage-calculator/infrastructure/sqlite-damage-calculator-repository";
+import { DamageCalculatorCatalogLoader } from "@/features/damage-calculator/components/damage-calculator-catalog-loader";
 import styles from "@/features/damage-calculator/styles/damage-calculator.module.css";
 
 /**
@@ -10,8 +9,6 @@ import styles from "@/features/damage-calculator/styles/damage-calculator.module
  * DBライブラリをクライアント用JavaScriptへ混ぜずに済む。
  */
 export default function DamageCalculatorPage() {
-  const pokemonCatalog = getChampionsDamageCalculatorPokemon();
-
   return (
     <main className={styles.page}>
       <header className={styles.hero}>
@@ -21,7 +18,7 @@ export default function DamageCalculatorPage() {
           Pokémon Champions登場ポケモンと技を選んで、相手のHPをどれだけ削れるか調べよう。
         </span>
       </header>
-      <DamageCalculator pokemonCatalog={pokemonCatalog} />
+      <DamageCalculatorCatalogLoader />
     </main>
   );
 }

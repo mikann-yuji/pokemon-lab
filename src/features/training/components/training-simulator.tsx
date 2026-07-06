@@ -14,7 +14,11 @@ import {
 import type {
   HeldItem,
   Nature,
-} from "../infrastructure/training-repository";
+} from "../infrastructure/training-catalog-repository";
+import {
+  getHeldItems,
+  getNatures,
+} from "../infrastructure/training-catalog-repository";
 import styles from "../styles/training-simulator.module.css";
 
 const STAT_IDS = ["hp", "attack", "defense", "special-attack", "special-defense", "speed"];
@@ -22,20 +26,30 @@ const STAT_NAMES: Record<string, string> = {
   hp: "HP", attack: "こうげき", defense: "ぼうぎょ",
   "special-attack": "とくこう", "special-defense": "とくぼう", speed: "すばやさ",
 };
+const DEFAULT_NATURE: Nature = {
+  id: "serious",
+  name: "まじめ",
+  increasedStatId: "attack",
+  decreasedStatId: "attack",
+};
+
 const initialStats = (value: number) =>
   Object.fromEntries(STAT_IDS.map((id) => [id, value]));
 
 export function TrainingSimulator({
   pokemon,
-  natures,
-  heldItems,
+  natures: initialNatures,
+  heldItems: initialHeldItems,
   initialBuildId,
 }: {
   pokemon: PokemonDetail;
-  natures: Nature[];
-  heldItems: HeldItem[];
+  natures?: Nature[];
+  heldItems?: HeldItem[];
   initialBuildId?: number;
 }) {
+  const [natures, setNatures] = useState<Nature[]>(initialNatures ?? []);
+  const [heldItems, setHeldItems] = useState<HeldItem[]>(initialHeldItems ?? []);
+  const [catalogError, setCatalogError] = useState("");
   const [nature, setNature] = useState("serious");
   const [abilityPoints, setAbilityPoints] = useState<Record<string, number>>(
     () => initialStats(0),
@@ -61,6 +75,27 @@ export function TrainingSimulator({
   }, [toast]);
 
   useEffect(() => {
+    if (initialNatures && initialHeldItems) return;
+    let active = true;
+    void Promise.all([getNatures(), getHeldItems()])
+      .then(([loadedNatures, loadedItems]) => {
+        if (!active) return;
+        setNatures(loadedNatures);
+        setHeldItems(loadedItems);
+      })
+      .catch((error: unknown) => {
+        console.error("catalog.dbから育成シミュレータ用データを読み込めませんでした。", error);
+        if (active) {
+          setCatalogError("育成シミュレータ用データを読み込めませんでした。");
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [initialHeldItems, initialNatures]);
+
+  useEffect(() => {
+    if (natures.length === 0) return;
     let active = true;
     const buildPromise = initialBuildId
       ? loadTrainingBuild(initialBuildId)
@@ -85,7 +120,8 @@ export function TrainingSimulator({
   const selectedNature =
     natures.find(({ id }) => id === nature) ??
     natures.find(({ id }) => id === "serious") ??
-    natures[0];
+    natures[0] ??
+    DEFAULT_NATURE;
   const hasNatureModifier =
     selectedNature.increasedStatId !== selectedNature.decreasedStatId;
   // ChampionsではLv.50・個体値31固定。能力ポイントは性格補正の内側へ直接加算する。
@@ -173,6 +209,7 @@ export function TrainingSimulator({
 
   return (
     <section className={styles.simulator}>
+      {catalogError ? <p role="alert">{catalogError}</p> : null}
       <div className={styles.hero} style={getPokemonCardStyle(pokemon.types)}>
         <div>
           <p>CHAMPIONS TRAINING</p>

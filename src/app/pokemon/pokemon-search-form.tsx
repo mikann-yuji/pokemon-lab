@@ -3,7 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useCombobox } from "downshift";
 import { useEffect, useState } from "react";
-import type { PokemonSearchResult } from "@/infrastructure/database/pokemon-search-repository";
+import {
+  searchPokemon,
+  type PokemonSearchResult,
+} from "@/infrastructure/database/pokemon-search-repository";
 import styles from "./pokemon-search.module.css";
 
 type PokemonSearchFormProps = {
@@ -64,20 +67,12 @@ export function PokemonSearchForm({
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       try {
-        const searchParams = new URLSearchParams({
-          q: normalizedQuery,
-          offset: "0",
+        if (controller.signal.aborted) return;
+        const items = await searchPokemon(normalizedQuery, {
+          limit: 8,
+          championsOnly,
         });
-        if (championsOnly) searchParams.set("champions", "1");
-        const response = await fetch(`/api/pokemon?${searchParams}`, {
-          signal: controller.signal,
-        });
-        if (!response.ok) return;
-
-        const data = (await response.json()) as {
-          items: PokemonSearchResult[];
-        };
-        setSuggestions(data.items.slice(0, 8));
+        if (!controller.signal.aborted) setSuggestions(items.slice(0, 8));
       } catch (error) {
         if (!(error instanceof DOMException && error.name === "AbortError")) {
           setSuggestions([]);

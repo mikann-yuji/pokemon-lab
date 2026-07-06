@@ -19,24 +19,34 @@ import {
 import type {
   HeldItem,
   TrainingPokemon,
-} from "../infrastructure/training-repository";
+} from "../infrastructure/training-catalog-repository";
+import {
+  getHeldItems,
+  getTrainingPokemonCatalog,
+} from "../infrastructure/training-catalog-repository";
 import styles from "../styles/saved-training-builds.module.css";
 
 export function SavedTrainingBuilds({
   query,
-  pokemonCatalog,
-  heldItems,
+  pokemonCatalog: initialPokemonCatalog,
+  heldItems: initialHeldItems,
   teamBuilder = false,
   showEmptyState = false,
 }: {
   query: string;
-  pokemonCatalog: TrainingPokemon[];
-  heldItems: HeldItem[];
+  pokemonCatalog?: TrainingPokemon[];
+  heldItems?: HeldItem[];
   teamBuilder?: boolean;
   showEmptyState?: boolean;
 }) {
   const [builds, setBuilds] = useState<TrainingBuild[]>([]);
   const [teams, setTeams] = useState<BattleTeam[]>([]);
+  const [pokemonCatalog, setPokemonCatalog] = useState<TrainingPokemon[]>(
+    initialPokemonCatalog ?? [],
+  );
+  const [heldItems, setHeldItems] = useState<HeldItem[]>(
+    initialHeldItems ?? [],
+  );
   const [selectedBuildIds, setSelectedBuildIds] = useState<Set<number>>(
     new Set(),
   );
@@ -44,6 +54,9 @@ export function SavedTrainingBuilds({
   const [teamError, setTeamError] = useState("");
   const [teamSaved, setTeamSaved] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [catalogLoaded, setCatalogLoaded] = useState(
+    initialPokemonCatalog !== undefined && initialHeldItems !== undefined,
+  );
   const [loadError, setLoadError] = useState("");
   const pokemonById = useMemo(
     () => new Map(pokemonCatalog.map((pokemon) => [pokemon.id, pokemon])),
@@ -53,6 +66,27 @@ export function SavedTrainingBuilds({
     () => new Map(heldItems.map((item) => [item.id, item.name])),
     [heldItems],
   );
+
+  useEffect(() => {
+    if (initialPokemonCatalog && initialHeldItems) return;
+    let active = true;
+    void Promise.all([getTrainingPokemonCatalog(), getHeldItems()])
+      .then(([catalog, items]) => {
+        if (!active) return;
+        setPokemonCatalog(catalog);
+        setHeldItems(items);
+        setCatalogLoaded(true);
+      })
+      .catch((error: unknown) => {
+        console.error("catalog.dbから育成カタログを読み込めませんでした。", error);
+        if (active) {
+          setLoadError("育成カタログを読み込めませんでした。");
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [initialHeldItems, initialPokemonCatalog]);
   const buildById = useMemo(
     () =>
       new Map(
@@ -161,7 +195,6 @@ export function SavedTrainingBuilds({
     );
   });
 
-  if (!loaded) return null;
   if (loadError) {
     return (
       <section className={styles.savedSection}>
@@ -171,6 +204,7 @@ export function SavedTrainingBuilds({
       </section>
     );
   }
+  if (!loaded || !catalogLoaded) return null;
   if (builds.length === 0) {
     return teamBuilder || showEmptyState ? (
       <section className={styles.savedSection}>

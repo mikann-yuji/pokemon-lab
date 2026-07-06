@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "sqlite:assets": "node scripts/copy-sqlite-wasm-assets.mjs && node scripts/export-sqlite-catalog-db.mjs",
     "db:init": "node scripts/init-db.mjs",
-    "predev": "npm run db:init",
+    "predev": "npm run sqlite:assets && npm run db:init",
     "dev": "next dev",
-    "prebuild": "npm run db:init",
+    "prebuild": "npm run sqlite:assets && npm run db:init",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -18,8 +19,8 @@
   },
   "dependencies": {
     "@smogon/calc": "^0.11.0",
+    "@sqlite.org/sqlite-wasm": "^3.53.0-build1",
     "better-sqlite3": "^12.11.1",
-    "dexie": "^4.4.4",
     "downshift": "^9.4.0",
     "next": "16.2.10",
     "react": "19.2.4",

@@ -6,7 +6,7 @@
 1. `domain/damage-calculator-types.ts`
    - 各処理が受け渡すポケモンと技の形を定義します。
    - React、SQLite、Smogonのどれにも依存しない境界です。
-2. `infrastructure/sqlite-damage-calculator-repository.ts`
+2. `infrastructure/damage-calculator-catalog-repository.ts`
    - SQLiteから種族値、タイプ、習得技を読みます。
    - DBの複数行をdomainの型へ組み立てます。
 3. `config/champions-damage-ruleset.ts`
@@ -19,7 +19,7 @@
    - ユーザー入力と結果表示を担当します。
    - 計算式やSQLiteへの問い合わせは持ちません。
 6. `infrastructure/damage-history-repository.ts`
-   - 最近計算に使ったポケモンと技のIDをIndexedDBへ保存します。
+   - 最近計算に使ったポケモンと技のIDをuser.dbへ保存します。
    - 攻撃側・防御側それぞれ最新6件まで保持します。
 7. `styles/`
    - ダメージ計算ページ専用の見た目を定義します。
@@ -46,7 +46,7 @@ SmogonDamageCalculator
 検索や計算のたびにAPIへアクセスしないため、一度PWAへキャッシュされた後は
 ネットワーク接続がなくても計算できます。
 
-最近使った履歴もブラウザ内のIndexedDBへ保存されるため、オフラインで
+最近使った履歴もブラウザ内のOPFS上にあるuser.dbへ保存されるため、オフラインで
 画像ボタンからポケモンと技を再選択できます。種族値や技の詳細は重複保存せず、
 SQLite由来カタログのIDを参照する設計です。
 

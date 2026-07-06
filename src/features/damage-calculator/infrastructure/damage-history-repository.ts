@@ -1,75 +1,79 @@
-/**
- * このファイルの役割:
- * ダメージ計算で最近使ったポケモンと技をIndexedDBへ保存する。
- *
- * ポケモンの種族値などはSQLite由来のカタログを正とするため、
- * IndexedDBにはフォームIDと技IDだけを保存する。
- */
-
-import Dexie, { type EntityTable } from "dexie";
+import { sqliteWorkerClient } from "@/infrastructure/sqlite-wasm/sqlite-client";
+import type { SqliteRow } from "@/infrastructure/sqlite-wasm/worker-protocol";
 
 export type DamageHistorySide = "attacker" | "defender";
 
 export type DamageHistoryRecord = {
-  /** 攻撃側・防御側ごとに同じポケモンを1件へまとめるための主キー。 */
   id: string;
   side: DamageHistorySide;
   pokemonId: number;
-  /** 攻撃側で使用した技。防御側では保存しない。 */
   moveId?: string;
   updatedAt: number;
 };
 
-const HISTORY_LIMIT = 6;
-
-const database = new Dexie("pokemon-lab-damage-calculator") as Dexie & {
-  history: EntityTable<DamageHistoryRecord, "id">;
+type DamageHistoryRow = SqliteRow & {
+  side: DamageHistorySide;
+  pokemon_id: number;
+  move_id: string | null;
+  updated_at: number;
 };
 
-database.version(1).stores({
-  history: "&id, side, updatedAt",
-});
+const HISTORY_LIMIT = 6;
 
-/**
- * 指定した側で最近使った履歴を、新しい順に返す。
- */
+function toDamageHistory(row: DamageHistoryRow): DamageHistoryRecord {
+  const side = String(row.side) as DamageHistorySide;
+  const pokemonId = Number(row.pokemon_id);
+  return {
+    id: `${side}:${pokemonId}`,
+    side,
+    pokemonId,
+    ...(row.move_id === null ? {} : { moveId: String(row.move_id) }),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
 export async function getDamageHistory(
   side: DamageHistorySide,
 ): Promise<DamageHistoryRecord[]> {
-  const records = await database.history.where("side").equals(side).toArray();
-  return records
-    .sort((left, right) => right.updatedAt - left.updatedAt)
-    .slice(0, HISTORY_LIMIT);
+  const rows = await sqliteWorkerClient.query<DamageHistoryRow>(
+    `SELECT side, pokemon_id, move_id, updated_at
+     FROM damage_history
+     WHERE side = ?
+     ORDER BY updated_at DESC, id DESC
+     LIMIT ?`,
+    [side, HISTORY_LIMIT],
+  );
+  return rows.map(toDamageHistory);
 }
 
-/**
- * 計算に使った選択を保存し、古い履歴が増え続けないよう上限を超えた分を削除する。
- */
 export async function saveDamageHistory(
   side: DamageHistorySide,
   pokemonId: number,
   moveId?: string,
 ): Promise<DamageHistoryRecord[]> {
-  const record: DamageHistoryRecord = {
-    id: `${side}:${pokemonId}`,
-    side,
-    pokemonId,
-    ...(moveId ? { moveId } : {}),
-    updatedAt: Date.now(),
-  };
-
-  await database.history.put(record);
-  const records = await database.history.where("side").equals(side).toArray();
-  const sortedRecords = records.sort(
-    (left, right) => right.updatedAt - left.updatedAt,
-  );
-  const expiredIds = sortedRecords
-    .slice(HISTORY_LIMIT)
-    .map(({ id }) => id);
-
-  if (expiredIds.length > 0) {
-    await database.history.bulkDelete(expiredIds);
-  }
-
-  return sortedRecords.slice(0, HISTORY_LIMIT);
+  const now = Date.now();
+  await sqliteWorkerClient.transaction([
+    {
+      sql: "DELETE FROM damage_history WHERE side = ? AND pokemon_id = ?",
+      bind: [side, pokemonId],
+    },
+    {
+      sql: `INSERT INTO damage_history
+              (side, pokemon_id, move_id, updated_at)
+            VALUES (?, ?, ?, ?)`,
+      bind: [side, pokemonId, moveId ?? null, now],
+    },
+    {
+      sql: `DELETE FROM damage_history
+            WHERE side = ?
+              AND id NOT IN (
+                SELECT id FROM damage_history
+                WHERE side = ?
+                ORDER BY updated_at DESC, id DESC
+                LIMIT ?
+              )`,
+      bind: [side, side, HISTORY_LIMIT],
+    },
+  ]);
+  return getDamageHistory(side);
 }
