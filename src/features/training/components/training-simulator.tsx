@@ -38,6 +38,13 @@ type StatRankingRow = {
   uninvested: number;
   maximum: number;
 };
+type DisplayStatRankingRow = {
+  id: string;
+  name: string;
+  uninvested: number;
+  maximum: number;
+  isTrainingTarget: boolean;
+};
 type StatCompareMode = "uninvested" | "maximum";
 
 /** 6能力すべてに同じ初期値を入れた能力ポイント表を作る。 */
@@ -497,15 +504,34 @@ function StatRankingOverlay({
     useState<StatCompareMode>("uninvested");
   const targetRowRef = useRef<HTMLTableRowElement | null>(null);
   const sortedRows = useMemo(
-    () =>
-      [...rows].sort(
+    () => {
+      const displayRows: DisplayStatRankingRow[] = [
+        ...rows.map((row) => ({
+          id: String(row.profile.id),
+          name: row.profile.nameJa,
+          uninvested: row.uninvested,
+          maximum: row.maximum,
+          isTrainingTarget: false,
+        })),
+        {
+          id: "training-target",
+          name: `${pokemonName}（育成中）`,
+          uninvested: actualValue,
+          maximum: actualValue,
+          isTrainingTarget: true,
+        },
+      ];
+      return displayRows.sort(
         (left, right) =>
           right[compareMode] - left[compareMode] ||
           right.maximum - left.maximum ||
           right.uninvested - left.uninvested ||
-          left.profile.nameJa.localeCompare(right.profile.nameJa, "ja"),
-      ),
-    [compareMode, rows],
+          (right.isTrainingTarget ? 1 : 0) -
+            (left.isTrainingTarget ? 1 : 0) ||
+          left.name.localeCompare(right.name, "ja"),
+      );
+    },
+    [actualValue, compareMode, pokemonName, rows],
   );
   const actualRank =
     sortedRows.length > 0
@@ -515,9 +541,7 @@ function StatRankingOverlay({
         )
       : null;
   const targetRowIndex =
-    actualRank === null
-      ? -1
-      : Math.min(sortedRows.length - 1, Math.max(0, actualRank - 1));
+    sortedRows.findIndex((row) => row.isTrainingTarget);
 
   useEffect(() => {
     targetRowRef.current?.scrollIntoView({ block: "center" });
@@ -593,11 +617,11 @@ function StatRankingOverlay({
             <tbody>
               {sortedRows.map((row, index) => (
                 <tr
-                  className={index === targetRowIndex ? styles.targetRankRow : undefined}
-                  key={row.profile.id}
+                  className={row.isTrainingTarget ? styles.targetRankRow : undefined}
+                  key={row.id}
                   ref={index === targetRowIndex ? targetRowRef : null}
                 >
-                  <th scope="row">{row.profile.nameJa}</th>
+                  <th scope="row">{row.name}</th>
                   <td>{row.uninvested}</td>
                   <td>{row.maximum}</td>
                 </tr>
