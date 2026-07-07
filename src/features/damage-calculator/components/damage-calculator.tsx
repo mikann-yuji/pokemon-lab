@@ -9,6 +9,7 @@
  */
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   CHAMPIONS_DAMAGE_RULESET,
@@ -78,6 +79,7 @@ type StatAdjustmentState = Record<
   Record<AdjustableStatId, StatAdjustment>
 >;
 type TeamSelectionState = Record<DamageSide, number | null>;
+type BuildSelectionState = Record<DamageSide, number | null>;
 type SpeedComparisonRow = {
   id: string;
   label: string;
@@ -100,6 +102,15 @@ const ADJUSTABLE_STAT_IDS = [
   "special-attack",
   "special-defense",
 ] as const satisfies readonly AdjustableStatId[];
+
+const BASE_STAT_LABELS: Record<(typeof STAT_IDS)[number], string> = {
+  hp: "H",
+  attack: "A",
+  defense: "B",
+  "special-attack": "C",
+  "special-defense": "D",
+  speed: "S",
+};
 
 function createDefaultAdjustment(): StatAdjustment {
   return { point: 0, rank: 0, nature: false };
@@ -379,6 +390,10 @@ export function DamageCalculator({
     attacker: null,
     defender: null,
   });
+  const [selectedBuildIds, setSelectedBuildIds] = useState<BuildSelectionState>({
+    attacker: null,
+    defender: null,
+  });
   const [teamModalSide, setTeamModalSide] = useState<DamageSide | null>(null);
   const [speedModalOpen, setSpeedModalOpen] = useState(false);
   const [teamLoadError, setTeamLoadError] = useState("");
@@ -427,6 +442,19 @@ export function DamageCalculator({
       defender: toMembers(selectedTeams.defender),
     };
   }, [buildById, pokemonCatalog, selectedTeams]);
+  const getTrainingDetailHref = (
+    pokemon: DamageCalculatorPokemon | null,
+    buildId: number | null,
+  ) => {
+    if (!pokemon) return undefined;
+    const linkedBuildId =
+      buildId ??
+      trainingBuilds.find((build) => build.pokemonId === pokemon.id)?.id ??
+      null;
+    return linkedBuildId
+      ? `/training/${pokemon.id}?build=${linkedBuildId}`
+      : `/training/${pokemon.id}`;
+  };
 
   // user.dbはブラウザ専用なので、初回表示後に最近使った履歴を読み込む。
   useEffect(() => {
@@ -474,6 +502,7 @@ export function DamageCalculator({
   // 攻撃側を変更したら、前のポケモンの技や計算結果を残さない。
   function selectAttacker(pokemon: DamageCalculatorPokemon | null) {
     attackerSelection.select(pokemon);
+    setSelectedBuildIds((current) => ({ ...current, attacker: null }));
     setStatAdjustments((current) => ({
       ...current,
       attacker: createDefaultAdjustmentState().attacker,
@@ -486,6 +515,7 @@ export function DamageCalculator({
   // 防御側を変更した場合も、古い相手に対する結果を消す。
   function selectDefender(pokemon: DamageCalculatorPokemon | null) {
     defenderSelection.select(pokemon);
+    setSelectedBuildIds((current) => ({ ...current, defender: null }));
     setStatAdjustments((current) => ({
       ...current,
       defender: createDefaultAdjustmentState().defender,
@@ -547,6 +577,10 @@ export function DamageCalculator({
     );
     const selection = side === "attacker" ? attackerSelection : defenderSelection;
     selection.select(trainedPokemon);
+    setSelectedBuildIds((current) => ({
+      ...current,
+      [side]: build.id ?? null,
+    }));
     setStatAdjustments((current) => ({
       ...current,
       [side]: createStatAdjustmentsFromBuild(build, natures),
@@ -575,6 +609,10 @@ export function DamageCalculator({
       attacker: current.defender,
       defender: current.attacker,
     }));
+    setSelectedBuildIds((current) => ({
+      attacker: current.defender,
+      defender: current.attacker,
+    }));
     setMoveId(
       defender?.moves.some(({ id }) => id === moveId)
         ? moveId
@@ -599,6 +637,7 @@ export function DamageCalculator({
 
     if (side === "attacker") {
       attackerSelection.select(pokemon);
+      setSelectedBuildIds((current) => ({ ...current, attacker: null }));
       setMoveId(
         pokemon.moves.some(({ id }) => id === history.moveId)
           ? (history.moveId ?? "")
@@ -606,6 +645,7 @@ export function DamageCalculator({
       );
     } else {
       defenderSelection.select(pokemon);
+      setSelectedBuildIds((current) => ({ ...current, defender: null }));
     }
   }
 
@@ -784,7 +824,10 @@ export function DamageCalculator({
           pokemonCatalog={pokemonCatalog}
           onRestore={restoreHistory}
         />
-        <PokemonSummary pokemon={attacker} />
+        <PokemonSummary
+          pokemon={attacker}
+          href={getTrainingDetailHref(attacker, selectedBuildIds.attacker)}
+        />
         <AbilityField
           pokemon={attacker}
           conditionEnabled={abilityConditionEnabled.attacker}
@@ -905,7 +948,10 @@ export function DamageCalculator({
           pokemonCatalog={pokemonCatalog}
           onRestore={restoreHistory}
         />
-        <PokemonSummary pokemon={defender} />
+        <PokemonSummary
+          pokemon={defender}
+          href={getTrainingDetailHref(defender, selectedBuildIds.defender)}
+        />
         <AbilityField
           pokemon={defender}
           conditionEnabled={abilityConditionEnabled.defender}
@@ -1233,26 +1279,50 @@ function RecentPokemonList({
 /** 選択中ポケモンの画像と名前を表示し、未選択時は同じ高さのプレースホルダーを出す。 */
 function PokemonSummary({
   pokemon,
+  href,
 }: {
   pokemon: DamageCalculatorPokemon | null;
+  href?: string;
 }) {
   // 未選択時も同じ高さの枠を出し、左右のレイアウトが跳ねないようにする。
   if (!pokemon) return <div className={styles.placeholder}>ポケモンを選択</div>;
 
-  return (
-    <div className={styles.pokemonSummary}>
-      {pokemon.imageUrl ? (
-        <Image
-          src={pokemon.imageUrl}
-          alt={pokemon.nameJa}
-          width={112}
-          height={112}
-        />
-      ) : null}
-      <div>
-        <strong>{pokemon.nameJa}</strong>
-        <small>{pokemon.name}</small>
+  const content = (
+    <>
+      <div className={styles.pokemonArtwork}>
+        {pokemon.imageUrl ? (
+          <Image
+            src={pokemon.imageUrl}
+            alt={pokemon.nameJa}
+            width={112}
+            height={112}
+          />
+        ) : null}
       </div>
+      <div className={styles.pokemonSummaryBody}>
+        <div>
+          <strong>{pokemon.nameJa}</strong>
+          <small>{pokemon.name}</small>
+        </div>
+        <dl className={styles.baseStats}>
+          {STAT_IDS.map((statId) => (
+            <div key={statId}>
+              <dt>{BASE_STAT_LABELS[statId]}</dt>
+              <dd>{pokemon.stats[statId] ?? "-"}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </>
+  );
+
+  return href ? (
+    <Link className={styles.pokemonSummary} href={href}>
+      {content}
+    </Link>
+  ) : (
+    <div className={styles.pokemonSummary}>
+      {content}
     </div>
   );
 }
