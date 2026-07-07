@@ -15,7 +15,7 @@ const temporaryDirectory = path.join(rootDirectory, ".tmp");
 const databasePath = path.join(temporaryDirectory, "sqlite-catalog.db");
 const outputPath = path.join(publicDirectory, "sqlite-catalog.db.gz");
 
-const seedVersion = 2;
+const seedVersion = 3;
 
 // publicへ配布するcatalog.dbにも、通常DBと同じ親子関係順でCSVを投入する。
 const seedTableOrder = [
