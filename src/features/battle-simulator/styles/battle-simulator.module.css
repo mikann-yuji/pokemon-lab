@@ -321,7 +321,13 @@
   white-space: nowrap;
 }
 
-.actionHeader button {
+.actionButtons {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.35rem;
+}
+
+.actionButtons button {
   flex-shrink: 0;
   min-height: 36px;
   padding: 0.35rem 0.65rem;
@@ -335,23 +341,42 @@
   font-weight: 950;
 }
 
-.actionHeader button:hover,
-.actionHeader button:focus-visible {
+.actionButtons button:disabled {
+  border-color: #aebccd;
+  color: #7f8da0;
+  cursor: not-allowed;
+}
+
+.actionButtons button:not(:disabled):hover,
+.actionButtons button:not(:disabled):focus-visible {
   outline: 3px solid rgb(230 57 70 / 18%);
   outline-offset: 2px;
 }
 
-.moveList {
+.moveSelect {
   display: grid;
-  gap: 0.38rem;
-  max-height: 8.6rem;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding-right: 0.05rem;
-  scrollbar-width: thin;
+  gap: 0.35rem;
+  color: #344760;
+  font-size: 0.82rem;
+  font-weight: 900;
 }
 
-.moveList button,
+.moveSelect select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0.5rem 0.6rem;
+  border: 2px solid #b9cae0;
+  border-radius: 8px;
+  background: white;
+  color: #172b4d;
+  font: inherit;
+}
+
+.moveSelect select:focus {
+  border-color: #2857a4;
+  outline: 3px solid rgb(40 87 164 / 18%);
+}
+
 .switchRoster button {
   display: grid;
   gap: 0.12rem;
@@ -366,18 +391,13 @@
   text-align: left;
 }
 
-.moveList button:hover,
-.moveList button:focus-visible,
 .switchRoster button:hover,
-.switchRoster button:focus-visible,
-.selectedMove {
+.switchRoster button:focus-visible {
   border-color: #2857a4;
   outline: none;
   background: #eef6ff;
 }
 
-.moveList span,
-.moveList small,
 .switchRoster span,
 .switchRoster small {
   min-width: 0;
@@ -386,12 +406,10 @@
   white-space: nowrap;
 }
 
-.moveList span,
 .switchRoster span {
   font-weight: 950;
 }
 
-.moveList small,
 .switchRoster small {
   color: #536376;
   font-size: 0.72rem;
@@ -419,6 +437,28 @@
 
 .statusMessage {
   text-align: center;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 40px;
+  margin-top: 0.6rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #2857a4;
+  border-radius: 8px;
+  background: white;
+  color: #2857a4;
+  font-weight: 950;
+  text-decoration: none;
+}
+
+.backLink:hover,
+.backLink:focus-visible {
+  outline: 3px solid rgb(40 87 164 / 18%);
+  outline-offset: 2px;
 }
 
 .switchModalOverlay {
@@ -533,7 +573,11 @@
     height: 4.55rem;
   }
 
-  .moveList {
-    max-height: 7.9rem;
+  .actionHeader {
+    align-items: stretch;
+  }
+
+  .actionButtons {
+    flex-direction: column;
   }
 }

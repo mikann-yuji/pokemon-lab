@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   useEffect,
   useMemo,
@@ -50,6 +52,12 @@ const PLAYER_LABELS: Record<BattlePlayerId, string> = {
   player1: "Player 1",
   player2: "Player 2",
 };
+
+type SelectedTeamIds = Record<BattlePlayerId, number | "">;
+
+function createBattleHref(teamIds: SelectedTeamIds) {
+  return `/battle-simulator/battle?player1=${teamIds.player1}&player2=${teamIds.player2}`;
+}
 
 function opponentOf(playerId: BattlePlayerId): BattlePlayerId {
   return playerId === "player1" ? "player2" : "player1";
@@ -502,6 +510,102 @@ function TeamSelect({
   );
 }
 
+export function BattleSimulatorTeamSelect() {
+  const router = useRouter();
+  const [teams, setTeams] = useState<BattleTeam[]>([]);
+  const [selectedTeamIds, setSelectedTeamIds] = useState<SelectedTeamIds>({
+    player1: "",
+    player2: "",
+  });
+  const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const canStart = Boolean(selectedTeamIds.player1 && selectedTeamIds.player2);
+
+  useEffect(() => {
+    let active = true;
+    void getAllBattleTeams()
+      .then((loadedTeams) => {
+        if (!active) return;
+        setTeams(loadedTeams);
+        setLoaded(true);
+      })
+      .catch((error: unknown) => {
+        console.error("バトルチームを読み込めませんでした。", error);
+        if (!active) return;
+        setLoadError("バトルチームを読み込めませんでした。");
+        setLoaded(true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  function updateSelectedTeam(playerId: BattlePlayerId, teamId: number | "") {
+    setSelectedTeamIds((current) => ({ ...current, [playerId]: teamId }));
+  }
+
+  function openBattle() {
+    if (!canStart) return;
+    router.push(createBattleHref(selectedTeamIds));
+  }
+
+  if (!loaded) {
+    return <p className={styles.statusMessage}>データを読み込んでいます...</p>;
+  }
+
+  if (loadError) {
+    return (
+      <p className={styles.statusMessage} role="alert">
+        {loadError}
+      </p>
+    );
+  }
+
+  return (
+    <div className={styles.simulator}>
+      <section className={styles.setupPanel} aria-labelledby="setup-title">
+        <div className={styles.sectionHeading}>
+          <p>Team Select</p>
+          <h2 id="setup-title">バトルチームを2つ選択</h2>
+        </div>
+        {teams.length === 0 ? (
+          <p className={styles.emptyState}>
+            保存済みのバトルチームがありません。先にバトルチームを作成してください。
+          </p>
+        ) : (
+          <>
+            <div className={styles.teamSelectGrid}>
+              <TeamSelect
+                id="player1"
+                label="Player 1"
+                value={selectedTeamIds.player1}
+                teams={teams}
+                onChange={(teamId) => updateSelectedTeam("player1", teamId)}
+              />
+              <TeamSelect
+                id="player2"
+                label="Player 2"
+                value={selectedTeamIds.player2}
+                teams={teams}
+                onChange={(teamId) => updateSelectedTeam("player2", teamId)}
+              />
+            </div>
+            <button
+              className={styles.prepareButton}
+              type="button"
+              disabled={!canStart}
+              onClick={openBattle}
+            >
+              対戦画面へ進む
+            </button>
+          </>
+        )}
+      </section>
+    </div>
+  );
+}
+
 function HpPanel({
   playerId,
   state,
@@ -609,6 +713,9 @@ function ActionTabs({
   const player = state.players[activePlayerId];
   const active = player.team[player.activeIndex] ?? null;
   const command = state.pendingCommands[activePlayerId];
+  const [moveSelectPlayer, setMoveSelectPlayer] =
+    useState<BattlePlayerId | null>(null);
+  const isMoveSelectOpen = moveSelectPlayer === activePlayerId;
 
   return (
     <section className={styles.actionPanel} aria-label="行動選択">
@@ -633,36 +740,48 @@ function ActionTabs({
             <span>{player.label}</span>
             <strong>{active?.buildName ?? "行動できるポケモンなし"}</strong>
           </div>
-          <button type="button" onClick={() => onOpenSwitch(activePlayerId)}>
-            交代
-          </button>
+          <div className={styles.actionButtons}>
+            <button
+              type="button"
+              disabled={
+                !active || active.status === "fainted" || active.moves.length === 0
+              }
+              onClick={() => setMoveSelectPlayer(activePlayerId)}
+            >
+              技選択
+            </button>
+            <button type="button" onClick={() => onOpenSwitch(activePlayerId)}>
+              交代
+            </button>
+          </div>
         </div>
         {!active || active.status === "fainted" ? (
           <p className={styles.emptyState}>行動できるポケモンがいません。</p>
+        ) : isMoveSelectOpen ? (
+          <label className={styles.moveSelect}>
+            <span>使用する技</span>
+            <select
+              value={command?.type === "move" ? command.moveId : ""}
+              onChange={(event) => {
+                if (event.target.value) {
+                  onMove(activePlayerId, event.target.value);
+                }
+              }}
+            >
+              <option value="">技を選択</option>
+              {active.moves.map((move) => (
+                <option value={move.id} key={move.id}>
+                  {move.name} / {move.typeName} / {move.power}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : active.moves.length === 0 ? (
+          <p className={styles.emptyState}>選択できる技がありません。</p>
         ) : (
-          <div className={styles.moveList}>
-            {active.moves.length === 0 ? (
-              <p className={styles.emptyState}>選択できる技がありません。</p>
-            ) : (
-              active.moves.map((move) => (
-                <button
-                  className={
-                    command?.type === "move" && command.moveId === move.id
-                      ? styles.selectedMove
-                      : ""
-                  }
-                  type="button"
-                  onClick={() => onMove(activePlayerId, move.id)}
-                  key={move.id}
-                >
-                  <span>{move.name}</span>
-                  <small>
-                    {move.typeName} / {move.power}
-                  </small>
-                </button>
-              ))
-            )}
-          </div>
+          <p className={styles.commandStatus}>
+            技を選ぶ場合は「技選択」を押してください。
+          </p>
         )}
         <p className={styles.commandStatus}>
           {command
@@ -745,17 +864,17 @@ function SwitchModal({
   );
 }
 
-export function BattleSimulator() {
-  const [teams, setTeams] = useState<BattleTeam[]>([]);
-  const [builds, setBuilds] = useState<TrainingBuild[]>([]);
+export function BattleSimulator({
+  player1TeamId,
+  player2TeamId,
+}: {
+  player1TeamId: number | null;
+  player2TeamId: number | null;
+}) {
   const [pokemonCatalog, setPokemonCatalog] = useState<
     DamageCalculatorPokemon[]
   >([]);
   const [heldItems, setHeldItems] = useState<DamageCalculatorHeldItem[]>([]);
-  const [natures, setNatures] = useState<Nature[]>([]);
-  const [selectedTeamIds, setSelectedTeamIds] = useState<
-    Record<BattlePlayerId, number | "">
-  >({ player1: "", player2: "" });
   const [battleState, setBattleState] = useState<BattleState | null>(null);
   const [activeCommandPlayer, setActiveCommandPlayer] =
     useState<BattlePlayerId>("player1");
@@ -783,11 +902,35 @@ export function BattleSimulator() {
           loadedNatures,
         ]) => {
           if (!active) return;
-          setTeams(loadedTeams);
-          setBuilds(loadedBuilds);
+          const nextBuildsById = new Map(
+            loadedBuilds.flatMap((build) =>
+              build.id === undefined ? [] : [[build.id, build] as const],
+            ),
+          );
+          const nextPokemonById = new Map(
+            loadedPokemon.map((pokemon) => [pokemon.id, pokemon]),
+          );
+          const player1Team =
+            loadedTeams.find((team) => team.id === player1TeamId) ?? null;
+          const player2Team =
+            loadedTeams.find((team) => team.id === player2TeamId) ?? null;
+
           setPokemonCatalog(loadedPokemon);
           setHeldItems(loadedItems);
-          setNatures(loadedNatures);
+          if (player1Team && player2Team) {
+            setBattleState(
+              createBattleState({
+                player1Team,
+                player2Team,
+                buildsById: nextBuildsById,
+                pokemonById: nextPokemonById,
+                heldItems: loadedItems,
+                natures: loadedNatures,
+              }),
+            );
+          } else {
+            setBattleState(null);
+          }
           setLoaded(true);
         },
       )
@@ -801,62 +944,22 @@ export function BattleSimulator() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [player1TeamId, player2TeamId]);
 
   useEffect(() => {
     if (!logRef.current || !battleState) return;
     logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [battleState?.log.length, battleState]);
 
-  const buildsById = useMemo(
-    () =>
-      new Map(
-        builds.flatMap((build) =>
-          build.id === undefined ? [] : [[build.id, build] as const],
-        ),
-      ),
-    [builds],
-  );
   const pokemonById = useMemo(
     () => new Map(pokemonCatalog.map((pokemon) => [pokemon.id, pokemon])),
     [pokemonCatalog],
   );
-  const selectedTeams = useMemo(
-    () => ({
-      player1:
-        teams.find((team) => team.id === selectedTeamIds.player1) ?? null,
-      player2:
-        teams.find((team) => team.id === selectedTeamIds.player2) ?? null,
-    }),
-    [selectedTeamIds, teams],
-  );
-  const canCreateBattle = Boolean(selectedTeams.player1 && selectedTeams.player2);
   const canRunTurn = Boolean(
     battleState?.phase === "command" &&
       battleState.pendingCommands.player1 &&
       battleState.pendingCommands.player2,
   );
-
-  function updateSelectedTeam(playerId: BattlePlayerId, teamId: number | "") {
-    setSelectedTeamIds((current) => ({ ...current, [playerId]: teamId }));
-    setBattleState(null);
-  }
-
-  function prepareBattle() {
-    if (!selectedTeams.player1 || !selectedTeams.player2) return;
-    setBattleState(
-      createBattleState({
-        player1Team: selectedTeams.player1,
-        player2Team: selectedTeams.player2,
-        buildsById,
-        pokemonById,
-        heldItems,
-        natures,
-      }),
-    );
-    setActiveCommandPlayer("player1");
-    setSwitchModalPlayer(null);
-  }
 
   function chooseCommand(playerId: BattlePlayerId, command: BattleCommand) {
     setBattleState((current) =>
@@ -897,45 +1000,6 @@ export function BattleSimulator() {
 
   return (
     <div className={styles.simulator}>
-      <section className={styles.setupPanel} aria-labelledby="setup-title">
-        <div className={styles.sectionHeading}>
-          <p>Team Select</p>
-          <h2 id="setup-title">バトルチームを2つ選択</h2>
-        </div>
-        {teams.length === 0 ? (
-          <p className={styles.emptyState}>
-            保存済みのバトルチームがありません。先にバトルチームを作成してください。
-          </p>
-        ) : (
-          <>
-            <div className={styles.teamSelectGrid}>
-              <TeamSelect
-                id="player1"
-                label="Player 1"
-                value={selectedTeamIds.player1}
-                teams={teams}
-                onChange={(teamId) => updateSelectedTeam("player1", teamId)}
-              />
-              <TeamSelect
-                id="player2"
-                label="Player 2"
-                value={selectedTeamIds.player2}
-                teams={teams}
-                onChange={(teamId) => updateSelectedTeam("player2", teamId)}
-              />
-            </div>
-            <button
-              className={styles.prepareButton}
-              type="button"
-              disabled={!canCreateBattle}
-              onClick={prepareBattle}
-            >
-              対戦準備を作成
-            </button>
-          </>
-        )}
-      </section>
-
       {battleState ? (
         <div className={styles.battleLayout}>
           <BattleField state={battleState} />
@@ -983,11 +1047,14 @@ export function BattleSimulator() {
         <section className={styles.placeholderPanel}>
           <div className={styles.sectionHeading}>
             <p>Battle Board</p>
-            <h2>チームを選ぶと対戦画面が表示されます</h2>
+            <h2>対戦準備を作成できませんでした</h2>
           </div>
           <p>
-            2体の表示、対戦ログ、行動選択、ターン実行ボタンを縦に並べて操作します。
+            チーム選択画面に戻り、Player 1とPlayer 2のバトルチームを選び直してください。
           </p>
+          <Link className={styles.backLink} href="/battle-simulator">
+            チーム選択へ戻る
+          </Link>
         </section>
       )}
     </div>
