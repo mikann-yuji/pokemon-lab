@@ -48,7 +48,12 @@
 .statRankingHeader p { margin:0 0 .15rem; color:#2857a4; font-size:.72rem; font-weight:900; letter-spacing:.12em; }
 .statRankingHeader h2 { margin:0; color:#172b4d; }
 .statRankingHeader button { min-height:40px; padding:.5rem .85rem; border:1px solid #cad6e5; border-radius:9px; background:white; color:#172b4d; cursor:pointer; font:inherit; font-weight:900; }
-.statRankingControls { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:.85rem; align-items:end; padding:.8rem; border:1px solid #cad6e5; border-radius:12px; background:white; }
+.statRankingControls { display:grid; grid-template-columns:minmax(9rem,.7fr) minmax(0,1fr) auto; gap:.85rem; align-items:end; padding:.8rem; border:1px solid #cad6e5; border-radius:12px; background:white; }
+.statRankingSummary { display:grid; gap:.15rem; align-self:stretch; align-content:center; min-width:0; padding:.55rem .7rem; border-radius:10px; background:#eef6ff; color:#172b4d; }
+.statRankingSummary strong,.statRankingSummary span,.statRankingSummary small { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.statRankingSummary strong { font-size:.9rem; font-weight:950; }
+.statRankingSummary span { font-size:.8rem; font-weight:900; }
+.statRankingSummary small { color:#2857a4; font-size:.76rem; font-weight:900; }
 .statRankingPointControl { display:grid; grid-template-columns:auto 5rem minmax(9rem,1fr) auto; gap:.55rem; align-items:center; color:#172b4d; font-size:.82rem; font-weight:900; }
 .statRankingPointControl input[type="number"] { min-width:0; min-height:40px; padding:.45rem .55rem; border:2px solid #b9c7da; border-radius:9px; color:#172b4d; font:inherit; text-align:center; }
 .statRankingPointControl input[type="range"] { width:100%; min-height:18px; accent-color:#2857a4; }
@@ -57,16 +62,15 @@
 .statCompareToggle button { min-height:36px; padding:.4rem .75rem; border:0; border-radius:999px; background:transparent; color:#52657e; cursor:pointer; font:inherit; font-size:.78rem; font-weight:900; white-space:nowrap; }
 .statCompareToggle button:hover,.statCompareToggle button:focus-visible,.statCompareToggle .activeCompareMode { outline:none; background:#2857a4; color:white; }
 .statRankingTableWrap { min-height:0; overflow:auto; border:1px solid #cad6e5; border-radius:12px; background:white; }
-.statRankingTable { width:100%; min-width:42rem; border-collapse:collapse; font-size:.82rem; }
+.statRankingTable { width:100%; table-layout:fixed; border-collapse:collapse; font-size:.82rem; }
 .statRankingTable th,.statRankingTable td { padding:.65rem .75rem; border-bottom:1px solid #dce5f0; text-align:center; }
 .statRankingTable thead th { position:sticky; top:0; z-index:1; background:#172b4d; color:white; }
-.statRankingTable tbody th { display:grid; gap:.12rem; min-width:12rem; background:#f5f9ff; color:#172b4d; text-align:left; }
-.statRankingTable tbody th strong,.statRankingTable tbody th span,.statRankingTable tbody th small { display:block; }
-.statRankingTable tbody th small { color:#2857a4; font-weight:900; }
+.statRankingTable tbody th { background:#f5f9ff; color:#172b4d; text-align:left; }
+.statRankingTable tbody th,.statRankingTable td { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .statRankingTable tbody tr:last-child th,.statRankingTable tbody tr:last-child td { border-bottom:0; }
 .statRankingTable .targetRankRow th,.statRankingTable .targetRankRow td { background:#fff4c2; }
 .statRankingTable .targetRankRow td:last-child { color:#b51f2d; font-weight:950; }
-@media(max-width:38rem){.statRankingPanel{max-height:86vh}.statRankingHeader{align-items:flex-start}.statRankingHeader button{flex:0 0 auto}.statRankingControls{grid-template-columns:1fr;align-items:stretch}.statRankingPointControl{grid-template-columns:1fr 4.5rem;gap:.45rem}.statRankingPointControl input[type="range"],.statRankingPointControl small{grid-column:1/-1}.statCompareToggle{grid-template-columns:1fr 1fr;border-radius:12px}.statCompareToggle button{padding:.4rem .35rem;white-space:normal}.statRankingTable{min-width:36rem;font-size:.76rem}}
+@media(max-width:38rem){.statRankingPanel{max-height:86vh}.statRankingHeader{align-items:flex-start}.statRankingHeader button{flex:0 0 auto}.statRankingControls{grid-template-columns:1fr;align-items:stretch}.statRankingPointControl{grid-template-columns:1fr 4.5rem;gap:.45rem}.statRankingPointControl input[type="range"],.statRankingPointControl small{grid-column:1/-1}.statCompareToggle{grid-template-columns:1fr 1fr;border-radius:12px}.statCompareToggle button{padding:.4rem .35rem;white-space:normal}.statRankingTable{font-size:.72rem}.statRankingTable th,.statRankingTable td{padding:.5rem .35rem}.statRankingTable th:first-child{width:52%}.statRankingTable th:nth-child(2),.statRankingTable th:nth-child(3){width:24%}}
 .natureMatrix { display:grid; gap:.65rem; }
 .natureTableWrap { max-height:24rem; overflow:auto; border:1px solid #cad6e5; border-radius:14px; }
 .natureMatrix table { width:100%; border-collapse:collapse; text-align:center; }

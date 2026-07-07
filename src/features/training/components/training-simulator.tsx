@@ -535,6 +535,15 @@ function StatRankingOverlay({
           <button type="button" onClick={onClose}>閉じる</button>
         </div>
         <div className={styles.statRankingControls}>
+          <div className={styles.statRankingSummary}>
+            <strong>{pokemonName}</strong>
+            <span>{statName}: {actualValue}</span>
+            {actualRank ? (
+              <small>
+                {compareMode === "uninvested" ? "無振り" : "最大値"}基準 {actualRank}位
+              </small>
+            ) : null}
+          </div>
           <label className={styles.statRankingPointControl}>
             <span>{statName} 能力P</span>
             <input
@@ -576,7 +585,6 @@ function StatRankingOverlay({
           <table className={styles.statRankingTable}>
             <thead>
               <tr>
-                <th scope="col">シミュレート中</th>
                 <th scope="col">ポケモン</th>
                 <th scope="col">無振り</th>
                 <th scope="col">最大</th>
@@ -589,16 +597,7 @@ function StatRankingOverlay({
                   key={row.profile.id}
                   ref={index === targetRowIndex ? targetRowRef : null}
                 >
-                  <th scope="row">
-                    <strong>{pokemonName}</strong>
-                    <span>{statName}: {actualValue}</span>
-                    {actualRank ? (
-                      <small>
-                        {compareMode === "uninvested" ? "無振り" : "最大値"}基準 {actualRank}位
-                      </small>
-                    ) : null}
-                  </th>
-                  <td>{row.profile.nameJa}</td>
+                  <th scope="row">{row.profile.nameJa}</th>
                   <td>{row.uninvested}</td>
                   <td>{row.maximum}</td>
                 </tr>
