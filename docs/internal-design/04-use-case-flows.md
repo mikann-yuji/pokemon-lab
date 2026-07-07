@@ -100,12 +100,15 @@ sequenceDiagram
   User->>UI: 対戦準備作成
   UI->>UI: createBattleState
   User->>UI: 対戦開始
-  User->>UI: 両プレイヤーの技/交代選択
+  User->>UI: Player 1/2タブを切り替え
+  User->>UI: 技リストから技を選択
+  User->>UI: または交代モーダルで控えを選択
+  UI->>UI: setPendingCommand
   User->>UI: ターン実行
   UI->>UI: 交代処理
   UI->>Calc: 技ダメージ計算
   UI->>UI: HP/ひんし/勝敗更新
-  UI-->>User: ログと状態表示
+  UI-->>User: 場、HP、ログ、行動選択状態を表示
 ```
 
 ## クイズ

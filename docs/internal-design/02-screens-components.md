@@ -116,8 +116,23 @@
 | `BattleState` | 対戦全体の状態を表す。 |
 | `BattlePokemon` | 対戦中のポケモン状態を表す。 |
 | `BattleCommand` | 技または交代の行動入力を表す。 |
-| `CommandPanel` | Playerごとの技/交代選択UI。 |
-| `TeamPreview` | Playerごとの場と控えを表示する。 |
+| `BattleField` | 場に出ているPlayer 1/2のポケモンを横並びで表示する。 |
+| `HpPanel` | 各プレイヤーのHPバー、名前、HP数値を表示する。 |
+| `BattleLog` | 固定高のログ領域を表示し、ログ追加時に最新行へスクロールする。 |
+| `ActionTabs` | Player 1/2の行動選択をタブで切り替える。 |
+| `SwitchModal` | 交代ボタンから開く控えポケモン選択モーダル。 |
+
+### 対戦中の画面構成
+
+対戦中の画面はスマホ縦画面での操作を優先し、以下の順で縦に配置する。
+
+1. `BattleField`
+2. `BattleLog`
+3. `ActionTabs`
+4. ターン実行ボタン
+
+`BattleField` はPlayer 1のHPを左上、Player 2のHPを右下に固定配置する。
+`ActionTabs` は表示中プレイヤーの技リストと交代ボタンだけを表示し、交代先の選択は `SwitchModal` に分離する。
 
 ## クイズ
 

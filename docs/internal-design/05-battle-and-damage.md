@@ -109,6 +109,24 @@ type BattleCommand =
 | `toDamagePokemon` | `BattlePokemon` をダメージ計算用ポケモンへ変換する。 |
 | `toDamageMove` | 対戦中の技をダメージ計算用技へ変換する。 |
 
+主要UI要素:
+
+| 要素 | 役割 |
+|---|---|
+| `BattleField` | 場に出ている2体を横並びで表示し、HPパネルを重ねて配置する。 |
+| `HpPanel` | PlayerごとのHPバー、ポケモン名、HP数値を表示する。 |
+| `BattleLog` | 固定高のログ領域を表示する。ログ追加時は最新ログが見える位置へ自動スクロールする。 |
+| `ActionTabs` | Player 1/2の行動選択UIをタブで切り替える。 |
+| `SwitchModal` | 交代先の控えポケモンを選ぶモーダル。 |
+
+主なUI状態:
+
+| 状態 | 内容 |
+|---|---|
+| `activeCommandPlayer` | 行動選択セクションで表示中のプレイヤー。 |
+| `switchModalPlayer` | 交代先選択モーダルを開いているプレイヤー。 |
+| `logRef` | 対戦ログ領域のスクロール制御に使う参照。 |
+
 ### 処理順
 
 ```mermaid
