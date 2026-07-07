@@ -150,11 +150,40 @@
 }
 
 .versus {
+  display: grid;
+  gap: 0.6rem;
   align-self: center;
+  justify-items: center;
   padding: 0.5rem;
   color: #e63946;
   font-size: 1.15rem;
   font-weight: 950;
+}
+
+.versus button {
+  min-height: 40px;
+  padding: 0.5rem 0.7rem;
+  border: 2px solid #e63946;
+  border-radius: 9px;
+  background: white;
+  color: #e63946;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.versus button:disabled {
+  border-color: #c5d1df;
+  color: #8796a8;
+  cursor: not-allowed;
+}
+
+.versus button:not(:disabled):hover,
+.versus button:not(:disabled):focus-visible {
+  outline: 3px solid rgb(230 57 70 / 18%);
+  background: #fff5f6;
 }
 
 .combobox {

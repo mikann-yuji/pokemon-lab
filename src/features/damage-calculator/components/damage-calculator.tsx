@@ -75,6 +75,7 @@ type StatAdjustmentState = Record<
   DamageSide,
   Record<AdjustableStatId, StatAdjustment>
 >;
+type TeamSelectionState = Record<DamageSide, number | null>;
 
 const STAT_LABELS: Record<AdjustableStatId, string> = {
   hp: "HP",
@@ -195,6 +196,22 @@ function hasPositiveNatureForStat(
   );
 }
 
+function createStatAdjustmentsFromBuild(
+  build: TrainingBuild,
+  natures: Nature[],
+): Record<AdjustableStatId, StatAdjustment> {
+  return Object.fromEntries(
+    ADJUSTABLE_STAT_IDS.map((statId) => [
+      statId,
+      {
+        point: build.abilityPoints[statId] ?? 0,
+        rank: 0,
+        nature: hasPositiveNatureForStat(build, statId, natures),
+      },
+    ]),
+  ) as Record<AdjustableStatId, StatAdjustment>;
+}
+
 const DEFAULT_NATURE: Nature = {
   id: "serious",
   name: "まじめ",
@@ -300,8 +317,11 @@ export function DamageCalculator({
   const [battleTeams, setBattleTeams] = useState<BattleTeam[]>([]);
   const [trainingBuilds, setTrainingBuilds] = useState<TrainingBuild[]>([]);
   const [natures, setNatures] = useState<Nature[]>([]);
-  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
-  const [teamModalOpen, setTeamModalOpen] = useState(false);
+  const [selectedTeamIds, setSelectedTeamIds] = useState<TeamSelectionState>({
+    attacker: null,
+    defender: null,
+  });
+  const [teamModalSide, setTeamModalSide] = useState<DamageSide | null>(null);
   const [teamLoadError, setTeamLoadError] = useState("");
   const [metronomeConsecutiveUseCount, setMetronomeConsecutiveUseCount] =
     useState(1);
@@ -320,23 +340,34 @@ export function DamageCalculator({
       ),
     [trainingBuilds],
   );
-  const selectedTeam =
-    battleTeams.find((team) => team.id === selectedTeamId) ?? null;
-  const selectedTeamBuilds = useMemo(
-    () =>
-      selectedTeam?.buildIds
+  const selectedTeams = useMemo(
+    () => ({
+      attacker:
+        battleTeams.find((team) => team.id === selectedTeamIds.attacker) ??
+        null,
+      defender:
+        battleTeams.find((team) => team.id === selectedTeamIds.defender) ??
+        null,
+    }),
+    [battleTeams, selectedTeamIds],
+  );
+  const selectedTeamMembers = useMemo(() => {
+    const toMembers = (team: BattleTeam | null) =>
+      team?.buildIds
         .map((buildId) => buildById.get(buildId))
-        .filter((build): build is TrainingBuild => Boolean(build)) ?? [],
-    [buildById, selectedTeam],
-  );
-  const selectedTeamMembers = useMemo(
-    () =>
-      selectedTeamBuilds.flatMap((build) => {
-        const pokemon = pokemonCatalog.find(({ id }) => id === build.pokemonId);
-        return pokemon ? [{ build, pokemon }] : [];
-      }),
-    [pokemonCatalog, selectedTeamBuilds],
-  );
+        .filter((build): build is TrainingBuild => Boolean(build))
+        .flatMap((build) => {
+          const pokemon = pokemonCatalog.find(
+            ({ id }) => id === build.pokemonId,
+          );
+          return pokemon ? [{ build, pokemon }] : [];
+        }) ?? [];
+
+    return {
+      attacker: toMembers(selectedTeams.attacker),
+      defender: toMembers(selectedTeams.defender),
+    };
+  }, [buildById, pokemonCatalog, selectedTeams]);
 
   // user.dbはブラウザ専用なので、初回表示後に最近使った履歴を読み込む。
   useEffect(() => {
@@ -437,12 +468,15 @@ export function DamageCalculator({
     }));
   }
 
-  function selectBattleTeam(team: BattleTeam) {
-    setSelectedTeamId(team.id ?? null);
-    setTeamModalOpen(false);
+  function selectBattleTeam(side: DamageSide, team: BattleTeam) {
+    setSelectedTeamIds((current) => ({
+      ...current,
+      [side]: team.id ?? null,
+    }));
+    setTeamModalSide(null);
   }
 
-  function selectTeamMember(build: TrainingBuild) {
+  function selectTeamMember(side: DamageSide, build: TrainingBuild) {
     const pokemon = pokemonCatalog.find(({ id }) => id === build.pokemonId);
     if (!pokemon) return;
 
@@ -452,21 +486,44 @@ export function DamageCalculator({
       natures,
       heldItems,
     );
-    attackerSelection.select(trainedPokemon);
+    const selection = side === "attacker" ? attackerSelection : defenderSelection;
+    selection.select(trainedPokemon);
     setStatAdjustments((current) => ({
       ...current,
-      attacker: Object.fromEntries(
-        ADJUSTABLE_STAT_IDS.map((statId) => [
-          statId,
-          {
-            point: build.abilityPoints[statId] ?? 0,
-            rank: 0,
-            nature: hasPositiveNatureForStat(build, statId, natures),
-          },
-        ]),
-      ) as Record<AdjustableStatId, StatAdjustment>,
+      [side]: createStatAdjustmentsFromBuild(build, natures),
     }));
-    setMoveId(trainedPokemon.moves[0]?.id ?? "");
+    setAbilityConditionEnabled((current) => ({ ...current, [side]: false }));
+    if (side === "attacker") {
+      setMoveId(trainedPokemon.moves[0]?.id ?? "");
+      if (trainedPokemon.heldItem?.id !== "metronome") {
+        setMetronomeConsecutiveUseCount(1);
+      }
+    }
+  }
+
+  function swapBattleSides() {
+    attackerSelection.select(defender);
+    defenderSelection.select(attacker);
+    setStatAdjustments((current) => ({
+      attacker: current.defender,
+      defender: current.attacker,
+    }));
+    setAbilityConditionEnabled((current) => ({
+      attacker: current.defender,
+      defender: current.attacker,
+    }));
+    setSelectedTeamIds((current) => ({
+      attacker: current.defender,
+      defender: current.attacker,
+    }));
+    setMoveId(
+      defender?.moves.some(({ id }) => id === moveId)
+        ? moveId
+        : (defender?.moves[0]?.id ?? ""),
+    );
+    if (defender?.heldItem?.id !== "metronome") {
+      setMetronomeConsecutiveUseCount(1);
+    }
   }
 
   /**
@@ -601,24 +658,24 @@ export function DamageCalculator({
       <section className={styles.side}>
         <h2>攻撃側</h2>
         <div className={styles.teamPicker}>
-          <button type="button" onClick={() => setTeamModalOpen(true)}>
+          <button type="button" onClick={() => setTeamModalSide("attacker")}>
             バトルチームを選択
           </button>
-          <span>{selectedTeam?.name ?? "未選択"}</span>
+          <span>{selectedTeams.attacker?.name ?? "未選択"}</span>
         </div>
         {teamLoadError ? (
           <p className={styles.teamError} role="alert">
             {teamLoadError}
           </p>
         ) : null}
-        {selectedTeamMembers.length > 0 ? (
+        {selectedTeamMembers.attacker.length > 0 ? (
           <div className={styles.teamPokemon}>
-            {selectedTeamMembers.map(({ build, pokemon }) => (
+            {selectedTeamMembers.attacker.map(({ build, pokemon }) => (
               <button
                 type="button"
                 title={`${build.name || pokemon.nameJa}を攻撃側に反映`}
                 aria-label={`${build.name || pokemon.nameJa}を攻撃側に反映`}
-                onClick={() => selectTeamMember(build)}
+                onClick={() => selectTeamMember("attacker", build)}
                 key={build.id}
               >
                 {pokemon.imageUrl ? (
@@ -707,10 +764,54 @@ export function DamageCalculator({
         ) : null}
       </section>
 
-      <div className={styles.versus}>VS</div>
+      <div className={styles.versus}>
+        <span>VS</span>
+        <button
+          type="button"
+          onClick={swapBattleSides}
+          disabled={!attacker && !defender}
+        >
+          攻守交代
+        </button>
+      </div>
 
       <section className={styles.side}>
         <h2>防御側</h2>
+        <div className={styles.teamPicker}>
+          <button type="button" onClick={() => setTeamModalSide("defender")}>
+            バトルチームを選択
+          </button>
+          <span>{selectedTeams.defender?.name ?? "未選択"}</span>
+        </div>
+        {teamLoadError ? (
+          <p className={styles.teamError} role="alert">
+            {teamLoadError}
+          </p>
+        ) : null}
+        {selectedTeamMembers.defender.length > 0 ? (
+          <div className={styles.teamPokemon}>
+            {selectedTeamMembers.defender.map(({ build, pokemon }) => (
+              <button
+                type="button"
+                title={`${build.name || pokemon.nameJa}を防御側に反映`}
+                aria-label={`${build.name || pokemon.nameJa}を防御側に反映`}
+                onClick={() => selectTeamMember("defender", build)}
+                key={build.id}
+              >
+                {pokemon.imageUrl ? (
+                  <Image
+                    src={pokemon.imageUrl}
+                    alt=""
+                    width={48}
+                    height={48}
+                  />
+                ) : (
+                  <span>{pokemon.nameJa.slice(0, 1)}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        ) : null}
         <PokemonCombobox
           id="defender"
           label="攻撃を受けるポケモン"
@@ -779,12 +880,12 @@ export function DamageCalculator({
 
       {error ? <p className={styles.error}>{error}</p> : null}
       {result ? <DamageResult result={result} /> : null}
-      {teamModalOpen ? (
+      {teamModalSide ? (
         <BattleTeamModal
           teams={battleTeams}
-          selectedTeamId={selectedTeamId}
-          onSelect={selectBattleTeam}
-          onClose={() => setTeamModalOpen(false)}
+          selectedTeamId={selectedTeamIds[teamModalSide]}
+          onSelect={(team) => selectBattleTeam(teamModalSide, team)}
+          onClose={() => setTeamModalSide(null)}
         />
       ) : null}
     </form>
