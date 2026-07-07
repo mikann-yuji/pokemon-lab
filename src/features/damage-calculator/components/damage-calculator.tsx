@@ -78,6 +78,12 @@ type StatAdjustmentState = Record<
   Record<AdjustableStatId, StatAdjustment>
 >;
 type TeamSelectionState = Record<DamageSide, number | null>;
+type SpeedComparisonRow = {
+  id: string;
+  label: string;
+  attacker: number | null;
+  defender: number | null;
+};
 
 const STAT_LABELS: Record<AdjustableStatId, string> = {
   hp: "HP",
@@ -128,6 +134,50 @@ function calculateActualStat(
   const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
   if (statId === "hp") return baseStat === 1 ? 1 : base + 50 + 10 + point;
   return Math.floor((base + 5 + point) * (nature ? 1.1 : 1));
+}
+
+function calculateSpeedValue(
+  pokemon: DamageCalculatorPokemon | null,
+  point: number,
+  nature: boolean,
+  scarf = false,
+) {
+  if (!pokemon) return null;
+
+  const speed = calculateActualStat(pokemon, "speed", point, nature);
+  return scarf ? Math.floor(speed * 1.5) : speed;
+}
+
+function createSpeedComparisonRows(
+  attacker: DamageCalculatorPokemon | null,
+  defender: DamageCalculatorPokemon | null,
+): SpeedComparisonRow[] {
+  return [
+    {
+      id: "scarf-fastest",
+      label: "スカーフ最速",
+      attacker: calculateSpeedValue(attacker, 32, true, true),
+      defender: calculateSpeedValue(defender, 32, true, true),
+    },
+    {
+      id: "fastest",
+      label: "最速",
+      attacker: calculateSpeedValue(attacker, 32, true),
+      defender: calculateSpeedValue(defender, 32, true),
+    },
+    {
+      id: "semi-fast",
+      label: "準速",
+      attacker: calculateSpeedValue(attacker, 32, false),
+      defender: calculateSpeedValue(defender, 32, false),
+    },
+    {
+      id: "uninvested",
+      label: "無振",
+      attacker: calculateSpeedValue(attacker, 0, false),
+      defender: calculateSpeedValue(defender, 0, false),
+    },
+  ];
 }
 
 function createNeutralActualStats(pokemon: DamageCalculatorPokemon) {
@@ -330,6 +380,7 @@ export function DamageCalculator({
     defender: null,
   });
   const [teamModalSide, setTeamModalSide] = useState<DamageSide | null>(null);
+  const [speedModalOpen, setSpeedModalOpen] = useState(false);
   const [teamLoadError, setTeamLoadError] = useState("");
   const [metronomeConsecutiveUseCount, setMetronomeConsecutiveUseCount] =
     useState(1);
@@ -598,6 +649,10 @@ export function DamageCalculator({
       );
     },
     [defender, relevantStatIds.defender, statAdjustments.defender],
+  );
+  const speedComparisonRows = useMemo(
+    () => createSpeedComparisonRows(attacker, defender),
+    [attacker, defender],
   );
 
   const { result, error } = useMemo(() => {
@@ -939,6 +994,22 @@ export function DamageCalculator({
 
       {error ? <p className={styles.error}>{error}</p> : null}
       {result ? <DamageResult result={result} /> : null}
+      <button
+        className={styles.speedCompareButton}
+        type="button"
+        disabled={!attacker && !defender}
+        onClick={() => setSpeedModalOpen(true)}
+      >
+        かんたん素早さ比較
+      </button>
+      {speedModalOpen ? (
+        <SpeedComparisonModal
+          attackerName={attacker?.nameJa ?? "攻撃側未選択"}
+          defenderName={defender?.nameJa ?? "防御側未選択"}
+          rows={speedComparisonRows}
+          onClose={() => setSpeedModalOpen(false)}
+        />
+      ) : null}
       {teamModalSide ? (
         <BattleTeamModal
           teams={battleTeams}
@@ -948,6 +1019,98 @@ export function DamageCalculator({
         />
       ) : null}
     </form>
+  );
+}
+
+function SpeedComparisonModal({
+  attackerName,
+  defenderName,
+  rows,
+  onClose,
+}: {
+  attackerName: string;
+  defenderName: string;
+  rows: SpeedComparisonRow[];
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className={styles.speedModalOverlay}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="speed-comparison-modal-title"
+    >
+      <button
+        className={styles.speedModalBackdrop}
+        type="button"
+        aria-label="素早さ比較を閉じる"
+        onClick={onClose}
+      />
+      <section className={styles.speedModalPanel}>
+        <div className={styles.speedModalHeader}>
+          <div>
+            <p>SPEED CHECK</p>
+            <h2 id="speed-comparison-modal-title">かんたん素早さ比較</h2>
+          </div>
+          <button type="button" onClick={onClose}>
+            閉じる
+          </button>
+        </div>
+        <div className={styles.speedTable} role="table">
+          <div className={styles.speedTableHead} role="row">
+            <span role="columnheader">条件</span>
+            <strong role="columnheader">{attackerName}</strong>
+            <strong role="columnheader">{defenderName}</strong>
+          </div>
+          {rows.map((row) => (
+            <div className={styles.speedTableRow} role="row" key={row.id}>
+              <span role="rowheader">{row.label}</span>
+              <SpeedValue
+                value={row.attacker}
+                comparedValue={row.defender}
+                sideLabel="攻撃側"
+              />
+              <SpeedValue
+                value={row.defender}
+                comparedValue={row.attacker}
+                sideLabel="防御側"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function SpeedValue({
+  value,
+  comparedValue,
+  sideLabel,
+}: {
+  value: number | null;
+  comparedValue: number | null;
+  sideLabel: string;
+}) {
+  const comparison =
+    value === null || comparedValue === null
+      ? ""
+      : value === comparedValue
+        ? "同速"
+        : value > comparedValue
+          ? `${sideLabel}が速い`
+          : "";
+
+  return (
+    <span
+      className={`${styles.speedValue} ${
+        comparison && comparison !== "同速" ? styles.fasterSpeedValue : ""
+      }`}
+      role="cell"
+    >
+      <strong>{value ?? "-"}</strong>
+      {comparison ? <small>{comparison}</small> : null}
+    </span>
   );
 }
 
