@@ -19,6 +19,18 @@ function getEffectiveness(
 /**
  * 行を攻撃側、列を防御側として全タイプの相性を一覧表示する。
  */
+function DefenderTypeLabel({ label }: { label: string }) {
+  return (
+    <span className={styles.defenderTypeLabel} aria-label={label}>
+      {Array.from(label).map((character, index) => (
+        <span aria-hidden="true" key={`${character}-${index}`}>
+          {character}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export default function TypeMatchupMatrix({
   typeMatchups,
 }: {
@@ -40,7 +52,7 @@ export default function TypeMatchupMatrix({
               <th scope="col">攻＼防</th>
               {typeMatchups.map((defender) => (
                 <th scope="col" key={defender.name}>
-                  {defender.nameJa}
+                  <DefenderTypeLabel label={defender.nameJa} />
                 </th>
               ))}
             </tr>
