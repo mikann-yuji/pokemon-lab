@@ -13,6 +13,7 @@ export type TrainingBuild = {
   pokemonId: number;
   nature: string;
   itemId: string;
+  abilityId: string;
   /** Pokémon Champions の能力ポイント。合計66、各能力32が上限。 */
   abilityPoints: Record<string, number>;
   moveIds: string[];
@@ -34,6 +35,7 @@ type TrainingBuildRow = SqliteRow & {
   pokemon_id: number;
   nature: string;
   item_id: string | null;
+  ability_id: string | null;
   ability_points_json: string;
   move_ids_json: string;
   updated_at: number;
@@ -64,6 +66,7 @@ function toTrainingBuild(row: TrainingBuildRow): TrainingBuild {
     pokemonId: Number(row.pokemon_id),
     nature: String(row.nature),
     itemId: row.item_id === null ? "" : String(row.item_id),
+    abilityId: row.ability_id === null ? "" : String(row.ability_id),
     abilityPoints: parseJson<Record<string, number>>(
       String(row.ability_points_json),
       {},
@@ -74,7 +77,7 @@ function toTrainingBuild(row: TrainingBuildRow): TrainingBuild {
 }
 
 const BUILD_COLUMNS = `
-  id, name, content_key, pokemon_id, nature, item_id,
+  id, name, content_key, pokemon_id, nature, item_id, ability_id,
   ability_points_json, move_ids_json, updated_at
 `;
 
@@ -85,7 +88,7 @@ const BUILD_COLUMNS = `
 export function createTrainingBuildContentKey(
   build: Pick<
     TrainingBuild,
-    "pokemonId" | "nature" | "itemId" | "abilityPoints" | "moveIds"
+    "pokemonId" | "nature" | "itemId" | "abilityId" | "abilityPoints" | "moveIds"
   >,
 ) {
   const statKey = [
@@ -104,6 +107,7 @@ export function createTrainingBuildContentKey(
     build.pokemonId,
     build.nature,
     build.itemId || "-",
+    build.abilityId || "-",
     statKey,
     moveKey,
   ].join("|");
@@ -164,6 +168,7 @@ export async function saveTrainingBuild(build: TrainingBuild) {
     build.pokemonId,
     build.nature,
     build.itemId || null,
+    build.abilityId || null,
     JSON.stringify(build.abilityPoints),
     JSON.stringify(build.moveIds),
     build.updatedAt,
@@ -173,16 +178,16 @@ export async function saveTrainingBuild(build: TrainingBuild) {
   if (id === undefined) {
     const result = await sqliteWorkerClient.execute(
       `INSERT INTO training_builds (
-         name, content_key, pokemon_id, nature, item_id,
+         name, content_key, pokemon_id, nature, item_id, ability_id,
          ability_points_json, move_ids_json, updated_at
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       bind,
     );
     id = result.lastInsertRowId;
   } else {
     const result = await sqliteWorkerClient.execute(
       `UPDATE training_builds SET
-         name = ?, content_key = ?, pokemon_id = ?, nature = ?, item_id = ?,
+         name = ?, content_key = ?, pokemon_id = ?, nature = ?, item_id = ?, ability_id = ?,
          ability_points_json = ?, move_ids_json = ?, updated_at = ?
        WHERE id = ?`,
       [...bind, id],

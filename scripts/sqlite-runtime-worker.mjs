@@ -7,7 +7,7 @@ import sqlite3InitModule from "/sqlite-wasm/index.mjs";
 
 const DATABASE_FILENAME = "/user.db";
 const CATALOG_DATABASE_FILENAME = "/catalog.db";
-const SUPPORTED_SCHEMA_VERSION = 1;
+const SUPPORTED_SCHEMA_VERSION = 2;
 const CATALOG_DATABASE_URL = "/sqlite-catalog.db.gz";
 const CATALOG_SEED_VERSION = "3";
 
@@ -132,7 +132,7 @@ function migrateSchema() {
       database.exec(`
         DELETE FROM schema_metadata
         WHERE key IN ('catalog_seed_version');
-        PRAGMA user_version = 1;
+        PRAGMA user_version = ${SUPPORTED_SCHEMA_VERSION};
       `);
       database.exec("COMMIT");
     } catch (error) {
@@ -157,6 +157,7 @@ function migrateSchema() {
           pokemon_id INTEGER NOT NULL,
           nature TEXT NOT NULL,
           item_id INTEGER,
+          ability_id TEXT,
           ability_points_json TEXT NOT NULL,
           move_ids_json TEXT NOT NULL,
           updated_at INTEGER NOT NULL DEFAULT (unixepoch())
@@ -203,7 +204,21 @@ function migrateSchema() {
         INSERT INTO schema_metadata (key, value)
         VALUES ('database_created_at', CAST(unixepoch() AS TEXT));
 
-        PRAGMA user_version = 1;
+        PRAGMA user_version = 2;
+      `);
+      database.exec("COMMIT");
+    } catch (error) {
+      database.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  if (currentVersion === 1) {
+    database.exec("BEGIN IMMEDIATE");
+    try {
+      database.exec(`
+        ALTER TABLE training_builds ADD COLUMN ability_id TEXT;
+        PRAGMA user_version = 2;
       `);
       database.exec("COMMIT");
     } catch (error) {

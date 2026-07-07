@@ -52,6 +52,7 @@ async function runRepositoryDiagnostics(): Promise<RepositoryDiagnostics> {
       pokemonId,
       nature: "serious",
       itemId: "",
+      abilityId: "",
       abilityPoints: { hp: 1 },
       moveIds: ["diagnostic-move"],
       updatedAt: Date.now(),

@@ -57,12 +57,13 @@
 
         try {
           const insertedBuild = await request("execute", {
-            sql: "INSERT INTO training_builds (name, content_key, pokemon_id, nature, item_id, ability_points_json, move_ids_json, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            sql: "INSERT INTO training_builds (name, content_key, pokemon_id, nature, item_id, ability_id, ability_points_json, move_ids_json, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
             bind: [
               "SQLite診断用育成案",
               contentKey,
               pokemonId,
               "serious",
+              "",
               "",
               JSON.stringify({ hp: 1 }),
               JSON.stringify(["diagnostic-move"]),

@@ -3,7 +3,7 @@
 .hero p { font-size:.72rem; font-weight:900; letter-spacing:.15em; }
 .hero h1 { margin:.35rem 0; font-size:clamp(1.8rem,6vw,3.5rem); }
 .hero img { width:min(42%,190px); height:auto; object-fit:contain; }
-.settings { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
+.settings { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; }
 .settings p { align-self:end; min-height:42px; padding:.7rem; border-radius:9px; background:#eef6ff; font-size:.82rem; font-weight:800; }
 .settings label,.moves label { display:grid; gap:.4rem; font-size:.82rem; font-weight:800; }
 .settings input,.settings select,.moves select,.statRow input { min-width:0; min-height:42px; padding:.55rem; border:2px solid #b9c7da; border-radius:9px; background:white; color:#172b4d; }

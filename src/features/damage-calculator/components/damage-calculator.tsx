@@ -250,6 +250,8 @@ function applyTrainingBuildToPokemon(
     nameJa: build.name || pokemon.nameJa,
     actualStats: toActualStats(pokemon, build, natures),
     heldItem: heldItems.find(({ id }) => id === build.itemId) ?? null,
+    selectedAbility:
+      pokemon.abilities.find(({ id }) => id === build.abilityId) ?? null,
     moves: learnedDamageMoves,
   };
 }

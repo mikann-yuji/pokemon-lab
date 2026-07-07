@@ -65,6 +65,7 @@ export function TrainingSimulator({
   );
   const [moveIds, setMoveIds] = useState<string[]>(["", "", "", ""]);
   const [itemId, setItemId] = useState("");
+  const [abilityId, setAbilityId] = useState("");
   const [saved, setSaved] = useState(false);
   const [isNatureMatrixOpen, setNatureMatrixOpen] = useState(false);
   const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -123,11 +124,16 @@ export function TrainingSimulator({
       setAbilityPoints(build.abilityPoints ?? initialStats(0));
       setMoveIds([...build.moveIds, "", "", "", ""].slice(0, 4));
       setItemId(build.itemId ?? "");
+      setAbilityId(
+        pokemon.abilities.some(({ id }) => id === build.abilityId)
+          ? build.abilityId
+          : "",
+      );
       setBuildName(build.name ?? "");
       setSavedBuildName(build.name ?? "");
     });
     return () => { active = false; };
-  }, [initialBuildId, natures, pokemon.id]);
+  }, [initialBuildId, natures, pokemon.abilities, pokemon.id]);
 
   // 性格IDが古い保存データなどで見つからない場合は、まじめ/先頭性格へフォールバックする。
   const selectedNature =
@@ -188,6 +194,7 @@ export function TrainingSimulator({
       pokemonId: pokemon.id,
       nature,
       itemId,
+      abilityId,
       abilityPoints,
       moveIds,
     };
@@ -256,6 +263,24 @@ export function TrainingSimulator({
             <small>マトリックス表から選ぶ</small>
           </button>
         </div>
+        <label>
+          特性
+          <select
+            value={abilityId}
+            onChange={(event) => {
+              setAbilityId(event.target.value);
+              setSaved(false);
+            }}
+          >
+            <option value="">特性なし</option>
+            {pokemon.abilities.map((ability) => (
+              <option value={ability.id} key={ability.id}>
+                {ability.name}
+                {ability.isHidden ? " (隠れ特性)" : ""}
+              </option>
+            ))}
+          </select>
+        </label>
         <label>
           持ち物
           <select
