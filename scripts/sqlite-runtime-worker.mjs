@@ -9,7 +9,7 @@ const DATABASE_FILENAME = "/user.db";
 const CATALOG_DATABASE_FILENAME = "/catalog.db";
 const SUPPORTED_SCHEMA_VERSION = 2;
 const CATALOG_DATABASE_URL = "/sqlite-catalog.db.gz";
-const CATALOG_SEED_VERSION = "4";
+const CATALOG_SEED_VERSION = "5";
 
 // OPFS上のSQLite接続はWorker内でだけ保持し、UIスレッドへDBオブジェクトを渡さない。
 let database = null;
@@ -26,6 +26,7 @@ const catalogTableNames = [
   "champions_items",
   "items",
   "champions_forms",
+  "champions_form_move_usage",
   "form_moves",
   "move_learn_methods",
   "version_groups",
