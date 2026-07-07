@@ -58,6 +58,120 @@ const STAT_IDS = [
   "speed",
 ] as const;
 
+type AdjustableStatId =
+  | "attack"
+  | "defense"
+  | "special-attack"
+  | "special-defense";
+type DamageSide = "attacker" | "defender";
+type StatAdjustment = {
+  point: number;
+  rank: number;
+  nature: boolean;
+};
+type StatAdjustmentState = Record<
+  DamageSide,
+  Record<AdjustableStatId, StatAdjustment>
+>;
+
+const STAT_LABELS: Record<AdjustableStatId, string> = {
+  attack: "こうげき",
+  defense: "ぼうぎょ",
+  "special-attack": "とくこう",
+  "special-defense": "とくぼう",
+};
+
+const ADJUSTABLE_STAT_IDS = [
+  "attack",
+  "defense",
+  "special-attack",
+  "special-defense",
+] as const satisfies readonly AdjustableStatId[];
+
+function createDefaultAdjustment(): StatAdjustment {
+  return { point: 0, rank: 0, nature: false };
+}
+
+function createDefaultAdjustmentState(): StatAdjustmentState {
+  return {
+    attacker: {
+      attack: createDefaultAdjustment(),
+      defense: createDefaultAdjustment(),
+      "special-attack": createDefaultAdjustment(),
+      "special-defense": createDefaultAdjustment(),
+    },
+    defender: {
+      attack: createDefaultAdjustment(),
+      defense: createDefaultAdjustment(),
+      "special-attack": createDefaultAdjustment(),
+      "special-defense": createDefaultAdjustment(),
+    },
+  };
+}
+
+function calculateActualStat(
+  pokemon: DamageCalculatorPokemon,
+  statId: (typeof STAT_IDS)[number],
+  point = 0,
+  nature = false,
+) {
+  const baseStat = pokemon.stats[statId] ?? 1;
+  const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
+  if (statId === "hp") return baseStat === 1 ? 1 : base + 50 + 10 + point;
+  return Math.floor((base + 5 + point) * (nature ? 1.1 : 1));
+}
+
+function createNeutralActualStats(pokemon: DamageCalculatorPokemon) {
+  return Object.fromEntries(
+    STAT_IDS.map((statId) => [statId, calculateActualStat(pokemon, statId)]),
+  );
+}
+
+function applyStatAdjustment(
+  pokemon: DamageCalculatorPokemon | null,
+  statId: AdjustableStatId | null,
+  adjustment: StatAdjustment | null,
+): DamageCalculatorPokemon | null {
+  if (!pokemon || !statId || !adjustment) return pokemon;
+
+  return {
+    ...pokemon,
+    actualStats: {
+      ...createNeutralActualStats(pokemon),
+      ...pokemon.actualStats,
+      [statId]: calculateActualStat(
+        pokemon,
+        statId,
+        adjustment.point,
+        adjustment.nature,
+      ),
+    },
+    boosts: {
+      ...pokemon.boosts,
+      [statId]: adjustment.rank,
+    },
+  };
+}
+
+function getRelevantStatIds(move: DamageCalculatorMove | undefined) {
+  if (!move) return { attacker: null, defender: null };
+  return move.damageClass === "physical"
+    ? ({ attacker: "attack", defender: "defense" } as const)
+    : ({ attacker: "special-attack", defender: "special-defense" } as const);
+}
+
+function hasPositiveNatureForStat(
+  build: TrainingBuild,
+  statId: AdjustableStatId,
+  natures: Nature[],
+) {
+  const selectedNature = natures.find(({ id }) => id === build.nature);
+  return (
+    selectedNature?.increasedStatId === statId &&
+    selectedNature.increasedStatId !== selectedNature.decreasedStatId
+  );
+}
+
 const DEFAULT_NATURE: Nature = {
   id: "serious",
   name: "まじめ",
@@ -163,6 +277,8 @@ export function DamageCalculator({
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [teamModalOpen, setTeamModalOpen] = useState(false);
   const [teamLoadError, setTeamLoadError] = useState("");
+  const [statAdjustments, setStatAdjustments] =
+    useState<StatAdjustmentState>(() => createDefaultAdjustmentState());
   const buildById = useMemo(
     () =>
       new Map(
@@ -236,6 +352,10 @@ export function DamageCalculator({
   // 攻撃側を変更したら、前のポケモンの技や計算結果を残さない。
   function selectAttacker(pokemon: DamageCalculatorPokemon | null) {
     attackerSelection.select(pokemon);
+    setStatAdjustments((current) => ({
+      ...current,
+      attacker: createDefaultAdjustmentState().attacker,
+    }));
     setMoveId("");
     setResult(null);
     setError(null);
@@ -244,6 +364,29 @@ export function DamageCalculator({
   // 防御側を変更した場合も、古い相手に対する結果を消す。
   function selectDefender(pokemon: DamageCalculatorPokemon | null) {
     defenderSelection.select(pokemon);
+    setStatAdjustments((current) => ({
+      ...current,
+      defender: createDefaultAdjustmentState().defender,
+    }));
+    setResult(null);
+    setError(null);
+  }
+
+  function changeStatAdjustment(
+    side: DamageSide,
+    statId: AdjustableStatId,
+    values: Partial<StatAdjustment>,
+  ) {
+    setStatAdjustments((current) => ({
+      ...current,
+      [side]: {
+        ...current[side],
+        [statId]: {
+          ...current[side][statId],
+          ...values,
+        },
+      },
+    }));
     setResult(null);
     setError(null);
   }
@@ -261,6 +404,19 @@ export function DamageCalculator({
 
     const trainedPokemon = applyTrainingBuildToPokemon(pokemon, build, natures);
     attackerSelection.select(trainedPokemon);
+    setStatAdjustments((current) => ({
+      ...current,
+      attacker: Object.fromEntries(
+        ADJUSTABLE_STAT_IDS.map((statId) => [
+          statId,
+          {
+            point: build.abilityPoints[statId] ?? 0,
+            rank: 0,
+            nature: hasPositiveNatureForStat(build, statId, natures),
+          },
+        ]),
+      ) as Record<AdjustableStatId, StatAdjustment>,
+    }));
     setMoveId(trainedPokemon.moves[0]?.id ?? "");
     setResult(null);
     setError(null);
@@ -301,20 +457,20 @@ export function DamageCalculator({
     if (!attacker || !defender || !moveId) return;
 
     const move = attacker.moves.find(({ id }) => id === moveId);
-    if (!move) return;
+    if (!move || !adjustedAttacker || !adjustedDefender) return;
 
     setCalculating(true);
     setError(null);
     try {
       setResult({
         normal: championsDamageCalculator.calculate({
-          attacker,
-          defender,
+          attacker: adjustedAttacker,
+          defender: adjustedDefender,
           move,
         }),
         critical: championsDamageCalculator.calculate({
-          attacker,
-          defender,
+          attacker: adjustedAttacker,
+          defender: adjustedDefender,
           move,
           isCritical: true,
         }),
@@ -343,6 +499,21 @@ export function DamageCalculator({
   }
 
   const selectedMove = attacker?.moves.find(({ id }) => id === moveId);
+  const relevantStatIds = getRelevantStatIds(selectedMove);
+  const adjustedAttacker = applyStatAdjustment(
+    attacker,
+    relevantStatIds.attacker,
+    relevantStatIds.attacker
+      ? statAdjustments.attacker[relevantStatIds.attacker]
+      : null,
+  );
+  const adjustedDefender = applyStatAdjustment(
+    defender,
+    relevantStatIds.defender,
+    relevantStatIds.defender
+      ? statAdjustments.defender[relevantStatIds.defender]
+      : null,
+  );
 
   return (
     <form className={styles.calculator} onSubmit={submit}>
@@ -418,6 +589,20 @@ export function DamageCalculator({
           </select>
         </label>
         {selectedMove ? <MoveSummary move={selectedMove} /> : null}
+        {selectedMove && relevantStatIds.attacker ? (
+          <DamageStatControls
+            title="攻撃側の補正"
+            statLabel={STAT_LABELS[relevantStatIds.attacker]}
+            value={statAdjustments.attacker[relevantStatIds.attacker]}
+            onChange={(values) =>
+              changeStatAdjustment(
+                "attacker",
+                relevantStatIds.attacker,
+                values,
+              )
+            }
+          />
+        ) : null}
       </section>
 
       <div className={styles.versus}>VS</div>
@@ -440,6 +625,20 @@ export function DamageCalculator({
           onRestore={restoreHistory}
         />
         <PokemonSummary pokemon={defender} />
+        {selectedMove && relevantStatIds.defender ? (
+          <DamageStatControls
+            title="防御側の補正"
+            statLabel={STAT_LABELS[relevantStatIds.defender]}
+            value={statAdjustments.defender[relevantStatIds.defender]}
+            onChange={(values) =>
+              changeStatAdjustment(
+                "defender",
+                relevantStatIds.defender,
+                values,
+              )
+            }
+          />
+        ) : null}
       </section>
 
       <div className={styles.conditions}>
@@ -619,6 +818,63 @@ function MoveSummary({ move }: { move: DamageCalculatorMove }) {
       {move.typeName} / {move.damageClass === "physical" ? "物理" : "特殊"} /
       威力 {move.power}
     </p>
+  );
+}
+
+function DamageStatControls({
+  title,
+  statLabel,
+  value,
+  onChange,
+}: {
+  title: string;
+  statLabel: string;
+  value: StatAdjustment;
+  onChange: (values: Partial<StatAdjustment>) => void;
+}) {
+  return (
+    <div className={styles.statControls}>
+      <div className={styles.statControlsHeader}>
+        <strong>{title}</strong>
+        <span>{statLabel}</span>
+      </div>
+      <label>
+        能力ポイント
+        <input
+          type="number"
+          min="0"
+          max="32"
+          value={value.point}
+          onChange={(event) =>
+            onChange({
+              point: Math.min(32, Math.max(0, Number(event.target.value))),
+            })
+          }
+        />
+      </label>
+      <label>
+        能力ランク
+        <span className={styles.rankValue}>
+          {value.rank > 0 ? `+${value.rank}` : value.rank}
+        </span>
+        <input
+          type="range"
+          min="-6"
+          max="6"
+          step="1"
+          value={value.rank}
+          onChange={(event) => onChange({ rank: Number(event.target.value) })}
+        />
+      </label>
+      <label className={styles.natureToggle}>
+        <input
+          type="checkbox"
+          checked={value.nature}
+          onChange={(event) => onChange({ nature: event.target.checked })}
+        />
+        性格補正あり
+      </label>
+    </div>
   );
 }
 

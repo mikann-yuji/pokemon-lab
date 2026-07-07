@@ -137,6 +137,16 @@ function toActualStats(pokemon: DamageCalculatorPokemon): StatsTable | null {
   ) as StatsTable;
 }
 
+function toBoosts(pokemon: DamageCalculatorPokemon): Partial<StatsTable> {
+  if (!pokemon.boosts) return {};
+  return Object.fromEntries(
+    Object.entries(STAT_IDS).flatMap(([databaseId, calculatorId]) => {
+      const boost = pokemon.boosts?.[databaseId];
+      return typeof boost === "number" ? [[calculatorId, boost]] : [];
+    }),
+  ) as Partial<StatsTable>;
+}
+
 /** SmogonのKO chanceから、日本語の「確定n発/乱数n発」表示を作る。 */
 function formatKoLabel({
   chance,
@@ -216,6 +226,7 @@ export class SmogonDamageCalculator {
       nature: this.ruleset.nature,
       ivs: { ...this.ruleset.ivs },
       evs: { ...this.ruleset.evs },
+      boosts: toBoosts(pokemon),
       overrides: {
         types,
         baseStats: toBaseStats(pokemon),
