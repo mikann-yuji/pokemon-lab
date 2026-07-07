@@ -15,7 +15,7 @@ const temporaryDirectory = path.join(rootDirectory, ".tmp");
 const databasePath = path.join(temporaryDirectory, "sqlite-catalog.db");
 const outputPath = path.join(publicDirectory, "sqlite-catalog.db.gz");
 
-const seedVersion = 3;
+const seedVersion = 4;
 
 // publicへ配布するcatalog.dbにも、通常DBと同じ親子関係順でCSVを投入する。
 const seedTableOrder = [
@@ -38,6 +38,8 @@ const seedTableOrder = [
   "champions_items",
   "champions_item_damage_modifiers",
   "champions_ability_damage_modifiers",
+  "champions_damage_weathers",
+  "champions_damage_terrains",
 ];
 
 const numericColumns = new Map([
@@ -112,6 +114,14 @@ const numericColumns = new Map([
     new Set(["multiplier", "max_multiplier"]),
   ],
   ["champions_ability_damage_modifiers", new Set(["id", "multiplier"])],
+  [
+    "champions_damage_weathers",
+    new Set(["sort_order", "normally_available"]),
+  ],
+  [
+    "champions_damage_terrains",
+    new Set(["sort_order", "normally_available"]),
+  ],
 ]);
 
 /** CSVを読み、catalog.db投入用に空文字をnull、数値列をNumberへ変換する。 */

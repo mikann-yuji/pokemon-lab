@@ -8,6 +8,28 @@
 
 import type { TypeName } from "@/domain/type-matchup";
 
+export type DamageCalculatorWeather = {
+  id: string;
+  name: string;
+  smogonWeather:
+    | "Sand"
+    | "Sun"
+    | "Rain"
+    | "Hail"
+    | "Snow"
+    | "Harsh Sunshine"
+    | "Heavy Rain"
+    | "Strong Winds";
+  normallyAvailable: boolean;
+};
+
+export type DamageCalculatorTerrain = {
+  id: string;
+  name: string;
+  smogonTerrain: "Electric" | "Grassy" | "Psychic" | "Misty";
+  normallyAvailable: boolean;
+};
+
 /**
  * ダメージを与える技の情報。
  * 変化技はダメージ計算に使わないため、physicalとspecialだけを扱う。

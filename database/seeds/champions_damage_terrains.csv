@@ -1,0 +1,5 @@
+id,name_ja,smogon_terrain,sort_order,normally_available
+electric,エレキフィールド,Electric,10,1
+grassy,グラスフィールド,Grassy,20,1
+psychic,サイコフィールド,Psychic,30,1
+misty,ミストフィールド,Misty,40,1

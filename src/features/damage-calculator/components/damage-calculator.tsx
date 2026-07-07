@@ -20,6 +20,8 @@ import type {
   DamageCalculatorHeldItem,
   DamageCalculatorMove,
   DamageCalculatorPokemon,
+  DamageCalculatorTerrain,
+  DamageCalculatorWeather,
 } from "../domain/damage-calculator-types";
 import { PokemonCombobox } from "./pokemon-combobox";
 import {
@@ -298,16 +300,22 @@ function usePokemonSelection() {
 export function DamageCalculator({
   pokemonCatalog,
   heldItems,
+  weathers,
+  terrains,
 }: {
   /** Server Component側でcatalog.dbから読み込んだ、計算対象ポケモンの全データ。 */
   pokemonCatalog: DamageCalculatorPokemon[];
   heldItems: DamageCalculatorHeldItem[];
+  weathers: DamageCalculatorWeather[];
+  terrains: DamageCalculatorTerrain[];
 }) {
   const attackerSelection = usePokemonSelection();
   const defenderSelection = usePokemonSelection();
   const attacker = attackerSelection.pokemon;
   const defender = defenderSelection.pokemon;
   const [moveId, setMoveId] = useState("");
+  const [weatherId, setWeatherId] = useState("");
+  const [terrainId, setTerrainId] = useState("");
   const [attackerHistory, setAttackerHistory] = useState<
     DamageHistoryRecord[]
   >([]);
@@ -551,6 +559,17 @@ export function DamageCalculator({
   }
 
   const selectedMove = attacker?.moves.find(({ id }) => id === moveId);
+  const selectedWeather =
+    weathers.find(({ id }) => id === weatherId) ?? null;
+  const selectedTerrain =
+    terrains.find(({ id }) => id === terrainId) ?? null;
+  const fieldOptions = useMemo(
+    () => ({
+      ...(selectedWeather ? { weather: selectedWeather.smogonWeather } : {}),
+      ...(selectedTerrain ? { terrain: selectedTerrain.smogonTerrain } : {}),
+    }),
+    [selectedTerrain, selectedWeather],
+  );
   const relevantStatIds = getRelevantStatIds(selectedMove);
   const adjustedAttacker = useMemo(
     () =>
@@ -598,6 +617,7 @@ export function DamageCalculator({
             move: selectedMove,
             metronomeConsecutiveUseCount,
             abilityConditionEnabled,
+            field: fieldOptions,
           }),
           critical: championsDamageCalculator.calculate({
             attacker: adjustedAttacker,
@@ -606,6 +626,7 @@ export function DamageCalculator({
             metronomeConsecutiveUseCount,
             abilityConditionEnabled,
             isCritical: true,
+            field: fieldOptions,
           }),
           attackerName: attacker.nameJa,
           defenderName: defender.nameJa,
@@ -625,6 +646,7 @@ export function DamageCalculator({
     abilityConditionEnabled,
     attacker,
     defender,
+    fieldOptions,
     metronomeConsecutiveUseCount,
     selectedMove,
   ]);
@@ -870,6 +892,43 @@ export function DamageCalculator({
             }
           />
         ) : null}
+      </section>
+
+      <section className={styles.fieldConditions}>
+        <div>
+          <p>BATTLE CONDITIONS</p>
+          <h2>場の条件</h2>
+        </div>
+        <label>
+          天候
+          <select
+            value={weatherId}
+            onChange={(event) => setWeatherId(event.target.value)}
+          >
+            <option value="">なし</option>
+            {weathers.map((weather) => (
+              <option value={weather.id} key={weather.id}>
+                {weather.name}
+                {weather.normallyAvailable ? "" : " (特殊)"}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          フィールド
+          <select
+            value={terrainId}
+            onChange={(event) => setTerrainId(event.target.value)}
+          >
+            <option value="">なし</option>
+            {terrains.map((terrain) => (
+              <option value={terrain.id} key={terrain.id}>
+                {terrain.name}
+                {terrain.normallyAvailable ? "" : " (特殊)"}
+              </option>
+            ))}
+          </select>
+        </label>
       </section>
 
       <div className={styles.conditions}>

@@ -103,6 +103,8 @@ const seedTableOrder = [
   "champions_items",
   "champions_item_damage_modifiers",
   "champions_ability_damage_modifiers",
+  "champions_damage_weathers",
+  "champions_damage_terrains",
 ];
 
 // DBスキーマとCSVヘッダーの一致を確認し、SQLiteへ渡す型へ変換する。

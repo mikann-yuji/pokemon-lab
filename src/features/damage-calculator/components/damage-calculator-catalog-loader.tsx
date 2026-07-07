@@ -5,8 +5,11 @@ import { DamageCalculator } from "./damage-calculator";
 import type {
   DamageCalculatorHeldItem,
   DamageCalculatorPokemon,
+  DamageCalculatorTerrain,
+  DamageCalculatorWeather,
 } from "../domain/damage-calculator-types";
 import {
+  getChampionsDamageFieldConditions,
   getChampionsDamageCalculatorHeldItems,
   getChampionsDamageCalculatorPokemon,
 } from "../infrastructure/damage-calculator-catalog-repository";
@@ -21,6 +24,8 @@ export function DamageCalculatorCatalogLoader() {
     DamageCalculatorPokemon[]
   >([]);
   const [heldItems, setHeldItems] = useState<DamageCalculatorHeldItem[]>([]);
+  const [weathers, setWeathers] = useState<DamageCalculatorWeather[]>([]);
+  const [terrains, setTerrains] = useState<DamageCalculatorTerrain[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState("");
 
@@ -30,11 +35,14 @@ export function DamageCalculatorCatalogLoader() {
     void Promise.all([
       getChampionsDamageCalculatorPokemon(),
       getChampionsDamageCalculatorHeldItems(),
+      getChampionsDamageFieldConditions(),
     ])
-      .then(([catalog, items]) => {
+      .then(([catalog, items, fieldConditions]) => {
         if (!active) return;
         setPokemonCatalog(catalog);
         setHeldItems(items);
+        setWeathers(fieldConditions.weathers);
+        setTerrains(fieldConditions.terrains);
         setLoaded(true);
       })
       .catch((error: unknown) => {
@@ -67,6 +75,11 @@ export function DamageCalculatorCatalogLoader() {
   }
 
   return (
-    <DamageCalculator pokemonCatalog={pokemonCatalog} heldItems={heldItems} />
+    <DamageCalculator
+      pokemonCatalog={pokemonCatalog}
+      heldItems={heldItems}
+      weathers={weathers}
+      terrains={terrains}
+    />
   );
 }

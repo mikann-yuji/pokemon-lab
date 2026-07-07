@@ -1,0 +1,9 @@
+id,name_ja,smogon_weather,sort_order,normally_available
+sun,にほんばれ,Sun,10,1
+rain,あめ,Rain,20,1
+sand,すなあらし,Sand,30,1
+snow,ゆき,Snow,40,1
+hail,あられ,Hail,50,0
+harsh-sunshine,おおひでり,Harsh Sunshine,60,0
+heavy-rain,おおあめ,Heavy Rain,70,0
+strong-winds,らんきりゅう,Strong Winds,80,0

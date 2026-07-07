@@ -8,6 +8,8 @@ import type {
   DamageCalculatorHeldItem,
   DamageCalculatorMove,
   DamageCalculatorPokemon,
+  DamageCalculatorTerrain,
+  DamageCalculatorWeather,
 } from "../domain/damage-calculator-types";
 
 type PokemonBaseRow = SqliteRow & {
@@ -84,6 +86,20 @@ type HeldItemRow = SqliteRow & {
     | null;
   moveTypeName: TypeName | null;
   pokemonName: string | null;
+};
+
+type WeatherRow = SqliteRow & {
+  id: string;
+  name: string;
+  smogonWeather: DamageCalculatorWeather["smogonWeather"];
+  normallyAvailable: number;
+};
+
+type TerrainRow = SqliteRow & {
+  id: string;
+  name: string;
+  smogonTerrain: DamageCalculatorTerrain["smogonTerrain"];
+  normallyAvailable: number;
 };
 
 /**
@@ -292,4 +308,45 @@ export async function getChampionsDamageCalculatorHeldItems(): Promise<
             pokemonName: row.pokemonName,
           },
   }));
+}
+
+export async function getChampionsDamageFieldConditions(): Promise<{
+  weathers: DamageCalculatorWeather[];
+  terrains: DamageCalculatorTerrain[];
+}> {
+  const [weatherRows, terrainRows] = await Promise.all([
+    sqliteWorkerClient.catalogQuery<WeatherRow>(`
+      SELECT
+        id,
+        name_ja AS name,
+        smogon_weather AS smogonWeather,
+        normally_available AS normallyAvailable
+      FROM champions_damage_weathers
+      ORDER BY sort_order, id
+    `),
+    sqliteWorkerClient.catalogQuery<TerrainRow>(`
+      SELECT
+        id,
+        name_ja AS name,
+        smogon_terrain AS smogonTerrain,
+        normally_available AS normallyAvailable
+      FROM champions_damage_terrains
+      ORDER BY sort_order, id
+    `),
+  ]);
+
+  return {
+    weathers: weatherRows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      smogonWeather: row.smogonWeather,
+      normallyAvailable: row.normallyAvailable === 1,
+    })),
+    terrains: terrainRows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      smogonTerrain: row.smogonTerrain,
+      normallyAvailable: row.normallyAvailable === 1,
+    })),
+  };
 }
