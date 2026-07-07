@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import type { PokemonDetail } from "@/infrastructure/database/pokemon-search-repository";
 import { getPokemonCardStyle } from "@/presentation/pokemon-type-colors";
 import {
@@ -38,6 +38,7 @@ type StatRankingRow = {
   uninvested: number;
   maximum: number;
 };
+type StatCompareMode = "uninvested" | "maximum";
 
 /** 6能力すべてに同じ初期値を入れた能力ポイント表を作る。 */
 const initialStats = (value: number) =>
@@ -217,21 +218,8 @@ export function TrainingSimulator({
             rankingStatId !== "hp",
           ),
         };
-      })
-      .sort(
-        (left, right) =>
-          right.maximum - left.maximum ||
-          right.uninvested - left.uninvested ||
-          left.profile.nameJa.localeCompare(right.profile.nameJa, "ja"),
-      );
+      });
   }, [rankingStatId, statProfiles]);
-  const selectedActualRank =
-    rankingStatId && statRankingRows.length > 0
-      ? rankCurrentValue(
-          statRankingRows.map((row) => row.maximum),
-          actualStats[rankingStatId] as number,
-        )
-      : null;
   const pointTotal = Object.values(abilityPoints).reduce((sum, value) => sum + value, 0);
 
   /**
@@ -376,11 +364,14 @@ export function TrainingSimulator({
       </div>
       <div className={styles.statHeader}><h2>能力値</h2><span>能力ポイント {pointTotal} / 66</span></div>
       <div className={styles.statTable}>
-        <div className={styles.statLabels}><b>能力</b><b>種族値</b><b>順位</b><b>能力P</b><b>実数値</b></div>
+        <div className={styles.statLabels}><b>能力</b><b>種族値</b><b>順位</b><b>能力P</b><b>実数値</b><b>ランキング</b></div>
         {pokemon.stats.map((stat) => <div className={styles.statRow} key={stat.id}>
-          <strong><button className={styles.statNameButton} type="button" onClick={() => setRankingStatId(stat.id)}>{STAT_NAMES[stat.id] ?? stat.name}{hasNatureModifier && selectedNature.increasedStatId === stat.id ? <NatureCaret direction="up" /> : hasNatureModifier && selectedNature.decreasedStatId === stat.id ? <NatureCaret direction="down" /> : null}</button></strong><span>{stat.baseStat}</span><span className={styles.rankBadge}>{baseStatRanks[stat.id] ? `${baseStatRanks[stat.id]}位` : "-"}</span>
+          <strong>{STAT_NAMES[stat.id] ?? stat.name}{hasNatureModifier && selectedNature.increasedStatId === stat.id ? <NatureCaret direction="up" /> : hasNatureModifier && selectedNature.decreasedStatId === stat.id ? <NatureCaret direction="down" /> : null}</strong><span>{stat.baseStat}</span><span className={styles.rankBadge}>{baseStatRanks[stat.id] ? `${baseStatRanks[stat.id]}位` : "-"}</span>
           <div className={styles.pointControl}><input aria-label={`${stat.name}の能力ポイント`} type="number" min="0" max="32" value={abilityPoints[stat.id] ?? 0} onChange={(e) => changeAbilityPoint(stat.id, Number(e.target.value))} /><input aria-label={`${stat.name}の能力ポイントスライダー`} type="range" min="0" max="32" value={abilityPoints[stat.id] ?? 0} onChange={(e) => changeAbilityPoint(stat.id, Number(e.target.value))} /></div>
           <b>{actualStats[stat.id]}</b>
+          <button className={styles.statRankingButton} type="button" onClick={() => setRankingStatId(stat.id)}>
+            {STAT_NAMES[stat.id] ?? stat.name}ランキング
+          </button>
         </div>)}
       </div>
       {rankingStatId && selectedRankingStat ? (
@@ -388,8 +379,10 @@ export function TrainingSimulator({
           pokemonName={pokemon.nameJa}
           statName={STAT_NAMES[rankingStatId] ?? selectedRankingStat.name}
           actualValue={actualStats[rankingStatId] as number}
-          actualRank={selectedActualRank}
+          abilityPoint={abilityPoints[rankingStatId] ?? 0}
+          pointTotal={pointTotal}
           rows={statRankingRows}
+          onPointChange={(value) => changeAbilityPoint(rankingStatId, value)}
           onClose={() => setRankingStatId(null)}
         />
       ) : null}
@@ -485,17 +478,51 @@ function StatRankingOverlay({
   pokemonName,
   statName,
   actualValue,
-  actualRank,
+  abilityPoint,
+  pointTotal,
   rows,
+  onPointChange,
   onClose,
 }: {
   pokemonName: string;
   statName: string;
   actualValue: number;
-  actualRank: number | null;
+  abilityPoint: number;
+  pointTotal: number;
   rows: StatRankingRow[];
+  onPointChange: (value: number) => void;
   onClose: () => void;
 }) {
+  const [compareMode, setCompareMode] =
+    useState<StatCompareMode>("uninvested");
+  const targetRowRef = useRef<HTMLTableRowElement | null>(null);
+  const sortedRows = useMemo(
+    () =>
+      [...rows].sort(
+        (left, right) =>
+          right[compareMode] - left[compareMode] ||
+          right.maximum - left.maximum ||
+          right.uninvested - left.uninvested ||
+          left.profile.nameJa.localeCompare(right.profile.nameJa, "ja"),
+      ),
+    [compareMode, rows],
+  );
+  const actualRank =
+    sortedRows.length > 0
+      ? rankCurrentValue(
+          sortedRows.map((row) => row[compareMode]),
+          actualValue,
+        )
+      : null;
+  const targetRowIndex =
+    actualRank === null
+      ? -1
+      : Math.min(sortedRows.length - 1, Math.max(0, actualRank - 1));
+
+  useEffect(() => {
+    targetRowRef.current?.scrollIntoView({ block: "center" });
+  }, [actualRank, actualValue, compareMode]);
+
   return (
     <div className={styles.statRankingOverlay} role="dialog" aria-modal="true" aria-labelledby="stat-ranking-title">
       <button className={styles.statRankingBackdrop} type="button" aria-label="実数値順位表を閉じる" onClick={onClose} />
@@ -506,6 +533,44 @@ function StatRankingOverlay({
             <h2 id="stat-ranking-title">実数値順位表</h2>
           </div>
           <button type="button" onClick={onClose}>閉じる</button>
+        </div>
+        <div className={styles.statRankingControls}>
+          <label className={styles.statRankingPointControl}>
+            <span>{statName} 能力P</span>
+            <input
+              aria-label={`${statName}の能力ポイント`}
+              type="number"
+              min="0"
+              max="32"
+              value={abilityPoint}
+              onChange={(event) => onPointChange(Number(event.target.value))}
+            />
+            <input
+              aria-label={`${statName}の能力ポイントスライダー`}
+              type="range"
+              min="0"
+              max="32"
+              value={abilityPoint}
+              onChange={(event) => onPointChange(Number(event.target.value))}
+            />
+            <small>合計 {pointTotal} / 66</small>
+          </label>
+          <div className={styles.statCompareToggle} role="group" aria-label="比較基準">
+            <button
+              className={compareMode === "uninvested" ? styles.activeCompareMode : undefined}
+              type="button"
+              onClick={() => setCompareMode("uninvested")}
+            >
+              無振りで比較
+            </button>
+            <button
+              className={compareMode === "maximum" ? styles.activeCompareMode : undefined}
+              type="button"
+              onClick={() => setCompareMode("maximum")}
+            >
+              最大値で比較
+            </button>
+          </div>
         </div>
         <div className={styles.statRankingTableWrap}>
           <table className={styles.statRankingTable}>
@@ -518,12 +583,20 @@ function StatRankingOverlay({
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
-                <tr key={row.profile.id}>
+              {sortedRows.map((row, index) => (
+                <tr
+                  className={index === targetRowIndex ? styles.targetRankRow : undefined}
+                  key={row.profile.id}
+                  ref={index === targetRowIndex ? targetRowRef : null}
+                >
                   <th scope="row">
                     <strong>{pokemonName}</strong>
                     <span>{statName}: {actualValue}</span>
-                    {actualRank ? <small>最大実数値基準 {actualRank}位</small> : null}
+                    {actualRank ? (
+                      <small>
+                        {compareMode === "uninvested" ? "無振り" : "最大値"}基準 {actualRank}位
+                      </small>
+                    ) : null}
                   </th>
                   <td>{row.profile.nameJa}</td>
                   <td>{row.uninvested}</td>
