@@ -376,9 +376,44 @@
   font: inherit;
 }
 
+.pointControl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.pointControl button,
+.rankStepper button {
+  min-width: 2.4rem;
+  min-height: 36px;
+  border: 1px solid #b9cae0;
+  border-radius: 8px;
+  background: #eef6ff;
+  color: #172b4d;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+}
+
+.pointControl button:hover,
+.pointControl button:focus-visible,
+.rankStepper button:hover,
+.rankStepper button:focus-visible {
+  border-color: #2857a4;
+  outline: 3px solid rgb(40 87 164 / 18%);
+}
+
 .statControls input[type="range"] {
   width: 100%;
   accent-color: #2857a4;
+}
+
+.rankStepper {
+  display: grid;
+  grid-template-columns: auto minmax(3rem, 1fr) auto;
+  gap: 0.45rem;
+  align-items: center;
 }
 
 .natureToggle {
@@ -441,16 +476,6 @@
   margin-bottom: 0.55rem;
 }
 
-.resultHeader span {
-  flex: 0 0 auto;
-  padding: 0.18rem 0.55rem;
-  border-radius: 999px;
-  background: #ffd43b;
-  color: #172b4d;
-  font-size: 0.7rem;
-  font-weight: 950;
-}
-
 .resultHeader strong {
   min-width: 0;
   overflow: hidden;
@@ -458,6 +483,13 @@
   font-weight: 950;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.resultHeader span {
+  flex: 0 0 auto;
+  color: rgb(255 255 255 / 72%);
+  font-size: 0.78rem;
+  font-weight: 900;
 }
 
 .outcomeGrid {
@@ -510,11 +542,11 @@
 }
 
 .maximumDamageBar {
-  background: rgb(255 212 59 / 42%);
+  background: rgb(116 214 108 / 42%);
 }
 
 .minimumDamageBar {
-  background: #ffd43b;
+  background: #64d258;
 }
 
 .outcomeTitle {
@@ -525,7 +557,7 @@
 
 .damagePercent {
   min-width: 0;
-  color: #ffd43b;
+  color: #91e687;
   font-size: clamp(1rem, 4vw, 1.35rem);
   font-weight: 950;
   text-align: right;
@@ -542,11 +574,11 @@
 }
 
 .criticalOutcome .maximumDamageBar {
-  background: rgb(239 69 82 / 38%);
+  background: rgb(116 214 108 / 42%);
 }
 
 .criticalOutcome .minimumDamageBar {
-  background: #ef4552;
+  background: #64d258;
 }
 
 .teamModalOverlay {

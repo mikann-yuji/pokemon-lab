@@ -43,6 +43,8 @@ type CalculationResult = {
   normal: DamageCalculation;
   /** 急所ヒット時のダメージ範囲。通常結果と並べて比較表示する。 */
   critical: DamageCalculation;
+  attackerName: string;
+  defenderName: string;
   moveName: string;
 };
 
@@ -56,6 +58,7 @@ const STAT_IDS = [
 ] as const;
 
 type AdjustableStatId =
+  | "hp"
   | "attack"
   | "defense"
   | "special-attack"
@@ -72,6 +75,7 @@ type StatAdjustmentState = Record<
 >;
 
 const STAT_LABELS: Record<AdjustableStatId, string> = {
+  hp: "HP",
   attack: "こうげき",
   defense: "ぼうぎょ",
   "special-attack": "とくこう",
@@ -79,6 +83,7 @@ const STAT_LABELS: Record<AdjustableStatId, string> = {
 };
 
 const ADJUSTABLE_STAT_IDS = [
+  "hp",
   "attack",
   "defense",
   "special-attack",
@@ -92,12 +97,14 @@ function createDefaultAdjustment(): StatAdjustment {
 function createDefaultAdjustmentState(): StatAdjustmentState {
   return {
     attacker: {
+      hp: createDefaultAdjustment(),
       attack: createDefaultAdjustment(),
       defense: createDefaultAdjustment(),
       "special-attack": createDefaultAdjustment(),
       "special-defense": createDefaultAdjustment(),
     },
     defender: {
+      hp: createDefaultAdjustment(),
       attack: createDefaultAdjustment(),
       defense: createDefaultAdjustment(),
       "special-attack": createDefaultAdjustment(),
@@ -143,10 +150,13 @@ function applyStatAdjustment(
         adjustment.nature,
       ),
     },
-    boosts: {
-      ...pokemon.boosts,
-      [statId]: adjustment.rank,
-    },
+    boosts:
+      statId === "hp"
+        ? pokemon.boosts
+        : {
+            ...pokemon.boosts,
+            [statId]: adjustment.rank,
+          },
   };
 }
 
@@ -444,14 +454,20 @@ export function DamageCalculator({
     [attacker, relevantStatIds.attacker, statAdjustments.attacker],
   );
   const adjustedDefender = useMemo(
-    () =>
-      applyStatAdjustment(
+    () => {
+      const statAdjustedDefender = applyStatAdjustment(
         defender,
         relevantStatIds.defender,
         relevantStatIds.defender
           ? statAdjustments.defender[relevantStatIds.defender]
           : null,
-      ),
+      );
+      return applyStatAdjustment(
+        statAdjustedDefender,
+        "hp",
+        statAdjustments.defender.hp,
+      );
+    },
     [defender, relevantStatIds.defender, statAdjustments.defender],
   );
 
@@ -477,6 +493,8 @@ export function DamageCalculator({
             move: selectedMove,
             isCritical: true,
           }),
+          attackerName: attacker.nameJa,
+          defenderName: defender.nameJa,
           moveName: selectedMove.name,
         },
         error: null,
@@ -628,6 +646,18 @@ export function DamageCalculator({
           onRestore={restoreHistory}
         />
         <PokemonSummary pokemon={defender} />
+        {selectedMove ? (
+          <DamageStatControls
+            title="髦ｲ蠕｡蛛ｴ縺ｮHP"
+            statLabel={STAT_LABELS.hp}
+            value={statAdjustments.defender.hp}
+            showRank={false}
+            showNature={false}
+            onChange={(values) =>
+              changeStatAdjustment("defender", "hp", values)
+            }
+          />
+        ) : null}
         {selectedMove && relevantStatIds.defender ? (
           <DamageStatControls
             title="防御側の補正"
@@ -820,13 +850,24 @@ function DamageStatControls({
   title,
   statLabel,
   value,
+  showRank = true,
+  showNature = true,
   onChange,
 }: {
   title: string;
   statLabel: string;
   value: StatAdjustment;
+  showRank?: boolean;
+  showNature?: boolean;
   onChange: (values: Partial<StatAdjustment>) => void;
 }) {
+  const changePoint = (point: number) => {
+    onChange({ point: Math.min(32, Math.max(0, point)) });
+  };
+  const changeRank = (rank: number) => {
+    onChange({ rank: Math.min(6, Math.max(-6, rank)) });
+  };
+
   return (
     <div className={styles.statControls}>
       <div className={styles.statControlsHeader}>
@@ -835,51 +876,73 @@ function DamageStatControls({
       </div>
       <label>
         能力ポイント
-        <input
-          type="number"
-          min="0"
-          max="32"
-          value={value.point}
-          onChange={(event) =>
-            onChange({
-              point: Math.min(32, Math.max(0, Number(event.target.value))),
-            })
-          }
-        />
-      </label>
-      <label>
-        能力ランク
-        <span className={styles.rankValue}>
-          {value.rank > 0 ? `+${value.rank}` : value.rank}
-        </span>
+        <div className={styles.pointControl}>
+          <input
+            type="number"
+            min="0"
+            max="32"
+            value={value.point}
+            onChange={(event) => changePoint(Number(event.target.value))}
+          />
+          <button type="button" onClick={() => changePoint(32)}>
+            32
+          </button>
+        </div>
         <input
           type="range"
-          min="-6"
-          max="6"
+          min="0"
+          max="32"
           step="1"
-          value={value.rank}
-          onChange={(event) => onChange({ rank: Number(event.target.value) })}
+          value={value.point}
+          onChange={(event) => changePoint(Number(event.target.value))}
         />
       </label>
-      <label className={styles.natureToggle}>
-        <input
-          type="checkbox"
-          checked={value.nature}
-          onChange={(event) => onChange({ nature: event.target.checked })}
-        />
-        性格補正あり
-      </label>
+      {showRank ? (
+        <label>
+          能力ランク
+          <div className={styles.rankStepper}>
+            <button type="button" onClick={() => changeRank(value.rank - 1)}>
+              -
+            </button>
+            <span className={styles.rankValue}>
+              {value.rank > 0 ? `+${value.rank}` : value.rank}
+            </span>
+            <button type="button" onClick={() => changeRank(value.rank + 1)}>
+              +
+            </button>
+          </div>
+          <input
+            type="range"
+            min="-6"
+            max="6"
+            step="1"
+            value={value.rank}
+            onChange={(event) => changeRank(Number(event.target.value))}
+          />
+        </label>
+      ) : null}
+      {showNature ? (
+        <label className={styles.natureToggle}>
+          <input
+            type="checkbox"
+            checked={value.nature}
+            onChange={(event) => onChange({ nature: event.target.checked })}
+          />
+          性格補正あり
+        </label>
+      ) : null}
     </div>
   );
 }
-
 /** 通常ダメージと急所ダメージをまとめて表示する結果パネル。 */
 function DamageResult({ result }: { result: CalculationResult }) {
   return (
     <section className={styles.result} aria-live="polite">
       <div className={styles.resultHeader}>
-        <span>計算結果</span>
-        <strong>{result.moveName}</strong>
+        <strong>
+          {result.attackerName}→{result.defenderName}
+        </strong>
+        <span>{result.moveName}</span>
       </div>
       <div className={styles.outcomeGrid}>
         <DamageOutcome title="通常" calculation={result.normal} />
@@ -898,8 +961,14 @@ function DamageOutcome({
   calculation: DamageCalculation;
   critical?: boolean;
 }) {
-  const minimumPercent = Math.min(100, Math.max(0, calculation.minimumPercent));
-  const maximumPercent = Math.min(100, Math.max(0, calculation.maximumPercent));
+  const minimumRemainingPercent = Math.max(
+    0,
+    Math.min(100, 100 - calculation.maximumPercent),
+  );
+  const maximumRemainingPercent = Math.max(
+    0,
+    Math.min(100, 100 - calculation.minimumPercent),
+  );
 
   return (
     <article
@@ -907,21 +976,21 @@ function DamageOutcome({
     >
       <span className={styles.outcomeTitle}>{title}</span>
       <strong className={styles.damagePercent}>
-        {calculation.minimumPercent.toFixed(1)}~
-        {calculation.maximumPercent.toFixed(1)}%
+        {minimumRemainingPercent.toFixed(1)}~
+        {maximumRemainingPercent.toFixed(1)}%
       </strong>
       <div
         className={styles.damageBar}
         role="img"
-        aria-label={`ダメージ割合 ${calculation.minimumPercent.toFixed(1)}から${calculation.maximumPercent.toFixed(1)}%`}
+        aria-label={`防御側の残りHP ${minimumRemainingPercent.toFixed(1)}から${maximumRemainingPercent.toFixed(1)}%`}
       >
         <span
           className={styles.maximumDamageBar}
-          style={{ width: `${maximumPercent}%` }}
+          style={{ width: `${maximumRemainingPercent}%` }}
         />
         <span
           className={styles.minimumDamageBar}
-          style={{ width: `${minimumPercent}%` }}
+          style={{ width: `${minimumRemainingPercent}%` }}
         />
       </div>
       <span className={styles.koLabel}>{calculation.koLabel}</span>
