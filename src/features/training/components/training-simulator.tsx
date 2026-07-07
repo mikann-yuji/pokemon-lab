@@ -14,6 +14,7 @@ import {
 import type {
   HeldItem,
   Nature,
+  TrainingPokemonStatProfile,
 } from "../infrastructure/training-catalog-repository";
 import {
   getHeldItems,
@@ -32,10 +33,25 @@ const DEFAULT_NATURE: Nature = {
   increasedStatId: "attack",
   decreasedStatId: "attack",
 };
+type StatRankingRow = {
+  profile: TrainingPokemonStatProfile;
+  uninvested: number;
+  maximum: number;
+};
 
 /** 6能力すべてに同じ初期値を入れた能力ポイント表を作る。 */
 const initialStats = (value: number) =>
   Object.fromEntries(STAT_IDS.map((id) => [id, value]));
+
+function calculateActualStat(baseStat: number, statId: string, point = 0, nature = false) {
+  const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
+  if (statId === "hp") return baseStat === 1 ? 1 : base + 50 + 10 + point;
+  return Math.floor((base + 5 + point) * (nature ? 1.1 : 1));
+}
+
+function rankCurrentValue(values: number[], currentValue: number) {
+  return 1 + values.filter((value) => value > currentValue).length;
+}
 
 /**
  * Pokémon Champions向けの育成案編集画面。
@@ -43,12 +59,15 @@ const initialStats = (value: number) =>
  */
 export function TrainingSimulator({
   pokemon,
+  statProfiles,
   natures: initialNatures,
   heldItems: initialHeldItems,
   initialBuildId,
 }: {
   /** 詳細ページや一覧から渡される、育成対象のポケモン詳細。 */
   pokemon: PokemonDetail;
+  /** Champions登場ポケモン全体の順位計算に使うステータス一覧。 */
+  statProfiles: TrainingPokemonStatProfile[];
   /** Server Componentで先読み済みなら渡される性格一覧。未指定ならブラウザ側でcatalog.dbから読む。 */
   natures?: Nature[];
   /** Server Componentで先読み済みなら渡される持ち物一覧。未指定ならブラウザ側でcatalog.dbから読む。 */
@@ -68,6 +87,7 @@ export function TrainingSimulator({
   const [abilityId, setAbilityId] = useState("");
   const [saved, setSaved] = useState(false);
   const [isNatureMatrixOpen, setNatureMatrixOpen] = useState(false);
+  const [rankingStatId, setRankingStatId] = useState<string | null>(null);
   const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
   const [buildName, setBuildName] = useState("");
   const [savedBuildName, setSavedBuildName] = useState<string | null>(null);
@@ -146,18 +166,72 @@ export function TrainingSimulator({
   // ChampionsではLv.50・個体値31固定。能力ポイントは性格補正の内側へ直接加算する。
   const actualStats = useMemo(() => Object.fromEntries(
     pokemon.stats.map(({ id, baseStat }) => {
-      const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
       const point = abilityPoints[id] ?? 0;
-      if (id === "hp") return [id, baseStat === 1 ? 1 : base + 50 + 10 + point];
-      const modifier =
+      const natureModifier =
         hasNatureModifier && selectedNature.increasedStatId === id
-          ? 1.1
-          : hasNatureModifier && selectedNature.decreasedStatId === id
-            ? 0.9
-            : 1;
-      return [id, Math.floor((base + 5 + point) * modifier)];
+          ? true
+          : false;
+      if (hasNatureModifier && selectedNature.decreasedStatId === id) {
+        const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
+        return [id, Math.floor((base + 5 + point) * 0.9)];
+      }
+      return [id, calculateActualStat(baseStat, id, point, natureModifier)];
     }),
   ), [abilityPoints, hasNatureModifier, pokemon.stats, selectedNature]);
+  const baseStatRanks = useMemo(
+    () =>
+      Object.fromEntries(
+        STAT_IDS.map((statId) => {
+          const currentBaseStat =
+            pokemon.stats.find((stat) => stat.id === statId)?.baseStat ?? null;
+          if (currentBaseStat === null) return [statId, null];
+          return [
+            statId,
+            rankCurrentValue(
+              statProfiles
+                .map((profile) => profile.stats[statId])
+                .filter((value): value is number => value !== undefined),
+              currentBaseStat,
+            ),
+          ];
+        }),
+      ) as Record<string, number | null>,
+    [pokemon.stats, statProfiles],
+  );
+  const selectedRankingStat = rankingStatId
+    ? pokemon.stats.find((stat) => stat.id === rankingStatId) ?? null
+    : null;
+  const statRankingRows = useMemo<StatRankingRow[]>(() => {
+    if (!rankingStatId) return [];
+    return statProfiles
+      .filter((profile) => profile.stats[rankingStatId] !== undefined)
+      .map((profile) => {
+        const baseStat = profile.stats[rankingStatId];
+        return {
+          profile,
+          uninvested: calculateActualStat(baseStat, rankingStatId, 0, false),
+          maximum: calculateActualStat(
+            baseStat,
+            rankingStatId,
+            32,
+            rankingStatId !== "hp",
+          ),
+        };
+      })
+      .sort(
+        (left, right) =>
+          right.maximum - left.maximum ||
+          right.uninvested - left.uninvested ||
+          left.profile.nameJa.localeCompare(right.profile.nameJa, "ja"),
+      );
+  }, [rankingStatId, statProfiles]);
+  const selectedActualRank =
+    rankingStatId && statRankingRows.length > 0
+      ? rankCurrentValue(
+          statRankingRows.map((row) => row.maximum),
+          actualStats[rankingStatId] as number,
+        )
+      : null;
   const pointTotal = Object.values(abilityPoints).reduce((sum, value) => sum + value, 0);
 
   /**
@@ -302,13 +376,23 @@ export function TrainingSimulator({
       </div>
       <div className={styles.statHeader}><h2>能力値</h2><span>能力ポイント {pointTotal} / 66</span></div>
       <div className={styles.statTable}>
-        <div className={styles.statLabels}><b>能力</b><b>種族値</b><b>能力P</b><b>実数値</b></div>
+        <div className={styles.statLabels}><b>能力</b><b>種族値</b><b>順位</b><b>能力P</b><b>実数値</b></div>
         {pokemon.stats.map((stat) => <div className={styles.statRow} key={stat.id}>
-          <strong>{STAT_NAMES[stat.id] ?? stat.name}{hasNatureModifier && selectedNature.increasedStatId === stat.id ? <NatureCaret direction="up" /> : hasNatureModifier && selectedNature.decreasedStatId === stat.id ? <NatureCaret direction="down" /> : null}</strong><span>{stat.baseStat}</span>
+          <strong><button className={styles.statNameButton} type="button" onClick={() => setRankingStatId(stat.id)}>{STAT_NAMES[stat.id] ?? stat.name}{hasNatureModifier && selectedNature.increasedStatId === stat.id ? <NatureCaret direction="up" /> : hasNatureModifier && selectedNature.decreasedStatId === stat.id ? <NatureCaret direction="down" /> : null}</button></strong><span>{stat.baseStat}</span><span className={styles.rankBadge}>{baseStatRanks[stat.id] ? `${baseStatRanks[stat.id]}位` : "-"}</span>
           <div className={styles.pointControl}><input aria-label={`${stat.name}の能力ポイント`} type="number" min="0" max="32" value={abilityPoints[stat.id] ?? 0} onChange={(e) => changeAbilityPoint(stat.id, Number(e.target.value))} /><input aria-label={`${stat.name}の能力ポイントスライダー`} type="range" min="0" max="32" value={abilityPoints[stat.id] ?? 0} onChange={(e) => changeAbilityPoint(stat.id, Number(e.target.value))} /></div>
           <b>{actualStats[stat.id]}</b>
         </div>)}
       </div>
+      {rankingStatId && selectedRankingStat ? (
+        <StatRankingOverlay
+          pokemonName={pokemon.nameJa}
+          statName={STAT_NAMES[rankingStatId] ?? selectedRankingStat.name}
+          actualValue={actualStats[rankingStatId] as number}
+          actualRank={selectedActualRank}
+          rows={statRankingRows}
+          onClose={() => setRankingStatId(null)}
+        />
+      ) : null}
       {isNatureMatrixOpen ? (
         <NatureMatrixOverlay
           natures={natures}
@@ -396,6 +480,63 @@ export function TrainingSimulator({
   );
 }
 
+
+function StatRankingOverlay({
+  pokemonName,
+  statName,
+  actualValue,
+  actualRank,
+  rows,
+  onClose,
+}: {
+  pokemonName: string;
+  statName: string;
+  actualValue: number;
+  actualRank: number | null;
+  rows: StatRankingRow[];
+  onClose: () => void;
+}) {
+  return (
+    <div className={styles.statRankingOverlay} role="dialog" aria-modal="true" aria-labelledby="stat-ranking-title">
+      <button className={styles.statRankingBackdrop} type="button" aria-label="実数値順位表を閉じる" onClick={onClose} />
+      <section className={styles.statRankingPanel}>
+        <div className={styles.statRankingHeader}>
+          <div>
+            <p>LV.50 / IV31</p>
+            <h2 id="stat-ranking-title">実数値順位表</h2>
+          </div>
+          <button type="button" onClick={onClose}>閉じる</button>
+        </div>
+        <div className={styles.statRankingTableWrap}>
+          <table className={styles.statRankingTable}>
+            <thead>
+              <tr>
+                <th scope="col">シミュレート中</th>
+                <th scope="col">ポケモン</th>
+                <th scope="col">無振り</th>
+                <th scope="col">最大</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.profile.id}>
+                  <th scope="row">
+                    <strong>{pokemonName}</strong>
+                    <span>{statName}: {actualValue}</span>
+                    {actualRank ? <small>最大実数値基準 {actualRank}位</small> : null}
+                  </th>
+                  <td>{row.profile.nameJa}</td>
+                  <td>{row.uninvested}</td>
+                  <td>{row.maximum}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  );
+}
 
 /** 性格補正の上昇/下降を小さな矢印アイコンとして表示する。 */
 function NatureCaret({ direction }: { direction: "up" | "down" }) {

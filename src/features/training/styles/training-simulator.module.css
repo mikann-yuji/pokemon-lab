@@ -10,10 +10,13 @@
 .statHeader { display:flex; align-items:center; justify-content:space-between; }
 .statHeader span { padding:.25rem .65rem; border-radius:999px; background:#eef6ff; font-size:.8rem; font-weight:800; }
 .statTable { overflow:hidden; border:1px solid #cad6e5; border-radius:14px; }
-.statLabels,.statRow { display:grid; grid-template-columns:1.25fr repeat(3,1fr); gap:.5rem; align-items:center; padding:.55rem .75rem; text-align:center; }
+.statLabels,.statRow { display:grid; grid-template-columns:1.25fr .7fr .7fr minmax(7rem,1.1fr) .7fr; gap:.5rem; align-items:center; padding:.55rem .75rem; text-align:center; }
 .statLabels { background:#172b4d; color:white; font-size:.75rem; }
 .statRow:nth-child(odd) { background:#f5f9ff; }
 .statRow strong { text-align:left; }
+.statNameButton { display:inline-flex; align-items:center; min-height:34px; padding:.25rem .4rem; border:1px solid transparent; border-radius:8px; background:transparent; color:#172b4d; cursor:pointer; font:inherit; font-weight:900; text-align:left; }
+.statNameButton:hover,.statNameButton:focus-visible { border-color:#2857a4; outline:3px solid rgb(40 87 164 / 16%); background:#eef6ff; }
+.rankBadge { justify-self:center; min-width:3.2rem; padding:.18rem .45rem; border-radius:999px; background:#eef6ff; color:#2857a4; font-size:.72rem; font-weight:900; }
 .statRow i { margin-left:.25rem; font-style:normal; font-size:1.1rem; }
 .statUp { color:#d73535; }
 .statDown { color:#2870bd; }
@@ -38,6 +41,21 @@
 .saveDialogActions { display:flex; justify-content:flex-end; gap:.65rem; }
 .saveDialogActions button { min-height:42px; padding:.55rem 1rem; border:1px solid #9aabc0; border-radius:999px; background:white; color:#172b4d; cursor:pointer; font-weight:900; }
 .saveDialogActions button[type="submit"] { border-color:#2857a4; background:#2857a4; color:white; }
+.statRankingOverlay { position:fixed; z-index:70; inset:0; display:grid; place-items:center; padding:clamp(.75rem,3vw,2rem); }
+.statRankingBackdrop { position:absolute; inset:0; border:0; background:rgb(10 20 35 / 58%); cursor:pointer; }
+.statRankingPanel { position:relative; display:grid; gap:1rem; width:min(64rem,100%); max-height:min(88vh,44rem); overflow:hidden; padding:clamp(.85rem,3vw,1.25rem); border:1px solid rgb(255 255 255 / 45%); border-radius:18px; background:#f8fbff; box-shadow:0 24px 80px rgb(0 0 0 / 35%); }
+.statRankingHeader { display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+.statRankingHeader p { margin:0 0 .15rem; color:#2857a4; font-size:.72rem; font-weight:900; letter-spacing:.12em; }
+.statRankingHeader h2 { margin:0; color:#172b4d; }
+.statRankingHeader button { min-height:40px; padding:.5rem .85rem; border:1px solid #cad6e5; border-radius:9px; background:white; color:#172b4d; cursor:pointer; font:inherit; font-weight:900; }
+.statRankingTableWrap { overflow:auto; border:1px solid #cad6e5; border-radius:12px; background:white; }
+.statRankingTable { width:100%; min-width:42rem; border-collapse:collapse; font-size:.82rem; }
+.statRankingTable th,.statRankingTable td { padding:.65rem .75rem; border-bottom:1px solid #dce5f0; text-align:center; }
+.statRankingTable thead th { position:sticky; top:0; z-index:1; background:#172b4d; color:white; }
+.statRankingTable tbody th { display:grid; gap:.12rem; min-width:12rem; background:#f5f9ff; color:#172b4d; text-align:left; }
+.statRankingTable tbody th strong,.statRankingTable tbody th span,.statRankingTable tbody th small { display:block; }
+.statRankingTable tbody th small { color:#2857a4; font-weight:900; }
+.statRankingTable tbody tr:last-child th,.statRankingTable tbody tr:last-child td { border-bottom:0; }
 .natureMatrix { display:grid; gap:.65rem; }
 .natureTableWrap { max-height:24rem; overflow:auto; border:1px solid #cad6e5; border-radius:14px; }
 .natureMatrix table { width:100%; border-collapse:collapse; text-align:center; }
@@ -45,7 +63,7 @@
 .natureMatrix thead th { position:sticky; z-index:1; top:0; background:#172b4d; color:white; }
 .natureMatrix tbody th { text-align:left; }
 .selectedNature { background:#fff4c2; outline:2px solid #e0ad00; outline-offset:-2px; }
-@media(max-width:38rem){.settings,.moves{grid-template-columns:1fr}.statLabels,.statRow{grid-template-columns:1.2fr repeat(3,.8fr);gap:.2rem;padding:.45rem .3rem;font-size:.72rem}.statRow input{padding:.25rem}.hero{min-height:10rem}.hero h1{font-size:1.7rem}}
+@media(max-width:38rem){.settings,.moves{grid-template-columns:1fr}.statLabels,.statRow{grid-template-columns:1fr .58fr .58fr minmax(5.4rem,.95fr) .62fr;gap:.15rem;padding:.45rem .25rem;font-size:.68rem}.statNameButton{min-height:30px;padding:.15rem .2rem}.rankBadge{min-width:2.6rem;padding:.12rem .25rem;font-size:.62rem}.statRow input{padding:.25rem}.hero{min-height:10rem}.hero h1{font-size:1.7rem}}
 .natureSetting { display:grid; gap:.4rem; font-size:.82rem; font-weight:800; }
 .natureSelectButton { display:flex; align-items:center; justify-content:space-between; min-height:42px; padding:.55rem .75rem; border:2px solid #b9c7da; border-radius:9px; background:white; color:#172b4d; cursor:pointer; font:inherit; text-align:left; }
 .natureSelectButton small { color:#52657e; font-size:.72rem; }

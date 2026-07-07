@@ -6,6 +6,10 @@ import {
   isChampionsForm,
   type PokemonDetail,
 } from "@/infrastructure/database/pokemon-search-repository";
+import {
+  getTrainingPokemonStatProfiles,
+  type TrainingPokemonStatProfile,
+} from "../infrastructure/training-catalog-repository";
 import { TrainingSimulator } from "./training-simulator";
 import pageStyles from "@/app/pokemon/pokemon-search.module.css";
 
@@ -23,6 +27,9 @@ export function TrainingSimulatorLoader({
   initialBuildId?: number;
 }) {
   const [pokemon, setPokemon] = useState<PokemonDetail | null>(null);
+  const [statProfiles, setStatProfiles] = useState<
+    TrainingPokemonStatProfile[]
+  >([]);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
 
@@ -31,10 +38,15 @@ export function TrainingSimulatorLoader({
     if (!Number.isInteger(pokemonId)) return;
 
     let active = true;
-    void Promise.all([isChampionsForm(pokemonId), getPokemonDetail(pokemonId)])
-      .then(([championsForm, detail]) => {
+    void Promise.all([
+      isChampionsForm(pokemonId),
+      getPokemonDetail(pokemonId),
+      getTrainingPokemonStatProfiles(),
+    ])
+      .then(([championsForm, detail, profiles]) => {
         if (!active) return;
         setPokemon(championsForm ? detail : null);
+        setStatProfiles(profiles);
       })
       .catch((caught: unknown) => {
         console.error("育成シミュレーター用ポケモンを読み込めませんでした。", caught);
@@ -67,6 +79,7 @@ export function TrainingSimulatorLoader({
   return (
     <TrainingSimulator
       pokemon={pokemon}
+      statProfiles={statProfiles}
       initialBuildId={initialBuildId}
     />
   );

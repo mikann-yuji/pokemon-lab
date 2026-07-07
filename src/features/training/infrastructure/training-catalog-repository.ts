@@ -24,6 +24,10 @@ export type TrainingPokemon = {
   imageUrl: string | null;
 };
 
+export type TrainingPokemonStatProfile = TrainingPokemon & {
+  stats: Record<string, number>;
+};
+
 type NatureRow = SqliteRow & {
   id: string;
   name: string;
@@ -36,6 +40,11 @@ type TrainingPokemonRow = SqliteRow & {
   name: string;
   nameJa: string;
   imageUrl: string | null;
+};
+
+type TrainingPokemonStatRow = TrainingPokemonRow & {
+  statId: string;
+  baseStat: number;
 };
 
 type HeldItemRow = SqliteRow & {
@@ -80,6 +89,42 @@ export async function getTrainingPokemonCatalog(): Promise<TrainingPokemon[]> {
     nameJa: row.nameJa,
     imageUrl: row.imageUrl,
   }));
+}
+
+/** Champions対象ポケモンの種族値順位・実数値比較に使う全フォームのステータス一覧を取得する。 */
+export async function getTrainingPokemonStatProfiles(): Promise<
+  TrainingPokemonStatProfile[]
+> {
+  const rows = await sqliteWorkerClient.catalogQuery<TrainingPokemonStatRow>(`
+    SELECT
+      forms.id,
+      forms.name,
+      COALESCE(forms.name_ja, forms.form_name_ja, forms.name) AS nameJa,
+      COALESCE(forms.artwork_default_url, forms.sprite_default_url) AS imageUrl,
+      form_stats.stat_id AS statId,
+      form_stats.base_stat AS baseStat
+    FROM champions_forms
+    JOIN forms ON forms.id = champions_forms.form_id
+    JOIN form_stats ON form_stats.form_id = forms.id
+    JOIN stats ON stats.id = form_stats.stat_id
+    WHERE stats.is_battle_only = 0
+    ORDER BY forms.species_id, forms.is_default DESC, forms.form_order, stats.game_index
+  `);
+
+  const profiles = new Map<number, TrainingPokemonStatProfile>();
+  for (const row of rows) {
+    const profile = profiles.get(row.id) ?? {
+      id: row.id,
+      name: row.name,
+      nameJa: row.nameJa,
+      imageUrl: row.imageUrl,
+      stats: {},
+    };
+    profile.stats[row.statId] = row.baseStat;
+    profiles.set(row.id, profile);
+  }
+
+  return [...profiles.values()];
 }
 
 /** Pokémon Championsで使用できる持ち物をcatalog.dbから表示順で取得する。 */
