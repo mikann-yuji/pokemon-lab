@@ -36,6 +36,8 @@ const seedTableOrder = [
   "form_moves",
   "champions_forms",
   "champions_items",
+  "champions_item_damage_modifiers",
+  "champions_ability_damage_modifiers",
 ];
 
 const numericColumns = new Map([
@@ -105,6 +107,11 @@ const numericColumns = new Map([
     ]),
   ],
   ["champions_forms", new Set(["form_id", "normally_available"])],
+  [
+    "champions_item_damage_modifiers",
+    new Set(["multiplier", "max_multiplier"]),
+  ],
+  ["champions_ability_damage_modifiers", new Set(["id", "multiplier"])],
 ]);
 
 /** CSVを読み、catalog.db投入用に空文字をnull、数値列をNumberへ変換する。 */

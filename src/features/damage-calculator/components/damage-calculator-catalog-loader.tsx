@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { DamageCalculator } from "./damage-calculator";
-import type { DamageCalculatorPokemon } from "../domain/damage-calculator-types";
-import { getChampionsDamageCalculatorPokemon } from "../infrastructure/damage-calculator-catalog-repository";
+import type {
+  DamageCalculatorHeldItem,
+  DamageCalculatorPokemon,
+} from "../domain/damage-calculator-types";
+import {
+  getChampionsDamageCalculatorHeldItems,
+  getChampionsDamageCalculatorPokemon,
+} from "../infrastructure/damage-calculator-catalog-repository";
 import styles from "../styles/damage-calculator.module.css";
 
 /**
@@ -14,16 +20,21 @@ export function DamageCalculatorCatalogLoader() {
   const [pokemonCatalog, setPokemonCatalog] = useState<
     DamageCalculatorPokemon[]
   >([]);
+  const [heldItems, setHeldItems] = useState<DamageCalculatorHeldItem[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState("");
 
   // ダメージ計算に必要な全カタログを1回だけ読み、以降の検索と計算はローカル配列で行う。
   useEffect(() => {
     let active = true;
-    void getChampionsDamageCalculatorPokemon()
-      .then((catalog) => {
+    void Promise.all([
+      getChampionsDamageCalculatorPokemon(),
+      getChampionsDamageCalculatorHeldItems(),
+    ])
+      .then(([catalog, items]) => {
         if (!active) return;
         setPokemonCatalog(catalog);
+        setHeldItems(items);
         setLoaded(true);
       })
       .catch((error: unknown) => {
@@ -55,5 +66,7 @@ export function DamageCalculatorCatalogLoader() {
     );
   }
 
-  return <DamageCalculator pokemonCatalog={pokemonCatalog} />;
+  return (
+    <DamageCalculator pokemonCatalog={pokemonCatalog} heldItems={heldItems} />
+  );
 }

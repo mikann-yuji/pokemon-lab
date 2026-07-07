@@ -25,6 +25,55 @@ export type DamageCalculatorMove = {
   power: number;
 };
 
+export type DamageCalculatorItemDamageModifier = {
+  modifierKind: "power" | "attacking_stat" | "received_damage";
+  multiplier: number;
+  maxMultiplier: number | null;
+  condition:
+    | "always"
+    | "type_match"
+    | "physical"
+    | "special"
+    | "super_effective"
+    | "super_effective_type_match"
+    | "consecutive_use"
+    | "pokemon_match";
+  moveTypeName: TypeName | null;
+  pokemonName: string | null;
+};
+
+export type DamageCalculatorHeldItem = {
+  id: string;
+  name: string;
+  damageModifier: DamageCalculatorItemDamageModifier | null;
+};
+
+export type DamageCalculatorAbilityDamageModifier = {
+  modifierKind: "power" | "attacking_stat" | "received_damage" | "stab";
+  multiplier: number;
+  condition:
+    | "always"
+    | "type_match"
+    | "physical"
+    | "special"
+    | "low_power_move"
+    | "critical_hit"
+    | "not_very_effective"
+    | "super_effective"
+    | "super_effective_received"
+    | "manual"
+    | "manual_type_match"
+    | "manual_physical"
+    | "manual_special";
+  moveTypeName: TypeName | null;
+};
+
+export type DamageCalculatorAbility = {
+  id: string;
+  name: string;
+  damageModifiers: DamageCalculatorAbilityDamageModifier[];
+};
+
 /**
  * 1フォーム分のダメージ計算用ポケモン情報。
  * ページ生成時にSQLiteから読み込み、ブラウザへ渡すのでオフラインでも利用できる。
@@ -47,6 +96,9 @@ export type DamageCalculatorPokemon = {
   /** 育成案から復元した実数値。指定時はダメージ計算で種族値計算より優先する。 */
   actualStats?: Record<string, number>;
   boosts?: Record<string, number>;
+  heldItem?: DamageCalculatorHeldItem | null;
+  selectedAbility?: DamageCalculatorAbility | null;
   /** このフォームが利用できるダメージ技。 */
   moves: DamageCalculatorMove[];
+  abilities: DamageCalculatorAbility[];
 };

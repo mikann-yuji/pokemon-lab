@@ -16,6 +16,8 @@ import {
 } from "../config/champions-damage-ruleset";
 import type { DamageCalculation } from "../application/smogon-damage-calculator";
 import type {
+  DamageCalculatorAbility,
+  DamageCalculatorHeldItem,
   DamageCalculatorMove,
   DamageCalculatorPokemon,
 } from "../domain/damage-calculator-types";
@@ -160,6 +162,20 @@ function applyStatAdjustment(
   };
 }
 
+function applyHeldItem(
+  pokemon: DamageCalculatorPokemon | null,
+  item: DamageCalculatorHeldItem | null,
+): DamageCalculatorPokemon | null {
+  return pokemon ? { ...pokemon, heldItem: item } : pokemon;
+}
+
+function applyAbility(
+  pokemon: DamageCalculatorPokemon | null,
+  ability: DamageCalculatorAbility | null,
+): DamageCalculatorPokemon | null {
+  return pokemon ? { ...pokemon, selectedAbility: ability } : pokemon;
+}
+
 function getRelevantStatIds(move: DamageCalculatorMove | undefined) {
   if (!move) return { attacker: null, defender: null };
   return move.damageClass === "physical"
@@ -221,6 +237,7 @@ function applyTrainingBuildToPokemon(
   pokemon: DamageCalculatorPokemon,
   build: TrainingBuild,
   natures: Nature[],
+  heldItems: DamageCalculatorHeldItem[],
 ): DamageCalculatorPokemon {
   const learnedMoveIds = new Set(build.moveIds.filter(Boolean));
   const learnedDamageMoves =
@@ -232,6 +249,7 @@ function applyTrainingBuildToPokemon(
     ...pokemon,
     nameJa: build.name || pokemon.nameJa,
     actualStats: toActualStats(pokemon, build, natures),
+    heldItem: heldItems.find(({ id }) => id === build.itemId) ?? null,
     moves: learnedDamageMoves,
   };
 }
@@ -260,9 +278,11 @@ function usePokemonSelection() {
  */
 export function DamageCalculator({
   pokemonCatalog,
+  heldItems,
 }: {
   /** Server Component側でcatalog.dbから読み込んだ、計算対象ポケモンの全データ。 */
   pokemonCatalog: DamageCalculatorPokemon[];
+  heldItems: DamageCalculatorHeldItem[];
 }) {
   const attackerSelection = usePokemonSelection();
   const defenderSelection = usePokemonSelection();
@@ -281,6 +301,12 @@ export function DamageCalculator({
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [teamModalOpen, setTeamModalOpen] = useState(false);
   const [teamLoadError, setTeamLoadError] = useState("");
+  const [metronomeConsecutiveUseCount, setMetronomeConsecutiveUseCount] =
+    useState(1);
+  const [abilityConditionEnabled, setAbilityConditionEnabled] = useState({
+    attacker: false,
+    defender: false,
+  });
   const [statAdjustments, setStatAdjustments] =
     useState<StatAdjustmentState>(() => createDefaultAdjustmentState());
   const buildById = useMemo(
@@ -360,6 +386,8 @@ export function DamageCalculator({
       ...current,
       attacker: createDefaultAdjustmentState().attacker,
     }));
+    setAbilityConditionEnabled((current) => ({ ...current, attacker: false }));
+    setMetronomeConsecutiveUseCount(1);
     setMoveId("");
   }
 
@@ -370,6 +398,24 @@ export function DamageCalculator({
       ...current,
       defender: createDefaultAdjustmentState().defender,
     }));
+    setAbilityConditionEnabled((current) => ({ ...current, defender: false }));
+  }
+
+  function changeHeldItem(side: DamageSide, itemId: string) {
+    const item = heldItems.find(({ id }) => id === itemId) ?? null;
+    const selection = side === "attacker" ? attackerSelection : defenderSelection;
+    selection.select(applyHeldItem(selection.pokemon, item));
+    if (side === "attacker" && item?.id !== "metronome") {
+      setMetronomeConsecutiveUseCount(1);
+    }
+  }
+
+  function changeAbility(side: DamageSide, abilityId: string) {
+    const selection = side === "attacker" ? attackerSelection : defenderSelection;
+    const ability =
+      selection.pokemon?.abilities.find(({ id }) => id === abilityId) ?? null;
+    selection.select(applyAbility(selection.pokemon, ability));
+    setAbilityConditionEnabled((current) => ({ ...current, [side]: false }));
   }
 
   function changeStatAdjustment(
@@ -398,7 +444,12 @@ export function DamageCalculator({
     const pokemon = pokemonCatalog.find(({ id }) => id === build.pokemonId);
     if (!pokemon) return;
 
-    const trainedPokemon = applyTrainingBuildToPokemon(pokemon, build, natures);
+    const trainedPokemon = applyTrainingBuildToPokemon(
+      pokemon,
+      build,
+      natures,
+      heldItems,
+    );
     attackerSelection.select(trainedPokemon);
     setStatAdjustments((current) => ({
       ...current,
@@ -486,11 +537,15 @@ export function DamageCalculator({
             attacker: adjustedAttacker,
             defender: adjustedDefender,
             move: selectedMove,
+            metronomeConsecutiveUseCount,
+            abilityConditionEnabled,
           }),
           critical: championsDamageCalculator.calculate({
             attacker: adjustedAttacker,
             defender: adjustedDefender,
             move: selectedMove,
+            metronomeConsecutiveUseCount,
+            abilityConditionEnabled,
             isCritical: true,
           }),
           attackerName: attacker.nameJa,
@@ -508,8 +563,10 @@ export function DamageCalculator({
   }, [
     adjustedAttacker,
     adjustedDefender,
+    abilityConditionEnabled,
     attacker,
     defender,
+    metronomeConsecutiveUseCount,
     selectedMove,
   ]);
   useEffect(() => {
@@ -592,6 +649,28 @@ export function DamageCalculator({
           onRestore={restoreHistory}
         />
         <PokemonSummary pokemon={attacker} />
+        <AbilityField
+          pokemon={attacker}
+          conditionEnabled={abilityConditionEnabled.attacker}
+          onAbilityChange={(abilityId) => changeAbility("attacker", abilityId)}
+          onConditionChange={(enabled) =>
+            setAbilityConditionEnabled((current) => ({
+              ...current,
+              attacker: enabled,
+            }))
+          }
+        />
+        <HeldItemField
+          pokemon={attacker}
+          heldItems={heldItems}
+          onChange={(itemId) => changeHeldItem("attacker", itemId)}
+        />
+        {attacker?.heldItem?.id === "metronome" ? (
+          <MetronomeUseControl
+            value={metronomeConsecutiveUseCount}
+            onChange={setMetronomeConsecutiveUseCount}
+          />
+        ) : null}
         <label className={styles.moveField}>
           使用する技
           <select
@@ -646,6 +725,22 @@ export function DamageCalculator({
           onRestore={restoreHistory}
         />
         <PokemonSummary pokemon={defender} />
+        <AbilityField
+          pokemon={defender}
+          conditionEnabled={abilityConditionEnabled.defender}
+          onAbilityChange={(abilityId) => changeAbility("defender", abilityId)}
+          onConditionChange={(enabled) =>
+            setAbilityConditionEnabled((current) => ({
+              ...current,
+              defender: enabled,
+            }))
+          }
+        />
+        <HeldItemField
+          pokemon={defender}
+          heldItems={heldItems}
+          onChange={(itemId) => changeHeldItem("defender", itemId)}
+        />
         {selectedMove ? (
           <DamageStatControls
             title="髦ｲ蠕｡蛛ｴ縺ｮHP"
@@ -836,6 +931,110 @@ function PokemonSummary({
   );
 }
 
+function formatItemModifier(item: DamageCalculatorHeldItem) {
+  const modifier = item.damageModifier;
+  return modifier ? ` x${modifier.multiplier}` : "";
+}
+
+function hasManualAbilityCondition(ability: DamageCalculatorAbility | null) {
+  return Boolean(
+    ability?.damageModifiers.some((modifier) =>
+      [
+        "low_power_move",
+        "not_very_effective",
+        "manual",
+        "manual_type_match",
+        "manual_physical",
+        "manual_special",
+      ].includes(modifier.condition),
+    ),
+  );
+}
+
+function formatAbilityModifier(ability: DamageCalculatorAbility) {
+  if (ability.damageModifiers.length === 0) return "";
+  const strongestMultiplier = ability.damageModifiers.reduce(
+    (maximum, modifier) => Math.max(maximum, modifier.multiplier),
+    1,
+  );
+  return strongestMultiplier === 1 ? "" : ` x${strongestMultiplier}`;
+}
+
+function AbilityField({
+  pokemon,
+  conditionEnabled,
+  onAbilityChange,
+  onConditionChange,
+}: {
+  pokemon: DamageCalculatorPokemon | null;
+  conditionEnabled: boolean;
+  onAbilityChange: (abilityId: string) => void;
+  onConditionChange: (enabled: boolean) => void;
+}) {
+  const selectedAbility = pokemon?.selectedAbility ?? null;
+  const showCondition = hasManualAbilityCondition(selectedAbility);
+
+  return (
+    <div className={styles.abilityField}>
+      <label className={styles.moveField}>
+        特性
+        <select
+          value={selectedAbility?.id ?? ""}
+          disabled={!pokemon}
+          onChange={(event) => onAbilityChange(event.target.value)}
+        >
+          <option value="">特性なし</option>
+          {pokemon?.abilities.map((ability) => (
+            <option value={ability.id} key={ability.id}>
+              {ability.name}
+              {formatAbilityModifier(ability)}
+            </option>
+          ))}
+        </select>
+      </label>
+      {showCondition ? (
+        <label className={styles.conditionToggle}>
+          <input
+            type="checkbox"
+            checked={conditionEnabled}
+            onChange={(event) => onConditionChange(event.target.checked)}
+          />
+          条件を適用
+        </label>
+      ) : null}
+    </div>
+  );
+}
+
+function HeldItemField({
+  pokemon,
+  heldItems,
+  onChange,
+}: {
+  pokemon: DamageCalculatorPokemon | null;
+  heldItems: DamageCalculatorHeldItem[];
+  onChange: (itemId: string) => void;
+}) {
+  return (
+    <label className={styles.moveField}>
+      持ち物
+      <select
+        value={pokemon?.heldItem?.id ?? ""}
+        disabled={!pokemon}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        <option value="">持ち物なし</option>
+        {heldItems.map((item) => (
+          <option value={item.id} key={item.id}>
+            {item.name}
+            {formatItemModifier(item)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 /** 技のタイプ、分類、威力を選択欄の直下に確認用として表示する。 */
 function MoveSummary({ move }: { move: DamageCalculatorMove }) {
   return (
@@ -843,6 +1042,31 @@ function MoveSummary({ move }: { move: DamageCalculatorMove }) {
       {move.typeName} / {move.damageClass === "physical" ? "物理" : "特殊"} /
       威力 {move.power}
     </p>
+  );
+}
+
+function MetronomeUseControl({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  const changeValue = (nextValue: number) => {
+    onChange(Math.min(6, Math.max(1, nextValue)));
+  };
+
+  return (
+    <label className={styles.moveField}>
+      メトロノーム連続使用回数
+      <input
+        type="number"
+        min="1"
+        max="6"
+        value={value}
+        onChange={(event) => changeValue(Number(event.target.value))}
+      />
+    </label>
   );
 }
 

@@ -4,6 +4,8 @@ import type { TypeName } from "@/domain/type-matchup";
 import { sqliteWorkerClient } from "@/infrastructure/sqlite-wasm/sqlite-client";
 import type { SqliteRow } from "@/infrastructure/sqlite-wasm/worker-protocol";
 import type {
+  DamageCalculatorAbility,
+  DamageCalculatorHeldItem,
   DamageCalculatorMove,
   DamageCalculatorPokemon,
 } from "../domain/damage-calculator-types";
@@ -36,6 +38,54 @@ type PokemonMoveRow = SqliteRow & {
   power: number;
 };
 
+type PokemonAbilityRow = SqliteRow & {
+  formId: number;
+  id: string;
+  name: string;
+  slot: number;
+};
+
+type AbilityModifierRow = SqliteRow & {
+  abilityId: string;
+  modifierKind: "power" | "attacking_stat" | "received_damage" | "stab";
+  multiplier: number;
+  condition:
+    | "always"
+    | "type_match"
+    | "physical"
+    | "special"
+    | "low_power_move"
+    | "critical_hit"
+    | "not_very_effective"
+    | "super_effective"
+    | "super_effective_received"
+    | "manual"
+    | "manual_type_match"
+    | "manual_physical"
+    | "manual_special";
+  moveTypeName: TypeName | null;
+};
+
+type HeldItemRow = SqliteRow & {
+  id: string;
+  name: string;
+  modifierKind: "power" | "attacking_stat" | "received_damage" | null;
+  multiplier: number | null;
+  maxMultiplier: number | null;
+  condition:
+    | "always"
+    | "type_match"
+    | "physical"
+    | "special"
+    | "super_effective"
+    | "super_effective_type_match"
+    | "consecutive_use"
+    | "pokemon_match"
+    | null;
+  moveTypeName: TypeName | null;
+  pokemonName: string | null;
+};
+
 /**
  * ダメージ計算に必要なChampions対象ポケモンだけをcatalog.dbから読み込む。
  * 画面側で検索・選択を即時に行えるよう、種族値・タイプ・物理/特殊技をまとめた配列へ変換する。
@@ -44,7 +94,8 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
   DamageCalculatorPokemon[]
 > {
   // ベース情報、タイプ、種族値、技は行の粒度が違うため、別々に取得してフォームIDで結合する。
-  const [baseRows, typeRows, statRows, moveRows] = await Promise.all([
+  const [baseRows, typeRows, statRows, moveRows, abilityRows, modifierRows] =
+    await Promise.all([
     sqliteWorkerClient.catalogQuery<PokemonBaseRow>(`
       SELECT
         forms.id,
@@ -123,7 +174,29 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
         AND moves.power > 0
       ORDER BY latest_versions.formId, moves.name_ja, moves.id
     `),
-  ]);
+      sqliteWorkerClient.catalogQuery<PokemonAbilityRow>(`
+      SELECT
+        forms.id AS formId,
+        abilities.id,
+        COALESCE(abilities.name_ja, abilities.id) AS name,
+        form_abilities.slot
+      FROM champions_forms
+      JOIN forms ON forms.id = champions_forms.form_id
+      JOIN form_abilities ON form_abilities.form_id = forms.id
+      JOIN abilities ON abilities.id = form_abilities.ability_id
+      ORDER BY forms.id, form_abilities.slot
+    `),
+      sqliteWorkerClient.catalogQuery<AbilityModifierRow>(`
+      SELECT
+        ability_id AS abilityId,
+        modifier_kind AS modifierKind,
+        multiplier,
+        condition,
+        move_type_name AS moveTypeName
+      FROM champions_ability_damage_modifiers
+      ORDER BY id
+    `),
+    ]);
 
   // フォームIDごとにタイプ配列を作る。複合タイプはslot順のまま保持する。
   const typesByFormId = new Map<number, TypeName[]>();
@@ -149,6 +222,27 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
     movesByFormId.set(formId, moves);
   }
 
+  const modifiersByAbilityId = new Map<
+    string,
+    DamageCalculatorAbility["damageModifiers"]
+  >();
+  for (const { abilityId, ...modifier } of modifierRows) {
+    const modifiers = modifiersByAbilityId.get(abilityId) ?? [];
+    modifiers.push(modifier);
+    modifiersByAbilityId.set(abilityId, modifiers);
+  }
+
+  const abilitiesByFormId = new Map<number, DamageCalculatorAbility[]>();
+  for (const row of abilityRows) {
+    const abilities = abilitiesByFormId.get(row.formId) ?? [];
+    const ability = { id: row.id, name: row.name };
+    abilities.push({
+      ...ability,
+      damageModifiers: modifiersByAbilityId.get(ability.id) ?? [],
+    });
+    abilitiesByFormId.set(row.formId, abilities);
+  }
+
   // DBのweightはhectogramなので、@smogon/calcが期待するkgへ変換する。
   return baseRows.map((row) => ({
     id: row.id,
@@ -159,5 +253,43 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
     types: typesByFormId.get(row.id) ?? [],
     stats: statsByFormId.get(row.id) ?? {},
     moves: movesByFormId.get(row.id) ?? [],
+    abilities: abilitiesByFormId.get(row.id) ?? [],
+  }));
+}
+
+export async function getChampionsDamageCalculatorHeldItems(): Promise<
+  DamageCalculatorHeldItem[]
+> {
+  const rows = await sqliteWorkerClient.catalogQuery<HeldItemRow>(`
+    SELECT
+      items.id,
+      COALESCE(champions_items.name_ja, items.name_ja, items.id) AS name,
+      champions_item_damage_modifiers.modifier_kind AS modifierKind,
+      champions_item_damage_modifiers.multiplier,
+      champions_item_damage_modifiers.max_multiplier AS maxMultiplier,
+      champions_item_damage_modifiers.condition,
+      champions_item_damage_modifiers.move_type_name AS moveTypeName,
+      champions_item_damage_modifiers.pokemon_name AS pokemonName
+    FROM champions_items
+    JOIN items ON items.id = champions_items.item_id
+    LEFT JOIN champions_item_damage_modifiers
+      ON champions_item_damage_modifiers.item_id = champions_items.item_id
+    ORDER BY name COLLATE NOCASE, items.id
+  `);
+
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    damageModifier:
+      row.multiplier === null || row.condition === null
+        ? null
+        : {
+            modifierKind: row.modifierKind ?? "power",
+            multiplier: row.multiplier,
+            maxMultiplier: row.maxMultiplier,
+            condition: row.condition,
+            moveTypeName: row.moveTypeName,
+            pokemonName: row.pokemonName,
+          },
   }));
 }

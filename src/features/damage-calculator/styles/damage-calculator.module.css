@@ -171,7 +171,8 @@
 }
 
 .combobox input,
-.moveField select {
+.moveField select,
+.moveField input {
   width: 100%;
   min-height: 46px;
   padding: 0.65rem 0.75rem;
@@ -183,7 +184,8 @@
 }
 
 .combobox input:focus,
-.moveField select:focus {
+.moveField select:focus,
+.moveField input:focus {
   border-color: #2857a4;
   outline: 3px solid rgb(40 87 164 / 18%);
 }
@@ -322,6 +324,28 @@
   margin: 0.65rem 0 0;
   color: #536376;
   font-size: 0.8rem;
+}
+
+.abilityField {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.conditionToggle {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.45rem;
+  align-items: center;
+  width: fit-content;
+  color: #344760;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.conditionToggle input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #2857a4;
 }
 
 .statControls {

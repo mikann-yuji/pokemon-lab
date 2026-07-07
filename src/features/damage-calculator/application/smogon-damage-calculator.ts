@@ -18,6 +18,8 @@ import {
   type StatsTable,
 } from "@smogon/calc";
 import type {
+  DamageCalculatorAbilityDamageModifier,
+  DamageCalculatorItemDamageModifier,
   DamageCalculatorMove,
   DamageCalculatorPokemon,
 } from "../domain/damage-calculator-types";
@@ -50,6 +52,11 @@ export type DamageCalculationInput = {
   attacker: DamageCalculatorPokemon;
   defender: DamageCalculatorPokemon;
   move: DamageCalculatorMove;
+  metronomeConsecutiveUseCount?: number;
+  abilityConditionEnabled?: {
+    attacker?: boolean;
+    defender?: boolean;
+  };
   /** trueの場合、技を急所に当たったものとして計算する。 */
   isCritical?: boolean;
   /** 画面から一時的な場の条件を追加したい時に渡す。 */
@@ -111,6 +118,136 @@ const STAT_IDS = {
   "special-defense": "spd",
   speed: "spe",
 } as const;
+
+const TYPE_EFFECTIVENESS: Record<
+  string,
+  Partial<Record<string, number>>
+> = {
+  Normal: { Rock: 0.5, Ghost: 0, Steel: 0.5 },
+  Fire: {
+    Fire: 0.5,
+    Water: 0.5,
+    Grass: 2,
+    Ice: 2,
+    Bug: 2,
+    Rock: 0.5,
+    Dragon: 0.5,
+    Steel: 2,
+  },
+  Water: {
+    Fire: 2,
+    Water: 0.5,
+    Grass: 0.5,
+    Ground: 2,
+    Rock: 2,
+    Dragon: 0.5,
+  },
+  Electric: {
+    Water: 2,
+    Electric: 0.5,
+    Grass: 0.5,
+    Ground: 0,
+    Flying: 2,
+    Dragon: 0.5,
+  },
+  Grass: {
+    Fire: 0.5,
+    Water: 2,
+    Grass: 0.5,
+    Poison: 0.5,
+    Ground: 2,
+    Flying: 0.5,
+    Bug: 0.5,
+    Rock: 2,
+    Dragon: 0.5,
+    Steel: 0.5,
+  },
+  Ice: {
+    Fire: 0.5,
+    Water: 0.5,
+    Grass: 2,
+    Ice: 0.5,
+    Ground: 2,
+    Flying: 2,
+    Dragon: 2,
+    Steel: 0.5,
+  },
+  Fighting: {
+    Normal: 2,
+    Ice: 2,
+    Poison: 0.5,
+    Flying: 0.5,
+    Psychic: 0.5,
+    Bug: 0.5,
+    Rock: 2,
+    Ghost: 0,
+    Dark: 2,
+    Steel: 2,
+    Fairy: 0.5,
+  },
+  Poison: {
+    Grass: 2,
+    Poison: 0.5,
+    Ground: 0.5,
+    Rock: 0.5,
+    Ghost: 0.5,
+    Steel: 0,
+    Fairy: 2,
+  },
+  Ground: {
+    Fire: 2,
+    Electric: 2,
+    Grass: 0.5,
+    Poison: 2,
+    Flying: 0,
+    Bug: 0.5,
+    Rock: 2,
+    Steel: 2,
+  },
+  Flying: {
+    Electric: 0.5,
+    Grass: 2,
+    Fighting: 2,
+    Bug: 2,
+    Rock: 0.5,
+    Steel: 0.5,
+  },
+  Psychic: { Fighting: 2, Poison: 2, Psychic: 0.5, Dark: 0, Steel: 0.5 },
+  Bug: {
+    Fire: 0.5,
+    Grass: 2,
+    Fighting: 0.5,
+    Poison: 0.5,
+    Flying: 0.5,
+    Psychic: 2,
+    Ghost: 0.5,
+    Dark: 2,
+    Steel: 0.5,
+    Fairy: 0.5,
+  },
+  Rock: {
+    Fire: 2,
+    Ice: 2,
+    Fighting: 0.5,
+    Ground: 0.5,
+    Flying: 2,
+    Bug: 2,
+    Steel: 0.5,
+  },
+  Ghost: { Normal: 0, Psychic: 2, Ghost: 2, Dark: 0.5 },
+  Dragon: { Dragon: 2, Steel: 0.5, Fairy: 0 },
+  Dark: { Fighting: 0.5, Psychic: 2, Ghost: 2, Dark: 0.5, Fairy: 0.5 },
+  Steel: {
+    Fire: 0.5,
+    Water: 0.5,
+    Electric: 0.5,
+    Ice: 2,
+    Rock: 2,
+    Steel: 0.5,
+    Fairy: 2,
+  },
+  Fairy: { Fire: 0.5, Fighting: 2, Poison: 0.5, Dragon: 2, Dark: 2, Steel: 0.5 },
+};
 
 /** PokeAPI/DB由来のIDを、Smogon lookup用の小文字英数字IDへ寄せる。 */
 function normalizeId(value: string) {
@@ -198,6 +335,197 @@ function toBoosts(pokemon: DamageCalculatorPokemon): Partial<StatsTable> {
   ) as Partial<StatsTable>;
 }
 
+function getTypeEffectiveness(input: DamageCalculationInput) {
+  return input.defender.types.reduce((multiplier, defenderType) => {
+    const typeMultiplier =
+      TYPE_EFFECTIVENESS[input.move.typeName]?.[defenderType] ?? 1;
+    return multiplier * typeMultiplier;
+  }, 1);
+}
+
+function itemModifierApplies(
+  modifier: DamageCalculatorItemDamageModifier,
+  input: DamageCalculationInput,
+) {
+  switch (modifier.condition) {
+    case "always":
+      return true;
+    case "type_match":
+      return modifier.moveTypeName === input.move.typeName;
+    case "physical":
+      return input.move.damageClass === "physical";
+    case "special":
+      return input.move.damageClass === "special";
+    case "super_effective":
+      return getTypeEffectiveness(input) > 1;
+    case "super_effective_type_match":
+      return (
+        modifier.moveTypeName === input.move.typeName &&
+        getTypeEffectiveness(input) > 1
+      );
+    case "consecutive_use":
+      return (input.metronomeConsecutiveUseCount ?? 1) > 1;
+    case "pokemon_match":
+      return Boolean(
+        modifier.pokemonName &&
+          input.attacker.name.toLowerCase().startsWith(modifier.pokemonName),
+      );
+  }
+}
+
+function getHeldItemPowerMultiplier(input: DamageCalculationInput) {
+  const modifier = input.attacker.heldItem?.damageModifier;
+  if (
+    !modifier ||
+    modifier.modifierKind !== "power" ||
+    !itemModifierApplies(modifier, input)
+  ) {
+    return 1;
+  }
+  if (modifier.condition === "consecutive_use") {
+    const count = Math.max(1, input.metronomeConsecutiveUseCount ?? 1);
+    const multiplier = 1 + (modifier.multiplier - 1) * (count - 1);
+    return Math.min(modifier.maxMultiplier ?? multiplier, multiplier);
+  }
+  return modifier.multiplier;
+}
+
+function abilityManualConditionEnabled(
+  side: BattleSide,
+  input: DamageCalculationInput,
+) {
+  return side === "attacker"
+    ? (input.abilityConditionEnabled?.attacker ?? false)
+    : (input.abilityConditionEnabled?.defender ?? false);
+}
+
+function abilityModifierApplies(
+  side: BattleSide,
+  modifier: DamageCalculatorAbilityDamageModifier,
+  input: DamageCalculationInput,
+) {
+  const manualEnabled = abilityManualConditionEnabled(side, input);
+  switch (modifier.condition) {
+    case "always":
+      return true;
+    case "type_match":
+      return modifier.moveTypeName === input.move.typeName;
+    case "physical":
+      return input.move.damageClass === "physical";
+    case "special":
+      return input.move.damageClass === "special";
+    case "low_power_move":
+      return manualEnabled && input.move.power <= 60;
+    case "critical_hit":
+      return input.isCritical === true;
+    case "not_very_effective":
+      return manualEnabled && getTypeEffectiveness(input) > 0 && getTypeEffectiveness(input) < 1;
+    case "super_effective":
+    case "super_effective_received":
+      return getTypeEffectiveness(input) > 1;
+    case "manual":
+      return manualEnabled;
+    case "manual_type_match":
+      return manualEnabled && modifier.moveTypeName === input.move.typeName;
+    case "manual_physical":
+      return manualEnabled && input.move.damageClass === "physical";
+    case "manual_special":
+      return manualEnabled && input.move.damageClass === "special";
+  }
+}
+
+function getAbilityModifiers(
+  side: BattleSide,
+  input: DamageCalculationInput,
+) {
+  const ability =
+    side === "attacker"
+      ? input.attacker.selectedAbility
+      : input.defender.selectedAbility;
+  return (
+    ability?.damageModifiers.filter((modifier) =>
+      abilityModifierApplies(side, modifier, input),
+    ) ?? []
+  );
+}
+
+function getAbilityPowerMultiplier(input: DamageCalculationInput) {
+  return getAbilityModifiers("attacker", input)
+    .filter(
+      (modifier) =>
+        modifier.modifierKind === "power" || modifier.modifierKind === "stab",
+    )
+    .reduce((multiplier, modifier) => multiplier * modifier.multiplier, 1);
+}
+
+function getAbilityAttackingStatMultiplier(input: DamageCalculationInput) {
+  return getAbilityModifiers("attacker", input)
+    .filter((modifier) => modifier.modifierKind === "attacking_stat")
+    .reduce((multiplier, modifier) => multiplier * modifier.multiplier, 1);
+}
+
+function getAbilityReceivedDamageMultiplier(input: DamageCalculationInput) {
+  return getAbilityModifiers("defender", input)
+    .filter((modifier) => modifier.modifierKind === "received_damage")
+    .reduce((multiplier, modifier) => multiplier * modifier.multiplier, 1);
+}
+
+function getAttackingStatItemMultiplier(input: DamageCalculationInput) {
+  const modifier = input.attacker.heldItem?.damageModifier;
+  if (
+    !modifier ||
+    modifier.modifierKind !== "attacking_stat" ||
+    !itemModifierApplies(modifier, input)
+  ) {
+    return 1;
+  }
+  return modifier.multiplier;
+}
+
+function getReceivedDamageItemMultiplier(input: DamageCalculationInput) {
+  const modifier = input.defender.heldItem?.damageModifier;
+  if (
+    !modifier ||
+    modifier.modifierKind !== "received_damage" ||
+    !itemModifierApplies(modifier, input)
+  ) {
+    return 1;
+  }
+  return modifier.multiplier;
+}
+
+function scaleDamage(
+  damage: Result["damage"],
+  multiplier: number,
+): Result["damage"] {
+  const scale = (value: number) => Math.max(1, Math.floor(value * multiplier));
+  if (typeof damage === "number") {
+    return scale(damage);
+  }
+  if (Array.isArray(damage[0])) {
+    return (damage as number[][]).map((entry) => entry.map(scale));
+  }
+  return (damage as number[]).map(scale);
+}
+
+function applyAttackingStatMultiplier(
+  pokemon: Pokemon,
+  move: DamageCalculatorMove,
+  multiplier: number,
+) {
+  if (multiplier === 1) return;
+
+  const stat = move.damageClass === "physical" ? "atk" : "spa";
+  pokemon.rawStats[stat] = Math.max(
+    1,
+    Math.floor(pokemon.rawStats[stat] * multiplier),
+  );
+  pokemon.stats[stat] = Math.max(
+    1,
+    Math.floor(pokemon.stats[stat] * multiplier),
+  );
+}
+
 /** SmogonのKO chanceから、日本語の「確定n発/乱数n発」表示を作る。 */
 function formatKoLabel({
   chance,
@@ -229,7 +557,17 @@ export class SmogonDamageCalculator {
     const generation = Generations.get(this.ruleset.generation);
     const attacker = this.toPokemon("attacker", input.attacker);
     const defender = this.toPokemon("defender", input.defender);
-    const move = this.toMove(input.move, input.isCritical ?? false);
+    const move = this.toMove(
+      input.move,
+      input.isCritical ?? false,
+      getHeldItemPowerMultiplier(input) * getAbilityPowerMultiplier(input),
+    );
+    applyAttackingStatMultiplier(
+      attacker,
+      input.move,
+      getAttackingStatItemMultiplier(input) *
+        getAbilityAttackingStatMultiplier(input),
+    );
     const field = new Field({
       ...this.ruleset.createField?.(input),
       ...input.field,
@@ -237,6 +575,15 @@ export class SmogonDamageCalculator {
     const sourceResult = this.ruleset.calculate
       ? this.ruleset.calculate(generation, attacker, defender, move, field)
       : calculate(generation, attacker, defender, move, field);
+    const receivedDamageMultiplier =
+      getReceivedDamageItemMultiplier(input) *
+      getAbilityReceivedDamageMultiplier(input);
+    if (receivedDamageMultiplier !== 1) {
+      sourceResult.damage = scaleDamage(
+        sourceResult.damage,
+        receivedDamageMultiplier,
+      );
+    }
     const [minimum, maximum] = sourceResult.range();
     const defenderHp = sourceResult.defender.maxHP();
     const koChance = sourceResult.kochance();
@@ -299,7 +646,11 @@ export class SmogonDamageCalculator {
     return result;
   }
 
-  private toMove(move: DamageCalculatorMove, isCritical: boolean): Move {
+  private toMove(
+    move: DamageCalculatorMove,
+    isCritical: boolean,
+    powerMultiplier: number,
+  ): Move {
     // 技名がSmogon側に存在すれば固有効果を利用し、存在しない場合でも
     // DBの威力・タイプ・分類を上書きして基本ダメージを計算する。
     const generation = Generations.get(this.ruleset.generation);
@@ -310,7 +661,7 @@ export class SmogonDamageCalculator {
     const options: MoveOptions = {
       isCrit: isCritical,
       overrides: {
-        basePower: move.power,
+        basePower: Math.max(1, Math.floor(move.power * powerMultiplier)),
         type: move.typeName,
         category: move.damageClass === "physical" ? "Physical" : "Special",
       },
