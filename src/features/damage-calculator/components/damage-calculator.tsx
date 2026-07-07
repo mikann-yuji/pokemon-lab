@@ -819,7 +819,8 @@ export function DamageCalculator({
             <option value="">技を選択</option>
             {attacker?.moves.map((move) => (
               <option value={move.id} key={move.id}>
-                {move.name}（威力 {move.power}）
+                {move.name}（威力 {move.power}
+                {formatMoveUsageRate(move)}）
               </option>
             ))}
           </select>
@@ -1259,6 +1260,10 @@ function PokemonSummary({
 function formatItemModifier(item: DamageCalculatorHeldItem) {
   const modifier = item.damageModifier;
   return modifier ? ` x${modifier.multiplier}` : "";
+}
+
+function formatMoveUsageRate(move: DamageCalculatorMove) {
+  return move.usageRate === null ? "" : ` / 採用率 ${move.usageRate.toFixed(1)}%`;
 }
 
 function hasManualAbilityCondition(ability: DamageCalculatorAbility | null) {

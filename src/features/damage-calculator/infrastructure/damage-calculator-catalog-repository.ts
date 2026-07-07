@@ -38,6 +38,7 @@ type PokemonMoveRow = SqliteRow & {
   typeName: TypeName;
   damageClass: "physical" | "special";
   power: number;
+  usageRate: number | null;
 };
 
 type PokemonAbilityRow = SqliteRow & {
@@ -179,16 +180,25 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
         COALESCE(moves.name_ja, moves.id) AS name,
         moves.type_name AS typeName,
         moves.damage_class_name AS damageClass,
-        moves.power
+        moves.power,
+        champions_form_move_usage.usage_rate AS usageRate
       FROM latest_versions
       JOIN form_moves
         ON form_moves.form_id = latest_versions.moveSourceId
         AND form_moves.version_group_id = latest_versions.versionGroupId
       JOIN moves ON moves.id = form_moves.move_id
+      LEFT JOIN champions_form_move_usage
+        ON champions_form_move_usage.form_id = latest_versions.formId
+        AND champions_form_move_usage.move_id = moves.id
       WHERE
         moves.damage_class_name IN ('physical', 'special')
         AND moves.power > 0
-      ORDER BY latest_versions.formId, moves.name_ja, moves.id
+      ORDER BY
+        latest_versions.formId,
+        champions_form_move_usage.usage_rate IS NULL,
+        champions_form_move_usage.usage_rate DESC,
+        moves.name_ja,
+        moves.id
     `),
       sqliteWorkerClient.catalogQuery<PokemonAbilityRow>(`
       SELECT

@@ -61,6 +61,10 @@ function rankCurrentValue(values: number[], currentValue: number) {
   return 1 + values.filter((value) => value > currentValue).length;
 }
 
+function formatUsageRate(usageRate: number | null) {
+  return usageRate === null ? "" : ` / 採用率 ${usageRate.toFixed(1)}%`;
+}
+
 /**
  * Pokémon Champions向けの育成案編集画面。
  * 種族値、性格、能力ポイント、持ち物、技構成を編集し、user.dbへ保存する。
@@ -413,7 +417,7 @@ export function TrainingSimulator({
       <section className={styles.moves}><h2>技構成</h2>{moveIds.map((moveId, index) => {
         const selectedMoveIds = new Set(moveIds.filter((id, i) => id && i !== index));
         const selectableMoves = pokemon.moves.filter((move) => !selectedMoveIds.has(move.id));
-        return <label key={index}>技 {index + 1}<select value={moveId} onChange={(e) => { setMoveIds((current) => current.map((value, i) => i === index ? e.target.value : value)); setSaved(false); }}><option value="">未選択</option>{selectableMoves.map((move) => <option value={move.id} key={move.id}>{move.name}</option>)}</select></label>;
+        return <label key={index}>技 {index + 1}<select value={moveId} onChange={(e) => { setMoveIds((current) => current.map((value, i) => i === index ? e.target.value : value)); setSaved(false); }}><option value="">未選択</option>{selectableMoves.map((move) => <option value={move.id} key={move.id}>{move.name}{formatUsageRate(move.usageRate)}</option>)}</select></label>;
       })}</section>
       <button className={styles.saveButton} type="button" onClick={openSaveDialog}>{saved ? "保存しました" : "この育成案を保存"}</button>
       {toast ? (
@@ -609,6 +613,7 @@ function StatRankingOverlay({
           <table className={styles.statRankingTable}>
             <thead>
               <tr>
+                <th scope="col">順位</th>
                 <th scope="col">ポケモン</th>
                 <th scope="col">無振り</th>
                 <th scope="col">最大</th>
@@ -621,6 +626,7 @@ function StatRankingOverlay({
                   key={row.id}
                   ref={index === targetRowIndex ? targetRowRef : null}
                 >
+                  <td>{rankCurrentValue(sortedRows.map((item) => item[compareMode]), row[compareMode])}位</td>
                   <th scope="row">{row.name}</th>
                   <td>{row.uninvested}</td>
                   <td>{row.maximum}</td>

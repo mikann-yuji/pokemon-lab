@@ -59,6 +59,7 @@ type PokemonMoveRow = SqliteRow & {
   learnMethodNameJa: string | null;
   levelLearnedAt: number;
   moveOrder: number | null;
+  usageRate: number | null;
 };
 
 type LatestVersionGroupRow = SqliteRow & {
@@ -100,6 +101,7 @@ export type PokemonMove = {
   accuracy: number | null;
   learnMethod: string;
   levelLearnedAt: number;
+  usageRate: number | null;
 };
 
 export type PokemonDetail = PokemonSearchResult & {
@@ -361,15 +363,21 @@ export async function getPokemonDetail(
             move_learn_methods.name AS learnMethodName,
             move_learn_methods.name_ja AS learnMethodNameJa,
             form_moves.level_learned_at AS levelLearnedAt,
-            form_moves.move_order AS moveOrder
+            form_moves.move_order AS moveOrder,
+            champions_form_move_usage.usage_rate AS usageRate
           FROM form_moves
           JOIN moves ON moves.id = form_moves.move_id
           JOIN types ON types.name = moves.type_name
           JOIN move_learn_methods ON move_learn_methods.id = form_moves.learn_method_id
+          LEFT JOIN champions_form_move_usage
+            ON champions_form_move_usage.form_id = @id
+            AND champions_form_move_usage.move_id = moves.id
           WHERE
             form_moves.form_id = @moveSourceFormId
             AND form_moves.version_group_id = @versionGroupId
           ORDER BY
+            champions_form_move_usage.usage_rate IS NULL,
+            champions_form_move_usage.usage_rate DESC,
             move_learn_methods.id,
             form_moves.level_learned_at,
             form_moves.move_order,
@@ -385,6 +393,7 @@ export async function getPokemonDetail(
     ...new Map(moves.map((move) => [move.id, move])).values(),
   ].sort(
     (left, right) =>
+      (right.usageRate ?? -1) - (left.usageRate ?? -1) ||
       TYPE_NAMES.indexOf(left.typeName) - TYPE_NAMES.indexOf(right.typeName) ||
       (left.nameJa ?? left.id).localeCompare(right.nameJa ?? right.id, "ja"),
   );
@@ -425,6 +434,7 @@ export async function getPokemonDetail(
       accuracy: move.accuracy,
       learnMethod: move.learnMethodNameJa ?? move.learnMethodName,
       levelLearnedAt: move.levelLearnedAt,
+      usageRate: move.usageRate,
     })),
     moveVersionGroup: latestVersionGroup?.name ?? null,
   };

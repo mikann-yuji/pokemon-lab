@@ -15,7 +15,7 @@ const temporaryDirectory = path.join(rootDirectory, ".tmp");
 const databasePath = path.join(temporaryDirectory, "sqlite-catalog.db");
 const outputPath = path.join(publicDirectory, "sqlite-catalog.db.gz");
 
-const seedVersion = 4;
+const seedVersion = 5;
 
 // publicへ配布するcatalog.dbにも、通常DBと同じ親子関係順でCSVを投入する。
 const seedTableOrder = [
@@ -35,6 +35,7 @@ const seedTableOrder = [
   "form_types",
   "form_moves",
   "champions_forms",
+  "champions_form_move_usage",
   "champions_items",
   "champions_item_damage_modifiers",
   "champions_ability_damage_modifiers",
@@ -109,6 +110,7 @@ const numericColumns = new Map([
     ]),
   ],
   ["champions_forms", new Set(["form_id", "normally_available"])],
+  ["champions_form_move_usage", new Set(["form_id", "usage_rate"])],
   [
     "champions_item_damage_modifiers",
     new Set(["multiplier", "max_multiplier"]),
@@ -293,6 +295,12 @@ const selectedMoveIds = new Set(
   tables.form_moves.rows.map((row) => row[formMovesMoveIndex]),
 );
 filterRows("moves", (row) => selectedMoveIds.has(row[columnIndex("moves", "id")]));
+filterRows(
+  "champions_form_move_usage",
+  (row) =>
+    championFormIds.has(row[columnIndex("champions_form_move_usage", "form_id")]) &&
+    selectedMoveIds.has(row[columnIndex("champions_form_move_usage", "move_id")]),
+);
 
 const selectedAbilityIds = new Set(
   tables.form_abilities.rows.map(

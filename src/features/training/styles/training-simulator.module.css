@@ -64,13 +64,16 @@
 .statRankingTableWrap { min-height:0; overflow:auto; border:1px solid #cad6e5; border-radius:12px; background:white; }
 .statRankingTable { width:100%; table-layout:fixed; border-collapse:collapse; font-size:.82rem; }
 .statRankingTable th,.statRankingTable td { padding:.65rem .75rem; border-bottom:1px solid #dce5f0; text-align:center; }
+.statRankingTable th:first-child { width:4.2rem; }
+.statRankingTable th:nth-child(2) { width:auto; }
+.statRankingTable th:nth-child(3),.statRankingTable th:nth-child(4) { width:5.5rem; }
 .statRankingTable thead th { position:sticky; top:0; z-index:1; background:#172b4d; color:white; }
 .statRankingTable tbody th { background:#f5f9ff; color:#172b4d; text-align:left; }
 .statRankingTable tbody th,.statRankingTable td { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .statRankingTable tbody tr:last-child th,.statRankingTable tbody tr:last-child td { border-bottom:0; }
 .statRankingTable .targetRankRow th,.statRankingTable .targetRankRow td { background:#fff4c2; }
 .statRankingTable .targetRankRow td:last-child { color:#b51f2d; font-weight:950; }
-@media(max-width:38rem){.statRankingPanel{max-height:86vh}.statRankingHeader{align-items:flex-start}.statRankingHeader button{flex:0 0 auto}.statRankingControls{grid-template-columns:1fr;align-items:stretch}.statRankingPointControl{grid-template-columns:1fr 4.5rem;gap:.45rem}.statRankingPointControl input[type="range"],.statRankingPointControl small{grid-column:1/-1}.statCompareToggle{grid-template-columns:1fr 1fr;border-radius:12px}.statCompareToggle button{padding:.4rem .35rem;white-space:normal}.statRankingTable{font-size:.72rem}.statRankingTable th,.statRankingTable td{padding:.5rem .35rem}.statRankingTable th:first-child{width:52%}.statRankingTable th:nth-child(2),.statRankingTable th:nth-child(3){width:24%}}
+@media(max-width:38rem){.statRankingPanel{max-height:86vh}.statRankingHeader{align-items:flex-start}.statRankingHeader button{flex:0 0 auto}.statRankingControls{grid-template-columns:1fr;align-items:stretch}.statRankingPointControl{grid-template-columns:1fr 4.5rem;gap:.45rem}.statRankingPointControl input[type="range"],.statRankingPointControl small{grid-column:1/-1}.statCompareToggle{grid-template-columns:1fr 1fr;border-radius:12px}.statCompareToggle button{padding:.4rem .35rem;white-space:normal}.statRankingTable{font-size:.68rem}.statRankingTable th,.statRankingTable td{padding:.45rem .25rem}.statRankingTable th:first-child{width:2.65rem}.statRankingTable th:nth-child(2){width:auto}.statRankingTable th:nth-child(3),.statRankingTable th:nth-child(4){width:3.4rem}}
 .natureMatrix { display:grid; gap:.65rem; }
 .natureTableWrap { max-height:24rem; overflow:auto; border:1px solid #cad6e5; border-radius:14px; }
 .natureMatrix table { width:100%; border-collapse:collapse; text-align:center; }

@@ -45,6 +45,7 @@ export type DamageCalculatorMove = {
   damageClass: "physical" | "special";
   /** 技の基本威力。 */
   power: number;
+  usageRate: number | null;
 };
 
 export type DamageCalculatorItemDamageModifier = {
