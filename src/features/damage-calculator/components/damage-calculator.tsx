@@ -43,9 +43,6 @@ type CalculationResult = {
   normal: DamageCalculation;
   /** 急所ヒット時のダメージ範囲。通常結果と並べて比較表示する。 */
   critical: DamageCalculation;
-  /** 計算後に選択を変えても結果見出しがぶれないよう、表示名をスナップショットする。 */
-  attackerName: string;
-  defenderName: string;
   moveName: string;
 };
 
@@ -262,9 +259,6 @@ export function DamageCalculator({
   const attacker = attackerSelection.pokemon;
   const defender = defenderSelection.pokemon;
   const [moveId, setMoveId] = useState("");
-  const [result, setResult] = useState<CalculationResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [calculating, setCalculating] = useState(false);
   const [attackerHistory, setAttackerHistory] = useState<
     DamageHistoryRecord[]
   >([]);
@@ -357,8 +351,6 @@ export function DamageCalculator({
       attacker: createDefaultAdjustmentState().attacker,
     }));
     setMoveId("");
-    setResult(null);
-    setError(null);
   }
 
   // 防御側を変更した場合も、古い相手に対する結果を消す。
@@ -368,8 +360,6 @@ export function DamageCalculator({
       ...current,
       defender: createDefaultAdjustmentState().defender,
     }));
-    setResult(null);
-    setError(null);
   }
 
   function changeStatAdjustment(
@@ -387,15 +377,11 @@ export function DamageCalculator({
         },
       },
     }));
-    setResult(null);
-    setError(null);
   }
 
   function selectBattleTeam(team: BattleTeam) {
     setSelectedTeamId(team.id ?? null);
     setTeamModalOpen(false);
-    setResult(null);
-    setError(null);
   }
 
   function selectTeamMember(build: TrainingBuild) {
@@ -418,8 +404,6 @@ export function DamageCalculator({
       ) as Record<AdjustableStatId, StatAdjustment>,
     }));
     setMoveId(trainedPokemon.moves[0]?.id ?? "");
-    setResult(null);
-    setError(null);
   }
 
   /**
@@ -444,79 +428,99 @@ export function DamageCalculator({
     } else {
       defenderSelection.select(pokemon);
     }
-    setResult(null);
-    setError(null);
-  }
-
-  /**
-   * フォーム送信時に、選択中のIDから技データを見つけて計算する。
-   * 計算処理は同期的かつローカルなので、オフラインでも同じ結果になる。
-   */
-  function submit(event: React.FormEvent) {
-    event.preventDefault();
-    if (!attacker || !defender || !moveId) return;
-
-    const move = attacker.moves.find(({ id }) => id === moveId);
-    if (!move || !adjustedAttacker || !adjustedDefender) return;
-
-    setCalculating(true);
-    setError(null);
-    try {
-      setResult({
-        normal: championsDamageCalculator.calculate({
-          attacker: adjustedAttacker,
-          defender: adjustedDefender,
-          move,
-        }),
-        critical: championsDamageCalculator.calculate({
-          attacker: adjustedAttacker,
-          defender: adjustedDefender,
-          move,
-          isCritical: true,
-        }),
-        attackerName: attacker.nameJa,
-        defenderName: defender.nameJa,
-        moveName: move.name,
-      });
-      // 計算に成功した組み合わせだけを履歴へ残す。
-      void Promise.all([
-        saveDamageHistory("attacker", attacker.id, move.id),
-        saveDamageHistory("defender", defender.id),
-      ])
-        .then(([savedAttackers, savedDefenders]) => {
-          setAttackerHistory(savedAttackers);
-          setDefenderHistory(savedDefenders);
-        })
-        .catch((caught: unknown) => {
-          console.error("ダメージ計算履歴を保存できませんでした。", caught);
-        });
-    } catch (caught) {
-      setResult(null);
-      setError(caught instanceof Error ? caught.message : "計算に失敗しました。");
-    } finally {
-      setCalculating(false);
-    }
   }
 
   const selectedMove = attacker?.moves.find(({ id }) => id === moveId);
   const relevantStatIds = getRelevantStatIds(selectedMove);
-  const adjustedAttacker = applyStatAdjustment(
-    attacker,
-    relevantStatIds.attacker,
-    relevantStatIds.attacker
-      ? statAdjustments.attacker[relevantStatIds.attacker]
-      : null,
+  const adjustedAttacker = useMemo(
+    () =>
+      applyStatAdjustment(
+        attacker,
+        relevantStatIds.attacker,
+        relevantStatIds.attacker
+          ? statAdjustments.attacker[relevantStatIds.attacker]
+          : null,
+      ),
+    [attacker, relevantStatIds.attacker, statAdjustments.attacker],
   );
-  const adjustedDefender = applyStatAdjustment(
-    defender,
-    relevantStatIds.defender,
-    relevantStatIds.defender
-      ? statAdjustments.defender[relevantStatIds.defender]
-      : null,
+  const adjustedDefender = useMemo(
+    () =>
+      applyStatAdjustment(
+        defender,
+        relevantStatIds.defender,
+        relevantStatIds.defender
+          ? statAdjustments.defender[relevantStatIds.defender]
+          : null,
+      ),
+    [defender, relevantStatIds.defender, statAdjustments.defender],
   );
 
+  const { result, error } = useMemo(() => {
+    if (!attacker || !defender || !selectedMove) {
+      return { result: null, error: null };
+    }
+    if (!adjustedAttacker || !adjustedDefender) {
+      return { result: null, error: null };
+    }
+
+    try {
+      return {
+        result: {
+          normal: championsDamageCalculator.calculate({
+            attacker: adjustedAttacker,
+            defender: adjustedDefender,
+            move: selectedMove,
+          }),
+          critical: championsDamageCalculator.calculate({
+            attacker: adjustedAttacker,
+            defender: adjustedDefender,
+            move: selectedMove,
+            isCritical: true,
+          }),
+          moveName: selectedMove.name,
+        },
+        error: null,
+      };
+    } catch (caught) {
+      return {
+        result: null,
+        error: caught instanceof Error ? caught.message : "計算に失敗しました。",
+      };
+    }
+  }, [
+    adjustedAttacker,
+    adjustedDefender,
+    attacker,
+    defender,
+    selectedMove,
+  ]);
+  useEffect(() => {
+    if (!attacker || !defender || !selectedMove) return;
+
+    let active = true;
+    void Promise.all([
+      saveDamageHistory("attacker", attacker.id, selectedMove.id),
+      saveDamageHistory("defender", defender.id),
+    ])
+      .then(([savedAttackers, savedDefenders]) => {
+        if (!active) return;
+        setAttackerHistory(savedAttackers);
+        setDefenderHistory(savedDefenders);
+      })
+      .catch((caught: unknown) => {
+        console.error("ダメージ計算履歴を保存できませんでした。", caught);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [attacker, defender, selectedMove]);
+
   return (
-    <form className={styles.calculator} onSubmit={submit}>
+    <form
+      className={styles.calculator}
+      onSubmit={(event) => event.preventDefault()}
+    >
       <section className={styles.side}>
         <h2>攻撃側</h2>
         <div className={styles.teamPicker}>
@@ -577,7 +581,6 @@ export function DamageCalculator({
             disabled={!attacker}
             onChange={(event) => {
               setMoveId(event.target.value);
-              setResult(null);
             }}
           >
             <option value="">技を選択</option>
@@ -646,14 +649,6 @@ export function DamageCalculator({
         {CHAMPIONS_DAMAGE_RULESET.level}
         ・個体値31・努力値0・性格補正なし・HP満タン
       </div>
-
-      <button
-        className={styles.calculateButton}
-        type="submit"
-        disabled={!attacker || !defender || !moveId || calculating}
-      >
-        {calculating ? "計算中…" : "ダメージを計算"}
-      </button>
 
       {error ? <p className={styles.error}>{error}</p> : null}
       {result ? <DamageResult result={result} /> : null}
@@ -882,85 +877,54 @@ function DamageStatControls({
 function DamageResult({ result }: { result: CalculationResult }) {
   return (
     <section className={styles.result} aria-live="polite">
-      <p className={styles.resultLabel}>計算結果</p>
-      <h2>
-        {result.attackerName}の{result.moveName}
-      </h2>
+      <div className={styles.resultHeader}>
+        <span>計算結果</span>
+        <strong>{result.moveName}</strong>
+      </div>
       <div className={styles.outcomeGrid}>
-        <DamageOutcome
-          title="通常ダメージ"
-          calculation={result.normal}
-          defenderName={result.defenderName}
-        />
-        <DamageOutcome
-          title="急所に当たった場合"
-          calculation={result.critical}
-          defenderName={result.defenderName}
-          critical
-        />
+        <DamageOutcome title="通常" calculation={result.normal} />
+        <DamageOutcome title="急所" calculation={result.critical} critical />
       </div>
     </section>
   );
 }
 
-/**
- * 1種類のダメージ結果を表示する。
- * 残りHPバーは最小乱数/最大乱数の両端を重ねて、乱数幅が見えるようにする。
- */
 function DamageOutcome({
   title,
   calculation,
-  defenderName,
   critical = false,
 }: {
   title: string;
   calculation: DamageCalculation;
-  defenderName: string;
   critical?: boolean;
 }) {
-  // ダメージが大きいほど残りHPは小さいため、最小・最大の対応が逆になる。
-  const remainingMinimum = Math.max(0, 100 - calculation.maximumPercent);
-  const remainingMaximum = Math.max(0, 100 - calculation.minimumPercent);
+  const minimumPercent = Math.min(100, Math.max(0, calculation.minimumPercent));
+  const maximumPercent = Math.min(100, Math.max(0, calculation.maximumPercent));
 
   return (
     <article
       className={`${styles.outcome} ${critical ? styles.criticalOutcome : ""}`}
     >
-      <h3>{title}</h3>
-      <p className={styles.koLabel}>{calculation.koLabel}</p>
-      <h4>
-        {calculation.minimum}〜{calculation.maximum} ダメージ
-      </h4>
-      <strong>
-        HPの {calculation.minimumPercent.toFixed(1)}〜
+      <span className={styles.outcomeTitle}>{title}</span>
+      <strong className={styles.damagePercent}>
+        {calculation.minimumPercent.toFixed(1)}~
         {calculation.maximumPercent.toFixed(1)}%
       </strong>
       <div
-        className={styles.remainingHpBar}
+        className={styles.damageBar}
         role="img"
-        aria-label={`防御側の残りHPは、最低乱数時 ${remainingMaximum.toFixed(1)}%、最高乱数時 ${remainingMinimum.toFixed(1)}%`}
+        aria-label={`ダメージ割合 ${calculation.minimumPercent.toFixed(1)}から${calculation.maximumPercent.toFixed(1)}%`}
       >
         <span
-          className={styles.maximumRemainingHp}
-          style={{ width: `${remainingMaximum}%` }}
+          className={styles.maximumDamageBar}
+          style={{ width: `${maximumPercent}%` }}
         />
         <span
-          className={styles.minimumRemainingHp}
-          style={{ width: `${remainingMinimum}%` }}
+          className={styles.minimumDamageBar}
+          style={{ width: `${minimumPercent}%` }}
         />
       </div>
-      <div className={styles.remainingHpLegend}>
-        <span className={styles.maximumRemainingLegend}>
-          最低乱数時 {remainingMaximum.toFixed(1)}%
-        </span>
-        <span className={styles.minimumRemainingLegend}>
-          最高乱数時 {remainingMinimum.toFixed(1)}%
-        </span>
-      </div>
-      <p>
-        {defenderName}の残りHP：
-        {remainingMinimum.toFixed(1)}〜{remainingMaximum.toFixed(1)}%
-      </p>
+      <span className={styles.koLabel}>{calculation.koLabel}</span>
     </article>
   );
 }
