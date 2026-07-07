@@ -1,7 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from "react";
 import {
   getAllBattleTeams,
   getAllTrainingBuilds,
@@ -16,13 +22,13 @@ import {
   getChampionsDamageCalculatorHeldItems,
   getChampionsDamageCalculatorPokemon,
 } from "@/features/damage-calculator/infrastructure/damage-calculator-catalog-repository";
+import { championsDamageCalculator } from "@/features/damage-calculator/config/champions-damage-ruleset";
 import type {
   DamageCalculatorAbility,
   DamageCalculatorHeldItem,
   DamageCalculatorMove,
   DamageCalculatorPokemon,
 } from "@/features/damage-calculator/domain/damage-calculator-types";
-import { championsDamageCalculator } from "@/features/damage-calculator/config/champions-damage-ruleset";
 import type {
   BattleCommand,
   BattlePlayerId,
@@ -210,9 +216,6 @@ function createBattleState({
       return [toBattlePokemon(build, pokemon, heldItems, natures)];
     });
 
-  const player1Pokemon = toTeam(player1Team);
-  const player2Pokemon = toTeam(player2Team);
-
   return {
     id: `battle-${Date.now()}`,
     phase: "team-preview",
@@ -224,7 +227,7 @@ function createBattleState({
         teamId: player1Team.id ?? 0,
         teamName: player1Team.name,
         activeIndex: 0,
-        team: player1Pokemon,
+        team: toTeam(player1Team),
       },
       player2: {
         id: "player2",
@@ -232,23 +235,16 @@ function createBattleState({
         teamId: player2Team.id ?? 0,
         teamName: player2Team.name,
         activeIndex: 0,
-        team: player2Pokemon,
+        team: toTeam(player2Team),
       },
     },
-    field: {
-      weatherId: "",
-      terrainId: "",
-    },
-    pendingCommands: {
-      player1: null,
-      player2: null,
-    },
+    field: { weatherId: "", terrainId: "" },
+    pendingCommands: { player1: null, player2: null },
     log: [
-      {
-        id: "setup",
-        turn: 0,
-        message: `${player1Team.name} と ${player2Team.name} の対戦準備ができました。`,
-      },
+      createLogEntry(
+        0,
+        `${player1Team.name} と ${player2Team.name} の対戦準備ができました。`,
+      ),
     ],
   };
 }
@@ -302,10 +298,7 @@ function applySwitchCommand(
     ...state,
     players: {
       ...state.players,
-      [playerId]: {
-        ...player,
-        activeIndex: targetIndex,
-      },
+      [playerId]: { ...player, activeIndex: targetIndex },
     },
   };
 }
@@ -386,7 +379,9 @@ function applyMoveCommand({
     ),
   );
   if (fainted) {
-    log.unshift(createLogEntry(state.turn, `${defender.buildName} はひんしになりました。`));
+    log.unshift(
+      createLogEntry(state.turn, `${defender.buildName} はひんしになりました。`),
+    );
     if (nextActiveIndex >= 0) {
       log.unshift(
         createLogEntry(
@@ -408,7 +403,8 @@ function applyMoveCommand({
       ...state.players,
       [defenderPlayer.id]: {
         ...defenderPlayer,
-        activeIndex: nextActiveIndex >= 0 ? nextActiveIndex : defenderPlayer.activeIndex,
+        activeIndex:
+          nextActiveIndex >= 0 ? nextActiveIndex : defenderPlayer.activeIndex,
         team: nextDefenderTeam,
       },
     },
@@ -425,7 +421,9 @@ function executeTurn({
   pokemonById: Map<number, DamageCalculatorPokemon>;
 }): BattleState {
   if (state.phase !== "command") return state;
-  if (!state.pendingCommands.player1 || !state.pendingCommands.player2) return state;
+  if (!state.pendingCommands.player1 || !state.pendingCommands.player2) {
+    return state;
+  }
 
   let nextState = state;
   const log: BattleState["log"] = [];
@@ -443,8 +441,7 @@ function executeTurn({
     .sort((left, right) => {
       const leftPlayer = nextState.players[left];
       const rightPlayer = nextState.players[right];
-      const leftSpeed =
-        leftPlayer.team[leftPlayer.activeIndex]?.stats.speed ?? 0;
+      const leftSpeed = leftPlayer.team[leftPlayer.activeIndex]?.stats.speed ?? 0;
       const rightSpeed =
         rightPlayer.team[rightPlayer.activeIndex]?.stats.speed ?? 0;
       return rightSpeed - leftSpeed;
@@ -467,10 +464,7 @@ function executeTurn({
   return {
     ...nextState,
     turn: nextState.phase === "finished" ? nextState.turn : nextState.turn + 1,
-    pendingCommands: {
-      player1: null,
-      player2: null,
-    },
+    pendingCommands: { player1: null, player2: null },
     log: [...log, ...nextState.log],
   };
 }
@@ -508,7 +502,7 @@ function TeamSelect({
   );
 }
 
-function TeamPreview({
+function HpPanel({
   playerId,
   state,
 }: {
@@ -517,72 +511,187 @@ function TeamPreview({
 }) {
   const player = state.players[playerId];
   const active = player.team[player.activeIndex] ?? null;
+  const hpPercent = active
+    ? Math.max(0, (active.currentHp / active.maxHp) * 100)
+    : 0;
 
   return (
-    <section className={styles.previewPanel}>
-      <div className={styles.previewHeader}>
+    <div
+      className={`${styles.hpPanel} ${
+        playerId === "player1" ? styles.playerOneHp : styles.playerTwoHp
+      }`}
+    >
+      <div className={styles.hpHeader}>
         <span>{player.label}</span>
-        <h2>{player.teamName}</h2>
+        <strong>{active?.buildName ?? "未選出"}</strong>
       </div>
-      {active ? (
-        <div className={styles.activePokemon}>
-          {active.imageUrl ? (
+      <div className={styles.hpTrack} aria-label={`${player.label} HP`}>
+        <span style={{ width: `${hpPercent}%` }} />
+      </div>
+      <small>
+        HP {active?.currentHp ?? 0} / {active?.maxHp ?? 0}
+      </small>
+    </div>
+  );
+}
+
+function BattleField({ state }: { state: BattleState }) {
+  const player1 = state.players.player1;
+  const player2 = state.players.player2;
+  const player1Active = player1.team[player1.activeIndex] ?? null;
+  const player2Active = player2.team[player2.activeIndex] ?? null;
+
+  return (
+    <section className={styles.battleField} aria-label="対戦中のポケモン">
+      <HpPanel playerId="player1" state={state} />
+      <HpPanel playerId="player2" state={state} />
+      <div className={styles.pokemonStage}>
+        <div className={styles.playerOnePokemon}>
+          {player1Active?.imageUrl ? (
             <Image
-              src={active.imageUrl}
-              alt={active.nameJa}
-              width={120}
-              height={120}
+              src={player1Active.imageUrl}
+              alt={player1Active.nameJa}
+              width={132}
+              height={132}
+              priority
             />
           ) : null}
-          <div>
-            <strong>{active.buildName}</strong>
-            <small>{active.nameJa}</small>
-            <meter min="0" max={active.maxHp} value={active.currentHp} />
-            <span>
-              HP {active.currentHp} / {active.maxHp}
-            </span>
-          </div>
         </div>
-      ) : (
-        <p className={styles.emptyState}>先頭に出せるポケモンがいません。</p>
-      )}
-      <div className={styles.roster}>
-        {player.team.map((pokemon, index) => (
-          <article
-            className={index === player.activeIndex ? styles.activeSlot : ""}
-            key={pokemon.buildId}
-          >
-            {pokemon.imageUrl ? (
-              <Image
-                src={pokemon.imageUrl}
-                alt=""
-                width={52}
-                height={52}
-              />
-            ) : null}
-            <div>
-              <strong>{pokemon.buildName}</strong>
-              <span>{pokemon.moves.length}技 / {pokemon.itemName}</span>
-            </div>
-          </article>
+        <div className={styles.playerTwoPokemon}>
+          {player2Active?.imageUrl ? (
+            <Image
+              src={player2Active.imageUrl}
+              alt={player2Active.nameJa}
+              width={132}
+              height={132}
+              priority
+            />
+          ) : null}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BattleLog({
+  entries,
+  logRef,
+}: {
+  entries: BattleState["log"];
+  logRef: RefObject<HTMLDivElement | null>;
+}) {
+  const displayedEntries = [...entries].reverse();
+
+  return (
+    <section className={styles.battleLog} aria-label="対戦ログ">
+      <div className={styles.battleLogBody} ref={logRef}>
+        {displayedEntries.map((entry) => (
+          <p key={entry.id}>{entry.message}</p>
         ))}
       </div>
     </section>
   );
 }
 
-function CommandPanel({
+function ActionTabs({
+  state,
+  activePlayerId,
+  onTabChange,
+  onMove,
+  onOpenSwitch,
+}: {
+  state: BattleState;
+  activePlayerId: BattlePlayerId;
+  onTabChange: (playerId: BattlePlayerId) => void;
+  onMove: (playerId: BattlePlayerId, moveId: string) => void;
+  onOpenSwitch: (playerId: BattlePlayerId) => void;
+}) {
+  const player = state.players[activePlayerId];
+  const active = player.team[player.activeIndex] ?? null;
+  const command = state.pendingCommands[activePlayerId];
+
+  return (
+    <section className={styles.actionPanel} aria-label="行動選択">
+      <div className={styles.playerTabs} role="tablist" aria-label="操作するプレイヤー">
+        {(["player1", "player2"] as const).map((playerId) => (
+          <button
+            className={activePlayerId === playerId ? styles.activeTab : ""}
+            type="button"
+            role="tab"
+            aria-selected={activePlayerId === playerId}
+            onClick={() => onTabChange(playerId)}
+            key={playerId}
+          >
+            {state.players[playerId].label}
+            {state.pendingCommands[playerId] ? <span>選択済み</span> : null}
+          </button>
+        ))}
+      </div>
+      <div className={styles.actionBody}>
+        <div className={styles.actionHeader}>
+          <div>
+            <span>{player.label}</span>
+            <strong>{active?.buildName ?? "行動できるポケモンなし"}</strong>
+          </div>
+          <button type="button" onClick={() => onOpenSwitch(activePlayerId)}>
+            交代
+          </button>
+        </div>
+        {!active || active.status === "fainted" ? (
+          <p className={styles.emptyState}>行動できるポケモンがいません。</p>
+        ) : (
+          <div className={styles.moveList}>
+            {active.moves.length === 0 ? (
+              <p className={styles.emptyState}>選択できる技がありません。</p>
+            ) : (
+              active.moves.map((move) => (
+                <button
+                  className={
+                    command?.type === "move" && command.moveId === move.id
+                      ? styles.selectedMove
+                      : ""
+                  }
+                  type="button"
+                  onClick={() => onMove(activePlayerId, move.id)}
+                  key={move.id}
+                >
+                  <span>{move.name}</span>
+                  <small>
+                    {move.typeName} / {move.power}
+                  </small>
+                </button>
+              ))
+            )}
+          </div>
+        )}
+        <p className={styles.commandStatus}>
+          {command
+            ? command.type === "move"
+              ? `選択中: ${
+                  active?.moves.find((move) => move.id === command.moveId)?.name ?? "技"
+                }`
+              : `選択中: ${
+                  player.team[command.targetIndex]?.buildName ?? "交代先"
+                } に交代`
+            : "未選択"}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function SwitchModal({
   playerId,
   state,
-  onCommand,
+  onSelect,
+  onClose,
 }: {
   playerId: BattlePlayerId;
   state: BattleState;
-  onCommand: (playerId: BattlePlayerId, command: BattleCommand) => void;
+  onSelect: (targetIndex: number) => void;
+  onClose: () => void;
 }) {
   const player = state.players[playerId];
-  const active = player.team[player.activeIndex] ?? null;
-  const command = state.pendingCommands[playerId];
   const switchTargets = player.team
     .map((pokemon, index) => ({ pokemon, index }))
     .filter(
@@ -591,87 +700,48 @@ function CommandPanel({
     );
 
   return (
-    <section className={styles.commandPanel}>
-      <div className={styles.previewHeader}>
-        <span>{player.label}</span>
-        <h2>行動選択</h2>
-      </div>
-      {!active || active.status === "fainted" ? (
-        <p className={styles.emptyState}>行動できるポケモンがいません。</p>
-      ) : (
-        <>
-          <div className={styles.commandGroup}>
-            <strong>技</strong>
-            <div className={styles.moveButtons}>
-              {active.moves.length === 0 ? (
-                <p className={styles.emptyState}>選択できる技がありません。</p>
-              ) : (
-                active.moves.map((move) => (
-                  <button
-                    className={
-                      command?.type === "move" && command.moveId === move.id
-                        ? styles.selectedCommand
-                        : undefined
-                    }
-                    type="button"
-                    onClick={() =>
-                      onCommand(playerId, { type: "move", moveId: move.id })
-                    }
-                    key={move.id}
-                  >
-                    <span>{move.name}</span>
-                    <small>
-                      {move.typeName} / {move.power}
-                    </small>
-                  </button>
-                ))
-              )}
-            </div>
+    <div className={styles.switchModalOverlay} role="dialog" aria-modal="true">
+      <button
+        className={styles.switchModalBackdrop}
+        type="button"
+        aria-label="交代先選択を閉じる"
+        onClick={onClose}
+      />
+      <section className={styles.switchModalPanel}>
+        <div className={styles.switchModalHeader}>
+          <div>
+            <span>{player.label}</span>
+            <h2>交代先を選択</h2>
           </div>
-          <div className={styles.commandGroup}>
-            <strong>交代</strong>
-            <div className={styles.switchButtons}>
-              {switchTargets.length === 0 ? (
-                <p className={styles.emptyState}>交代先がいません。</p>
-              ) : (
-                switchTargets.map(({ pokemon, index }) => (
-                  <button
-                    className={
-                      command?.type === "switch" &&
-                      command.targetIndex === index
-                        ? styles.selectedCommand
-                        : undefined
-                    }
-                    type="button"
-                    onClick={() =>
-                      onCommand(playerId, { type: "switch", targetIndex: index })
-                    }
-                    key={pokemon.buildId}
-                  >
-                    {pokemon.imageUrl ? (
-                      <Image
-                        src={pokemon.imageUrl}
-                        alt=""
-                        width={36}
-                        height={36}
-                      />
-                    ) : null}
-                    <span>{pokemon.buildName}</span>
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-          <p className={styles.commandStatus}>
-            {command
-              ? command.type === "move"
-                ? `選択中: ${active.moves.find((move) => move.id === command.moveId)?.name ?? "技"}`
-                : `選択中: ${player.team[command.targetIndex]?.buildName ?? "交代"} に交代`
-              : "未選択"}
-          </p>
-        </>
-      )}
-    </section>
+          <button type="button" onClick={onClose}>
+            閉じる
+          </button>
+        </div>
+        <div className={styles.switchRoster}>
+          {switchTargets.length === 0 ? (
+            <p className={styles.emptyState}>交代できるポケモンがいません。</p>
+          ) : (
+            switchTargets.map(({ pokemon, index }) => (
+              <button
+                type="button"
+                onClick={() => onSelect(index)}
+                key={pokemon.buildId}
+              >
+                {pokemon.imageUrl ? (
+                  <Image src={pokemon.imageUrl} alt="" width={48} height={48} />
+                ) : null}
+                <div>
+                  <strong>{pokemon.buildName}</strong>
+                  <span>
+                    HP {pokemon.currentHp} / {pokemon.maxHp}
+                  </span>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -685,13 +755,15 @@ export function BattleSimulator() {
   const [natures, setNatures] = useState<Nature[]>([]);
   const [selectedTeamIds, setSelectedTeamIds] = useState<
     Record<BattlePlayerId, number | "">
-  >({
-    player1: "",
-    player2: "",
-  });
+  >({ player1: "", player2: "" });
   const [battleState, setBattleState] = useState<BattleState | null>(null);
+  const [activeCommandPlayer, setActiveCommandPlayer] =
+    useState<BattlePlayerId>("player1");
+  const [switchModalPlayer, setSwitchModalPlayer] =
+    useState<BattlePlayerId | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const logRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -702,15 +774,23 @@ export function BattleSimulator() {
       getChampionsDamageCalculatorHeldItems(),
       getNatures(),
     ])
-      .then(([loadedTeams, loadedBuilds, loadedPokemon, loadedItems, loadedNatures]) => {
-        if (!active) return;
-        setTeams(loadedTeams);
-        setBuilds(loadedBuilds);
-        setPokemonCatalog(loadedPokemon);
-        setHeldItems(loadedItems);
-        setNatures(loadedNatures);
-        setLoaded(true);
-      })
+      .then(
+        ([
+          loadedTeams,
+          loadedBuilds,
+          loadedPokemon,
+          loadedItems,
+          loadedNatures,
+        ]) => {
+          if (!active) return;
+          setTeams(loadedTeams);
+          setBuilds(loadedBuilds);
+          setPokemonCatalog(loadedPokemon);
+          setHeldItems(loadedItems);
+          setNatures(loadedNatures);
+          setLoaded(true);
+        },
+      )
       .catch((error: unknown) => {
         console.error("対戦シミュレータ用データを読み込めませんでした。", error);
         if (!active) return;
@@ -722,6 +802,11 @@ export function BattleSimulator() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!logRef.current || !battleState) return;
+    logRef.current.scrollTop = logRef.current.scrollHeight;
+  }, [battleState?.log.length, battleState]);
 
   const buildsById = useMemo(
     () =>
@@ -746,12 +831,14 @@ export function BattleSimulator() {
     [selectedTeamIds, teams],
   );
   const canCreateBattle = Boolean(selectedTeams.player1 && selectedTeams.player2);
+  const canRunTurn = Boolean(
+    battleState?.phase === "command" &&
+      battleState.pendingCommands.player1 &&
+      battleState.pendingCommands.player2,
+  );
 
   function updateSelectedTeam(playerId: BattlePlayerId, teamId: number | "") {
-    setSelectedTeamIds((current) => ({
-      ...current,
-      [playerId]: teamId,
-    }));
+    setSelectedTeamIds((current) => ({ ...current, [playerId]: teamId }));
     setBattleState(null);
   }
 
@@ -767,6 +854,8 @@ export function BattleSimulator() {
         natures,
       }),
     );
+    setActiveCommandPlayer("player1");
+    setSwitchModalPlayer(null);
   }
 
   function chooseCommand(playerId: BattlePlayerId, command: BattleCommand) {
@@ -782,13 +871,16 @@ export function BattleSimulator() {
   function runTurn() {
     setBattleState((current) =>
       current
-        ? executeTurn({
-            state: current,
-            heldItems,
-            pokemonById,
-          })
+        ? executeTurn({ state: current, heldItems, pokemonById })
         : current,
     );
+  }
+
+  function selectSwitchTarget(targetIndex: number) {
+    if (!switchModalPlayer) return;
+    chooseCommand(switchModalPlayer, { type: "switch", targetIndex });
+    setActiveCommandPlayer(switchModalPlayer);
+    setSwitchModalPlayer(null);
   }
 
   if (!loaded) {
@@ -807,7 +899,7 @@ export function BattleSimulator() {
     <div className={styles.simulator}>
       <section className={styles.setupPanel} aria-labelledby="setup-title">
         <div className={styles.sectionHeading}>
-          <p>Step 1</p>
+          <p>Team Select</p>
           <h2 id="setup-title">バトルチームを2つ選択</h2>
         </div>
         {teams.length === 0 ? (
@@ -845,88 +937,56 @@ export function BattleSimulator() {
       </section>
 
       {battleState ? (
-        <>
-          <section className={styles.stateSummary}>
-            <div className={styles.sectionHeading}>
-              <p>Step 2</p>
-              <h2>対戦状態の土台</h2>
-            </div>
-            <dl>
-              <div>
-                <dt>フェーズ</dt>
-                <dd>{battleState.phase}</dd>
-              </div>
-              <div>
-                <dt>ターン</dt>
-                <dd>{battleState.turn}</dd>
-              </div>
-              <div>
-                <dt>天候</dt>
-                <dd>未設定</dd>
-              </div>
-              <div>
-                <dt>フィールド</dt>
-                <dd>未設定</dd>
-              </div>
-            </dl>
-            <div className={styles.turnActions}>
-              {battleState.phase === "team-preview" ? (
-                <button type="button" onClick={beginBattle}>
-                  対戦開始
-                </button>
-              ) : null}
-              {battleState.phase === "command" ? (
-                <button
-                  type="button"
-                  disabled={
-                    !battleState.pendingCommands.player1 ||
-                    !battleState.pendingCommands.player2
-                  }
-                  onClick={runTurn}
-                >
+        <div className={styles.battleLayout}>
+          <BattleField state={battleState} />
+          <BattleLog entries={battleState.log} logRef={logRef} />
+          {battleState.phase === "team-preview" ? (
+            <section className={styles.startPanel}>
+              <button type="button" onClick={beginBattle}>
+                対戦開始
+              </button>
+            </section>
+          ) : null}
+          {battleState.phase === "command" ? (
+            <>
+              <ActionTabs
+                state={battleState}
+                activePlayerId={activeCommandPlayer}
+                onTabChange={setActiveCommandPlayer}
+                onMove={(playerId, moveId) =>
+                  chooseCommand(playerId, { type: "move", moveId })
+                }
+                onOpenSwitch={setSwitchModalPlayer}
+              />
+              <section className={styles.turnPanel}>
+                <button type="button" disabled={!canRunTurn} onClick={runTurn}>
                   ターン実行
                 </button>
-              ) : null}
-              {battleState.phase === "finished" ? <strong>対戦終了</strong> : null}
-            </div>
-          </section>
-          <div className={styles.previewGrid}>
-            <TeamPreview playerId="player1" state={battleState} />
-            <TeamPreview playerId="player2" state={battleState} />
-          </div>
-          {battleState.phase === "command" ? (
-            <div className={styles.commandGrid}>
-              <CommandPanel
-                playerId="player1"
-                state={battleState}
-                onCommand={chooseCommand}
-              />
-              <CommandPanel
-                playerId="player2"
-                state={battleState}
-                onCommand={chooseCommand}
-              />
-            </div>
+              </section>
+            </>
           ) : null}
-          <section className={styles.logPanel}>
-            <div className={styles.sectionHeading}>
-              <p>Battle Log</p>
-              <h2>ログ</h2>
-            </div>
-            {battleState.log.map((entry) => (
-              <p key={entry.id}>{entry.message}</p>
-            ))}
-          </section>
-        </>
+          {battleState.phase === "finished" ? (
+            <section className={styles.turnPanel}>
+              <strong>対戦終了</strong>
+            </section>
+          ) : null}
+          {switchModalPlayer ? (
+            <SwitchModal
+              playerId={switchModalPlayer}
+              state={battleState}
+              onSelect={selectSwitchTarget}
+              onClose={() => setSwitchModalPlayer(null)}
+            />
+          ) : null}
+        </div>
       ) : (
         <section className={styles.placeholderPanel}>
           <div className={styles.sectionHeading}>
-            <p>Next</p>
-            <h2>ここに対戦画面のガワが表示されます</h2>
+            <p>Battle Board</p>
+            <h2>チームを選ぶと対戦画面が表示されます</h2>
           </div>
           <p>
-            今回はチーム選択と対戦状態モデルまでです。ターン処理、技選択、
-            ダメージ処理、オフライン実行の細部は次の段階で追加します。
+            2体の表示、対戦ログ、行動選択、ターン実行ボタンを縦に並べて操作します。
           </p>
         </section>
       )}
