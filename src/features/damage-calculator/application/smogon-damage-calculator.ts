@@ -118,11 +118,62 @@ function normalizeId(value: string) {
 }
 
 /** DBのstat_idキーを、@smogon/calcが期待するatk/def/spa形式へ変換する。 */
-function toBaseStats(pokemon: DamageCalculatorPokemon): StatsTable {
+function calculateStatFromBaseStat({
+  stat,
+  baseStat,
+  ruleset,
+}: {
+  stat: keyof typeof STAT_IDS;
+  baseStat: number;
+  ruleset: DamageCalculatorRuleset;
+}) {
+  const iv = ruleset.ivs[STAT_IDS[stat]] ?? 31;
+  const ev = ruleset.evs[STAT_IDS[stat]] ?? 0;
+  const base = Math.floor(
+    ((2 * baseStat + iv + Math.floor(ev / 4)) * ruleset.level) / 100,
+  );
+  return stat === "hp" ? base + ruleset.level + 10 : base + 5;
+}
+
+function findBaseStatForActualStat({
+  stat,
+  actualStat,
+  ruleset,
+}: {
+  stat: keyof typeof STAT_IDS;
+  actualStat: number;
+  ruleset: DamageCalculatorRuleset;
+}) {
+  if (stat === "hp" && actualStat <= 1) return 1;
+
+  let closestBaseStat = 1;
+  let closestDiff = Number.POSITIVE_INFINITY;
+  for (let baseStat = 1; baseStat <= 999; baseStat += 1) {
+    const calculated = calculateStatFromBaseStat({ stat, baseStat, ruleset });
+    const diff = Math.abs(calculated - actualStat);
+    if (diff < closestDiff) {
+      closestBaseStat = baseStat;
+      closestDiff = diff;
+    }
+    if (diff === 0) break;
+  }
+  return closestBaseStat;
+}
+
+function toBaseStats(
+  pokemon: DamageCalculatorPokemon,
+  ruleset: DamageCalculatorRuleset,
+): StatsTable {
   return Object.fromEntries(
     Object.entries(STAT_IDS).map(([databaseId, calculatorId]) => [
       calculatorId,
-      pokemon.stats[databaseId] ?? 1,
+      typeof pokemon.actualStats?.[databaseId] === "number"
+        ? findBaseStatForActualStat({
+            stat: databaseId as keyof typeof STAT_IDS,
+            actualStat: pokemon.actualStats[databaseId],
+            ruleset,
+          })
+        : (pokemon.stats[databaseId] ?? 1),
     ]),
   ) as StatsTable;
 }
@@ -229,7 +280,7 @@ export class SmogonDamageCalculator {
       boosts: toBoosts(pokemon),
       overrides: {
         types,
-        baseStats: toBaseStats(pokemon),
+        baseStats: toBaseStats(pokemon, this.ruleset),
         weightkg: pokemon.weightKg,
       },
     };
