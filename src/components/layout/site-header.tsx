@@ -15,6 +15,7 @@ const navigationItems = [
   { href: "/damage-calculator", label: "ダメージ計算" },
   { href: "/training", label: "育成シミュレーター" },
   { href: "/battle-team", label: "バトルチーム編成" },
+  { href: "/battle-simulator", label: "対戦シミュレータ" },
   { href: "/quiz", label: "タイプ相性クイズ" },
 ] as const;
 

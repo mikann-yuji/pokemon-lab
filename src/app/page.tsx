@@ -28,6 +28,11 @@ const researchCards = [
     link: "/battle-team",
   },
   {
+    title: "Battle Simulator",
+    body: "Choose two saved battle teams and prepare a solo test battle board.",
+    link: "/battle-simulator",
+  },
+  {
     title: "Type Quiz",
     body: "Test your knowledge of Pokémon type matchups with an interactive quiz.",
     link: "/quiz",

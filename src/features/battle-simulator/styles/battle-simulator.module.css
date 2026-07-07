@@ -1,0 +1,460 @@
+.page {
+  min-height: 100vh;
+  padding: clamp(1rem, 4vw, 2.5rem);
+  background:
+    radial-gradient(circle at 12% 10%, rgb(255 202 40 / 22%), transparent 24rem),
+    linear-gradient(145deg, #f7fbff, #edf6f0 54%, #fff9e8);
+  color: #172b4d;
+}
+
+.hero {
+  width: min(100%, 72rem);
+  margin: 1.5rem auto 1.25rem;
+}
+
+.hero p,
+.sectionHeading p {
+  margin: 0 0 0.35rem;
+  color: #e63946;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 7vw, 4rem);
+  line-height: 1;
+}
+
+.hero span {
+  display: block;
+  max-width: 44rem;
+  margin-top: 0.75rem;
+  color: #536376;
+  line-height: 1.7;
+}
+
+.simulator {
+  display: grid;
+  gap: 1rem;
+  width: min(100%, 72rem);
+  margin: 0 auto;
+}
+
+.setupPanel,
+.stateSummary,
+.previewPanel,
+.logPanel,
+.placeholderPanel,
+.statusMessage {
+  border: 1px solid rgb(23 43 77 / 14%);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 88%);
+  box-shadow: 0 16px 40px rgb(23 43 77 / 10%);
+}
+
+.setupPanel,
+.stateSummary,
+.logPanel,
+.placeholderPanel,
+.statusMessage {
+  padding: clamp(1rem, 3vw, 1.35rem);
+}
+
+.sectionHeading h2 {
+  margin: 0;
+  color: #172b4d;
+  font-size: clamp(1.15rem, 3vw, 1.45rem);
+}
+
+.teamSelectGrid,
+.previewGrid,
+.commandGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.teamSelectGrid {
+  margin-top: 1rem;
+}
+
+.teamSelect {
+  display: grid;
+  gap: 0.45rem;
+  color: #344760;
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.teamSelect select {
+  width: 100%;
+  min-height: 46px;
+  padding: 0.65rem 0.75rem;
+  border: 2px solid #b9cae0;
+  border-radius: 8px;
+  background: white;
+  color: #172b4d;
+  font: inherit;
+}
+
+.teamSelect select:focus {
+  border-color: #2857a4;
+  outline: 3px solid rgb(40 87 164 / 18%);
+}
+
+.prepareButton {
+  min-height: 46px;
+  margin-top: 1rem;
+  padding: 0.65rem 1rem;
+  border: 2px solid #2857a4;
+  border-radius: 8px;
+  background: #2857a4;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+}
+
+.prepareButton:disabled {
+  border-color: #aebccd;
+  background: #7f8da0;
+  cursor: not-allowed;
+}
+
+.prepareButton:not(:disabled):hover,
+.prepareButton:not(:disabled):focus-visible {
+  outline: 3px solid rgb(40 87 164 / 18%);
+  outline-offset: 2px;
+  background: #214b8f;
+}
+
+.stateSummary dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 1rem 0 0;
+  overflow: hidden;
+  border: 1px solid #d7e2f0;
+  border-radius: 8px;
+  background: #d7e2f0;
+}
+
+.stateSummary div {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: white;
+}
+
+.stateSummary dt,
+.stateSummary dd {
+  margin: 0;
+}
+
+.stateSummary dt {
+  color: #6b778c;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.stateSummary dd {
+  color: #172b4d;
+  font-weight: 950;
+}
+
+.turnActions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.turnActions button {
+  min-height: 42px;
+  padding: 0.55rem 0.9rem;
+  border: 2px solid #e63946;
+  border-radius: 8px;
+  background: #e63946;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+}
+
+.turnActions button:disabled {
+  border-color: #aebccd;
+  background: #7f8da0;
+  cursor: not-allowed;
+}
+
+.turnActions button:not(:disabled):hover,
+.turnActions button:not(:disabled):focus-visible {
+  outline: 3px solid rgb(230 57 70 / 20%);
+  outline-offset: 2px;
+  background: #cf2f40;
+}
+
+.turnActions strong {
+  color: #b51f2d;
+  font-weight: 950;
+}
+
+.previewPanel {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.commandPanel {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid rgb(23 43 77 / 14%);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 88%);
+  box-shadow: 0 16px 40px rgb(23 43 77 / 10%);
+}
+
+.previewHeader {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.previewHeader span {
+  color: #e63946;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.previewHeader h2 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 1.1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activePokemon {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.8rem;
+  align-items: center;
+  min-height: 8.5rem;
+  padding: 0.75rem;
+  border: 1px dashed #c7d5e7;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.activePokemon img,
+.roster img {
+  object-fit: contain;
+}
+
+.activePokemon strong,
+.activePokemon small,
+.activePokemon span {
+  display: block;
+}
+
+.activePokemon strong {
+  color: #172b4d;
+  font-size: 1.1rem;
+}
+
+.activePokemon small,
+.activePokemon span {
+  color: #536376;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.activePokemon meter {
+  width: 100%;
+  height: 0.8rem;
+  margin: 0.55rem 0 0.25rem;
+  accent-color: #43a047;
+}
+
+.roster {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.roster article {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: center;
+  min-height: 4rem;
+  padding: 0.45rem;
+  border: 1px solid #d7e2f0;
+  border-radius: 8px;
+  background: white;
+}
+
+.roster .activeSlot {
+  border-color: #2857a4;
+  background: #eef6ff;
+}
+
+.roster strong,
+.roster span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roster strong {
+  color: #172b4d;
+  font-size: 0.88rem;
+}
+
+.roster span {
+  color: #536376;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.logPanel p {
+  margin: 0.8rem 0 0;
+  padding: 0.7rem;
+  border-radius: 8px;
+  background: #f8fbff;
+  color: #344760;
+  font-weight: 850;
+}
+
+.commandGroup {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.commandGroup > strong {
+  color: #172b4d;
+  font-size: 0.88rem;
+}
+
+.moveButtons,
+.switchButtons {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.moveButtons {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.moveButtons button,
+.switchButtons button {
+  min-height: 48px;
+  padding: 0.55rem;
+  border: 1px solid #c7d5e7;
+  border-radius: 8px;
+  background: white;
+  color: #172b4d;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.moveButtons button {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.moveButtons span,
+.moveButtons small,
+.switchButtons span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.moveButtons span,
+.switchButtons span {
+  font-weight: 900;
+}
+
+.moveButtons small {
+  color: #536376;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.switchButtons button {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.switchButtons img {
+  object-fit: contain;
+}
+
+.moveButtons button:hover,
+.moveButtons button:focus-visible,
+.switchButtons button:hover,
+.switchButtons button:focus-visible,
+.selectedCommand {
+  border-color: #2857a4;
+  outline: none;
+  background: #eef6ff;
+}
+
+.commandStatus {
+  margin: 0;
+  padding: 0.55rem;
+  border-radius: 8px;
+  background: #f8fbff;
+  color: #2857a4;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.placeholderPanel p,
+.emptyState,
+.statusMessage {
+  margin: 0;
+  color: #536376;
+  font-weight: 850;
+  line-height: 1.7;
+}
+
+.placeholderPanel p {
+  margin-top: 0.8rem;
+}
+
+.statusMessage {
+  text-align: center;
+}
+
+@media (max-width: 48rem) {
+  .teamSelectGrid,
+  .previewGrid,
+  .commandGrid,
+  .stateSummary dl {
+    grid-template-columns: 1fr;
+  }
+
+  .activePokemon {
+    grid-template-columns: 6rem minmax(0, 1fr);
+  }
+
+  .moveButtons {
+    grid-template-columns: 1fr;
+  }
+}
