@@ -4,8 +4,12 @@ import Image from "next/image";
 import { useCombobox } from "downshift";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { normalizePokemonSearchText } from "@/domain/pokemon-name-search";
+import type { TypeName } from "@/domain/type-matchup";
 import type { PokemonDetail } from "@/infrastructure/database/pokemon-search-repository";
-import { getPokemonCardStyle } from "@/presentation/pokemon-type-colors";
+import {
+  getPokemonCardStyle,
+  getTypeBadgeStyle,
+} from "@/presentation/pokemon-type-colors";
 import {
   createTrainingBuildContentKey,
   findTrainingBuildByContentKey,
@@ -50,6 +54,27 @@ type DisplayStatRankingRow = {
 };
 type StatCompareMode = "uninvested" | "maximum";
 
+const TYPE_LABELS: Record<TypeName, string> = {
+  Normal: "ノーマル",
+  Fire: "ほのお",
+  Water: "みず",
+  Electric: "でんき",
+  Grass: "くさ",
+  Ice: "こおり",
+  Fighting: "かくとう",
+  Poison: "どく",
+  Ground: "じめん",
+  Flying: "ひこう",
+  Psychic: "エスパー",
+  Bug: "むし",
+  Rock: "いわ",
+  Ghost: "ゴースト",
+  Dragon: "ドラゴン",
+  Dark: "あく",
+  Steel: "はがね",
+  Fairy: "フェアリー",
+};
+
 /** 6能力すべてに同じ初期値を入れた能力ポイント表を作る。 */
 const initialStats = (value: number) =>
   Object.fromEntries(STAT_IDS.map((id) => [id, value]));
@@ -66,6 +91,10 @@ function rankCurrentValue(values: number[], currentValue: number) {
 
 function formatUsageRate(usageRate: number | null) {
   return usageRate === null ? "" : ` / 採用率 ${usageRate.toFixed(1)}%`;
+}
+
+function formatMovePower(move: PokemonDetail["moves"][number]) {
+  return move.power === null ? "変化" : `威力 ${move.power}`;
 }
 
 function compareMoveUsageRate(
@@ -431,12 +460,33 @@ export function TrainingSimulator({
         加えた後に、性格の上昇補正（×1.1）または下降補正（×0.9）を掛け、
         小数点以下を切り捨てます。
       </p>
-      <section className={styles.moves}><h2>技構成</h2>{moveIds.map((moveId, index) => {
-        const selectedMoveIds = new Set(moveIds.filter((id, i) => id && i !== index));
-        const selectableMoves = sortedMovesByUsage
-          .filter((move) => !selectedMoveIds.has(move.id))
-        return <label key={index}>技 {index + 1}<select value={moveId} onChange={(e) => { setMoveIds((current) => current.map((value, i) => i === index ? e.target.value : value)); setSaved(false); }}><option value="">未選択</option>{selectableMoves.map((move) => <option value={move.id} key={move.id}>{move.name}{formatUsageRate(move.usageRate)}</option>)}</select></label>;
-      })}</section>
+      <section className={styles.moves}>
+        <h2>技構成</h2>
+        {moveIds.map((moveId, index) => {
+          const selectedMoveIds = new Set(
+            moveIds.filter((id, moveIndex) => id && moveIndex !== index),
+          );
+          const selectableMoves = sortedMovesByUsage.filter(
+            (move) => !selectedMoveIds.has(move.id),
+          );
+          return (
+            <TrainingMoveSelect
+              label={`技 ${index + 1}`}
+              moves={selectableMoves}
+              selectedMoveId={moveId}
+              onChange={(nextMoveId) => {
+                setMoveIds((current) =>
+                  current.map((value, moveIndex) =>
+                    moveIndex === index ? nextMoveId : value,
+                  ),
+                );
+                setSaved(false);
+              }}
+              key={index}
+            />
+          );
+        })}
+      </section>
       <button className={styles.saveButton} type="button" onClick={openSaveDialog}>{saved ? "保存しました" : "この育成案を保存"}</button>
       {toast ? (
         <div
@@ -502,6 +552,101 @@ export function TrainingSimulator({
   );
 }
 
+function TrainingTypeBadge({ typeName }: { typeName: TypeName }) {
+  return (
+    <span className={styles.typeBadge} style={getTypeBadgeStyle(typeName)}>
+      {TYPE_LABELS[typeName]}
+    </span>
+  );
+}
+
+function TrainingMoveSelect({
+  label,
+  moves,
+  selectedMoveId,
+  onChange,
+}: {
+  label: string;
+  moves: PokemonDetail["moves"];
+  selectedMoveId: string;
+  onChange: (moveId: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selectedMove =
+    moves.find((move) => move.id === selectedMoveId) ?? null;
+
+  function selectMove(moveId: string) {
+    onChange(moveId);
+    setOpen(false);
+  }
+
+  return (
+    <div className={styles.moveSelectField}>
+      <span>{label}</span>
+      <div
+        className={styles.moveSelect}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            setOpen(false);
+          }
+        }}
+      >
+        <button
+          type="button"
+          className={styles.moveSelectButton}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          onClick={() => setOpen((current) => !current)}
+        >
+          {selectedMove ? (
+            <span className={styles.moveOptionContent}>
+              <TrainingTypeBadge typeName={selectedMove.typeName} />
+              <strong>{selectedMove.name}</strong>
+              <small>
+                {formatMovePower(selectedMove)}
+                {formatUsageRate(selectedMove.usageRate)}
+              </small>
+            </span>
+          ) : (
+            <span className={styles.movePlaceholder}>未選択</span>
+          )}
+        </button>
+        {open ? (
+          <div className={styles.moveOptions} role="listbox" aria-label={label}>
+            <button
+              type="button"
+              role="option"
+              aria-selected={selectedMoveId === ""}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => selectMove("")}
+            >
+              <span className={styles.movePlaceholder}>未選択</span>
+            </button>
+            {moves.map((move) => (
+              <button
+                type="button"
+                role="option"
+                aria-selected={move.id === selectedMoveId}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => selectMove(move.id)}
+                key={move.id}
+              >
+                <span className={styles.moveOptionContent}>
+                  <TrainingTypeBadge typeName={move.typeName} />
+                  <strong>{move.name}</strong>
+                  <small>
+                    {formatMovePower(move)}
+                    {formatUsageRate(move.usageRate)}
+                  </small>
+                </span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 
 function StatRankingOverlay({
   pokemonName,
