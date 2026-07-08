@@ -377,6 +377,28 @@ a.pokemonSummary:focus-visible {
   color: #6b778c;
 }
 
+.typeBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.typeBadge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 3.2rem;
+  min-height: 1.35rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: var(--type-color);
+  color: var(--type-foreground);
+  font-size: 0.66rem;
+  font-weight: 950;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .baseStats {
   display: grid;
   grid-template-columns: repeat(3, minmax(2.35rem, 1fr));
@@ -419,6 +441,114 @@ a.pokemonSummary:focus-visible {
   margin: 0.65rem 0 0;
   color: #536376;
   font-size: 0.8rem;
+}
+
+.moveSelectField {
+  display: grid;
+  gap: 0.45rem;
+  color: #344760;
+  font-size: 0.8rem;
+  font-weight: 850;
+}
+
+.moveSelect {
+  position: relative;
+}
+
+.moveSelectButton {
+  width: 100%;
+  min-height: 46px;
+  padding: 0.55rem 0.75rem;
+  border: 2px solid #b9cae0;
+  border-radius: 10px;
+  background: white;
+  color: #172b4d;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.moveSelectButton::after {
+  content: "⌄";
+  float: right;
+  color: #536376;
+  font-weight: 950;
+}
+
+.moveSelectButton:disabled {
+  background: #eef3f8;
+  color: #8290a3;
+  cursor: not-allowed;
+}
+
+.moveSelectButton:not(:disabled):hover,
+.moveSelectButton:not(:disabled):focus-visible {
+  border-color: #2857a4;
+  outline: 3px solid rgb(40 87 164 / 18%);
+}
+
+.moveOptions {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  left: 0;
+  display: grid;
+  max-height: 18rem;
+  overflow: auto;
+  padding: 0.35rem;
+  border: 1px solid #b9cae0;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 14px 34px rgb(23 43 77 / 22%);
+}
+
+.moveOptions button {
+  min-height: 44px;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #172b4d;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.moveOptions button:hover,
+.moveOptions button:focus-visible,
+.moveOptions button[aria-selected="true"] {
+  outline: none;
+  background: #eef6ff;
+}
+
+.moveOptionContent {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.15rem 0.45rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.moveOptionContent strong,
+.moveOptionContent small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.moveOptionContent small {
+  grid-column: 2;
+  margin: 0;
+  color: #536376;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.movePlaceholder {
+  color: #8290a3;
+  font-weight: 850;
 }
 
 .abilityField {

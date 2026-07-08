@@ -41,6 +41,8 @@ import {
   getNatures,
   type Nature,
 } from "@/features/training/infrastructure/training-catalog-repository";
+import type { TypeName } from "@/domain/type-matchup";
+import { getTypeBadgeStyle } from "@/presentation/pokemon-type-colors";
 import styles from "../styles/damage-calculator.module.css";
 
 type CalculationResult = {
@@ -110,6 +112,27 @@ const BASE_STAT_LABELS: Record<(typeof STAT_IDS)[number], string> = {
   "special-attack": "C",
   "special-defense": "D",
   speed: "S",
+};
+
+const TYPE_LABELS: Record<TypeName, string> = {
+  Normal: "ノーマル",
+  Fire: "ほのお",
+  Water: "みず",
+  Electric: "でんき",
+  Grass: "くさ",
+  Ice: "こおり",
+  Fighting: "かくとう",
+  Poison: "どく",
+  Ground: "じめん",
+  Flying: "ひこう",
+  Psychic: "エスパー",
+  Bug: "むし",
+  Rock: "いわ",
+  Ghost: "ゴースト",
+  Dragon: "ドラゴン",
+  Dark: "あく",
+  Steel: "はがね",
+  Fairy: "フェアリー",
 };
 
 function createDefaultAdjustment(): StatAdjustment {
@@ -850,24 +873,13 @@ export function DamageCalculator({
             onChange={setMetronomeConsecutiveUseCount}
           />
         ) : null}
-        <label className={styles.moveField}>
-          使用する技
-          <select
-            value={moveId}
-            disabled={!attacker}
-            onChange={(event) => {
-              setMoveId(event.target.value);
-            }}
-          >
-            <option value="">技を選択</option>
-            {attacker?.moves.map((move) => (
-              <option value={move.id} key={move.id}>
-                {move.name}（威力 {move.power}
-                {formatMoveUsageRate(move)}）
-              </option>
-            ))}
-          </select>
-        </label>
+        <MoveSelect
+          label="使用する技"
+          moves={attacker?.moves ?? []}
+          selectedMoveId={moveId}
+          disabled={!attacker}
+          onChange={setMoveId}
+        />
         {selectedMove ? <MoveSummary move={selectedMove} /> : null}
         {selectedMove && relevantStatIds.attacker ? (
           <DamageStatControls
@@ -1304,6 +1316,11 @@ function PokemonSummary({
           <strong>{pokemon.nameJa}</strong>
           <small>{pokemon.name}</small>
         </div>
+        <div className={styles.typeBadges} aria-label={`${pokemon.nameJa}のタイプ`}>
+          {pokemon.types.map((typeName) => (
+            <TypeBadge typeName={typeName} key={typeName} />
+          ))}
+        </div>
         <dl className={styles.baseStats}>
           {STAT_IDS.map((statId) => (
             <div key={statId}>
@@ -1327,6 +1344,14 @@ function PokemonSummary({
   );
 }
 
+function TypeBadge({ typeName }: { typeName: DamageCalculatorPokemon["types"][number] }) {
+  return (
+    <span className={styles.typeBadge} style={getTypeBadgeStyle(typeName)}>
+      {TYPE_LABELS[typeName]}
+    </span>
+  );
+}
+
 function formatItemModifier(item: DamageCalculatorHeldItem) {
   const modifier = item.damageModifier;
   return modifier ? ` x${modifier.multiplier}` : "";
@@ -1334,6 +1359,94 @@ function formatItemModifier(item: DamageCalculatorHeldItem) {
 
 function formatMoveUsageRate(move: DamageCalculatorMove) {
   return move.usageRate === null ? "" : ` / 採用率 ${move.usageRate.toFixed(1)}%`;
+}
+
+function MoveSelect({
+  label,
+  moves,
+  selectedMoveId,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  moves: DamageCalculatorMove[];
+  selectedMoveId: string;
+  disabled: boolean;
+  onChange: (moveId: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selectedMove =
+    moves.find((move) => move.id === selectedMoveId) ?? null;
+  const buttonLabel = selectedMove
+    ? `${selectedMove.name} 威力 ${selectedMove.power}`
+    : "技を選択";
+
+  function selectMove(moveId: string) {
+    onChange(moveId);
+    setOpen(false);
+  }
+
+  return (
+    <div className={styles.moveSelectField}>
+      <span>{label}</span>
+      <div
+        className={styles.moveSelect}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            setOpen(false);
+          }
+        }}
+      >
+        <button
+          type="button"
+          className={styles.moveSelectButton}
+          disabled={disabled}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          onClick={() => setOpen((current) => !current)}
+        >
+          {selectedMove ? (
+            <span className={styles.moveOptionContent}>
+              <TypeBadge typeName={selectedMove.typeName} />
+              <strong>{selectedMove.name}</strong>
+              <small>威力 {selectedMove.power}{formatMoveUsageRate(selectedMove)}</small>
+            </span>
+          ) : (
+            <span className={styles.movePlaceholder}>{buttonLabel}</span>
+          )}
+        </button>
+        {open && !disabled ? (
+          <div className={styles.moveOptions} role="listbox" aria-label={label}>
+            <button
+              type="button"
+              role="option"
+              aria-selected={selectedMoveId === ""}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => selectMove("")}
+            >
+              <span className={styles.movePlaceholder}>技を選択</span>
+            </button>
+            {moves.map((move) => (
+              <button
+                type="button"
+                role="option"
+                aria-selected={move.id === selectedMoveId}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => selectMove(move.id)}
+                key={move.id}
+              >
+                <span className={styles.moveOptionContent}>
+                  <TypeBadge typeName={move.typeName} />
+                  <strong>{move.name}</strong>
+                  <small>威力 {move.power}{formatMoveUsageRate(move)}</small>
+                </span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
 function hasManualAbilityCondition(ability: DamageCalculatorAbility | null) {
