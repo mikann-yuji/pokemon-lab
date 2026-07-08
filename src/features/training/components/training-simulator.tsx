@@ -560,6 +560,16 @@ function TrainingTypeBadge({ typeName }: { typeName: TypeName }) {
   );
 }
 
+function TrainingMoveDescription({
+  description,
+}: {
+  description: string | null;
+}) {
+  return description ? (
+    <span className={styles.moveDescription}>{description}</span>
+  ) : null;
+}
+
 function TrainingMoveSelect({
   label,
   moves,
@@ -606,6 +616,7 @@ function TrainingMoveSelect({
                 {formatMovePower(selectedMove)}
                 {formatUsageRate(selectedMove.usageRate)}
               </small>
+              <TrainingMoveDescription description={selectedMove.description} />
             </span>
           ) : (
             <span className={styles.movePlaceholder}>未選択</span>
@@ -638,6 +649,7 @@ function TrainingMoveSelect({
                     {formatMovePower(move)}
                     {formatUsageRate(move.usageRate)}
                   </small>
+                  <TrainingMoveDescription description={move.description} />
                 </span>
               </button>
             ))}

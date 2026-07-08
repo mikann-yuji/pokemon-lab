@@ -1361,6 +1361,12 @@ function formatMoveUsageRate(move: DamageCalculatorMove) {
   return move.usageRate === null ? "" : ` / 採用率 ${move.usageRate.toFixed(1)}%`;
 }
 
+function MoveDescription({ description }: { description: string | null }) {
+  return description ? (
+    <span className={styles.moveDescription}>{description}</span>
+  ) : null;
+}
+
 function MoveSelect({
   label,
   moves,
@@ -1410,6 +1416,7 @@ function MoveSelect({
               <TypeBadge typeName={selectedMove.typeName} />
               <strong>{selectedMove.name}</strong>
               <small>威力 {selectedMove.power}{formatMoveUsageRate(selectedMove)}</small>
+              <MoveDescription description={selectedMove.description} />
             </span>
           ) : (
             <span className={styles.movePlaceholder}>{buttonLabel}</span>
@@ -1439,6 +1446,7 @@ function MoveSelect({
                   <TypeBadge typeName={move.typeName} />
                   <strong>{move.name}</strong>
                   <small>威力 {move.power}{formatMoveUsageRate(move)}</small>
+                  <MoveDescription description={move.description} />
                 </span>
               </button>
             ))}

@@ -38,6 +38,7 @@
 .moveOptionContent strong,.moveOptionContent small { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .moveOptionContent strong { font-weight:900; }
 .moveOptionContent small { grid-column:2; color:#52657e; font-size:.72rem; font-weight:800; }
+.moveDescription { display:-webkit-box; grid-column:2; overflow:hidden; color:#6b778c; font-size:.68rem; font-weight:700; line-height:1.35; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
 .typeBadge { display:inline-grid; place-items:center; min-width:3.2rem; min-height:1.35rem; padding:.12rem .45rem; border-radius:999px; background:var(--type-color); color:var(--type-foreground); font-size:.66rem; font-weight:950; line-height:1; white-space:nowrap; }
 .saveButton { min-height:50px; border:0; border-radius:999px; background:#2857a4; color:white; cursor:pointer; font-weight:900; }
 .toast { position:fixed; z-index:80; right:clamp(1rem,4vw,2rem); bottom:clamp(1rem,4vw,2rem); max-width:min(22rem,calc(100vw - 2rem)); padding:.8rem 1rem; border-radius:12px; color:white; font-weight:900; box-shadow:0 12px 35px rgb(10 20 35 / 28%); animation:toastIn .18s ease-out; }

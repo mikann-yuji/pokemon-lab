@@ -41,6 +41,8 @@ export type DamageCalculatorMove = {
   name: string;
   /** 技のタイプ。例: Electric */
   typeName: TypeName;
+  /** 技効果の説明文。 */
+  description: string | null;
   /** 攻撃と防御、特攻と特防のどちらを使うかを表す。 */
   damageClass: "physical" | "special";
   /** 技の基本威力。 */
