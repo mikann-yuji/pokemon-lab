@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import { useCombobox } from "downshift";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { normalizePokemonSearchText } from "@/domain/pokemon-name-search";
 import type { PokemonDetail } from "@/infrastructure/database/pokemon-search-repository";
 import { getPokemonCardStyle } from "@/presentation/pokemon-type-colors";
 import {
@@ -41,6 +43,7 @@ type StatRankingRow = {
 type DisplayStatRankingRow = {
   id: string;
   name: string;
+  searchName: string;
   uninvested: number;
   maximum: number;
   isTrainingTarget: boolean;
@@ -72,7 +75,7 @@ function compareMoveUsageRate(
   const leftRate = left.usageRate ?? -1;
   const rightRate = right.usageRate ?? -1;
   if (leftRate !== rightRate) return rightRate - leftRate;
-  return left.name.localeCompare(right.name, "ja");
+  return left.name.localeCompare(right.name, "ja") || left.id.localeCompare(right.id);
 }
 
 /**
@@ -241,6 +244,10 @@ export function TrainingSimulator({
         };
       });
   }, [rankingStatId, statProfiles]);
+  const sortedMovesByUsage = useMemo(
+    () => [...pokemon.moves].sort(compareMoveUsageRate),
+    [pokemon.moves],
+  );
   const pointTotal = Object.values(abilityPoints).reduce((sum, value) => sum + value, 0);
 
   /**
@@ -426,9 +433,8 @@ export function TrainingSimulator({
       </p>
       <section className={styles.moves}><h2>技構成</h2>{moveIds.map((moveId, index) => {
         const selectedMoveIds = new Set(moveIds.filter((id, i) => id && i !== index));
-        const selectableMoves = pokemon.moves
+        const selectableMoves = sortedMovesByUsage
           .filter((move) => !selectedMoveIds.has(move.id))
-          .sort(compareMoveUsageRate);
         return <label key={index}>技 {index + 1}<select value={moveId} onChange={(e) => { setMoveIds((current) => current.map((value, i) => i === index ? e.target.value : value)); setSaved(false); }}><option value="">未選択</option>{selectableMoves.map((move) => <option value={move.id} key={move.id}>{move.name}{formatUsageRate(move.usageRate)}</option>)}</select></label>;
       })}</section>
       <button className={styles.saveButton} type="button" onClick={openSaveDialog}>{saved ? "保存しました" : "この育成案を保存"}</button>
@@ -518,13 +524,15 @@ function StatRankingOverlay({
 }) {
   const [compareMode, setCompareMode] =
     useState<StatCompareMode>("uninvested");
-  const targetRowRef = useRef<HTMLTableRowElement | null>(null);
+  const [selectedRankRowId, setSelectedRankRowId] = useState("training-target");
+  const rankRowRefs = useRef(new Map<string, HTMLTableRowElement>());
   const sortedRows = useMemo(
     () => {
       const displayRows: DisplayStatRankingRow[] = [
         ...rows.map((row) => ({
           id: String(row.profile.id),
           name: row.profile.nameJa,
+          searchName: `${row.profile.nameJa} ${row.profile.name}`,
           uninvested: row.uninvested,
           maximum: row.maximum,
           isTrainingTarget: false,
@@ -532,6 +540,7 @@ function StatRankingOverlay({
         {
           id: "training-target",
           name: `${pokemonName}（育成中）`,
+          searchName: pokemonName,
           uninvested: actualValue,
           maximum: actualValue,
           isTrainingTarget: true,
@@ -549,6 +558,7 @@ function StatRankingOverlay({
     },
     [actualValue, compareMode, pokemonName, rows],
   );
+  const selectedRankRow = sortedRows.find((row) => row.id === selectedRankRowId);
   const actualRank =
     sortedRows.length > 0
       ? rankCurrentValue(
@@ -556,12 +566,10 @@ function StatRankingOverlay({
           actualValue,
         )
       : null;
-  const targetRowIndex =
-    sortedRows.findIndex((row) => row.isTrainingTarget);
 
   useEffect(() => {
-    targetRowRef.current?.scrollIntoView({ block: "center" });
-  }, [actualRank, actualValue, compareMode]);
+    rankRowRefs.current.get(selectedRankRowId)?.scrollIntoView({ block: "center" });
+  }, [selectedRankRowId, sortedRows]);
 
   return (
     <div className={styles.statRankingOverlay} role="dialog" aria-modal="true" aria-labelledby="stat-ranking-title">
@@ -584,6 +592,11 @@ function StatRankingOverlay({
               </small>
             ) : null}
           </div>
+          <RankingPokemonSearch
+            rows={sortedRows}
+            selectedRow={selectedRankRow ?? null}
+            onSelect={(row) => setSelectedRankRowId(row.id)}
+          />
           <label className={styles.statRankingPointControl}>
             <span>{statName} 能力P</span>
             <input
@@ -632,11 +645,23 @@ function StatRankingOverlay({
               </tr>
             </thead>
             <tbody>
-              {sortedRows.map((row, index) => (
+              {sortedRows.map((row) => (
                 <tr
-                  className={row.isTrainingTarget ? styles.targetRankRow : undefined}
+                  className={
+                    row.id === selectedRankRowId
+                      ? `${styles.selectedRankRow} ${row.isTrainingTarget ? styles.targetRankRow : ""}`
+                      : row.isTrainingTarget
+                        ? styles.targetRankRow
+                        : undefined
+                  }
                   key={row.id}
-                  ref={index === targetRowIndex ? targetRowRef : null}
+                  ref={(element) => {
+                    if (element) {
+                      rankRowRefs.current.set(row.id, element);
+                    } else {
+                      rankRowRefs.current.delete(row.id);
+                    }
+                  }}
                 >
                   <td>{rankCurrentValue(sortedRows.map((item) => item[compareMode]), row[compareMode])}位</td>
                   <th scope="row">{row.name}</th>
@@ -648,6 +673,75 @@ function StatRankingOverlay({
           </table>
         </div>
       </section>
+    </div>
+  );
+}
+
+function RankingPokemonSearch({
+  rows,
+  selectedRow,
+  onSelect,
+}: {
+  rows: DisplayStatRankingRow[];
+  selectedRow: DisplayStatRankingRow | null;
+  onSelect: (row: DisplayStatRankingRow) => void;
+}) {
+  const [inputValue, setInputValue] = useState(selectedRow?.name ?? "");
+  const suggestions = useMemo(() => {
+    const normalizedQuery = normalizePokemonSearchText(inputValue);
+    if (!normalizedQuery) return rows.slice(0, 8);
+    return rows
+      .filter((row) =>
+        normalizePokemonSearchText(row.searchName).includes(normalizedQuery),
+      )
+      .slice(0, 8);
+  }, [inputValue, rows]);
+  const {
+    getInputProps,
+    getItemProps,
+    getLabelProps,
+    getMenuProps,
+    highlightedIndex,
+    isOpen,
+  } = useCombobox({
+    inputValue,
+    items: suggestions,
+    itemToString: (item) => item?.name ?? "",
+    onInputValueChange: ({ inputValue: nextInputValue }) => {
+      setInputValue(nextInputValue ?? "");
+    },
+    onSelectedItemChange: ({ selectedItem }) => {
+      if (!selectedItem) return;
+      setInputValue(selectedItem.name);
+      onSelect(selectedItem);
+    },
+  });
+  const showSuggestions = isOpen && suggestions.length > 0;
+
+  return (
+    <div className={styles.statRankingSearch}>
+      <label {...getLabelProps()}>ポケモン検索</label>
+      <input
+        {...getInputProps({
+          placeholder: "ポケモン名を入力",
+        })}
+      />
+      <ul {...getMenuProps()} hidden={!showSuggestions}>
+        {showSuggestions
+          ? suggestions.map((row, index) => (
+              <li
+                className={
+                  highlightedIndex === index ? styles.highlightedSuggestion : undefined
+                }
+                key={row.id}
+                {...getItemProps({ item: row, index })}
+              >
+                <span>{row.name}</span>
+                <small>{row.isTrainingTarget ? "育成中" : row.searchName}</small>
+              </li>
+            ))
+          : null}
+      </ul>
     </div>
   );
 }
