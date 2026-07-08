@@ -39,9 +39,11 @@ export function ServiceWorkerRegister() {
     }
 
     // public/sw.js はビルド後もルート直下 /sw.js として配信される。
-    navigator.serviceWorker.register("/sw.js").catch((error) => {
-      console.error("Service worker registration failed", error);
-    });
+    navigator.serviceWorker
+      .register("/sw.js", { updateViaCache: "none" })
+      .catch((error) => {
+        console.error("Service worker registration failed", error);
+      });
   }, []);
 
   return null;

@@ -1,33 +1,56 @@
-/**
- * このファイルの役割: 静的アセットをキャッシュし、ネットワーク失敗時にキャッシュへフォールバックするPWA用Service Worker。
- */
-
-const CACHE_NAME = "pokemon-lab-v7";
+const CACHE_NAME = "pokemon-lab-v8";
 const IMAGE_CACHE_NAME = "pokemon-lab-images-v1";
 const IMAGE_CACHE_LIMIT = 300;
-const APP_SHELL = [
+
+const APP_ROUTES = [
   "/",
   "/quiz",
   "/pokemon",
   "/damage-calculator",
   "/training",
+  "/training-builds",
+  "/battle-team",
+  "/battle-team/new",
+  "/battle-simulator",
+  "/battle-simulator/battle",
+  "/sqlite-diagnostics",
+];
+
+const CORE_ASSETS = [
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/screenshots/desktop-wide.png",
   "/screenshots/mobile.png",
+  "/sqlite-runtime-worker.mjs",
+  "/sqlite-catalog.db.gz",
+  "/sqlite-wasm/index.mjs",
+  "/sqlite-wasm/sqlite3.wasm",
+  "/sqlite-wasm/sqlite3-worker1.mjs",
+  "/sqlite-wasm/sqlite3-opfs-async-proxy.js",
 ];
 
-async function cacheAppShell() {
-  const cache = await caches.open(CACHE_NAME);
-  await cache.addAll(APP_SHELL);
+async function cacheRequests(cache, paths) {
+  const results = await Promise.allSettled(
+    paths.map(async (path) => {
+      const response = await fetch(path, { cache: "reload" });
+      if (!response.ok) {
+        throw new Error(`${path} returned ${response.status}`);
+      }
+      await cache.put(path, response);
+    }),
+  );
 
-  // 各ページのHTMLが参照するビルド済みJS/CSSも保存し、初回キャッシュ後から
-  // ダメージ計算エンジンを含めて完全にオフラインで起動できるようにする。
+  const failures = results.filter((result) => result.status === "rejected");
+  if (failures.length > 0) {
+    console.warn("Some offline assets could not be cached.", failures);
+    throw new Error("Offline asset caching failed.");
+  }
+}
+
+async function cacheNextStaticAssets(cache) {
   const pageResponses = await Promise.all(
-    APP_SHELL.filter((path) => !path.includes(".")).map((path) =>
-      cache.match(path),
-    ),
+    APP_ROUTES.map((path) => cache.match(path)),
   );
   const assetPaths = new Set();
 
@@ -42,8 +65,14 @@ async function cacheAppShell() {
   }
 
   if (assetPaths.size > 0) {
-    await cache.addAll([...assetPaths]);
+    await cacheRequests(cache, [...assetPaths]);
   }
+}
+
+async function cacheAppShell() {
+  const cache = await caches.open(CACHE_NAME);
+  await cacheRequests(cache, [...APP_ROUTES, ...CORE_ASSETS]);
+  await cacheNextStaticAssets(cache);
 }
 
 self.addEventListener("install", (event) => {
@@ -58,10 +87,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter(
-              (key) =>
-                key !== CACHE_NAME && key !== IMAGE_CACHE_NAME,
-            )
+            .filter((key) => key !== CACHE_NAME && key !== IMAGE_CACHE_NAME)
             .map((key) => caches.delete(key)),
         ),
       ),
@@ -81,9 +107,7 @@ async function trimImageCache(cache) {
 }
 
 async function cacheImage(cache, request, response) {
-  if (!response.ok) return;
-
-  // 再登録して、最近使った画像がキャッシュ順の末尾になるようにする。
+  if (!response.ok && response.type !== "opaque") return;
   await cache.delete(request);
   await cache.put(request, response.clone());
   await trimImageCache(cache);
@@ -94,8 +118,7 @@ async function respondWithCachedImage(event) {
   const cached = await cache.match(event.request);
 
   if (cached) {
-    const refresh = cacheImage(cache, event.request, cached)
-      .then(() => fetch(event.request))
+    const refresh = fetch(event.request)
       .then(async (response) => {
         await cacheImage(cache, event.request, response);
         return response;
@@ -110,20 +133,56 @@ async function respondWithCachedImage(event) {
   return response;
 }
 
+async function respondWithCachedFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+
+  const response = await fetch(request);
+  if (response.ok) {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put(request, response.clone());
+  }
+  return response;
+}
+
+async function respondWithNavigation(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const cached = (await caches.match(request)) ?? (await caches.match("/"));
+    return (
+      cached ??
+      new Response("Offline", {
+        status: 503,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      })
+    );
+  }
+}
+
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
 
-  if (request.method !== "GET" || url.origin !== self.location.origin) {
+  if (request.method !== "GET") {
     return;
   }
 
-  const isReactServerComponent =
-    request.headers.get("RSC") === "1" ||
-    request.headers.has("Next-Router-Prefetch") ||
-    request.headers.get("Accept")?.includes("text/x-component");
+  if (request.destination === "image") {
+    event.respondWith(respondWithCachedImage(event));
+    return;
+  }
 
-  if (isReactServerComponent || url.pathname.startsWith("/_next/webpack-hmr")) {
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  if (url.pathname.startsWith("/_next/webpack-hmr")) {
     return;
   }
 
@@ -133,49 +192,30 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request)
-        .then(async (response) => {
-          if (response.ok) {
-            const cache = await caches.open(CACHE_NAME);
-            await cache.put(request, response.clone());
-          }
-          return response;
-        })
-        .catch(async () => {
-          const cached = (await caches.match(request)) ?? (await caches.match("/"));
-          return (
-            cached ??
-            new Response("オフラインです", {
-              status: 503,
-              headers: { "Content-Type": "text/plain; charset=utf-8" },
-            })
-          );
-        }),
-    );
+    event.respondWith(respondWithNavigation(request));
     return;
   }
 
-  const isStaticAsset =
+  const isOfflineAsset =
     url.pathname.startsWith("/_next/static/") ||
     url.pathname.startsWith("/icons/") ||
     url.pathname.startsWith("/screenshots/") ||
-    url.pathname === "/manifest.webmanifest";
+    url.pathname.startsWith("/sqlite-wasm/") ||
+    url.pathname === "/manifest.webmanifest" ||
+    url.pathname === "/sqlite-runtime-worker.mjs" ||
+    url.pathname === "/sqlite-catalog.db.gz";
 
-  if (isStaticAsset) {
-    event.respondWith(
-      caches.match(request).then(async (cached) => {
-        if (cached) {
-          return cached;
-        }
+  if (isOfflineAsset) {
+    event.respondWith(respondWithCachedFirst(request));
+    return;
+  }
 
-        const response = await fetch(request);
-        if (response.ok) {
-          const cache = await caches.open(CACHE_NAME);
-          await cache.put(request, response.clone());
-        }
-        return response;
-      }),
-    );
+  const isReactServerComponent =
+    request.headers.get("RSC") === "1" ||
+    request.headers.has("Next-Router-Prefetch") ||
+    request.headers.get("Accept")?.includes("text/x-component");
+
+  if (isReactServerComponent) {
+    event.respondWith(respondWithCachedFirst(request));
   }
 });
