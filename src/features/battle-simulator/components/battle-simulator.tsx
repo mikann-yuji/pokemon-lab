@@ -188,6 +188,7 @@ function toDamageMove(move: BattlePokemon["moves"][number]): DamageCalculatorMov
     id: move.id,
     name: move.name,
     typeName: move.typeName,
+    description: null,
     damageClass: move.damageClass,
     power: move.power,
     usageRate: null,
