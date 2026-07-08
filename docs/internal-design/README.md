@@ -16,6 +16,7 @@
 ## 関連文書
 
 - [外部設計書](../external-design/README.md)
+- [プログラム設計書](../program-design/README.md)
 
 ## 記述方針
 
