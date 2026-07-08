@@ -135,6 +135,149 @@ const TYPE_LABELS: Record<TypeName, string> = {
   Fairy: "フェアリー",
 };
 
+const TYPE_EFFECTIVENESS: Record<
+  TypeName,
+  Partial<Record<TypeName, 0 | 0.5 | 2>>
+> = {
+  Normal: { Rock: 0.5, Ghost: 0, Steel: 0.5 },
+  Fire: {
+    Fire: 0.5,
+    Water: 0.5,
+    Grass: 2,
+    Ice: 2,
+    Bug: 2,
+    Rock: 0.5,
+    Dragon: 0.5,
+    Steel: 2,
+  },
+  Water: {
+    Fire: 2,
+    Water: 0.5,
+    Grass: 0.5,
+    Ground: 2,
+    Rock: 2,
+    Dragon: 0.5,
+  },
+  Electric: {
+    Water: 2,
+    Electric: 0.5,
+    Grass: 0.5,
+    Ground: 0,
+    Flying: 2,
+    Dragon: 0.5,
+  },
+  Grass: {
+    Fire: 0.5,
+    Water: 2,
+    Grass: 0.5,
+    Poison: 0.5,
+    Ground: 2,
+    Flying: 0.5,
+    Bug: 0.5,
+    Rock: 2,
+    Dragon: 0.5,
+    Steel: 0.5,
+  },
+  Ice: {
+    Fire: 0.5,
+    Water: 0.5,
+    Grass: 2,
+    Ice: 0.5,
+    Ground: 2,
+    Flying: 2,
+    Dragon: 2,
+    Steel: 0.5,
+  },
+  Fighting: {
+    Normal: 2,
+    Ice: 2,
+    Poison: 0.5,
+    Flying: 0.5,
+    Psychic: 0.5,
+    Bug: 0.5,
+    Rock: 2,
+    Ghost: 0,
+    Dark: 2,
+    Steel: 2,
+    Fairy: 0.5,
+  },
+  Poison: {
+    Grass: 2,
+    Poison: 0.5,
+    Ground: 0.5,
+    Rock: 0.5,
+    Ghost: 0.5,
+    Steel: 0,
+    Fairy: 2,
+  },
+  Ground: {
+    Fire: 2,
+    Electric: 2,
+    Grass: 0.5,
+    Poison: 2,
+    Flying: 0,
+    Bug: 0.5,
+    Rock: 2,
+    Steel: 2,
+  },
+  Flying: {
+    Electric: 0.5,
+    Grass: 2,
+    Fighting: 2,
+    Bug: 2,
+    Rock: 0.5,
+    Steel: 0.5,
+  },
+  Psychic: {
+    Fighting: 2,
+    Poison: 2,
+    Psychic: 0.5,
+    Dark: 0,
+    Steel: 0.5,
+  },
+  Bug: {
+    Fire: 0.5,
+    Grass: 2,
+    Fighting: 0.5,
+    Poison: 0.5,
+    Flying: 0.5,
+    Psychic: 2,
+    Ghost: 0.5,
+    Dark: 2,
+    Steel: 0.5,
+    Fairy: 0.5,
+  },
+  Rock: {
+    Fire: 2,
+    Ice: 2,
+    Fighting: 0.5,
+    Ground: 0.5,
+    Flying: 2,
+    Bug: 2,
+    Steel: 0.5,
+  },
+  Ghost: { Normal: 0, Psychic: 2, Ghost: 2, Dark: 0.5 },
+  Dragon: { Dragon: 2, Steel: 0.5, Fairy: 0 },
+  Dark: { Fighting: 0.5, Psychic: 2, Ghost: 2, Dark: 0.5, Fairy: 0.5 },
+  Steel: {
+    Fire: 0.5,
+    Water: 0.5,
+    Electric: 0.5,
+    Ice: 2,
+    Rock: 2,
+    Steel: 0.5,
+    Fairy: 2,
+  },
+  Fairy: {
+    Fire: 0.5,
+    Fighting: 2,
+    Poison: 0.5,
+    Dragon: 2,
+    Dark: 2,
+    Steel: 0.5,
+  },
+};
+
 function createDefaultAdjustment(): StatAdjustment {
   return { point: 0, rank: 0, nature: false };
 }
@@ -876,6 +1019,7 @@ export function DamageCalculator({
         <MoveSelect
           label="使用する技"
           moves={attacker?.moves ?? []}
+          defenderTypes={defender?.types ?? []}
           selectedMoveId={moveId}
           disabled={!attacker}
           onChange={setMoveId}
@@ -1370,12 +1514,14 @@ function MoveDescription({ description }: { description: string | null }) {
 function MoveSelect({
   label,
   moves,
+  defenderTypes,
   selectedMoveId,
   disabled,
   onChange,
 }: {
   label: string;
   moves: DamageCalculatorMove[];
+  defenderTypes: DamageCalculatorPokemon["types"];
   selectedMoveId: string;
   disabled: boolean;
   onChange: (moveId: string) => void;
@@ -1412,12 +1558,7 @@ function MoveSelect({
           onClick={() => setOpen((current) => !current)}
         >
           {selectedMove ? (
-            <span className={styles.moveOptionContent}>
-              <TypeBadge typeName={selectedMove.typeName} />
-              <strong>{selectedMove.name}</strong>
-              <small>威力 {selectedMove.power}{formatMoveUsageRate(selectedMove)}</small>
-              <MoveDescription description={selectedMove.description} />
-            </span>
+            <MoveOptionContent move={selectedMove} defenderTypes={defenderTypes} />
           ) : (
             <span className={styles.movePlaceholder}>{buttonLabel}</span>
           )}
@@ -1442,18 +1583,82 @@ function MoveSelect({
                 onClick={() => selectMove(move.id)}
                 key={move.id}
               >
-                <span className={styles.moveOptionContent}>
-                  <TypeBadge typeName={move.typeName} />
-                  <strong>{move.name}</strong>
-                  <small>威力 {move.power}{formatMoveUsageRate(move)}</small>
-                  <MoveDescription description={move.description} />
-                </span>
+                <MoveOptionContent move={move} defenderTypes={defenderTypes} />
               </button>
             ))}
           </div>
         ) : null}
       </div>
     </div>
+  );
+}
+
+function getTypeEffectiveness(
+  moveType: TypeName,
+  defenderTypes: DamageCalculatorPokemon["types"],
+) {
+  return defenderTypes.reduce(
+    (multiplier, defenderType) =>
+      multiplier * (TYPE_EFFECTIVENESS[moveType][defenderType] ?? 1),
+    1,
+  );
+}
+
+function getEffectivenessLabel(effectiveness: number) {
+  if (effectiveness >= 4) return "ちょうばつぐん";
+  if (effectiveness === 2) return "ばつぐん";
+  if (effectiveness === 0.5) return "いまひとつ";
+  if (effectiveness > 0 && effectiveness <= 0.25) return "かなりいまひとつ";
+  if (effectiveness === 0) return "効果なし";
+  return "";
+}
+
+function MoveEffectivenessBadge({
+  effectiveness,
+}: {
+  effectiveness: number;
+}) {
+  const label = getEffectivenessLabel(effectiveness);
+  if (!label) return null;
+
+  return (
+    <span
+      className={`${styles.effectivenessBadge} ${
+        effectiveness >= 2
+          ? styles.effectivenessStrong
+          : effectiveness === 0
+            ? styles.effectivenessNone
+            : styles.effectivenessWeak
+      }`}
+    >
+      {label}
+    </span>
+  );
+}
+
+function MoveOptionContent({
+  move,
+  defenderTypes,
+}: {
+  move: DamageCalculatorMove;
+  defenderTypes: DamageCalculatorPokemon["types"];
+}) {
+  const effectiveness =
+    defenderTypes.length === 0
+      ? 1
+      : getTypeEffectiveness(move.typeName, defenderTypes);
+
+  return (
+    <span className={styles.moveOptionContent}>
+      <TypeBadge typeName={move.typeName} />
+      <strong>{move.name}</strong>
+      <MoveEffectivenessBadge effectiveness={effectiveness} />
+      <small>
+        威力 {move.power}
+        {formatMoveUsageRate(move)}
+      </small>
+      <MoveDescription description={move.description} />
+    </span>
   );
 }
 
@@ -1776,7 +1981,10 @@ function DamageOutcome({
     <article
       className={`${styles.outcome} ${critical ? styles.criticalOutcome : ""}`}
     >
-      <span className={styles.outcomeTitle}>{title}</span>
+      <div className={styles.outcomeTop}>
+        <span className={styles.outcomeTitle}>{title}</span>
+        <span className={styles.koLabel}>{calculation.koLabel}</span>
+      </div>
       <strong className={styles.damagePercent}>
         {minimumRemainingPercent.toFixed(1)}~
         {maximumRemainingPercent.toFixed(1)}%
@@ -1795,7 +2003,6 @@ function DamageOutcome({
           style={{ width: `${minimumRemainingPercent}%` }}
         />
       </div>
-      <span className={styles.koLabel}>{calculation.koLabel}</span>
     </article>
   );
 }

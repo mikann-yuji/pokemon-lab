@@ -1,7 +1,7 @@
 .page {
   min-height: 100vh;
   padding: clamp(1rem, 4vw, 2.5rem);
-  padding-bottom: calc(12.5rem + env(safe-area-inset-bottom));
+  padding-bottom: calc(8.5rem + env(safe-area-inset-bottom));
   background:
     radial-gradient(circle at 10% 10%, rgb(255 213 79 / 25%), transparent 22rem),
     linear-gradient(145deg, #eef7ff, #e5f0fa 55%, #f7fbff);
@@ -445,9 +445,9 @@ a.pokemonSummary:focus-visible {
 
 .moveSelectField {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.38rem;
   color: #344760;
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 850;
 }
 
@@ -457,8 +457,8 @@ a.pokemonSummary:focus-visible {
 
 .moveSelectButton {
   width: 100%;
-  min-height: 46px;
-  padding: 0.55rem 0.75rem;
+  min-height: 42px;
+  padding: 0.48rem 0.62rem;
   border: 2px solid #b9cae0;
   border-radius: 10px;
   background: white;
@@ -504,8 +504,8 @@ a.pokemonSummary:focus-visible {
 }
 
 .moveOptions button {
-  min-height: 44px;
-  padding: 0.5rem;
+  min-height: 40px;
+  padding: 0.44rem;
   border: 0;
   border-radius: 9px;
   background: transparent;
@@ -524,8 +524,8 @@ a.pokemonSummary:focus-visible {
 
 .moveOptionContent {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.15rem 0.45rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.12rem 0.38rem;
   align-items: center;
   min-width: 0;
 }
@@ -539,23 +539,51 @@ a.pokemonSummary:focus-visible {
 }
 
 .moveOptionContent small {
-  grid-column: 2;
+  grid-column: 2 / -1;
   margin: 0;
   color: #536376;
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   font-weight: 850;
 }
 
 .moveDescription {
   display: -webkit-box;
-  grid-column: 2;
+  grid-column: 2 / -1;
   overflow: hidden;
   color: #6b778c;
-  font-size: 0.68rem;
+  font-size: 0.63rem;
   font-weight: 700;
   line-height: 1.35;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.effectivenessBadge {
+  justify-self: end;
+  max-width: 6.4rem;
+  padding: 0.12rem 0.38rem;
+  overflow: hidden;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 950;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.effectivenessStrong {
+  background: #ffe7eb;
+  color: #b51f2d;
+}
+
+.effectivenessWeak {
+  background: #e8f1ff;
+  color: #2857a4;
+}
+
+.effectivenessNone {
+  background: #eceff4;
+  color: #536376;
 }
 
 .abilityOptionContent {
@@ -791,11 +819,11 @@ a.pokemonSummary:focus-visible {
   position: fixed;
   z-index: 230;
   right: max(0.75rem, env(safe-area-inset-right));
-  bottom: calc(4.8rem + env(safe-area-inset-bottom));
+  bottom: calc(3.7rem + env(safe-area-inset-bottom));
   left: max(0.75rem, env(safe-area-inset-left));
   width: min(64rem, calc(100% - 1.5rem));
   margin: 0 auto;
-  padding: 0.7rem;
+  padding: 0.55rem;
   border: 1px solid rgb(255 255 255 / 20%);
   border-radius: 14px;
   background: rgb(0 0 0 / 78%);
@@ -810,18 +838,20 @@ a.pokemonSummary:focus-visible {
   z-index: 240;
   right: max(0.75rem, env(safe-area-inset-right));
   bottom: max(0.75rem, env(safe-area-inset-bottom));
-  left: max(0.75rem, env(safe-area-inset-left));
-  width: min(64rem, calc(100% - 1.5rem));
-  min-height: 52px;
+  left: auto;
+  width: auto;
+  min-width: 10.5rem;
+  min-height: 38px;
   margin: 0 auto;
   border: 2px solid #e63946;
-  border-radius: 12px;
+  border-radius: 999px;
   background: #e63946;
   color: white;
   box-shadow: 0 14px 36px rgb(230 57 70 / 28%);
   cursor: pointer;
   font: inherit;
-  font-size: 0.95rem;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.78rem;
   font-weight: 950;
 }
 
@@ -841,16 +871,16 @@ a.pokemonSummary:focus-visible {
 
 .resultHeader {
   display: flex;
-  gap: 0.55rem;
+  gap: 0.45rem;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.38rem;
 }
 
 .resultHeader strong {
   min-width: 0;
   overflow: hidden;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   font-weight: 950;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -859,44 +889,54 @@ a.pokemonSummary:focus-visible {
 .resultHeader span {
   flex: 0 0 auto;
   color: rgb(255 255 255 / 72%);
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   font-weight: 900;
 }
 
 .outcomeGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.55rem;
+  gap: 0.38rem;
 }
 
 .outcome {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.35rem 0.55rem;
+  gap: 0.24rem;
   align-items: center;
   min-width: 0;
-  padding: 0.55rem;
+  padding: 0.38rem;
   border: 1px solid rgb(255 255 255 / 16%);
-  border-radius: 10px;
+  border-radius: 9px;
   background: rgb(255 255 255 / 10%);
 }
 
+.outcomeTop {
+  display: flex;
+  gap: 0.28rem;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+
 .koLabel {
-  grid-column: 1 / -1;
-  width: fit-content;
+  flex: 0 1 auto;
+  min-width: 0;
   margin: 0;
-  padding: 0.22rem 0.55rem;
+  padding: 0.12rem 0.34rem;
+  overflow: hidden;
   border-radius: 999px;
   background: rgb(255 255 255 / 18%);
   color: white;
-  font-size: 0.78rem;
+  font-size: 0.62rem;
   font-weight: 950;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .damageBar {
   position: relative;
-  grid-column: 1 / -1;
-  height: 0.7rem;
+  height: 0.48rem;
   overflow: hidden;
   border: 1px solid rgb(255 255 255 / 24%);
   border-radius: 999px;
@@ -921,17 +961,18 @@ a.pokemonSummary:focus-visible {
 }
 
 .outcomeTitle {
+  flex: 0 0 auto;
   color: rgb(255 255 255 / 76%);
-  font-size: 0.78rem;
+  font-size: 0.66rem;
   font-weight: 900;
 }
 
 .damagePercent {
   min-width: 0;
   color: #91e687;
-  font-size: clamp(1rem, 4vw, 1.35rem);
+  font-size: clamp(0.82rem, 3.2vw, 1.02rem);
   font-weight: 950;
-  text-align: right;
+  text-align: left;
   white-space: nowrap;
 }
 
@@ -1215,16 +1256,99 @@ a.pokemonSummary:focus-visible {
 }
 
 @media (max-width: 44rem) {
+  .page {
+    padding: 0.65rem;
+    padding-bottom: calc(7.75rem + env(safe-area-inset-bottom));
+  }
+
+  .hero {
+    margin: 0.7rem auto 1rem;
+  }
+
+  .hero p {
+    font-size: 0.62rem;
+  }
+
+  .hero h1 {
+    font-size: 1.75rem;
+  }
+
+  .hero span {
+    margin-top: 0.35rem;
+    font-size: 0.72rem;
+  }
+
   .calculator {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 0.7rem;
+    border-radius: 16px;
+  }
+
+  .side {
+    padding: 0.7rem;
+    border-radius: 14px;
+  }
+
+  .side h2 {
+    margin-bottom: 0.65rem;
+    font-size: 0.95rem;
+  }
+
+  .teamPicker button,
+  .versus button,
+  .combobox input,
+  .moveField select,
+  .moveField input,
+  .moveSelectButton,
+  .fieldConditions select {
+    min-height: 38px;
+    font-size: 0.74rem;
+  }
+
+  .combobox label,
+  .moveField,
+  .moveSelectField,
+  .fieldConditions label,
+  .statControls label {
+    font-size: 0.72rem;
+  }
+
+  .pokemonSummary,
+  .placeholder {
+    min-height: 6.6rem;
+    margin: 0.55rem 0;
+  }
+
+  .pokemonArtwork {
+    flex-basis: 5.2rem;
+  }
+
+  .baseStats {
+    grid-template-columns: repeat(3, minmax(2rem, 1fr));
+  }
+
+  .baseStats div {
+    padding: 0.14rem 0.25rem;
+  }
+
+  .baseStats dt {
+    font-size: 0.56rem;
+  }
+
+  .baseStats dd {
+    font-size: 0.68rem;
   }
 
   .versus {
     justify-self: center;
+    font-size: 0.92rem;
   }
 
   .fieldConditions {
     grid-template-columns: 1fr;
+    gap: 0.55rem;
+    padding: 0.65rem;
   }
 
   .fieldConditions,
@@ -1234,8 +1358,67 @@ a.pokemonSummary:focus-visible {
     grid-column: 1;
   }
 
+  .result {
+    right: max(0.45rem, env(safe-area-inset-right));
+    bottom: calc(3.25rem + env(safe-area-inset-bottom));
+    left: max(0.45rem, env(safe-area-inset-left));
+    width: min(100% - 0.9rem, 64rem);
+    padding: 0.45rem;
+  }
+
+  .resultHeader {
+    margin-bottom: 0.3rem;
+  }
+
+  .resultHeader strong {
+    font-size: 0.7rem;
+  }
+
+  .resultHeader span {
+    max-width: 42%;
+    overflow: hidden;
+    font-size: 0.62rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .outcomeGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.28rem;
+  }
+
+  .outcome {
+    padding: 0.32rem;
+  }
+
+  .outcomeTop {
+    gap: 0.18rem;
+  }
+
+  .outcomeTitle {
+    font-size: 0.6rem;
+  }
+
+  .koLabel {
+    padding: 0.1rem 0.25rem;
+    font-size: 0.55rem;
+  }
+
+  .damagePercent {
+    font-size: 0.78rem;
+  }
+
+  .damageBar {
+    height: 0.42rem;
+  }
+
+  .speedCompareButton {
+    right: max(0.45rem, env(safe-area-inset-right));
+    bottom: max(0.45rem, env(safe-area-inset-bottom));
+    min-width: 9.2rem;
+    min-height: 34px;
+    padding: 0.25rem 0.62rem;
+    font-size: 0.7rem;
   }
 
   .speedTableHead,
