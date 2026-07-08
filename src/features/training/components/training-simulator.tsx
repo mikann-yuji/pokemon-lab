@@ -382,24 +382,14 @@ export function TrainingSimulator({
             <small>マトリックス表から選ぶ</small>
           </button>
         </div>
-        <label>
-          特性
-          <select
-            value={abilityId}
-            onChange={(event) => {
-              setAbilityId(event.target.value);
-              setSaved(false);
-            }}
-          >
-            <option value="">特性なし</option>
-            {pokemon.abilities.map((ability) => (
-              <option value={ability.id} key={ability.id}>
-                {ability.name}
-                {ability.isHidden ? " (隠れ特性)" : ""}
-              </option>
-            ))}
-          </select>
-        </label>
+        <TrainingAbilitySelect
+          abilities={pokemon.abilities}
+          selectedAbilityId={abilityId}
+          onChange={(nextAbilityId) => {
+            setAbilityId(nextAbilityId);
+            setSaved(false);
+          }}
+        />
         <label>
           持ち物
           <select
@@ -556,6 +546,94 @@ function TrainingTypeBadge({ typeName }: { typeName: TypeName }) {
   return (
     <span className={styles.typeBadge} style={getTypeBadgeStyle(typeName)}>
       {TYPE_LABELS[typeName]}
+    </span>
+  );
+}
+
+function TrainingAbilitySelect({
+  abilities,
+  selectedAbilityId,
+  onChange,
+}: {
+  abilities: PokemonDetail["abilities"];
+  selectedAbilityId: string;
+  onChange: (abilityId: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selectedAbility =
+    abilities.find((ability) => ability.id === selectedAbilityId) ?? null;
+
+  function selectAbility(abilityId: string) {
+    onChange(abilityId);
+    setOpen(false);
+  }
+
+  return (
+    <div className={styles.abilitySelectField}>
+      <span>特性</span>
+      <div
+        className={styles.moveSelect}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            setOpen(false);
+          }
+        }}
+      >
+        <button
+          type="button"
+          className={styles.moveSelectButton}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          onClick={() => setOpen((current) => !current)}
+        >
+          {selectedAbility ? (
+            <TrainingAbilityOptionContent ability={selectedAbility} />
+          ) : (
+            <span className={styles.movePlaceholder}>特性なし</span>
+          )}
+        </button>
+        {open ? (
+          <div className={styles.moveOptions} role="listbox" aria-label="特性">
+            <button
+              type="button"
+              role="option"
+              aria-selected={selectedAbilityId === ""}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => selectAbility("")}
+            >
+              <span className={styles.movePlaceholder}>特性なし</span>
+            </button>
+            {abilities.map((ability) => (
+              <button
+                type="button"
+                role="option"
+                aria-selected={ability.id === selectedAbilityId}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => selectAbility(ability.id)}
+                key={ability.id}
+              >
+                <TrainingAbilityOptionContent ability={ability} />
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function TrainingAbilityOptionContent({
+  ability,
+}: {
+  ability: PokemonDetail["abilities"][number];
+}) {
+  return (
+    <span className={styles.abilityOptionContent}>
+      <strong>
+        {ability.name}
+        {ability.isHidden ? " (隠れ特性)" : ""}
+      </strong>
+      {ability.effect ? <small>{ability.effect}</small> : null}
     </span>
   );
 }

@@ -96,6 +96,7 @@ export type DamageCalculatorAbilityDamageModifier = {
 export type DamageCalculatorAbility = {
   id: string;
   name: string;
+  effect: string | null;
   damageModifiers: DamageCalculatorAbilityDamageModifier[];
 };
 

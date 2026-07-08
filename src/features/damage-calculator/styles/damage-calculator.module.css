@@ -558,6 +558,31 @@ a.pokemonSummary:focus-visible {
   -webkit-line-clamp: 2;
 }
 
+.abilityOptionContent {
+  display: grid;
+  gap: 0.16rem;
+  min-width: 0;
+}
+
+.abilityOptionContent strong {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.abilityOptionContent small {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #6b778c;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .movePlaceholder {
   color: #8290a3;
   font-weight: 850;

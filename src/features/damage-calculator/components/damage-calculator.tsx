@@ -1492,27 +1492,68 @@ function AbilityField({
   onAbilityChange: (abilityId: string) => void;
   onConditionChange: (enabled: boolean) => void;
 }) {
+  const [open, setOpen] = useState(false);
   const selectedAbility = pokemon?.selectedAbility ?? null;
   const showCondition = hasManualAbilityCondition(selectedAbility);
 
+  function selectAbility(abilityId: string) {
+    onAbilityChange(abilityId);
+    setOpen(false);
+  }
+
   return (
     <div className={styles.abilityField}>
-      <label className={styles.moveField}>
-        特性
-        <select
-          value={selectedAbility?.id ?? ""}
-          disabled={!pokemon}
-          onChange={(event) => onAbilityChange(event.target.value)}
+      <div className={styles.moveSelectField}>
+        <span>特性</span>
+        <div
+          className={styles.moveSelect}
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) {
+              setOpen(false);
+            }
+          }}
         >
-          <option value="">特性なし</option>
-          {pokemon?.abilities.map((ability) => (
-            <option value={ability.id} key={ability.id}>
-              {ability.name}
-              {formatAbilityModifier(ability)}
-            </option>
-          ))}
-        </select>
-      </label>
+          <button
+            type="button"
+            className={styles.moveSelectButton}
+            disabled={!pokemon}
+            aria-haspopup="listbox"
+            aria-expanded={open}
+            onClick={() => setOpen((current) => !current)}
+          >
+            {selectedAbility ? (
+              <AbilityOptionContent ability={selectedAbility} />
+            ) : (
+              <span className={styles.movePlaceholder}>特性なし</span>
+            )}
+          </button>
+          {open ? (
+            <div className={styles.moveOptions} role="listbox" aria-label="特性">
+              <button
+                type="button"
+                role="option"
+                aria-selected={!selectedAbility}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => selectAbility("")}
+              >
+                <span className={styles.movePlaceholder}>特性なし</span>
+              </button>
+              {pokemon?.abilities.map((ability) => (
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={selectedAbility?.id === ability.id}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => selectAbility(ability.id)}
+                  key={ability.id}
+                >
+                  <AbilityOptionContent ability={ability} />
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </div>
       {showCondition ? (
         <label className={styles.conditionToggle}>
           <input
@@ -1524,6 +1565,22 @@ function AbilityField({
         </label>
       ) : null}
     </div>
+  );
+}
+
+function AbilityOptionContent({
+  ability,
+}: {
+  ability: DamageCalculatorAbility;
+}) {
+  return (
+    <span className={styles.abilityOptionContent}>
+      <strong>
+        {ability.name}
+        {formatAbilityModifier(ability)}
+      </strong>
+      {ability.effect ? <small>{ability.effect}</small> : null}
+    </span>
   );
 }
 

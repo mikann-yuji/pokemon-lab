@@ -46,6 +46,7 @@ type PokemonAbilityRow = SqliteRow & {
   formId: number;
   id: string;
   name: string;
+  effect: string | null;
   slot: number;
 };
 
@@ -207,6 +208,7 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
         forms.id AS formId,
         abilities.id,
         COALESCE(abilities.name_ja, abilities.id) AS name,
+        COALESCE(abilities.effect_ja, abilities.effect_en) AS effect,
         form_abilities.slot
       FROM champions_forms
       JOIN forms ON forms.id = champions_forms.form_id
@@ -263,7 +265,7 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
   const abilitiesByFormId = new Map<number, DamageCalculatorAbility[]>();
   for (const row of abilityRows) {
     const abilities = abilitiesByFormId.get(row.formId) ?? [];
-    const ability = { id: row.id, name: row.name };
+    const ability = { id: row.id, name: row.name, effect: row.effect };
     abilities.push({
       ...ability,
       damageModifiers: modifiersByAbilityId.get(ability.id) ?? [],
