@@ -1,6 +1,6 @@
 "use client";
 
-import { TYPE_NAMES, type TypeName } from "@/domain/type-matchup";
+import type { TypeName } from "@/domain/type-matchup";
 import {
   toHiragana,
   toKatakana,
@@ -384,6 +384,7 @@ export async function getPokemonDetail(
             moves.id
         `,
         {
+          "@id": id,
           "@moveSourceFormId": moveSourceFormId,
           "@versionGroupId": latestVersionGroup.id,
         },
@@ -394,7 +395,6 @@ export async function getPokemonDetail(
   ].sort(
     (left, right) =>
       (right.usageRate ?? -1) - (left.usageRate ?? -1) ||
-      TYPE_NAMES.indexOf(left.typeName) - TYPE_NAMES.indexOf(right.typeName) ||
       (left.nameJa ?? left.id).localeCompare(right.nameJa ?? right.id, "ja"),
   );
 
