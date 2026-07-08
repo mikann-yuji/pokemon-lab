@@ -183,7 +183,7 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
         moves.type_name AS typeName,
         COALESCE(moves.effect_ja, moves.effect_en) AS description,
         moves.damage_class_name AS damageClass,
-        moves.power,
+        COALESCE(moves.power, 0) AS power,
         champions_form_move_usage.usage_rate AS usageRate
       FROM latest_versions
       JOIN form_moves
@@ -195,7 +195,10 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
         AND champions_form_move_usage.move_id = moves.id
       WHERE
         moves.damage_class_name IN ('physical', 'special')
-        AND moves.power > 0
+        AND (
+          moves.power > 0
+          OR champions_form_move_usage.move_id IS NOT NULL
+        )
       ORDER BY
         latest_versions.formId,
         champions_form_move_usage.usage_rate IS NULL,

@@ -1513,6 +1513,10 @@ function formatMoveUsageRate(move: DamageCalculatorMove) {
   return move.usageRate === null ? "" : ` / 採用率 ${move.usageRate.toFixed(1)}%`;
 }
 
+function formatMovePower(move: DamageCalculatorMove) {
+  return move.power > 0 ? String(move.power) : "変動";
+}
+
 function MoveDescription({ description }: { description: string | null }) {
   return description ? (
     <span className={styles.moveDescription}>{description}</span>
@@ -1538,7 +1542,7 @@ function MoveSelect({
   const selectedMove =
     moves.find((move) => move.id === selectedMoveId) ?? null;
   const buttonLabel = selectedMove
-    ? `${selectedMove.name} 威力 ${selectedMove.power}`
+    ? `${selectedMove.name} 威力 ${formatMovePower(selectedMove)}`
     : "技を選択";
 
   function selectMove(moveId: string) {
@@ -1662,7 +1666,7 @@ function MoveOptionContent({
       <strong>{move.name}</strong>
       <MoveEffectivenessBadge effectiveness={effectiveness} />
       <small>
-        威力 {move.power}
+        威力 {formatMovePower(move)}
         {formatMoveUsageRate(move)}
       </small>
       <MoveDescription description={move.description} />
@@ -1831,7 +1835,7 @@ function MoveSummary({ move }: { move: DamageCalculatorMove }) {
   return (
     <p className={styles.moveSummary}>
       {move.typeName} / {move.damageClass === "physical" ? "物理" : "特殊"} /
-      威力 {move.power}
+      威力 {formatMovePower(move)}
     </p>
   );
 }

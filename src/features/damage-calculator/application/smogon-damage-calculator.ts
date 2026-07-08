@@ -343,6 +343,23 @@ function getTypeEffectiveness(input: DamageCalculationInput) {
   }, 1);
 }
 
+function getWeightBasedMovePower(weightKg: number) {
+  if (weightKg >= 200) return 120;
+  if (weightKg >= 100) return 100;
+  if (weightKg >= 50) return 80;
+  if (weightKg >= 25) return 60;
+  if (weightKg >= 10) return 40;
+  return 20;
+}
+
+function getEffectiveMovePower(input: DamageCalculationInput) {
+  if (input.move.power > 0) return input.move.power;
+  if (["grass-knot", "low-kick"].includes(input.move.id)) {
+    return getWeightBasedMovePower(input.defender.weightKg);
+  }
+  return 1;
+}
+
 function itemModifierApplies(
   modifier: DamageCalculatorItemDamageModifier,
   input: DamageCalculationInput,
@@ -415,7 +432,7 @@ function abilityModifierApplies(
     case "special":
       return input.move.damageClass === "special";
     case "low_power_move":
-      return manualEnabled && input.move.power <= 60;
+      return manualEnabled && getEffectiveMovePower(input) <= 60;
     case "critical_hit":
       return input.isCritical === true;
     case "not_very_effective":
@@ -560,6 +577,7 @@ export class SmogonDamageCalculator {
     const move = this.toMove(
       input.move,
       input.isCritical ?? false,
+      getEffectiveMovePower(input),
       getHeldItemPowerMultiplier(input) * getAbilityPowerMultiplier(input),
     );
     applyAttackingStatMultiplier(
@@ -649,6 +667,7 @@ export class SmogonDamageCalculator {
   private toMove(
     move: DamageCalculatorMove,
     isCritical: boolean,
+    basePower: number,
     powerMultiplier: number,
   ): Move {
     // 技名がSmogon側に存在すれば固有効果を利用し、存在しない場合でも
@@ -661,7 +680,7 @@ export class SmogonDamageCalculator {
     const options: MoveOptions = {
       isCrit: isCritical,
       overrides: {
-        basePower: Math.max(1, Math.floor(move.power * powerMultiplier)),
+        basePower: Math.max(1, Math.floor(basePower * powerMultiplier)),
         type: move.typeName,
         category: move.damageClass === "physical" ? "Physical" : "Special",
       },
