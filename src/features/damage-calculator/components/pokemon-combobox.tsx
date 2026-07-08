@@ -103,6 +103,10 @@ export function PokemonCombobox({
           type: "search",
           placeholder: "ポケモン名を入力",
           autoComplete: "off",
+          onFocus: (event) => {
+            const input = event.currentTarget;
+            window.setTimeout(() => input.select(), 0);
+          },
         })}
       />
       <ul
