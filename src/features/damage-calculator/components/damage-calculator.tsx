@@ -53,6 +53,7 @@ type CalculationResult = {
   attackerName: string;
   defenderName: string;
   moveName: string;
+  moveEffectiveness: number;
 };
 
 const STAT_IDS = [
@@ -892,6 +893,10 @@ export function DamageCalculator({
           attackerName: attacker.nameJa,
           defenderName: defender.nameJa,
           moveName: selectedMove.name,
+          moveEffectiveness: getTypeEffectiveness(
+            selectedMove.typeName,
+            defender.types,
+          ),
         },
         error: null,
       };
@@ -1453,7 +1458,10 @@ function PokemonSummary({
             width={112}
             height={112}
           />
-        ) : null}
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src="" alt={pokemon.nameJa} width={112} height={112} />
+        )}
       </div>
       <div className={styles.pokemonSummaryBody}>
         <div>
@@ -1943,13 +1951,18 @@ function DamageStatControls({
 }
 /** 通常ダメージと急所ダメージをまとめて表示する結果パネル。 */
 function DamageResult({ result }: { result: CalculationResult }) {
+  const moveEffectivenessLabel = getEffectivenessLabel(result.moveEffectiveness);
+
   return (
     <section className={styles.result} aria-live="polite">
       <div className={styles.resultHeader}>
         <strong>
           {result.attackerName}→{result.defenderName}
         </strong>
-        <span>{result.moveName}</span>
+        <span className={styles.resultMove}>
+          {result.moveName}
+          {moveEffectivenessLabel ? <small>{moveEffectivenessLabel}</small> : null}
+        </span>
       </div>
       <div className={styles.outcomeGrid}>
         <DamageOutcome title="通常" calculation={result.normal} />
@@ -1981,14 +1994,12 @@ function DamageOutcome({
     <article
       className={`${styles.outcome} ${critical ? styles.criticalOutcome : ""}`}
     >
-      <div className={styles.outcomeTop}>
-        <span className={styles.outcomeTitle}>{title}</span>
-        <span className={styles.koLabel}>{calculation.koLabel}</span>
-      </div>
+      <span className={styles.outcomeTitle}>{title}</span>
       <strong className={styles.damagePercent}>
         {minimumRemainingPercent.toFixed(1)}~
         {maximumRemainingPercent.toFixed(1)}%
       </strong>
+      <span className={styles.koLabel}>{calculation.koLabel}</span>
       <div
         className={styles.damageBar}
         role="img"

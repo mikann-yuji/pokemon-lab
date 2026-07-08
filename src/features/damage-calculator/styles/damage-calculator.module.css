@@ -886,40 +886,47 @@ a.pokemonSummary:focus-visible {
   white-space: nowrap;
 }
 
-.resultHeader span {
+.resultMove {
+  display: inline-flex;
   flex: 0 0 auto;
+  gap: 0.32rem;
+  align-items: baseline;
+  min-width: 0;
+  max-width: 46%;
+  overflow: hidden;
   color: rgb(255 255 255 / 72%);
   font-size: 0.68rem;
   font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resultMove small {
+  flex: 0 0 auto;
+  color: #91e687;
+  font-size: 0.58rem;
+  font-weight: 950;
 }
 
 .outcomeGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.38rem;
+  gap: 0.28rem;
 }
 
 .outcome {
   display: grid;
-  gap: 0.24rem;
+  grid-template-columns: auto minmax(5.8rem, 1fr) auto;
+  gap: 0.26rem 0.38rem;
   align-items: center;
   min-width: 0;
-  padding: 0.38rem;
+  padding: 0.28rem 0.38rem;
   border: 1px solid rgb(255 255 255 / 16%);
   border-radius: 9px;
   background: rgb(255 255 255 / 10%);
 }
 
-.outcomeTop {
-  display: flex;
-  gap: 0.28rem;
-  align-items: center;
-  justify-content: space-between;
-  min-width: 0;
-}
-
 .koLabel {
-  flex: 0 1 auto;
+  justify-self: end;
   min-width: 0;
   margin: 0;
   padding: 0.12rem 0.34rem;
@@ -936,6 +943,7 @@ a.pokemonSummary:focus-visible {
 
 .damageBar {
   position: relative;
+  grid-column: 1 / -1;
   height: 0.48rem;
   overflow: hidden;
   border: 1px solid rgb(255 255 255 / 24%);
@@ -963,14 +971,14 @@ a.pokemonSummary:focus-visible {
 .outcomeTitle {
   flex: 0 0 auto;
   color: rgb(255 255 255 / 76%);
-  font-size: 0.66rem;
+  font-size: 0.68rem;
   font-weight: 900;
 }
 
 .damagePercent {
   min-width: 0;
   color: #91e687;
-  font-size: clamp(0.82rem, 3.2vw, 1.02rem);
+  font-size: clamp(0.84rem, 3vw, 1rem);
   font-weight: 950;
   text-align: left;
   white-space: nowrap;
@@ -1374,7 +1382,7 @@ a.pokemonSummary:focus-visible {
     font-size: 0.7rem;
   }
 
-  .resultHeader span {
+  .resultMove {
     max-width: 42%;
     overflow: hidden;
     font-size: 0.62rem;
@@ -1382,17 +1390,18 @@ a.pokemonSummary:focus-visible {
     white-space: nowrap;
   }
 
+  .resultMove small {
+    font-size: 0.52rem;
+  }
+
   .outcomeGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.28rem;
+    gap: 0.22rem;
   }
 
   .outcome {
-    padding: 0.32rem;
-  }
-
-  .outcomeTop {
-    gap: 0.18rem;
+    grid-template-columns: auto minmax(4.9rem, 1fr) auto;
+    gap: 0.2rem 0.3rem;
+    padding: 0.24rem 0.32rem;
   }
 
   .outcomeTitle {
