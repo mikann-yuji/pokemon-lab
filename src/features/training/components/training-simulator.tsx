@@ -143,7 +143,7 @@ function createMatchupSearchOptions(
     kind: "pokemon",
     pokemonId: pokemon.id,
     name: pokemon.nameJa,
-    subLabel: pokemon.name,
+    subLabel: `チャンピオンズ登場ポケモン / ${pokemon.name}`,
     searchName: normalizePokemonSearchText(`${pokemon.nameJa} ${pokemon.name}`),
     buildId: null,
   }));
@@ -157,7 +157,7 @@ function createMatchupSearchOptions(
         kind: "build" as const,
         pokemonId: build.pokemonId,
         name: build.name,
-        subLabel: `${pokemon.nameJa}の育成案`,
+        subLabel: `${pokemon.nameJa}の保存済み育成案`,
         searchName: normalizePokemonSearchText(
           `${build.name} ${pokemon.nameJa} ${pokemon.name}`,
         ),
@@ -165,7 +165,7 @@ function createMatchupSearchOptions(
       },
     ];
   });
-  return [...buildOptions, ...pokemonOptions];
+  return [...pokemonOptions, ...buildOptions];
 }
 
 /**
