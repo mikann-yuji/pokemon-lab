@@ -172,6 +172,7 @@ function toDamagePokemon(
     name: pokemon.name,
     nameJa: pokemon.nameJa,
     imageUrl: pokemon.imageUrl,
+    fallbackImageUrl: sourcePokemon?.fallbackImageUrl ?? null,
     weightKg: sourcePokemon?.weightKg ?? 1,
     types: pokemon.types,
     stats: pokemon.stats,

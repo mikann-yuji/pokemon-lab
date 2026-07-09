@@ -17,6 +17,7 @@ type PokemonBaseRow = SqliteRow & {
   name: string;
   nameJa: string;
   imageUrl: string | null;
+  fallbackImageUrl: string | null;
   weight: number;
 };
 
@@ -122,6 +123,7 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
         forms.name,
         COALESCE(forms.name_ja, forms.form_name_ja, forms.name) AS nameJa,
         COALESCE(forms.artwork_default_url, forms.sprite_default_url) AS imageUrl,
+        forms.sprite_default_url AS fallbackImageUrl,
         forms.weight
       FROM champions_forms
       JOIN forms ON forms.id = champions_forms.form_id
@@ -284,6 +286,10 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
     name: row.name,
     nameJa: row.nameJa,
     imageUrl: row.imageUrl,
+    fallbackImageUrl:
+      row.fallbackImageUrl && row.fallbackImageUrl !== row.imageUrl
+        ? row.fallbackImageUrl
+        : null,
     weightKg: row.weight / 10,
     types: typesByFormId.get(row.id) ?? [],
     stats: statsByFormId.get(row.id) ?? {},

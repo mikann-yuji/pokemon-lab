@@ -115,6 +115,8 @@ export type DamageCalculatorPokemon = {
   nameJa: string;
   /** 公式アートワーク。画像がないフォームではnull。 */
   imageUrl: string | null;
+  /** 公式アートワークが取れないときに使う小さいスプライト画像。 */
+  fallbackImageUrl: string | null;
   /** kg単位の重さ。一部の技の計算に利用される。 */
   weightKg: number;
   /** 1つまたは2つのタイプ。 */

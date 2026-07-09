@@ -967,11 +967,11 @@ export function DamageCalculator({
                 key={build.id}
               >
                 {pokemon.imageUrl ? (
-                  <Image
-                    src={pokemon.imageUrl}
+                  <PokemonImage
+                    pokemon={pokemon}
                     alt=""
-                    width={48}
-                    height={48}
+                    size={48}
+                    preferFallback
                   />
                 ) : (
                   <SmallPokemonName name={pokemon.nameJa} />
@@ -1081,11 +1081,11 @@ export function DamageCalculator({
                 key={build.id}
               >
                 {pokemon.imageUrl ? (
-                  <Image
-                    src={pokemon.imageUrl}
+                  <PokemonImage
+                    pokemon={pokemon}
                     alt=""
-                    width={48}
-                    height={48}
+                    size={48}
+                    preferFallback
                   />
                 ) : (
                   <SmallPokemonName name={pokemon.nameJa} />
@@ -1421,11 +1421,11 @@ function RecentPokemonList({
             key={record.id}
           >
             {pokemon.imageUrl ? (
-              <Image
-                src={pokemon.imageUrl}
+              <PokemonImage
+                pokemon={pokemon}
                 alt=""
-                width={48}
-                height={48}
+                size={48}
+                preferFallback
               />
             ) : (
               <SmallPokemonName name={pokemon.nameJa} />
@@ -1439,6 +1439,51 @@ function RecentPokemonList({
 
 function SmallPokemonName({ name }: { name: string }) {
   return <span className={styles.smallPokemonName}>{name}</span>;
+}
+
+function PokemonImage({
+  pokemon,
+  size,
+  alt,
+  preferFallback = false,
+}: {
+  pokemon: DamageCalculatorPokemon;
+  size: number;
+  alt: string;
+  preferFallback?: boolean;
+}) {
+  const primaryUrl =
+    preferFallback && pokemon.fallbackImageUrl
+      ? pokemon.fallbackImageUrl
+      : pokemon.imageUrl;
+  const fallbackUrl =
+    primaryUrl === pokemon.fallbackImageUrl
+      ? pokemon.imageUrl
+      : pokemon.fallbackImageUrl;
+  const [failedPrimaryUrl, setFailedPrimaryUrl] = useState<string | null>(null);
+  const src =
+    primaryUrl && failedPrimaryUrl === primaryUrl && fallbackUrl
+      ? fallbackUrl
+      : primaryUrl;
+
+  if (!src) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src="" alt={alt} width={size} height={size} />;
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={size}
+      height={size}
+      onError={() => {
+        if (primaryUrl && fallbackUrl && src === primaryUrl) {
+          setFailedPrimaryUrl(primaryUrl);
+        }
+      }}
+    />
+  );
 }
 
 /** 選択中ポケモンの画像と名前を表示し、未選択時は同じ高さのプレースホルダーを出す。 */
@@ -1456,11 +1501,10 @@ function PokemonSummary({
     <>
       <div className={styles.pokemonArtwork}>
         {pokemon.imageUrl ? (
-          <Image
-            src={pokemon.imageUrl}
+          <PokemonImage
+            pokemon={pokemon}
             alt={pokemon.nameJa}
-            width={112}
-            height={112}
+            size={112}
           />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
