@@ -87,7 +87,7 @@
 .saveDialogActions { display:flex; justify-content:flex-end; gap:.65rem; }
 .saveDialogActions button { min-height:42px; padding:.55rem 1rem; border:1px solid #9aabc0; border-radius:999px; background:white; color:#172b4d; cursor:pointer; font-weight:900; }
 .saveDialogActions button[type="submit"] { border-color:#2857a4; background:#2857a4; color:white; }
-.statRankingOverlay { position:fixed; z-index:70; inset:0; display:grid; place-items:center; padding:clamp(.35rem,2vw,1.25rem); }
+.statRankingOverlay { position:fixed; z-index:1000; inset:0; display:grid; place-items:center; padding:clamp(.35rem,2vw,1.25rem); }
 .statRankingBackdrop { position:absolute; inset:0; border:0; background:rgb(10 20 35 / 58%); cursor:pointer; }
 .statRankingPanel { position:relative; display:grid; grid-template-rows:auto auto minmax(0,1fr); gap:.6rem; width:min(72rem,100%); height:min(94vh,52rem); max-height:94vh; overflow:hidden; padding:clamp(.6rem,2vw,1rem); border:1px solid rgb(255 255 255 / 45%); border-radius:14px; background:#f8fbff; box-shadow:0 24px 80px rgb(0 0 0 / 35%); }
 .statRankingHeader { display:flex; align-items:center; justify-content:space-between; gap:1rem; }
