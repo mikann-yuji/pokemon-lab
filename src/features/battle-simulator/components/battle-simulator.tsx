@@ -130,6 +130,7 @@ function toBattlePokemon(
       typeName: move.typeName,
       damageClass: move.damageClass,
       power: move.power,
+      accuracy: move.accuracy,
     }));
   const item = heldItems.find((heldItem) => heldItem.id === build.itemId);
   const ability = pokemon.abilities.find(
@@ -191,6 +192,7 @@ function toDamageMove(move: BattlePokemon["moves"][number]): DamageCalculatorMov
     description: null,
     damageClass: move.damageClass,
     power: move.power,
+    accuracy: move.accuracy,
     usageRate: null,
   };
 }

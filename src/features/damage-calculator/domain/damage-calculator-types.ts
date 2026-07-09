@@ -47,6 +47,8 @@ export type DamageCalculatorMove = {
   damageClass: "physical" | "special";
   /** 技の基本威力。 */
   power: number;
+  /** 命中率。必中や特殊判定の技はnull。 */
+  accuracy: number | null;
   usageRate: number | null;
 };
 

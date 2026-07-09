@@ -8,6 +8,7 @@ export type BattleMoveSlot = {
   typeName: TypeName;
   damageClass: "physical" | "special";
   power: number;
+  accuracy: number | null;
 };
 
 export type BattleCommand =

@@ -974,7 +974,7 @@ export function DamageCalculator({
                     height={48}
                   />
                 ) : (
-                  <span>{pokemon.nameJa.slice(0, 1)}</span>
+                  <SmallPokemonName name={pokemon.nameJa} />
                 )}
               </button>
             ))}
@@ -1088,7 +1088,7 @@ export function DamageCalculator({
                     height={48}
                   />
                 ) : (
-                  <span>{pokemon.nameJa.slice(0, 1)}</span>
+                  <SmallPokemonName name={pokemon.nameJa} />
                 )}
               </button>
             ))}
@@ -1428,13 +1428,17 @@ function RecentPokemonList({
                 height={48}
               />
             ) : (
-              <span>{pokemon.nameJa.slice(0, 1)}</span>
+              <SmallPokemonName name={pokemon.nameJa} />
             )}
           </button>
         ))}
       </div>
     </div>
   );
+}
+
+function SmallPokemonName({ name }: { name: string }) {
+  return <span className={styles.smallPokemonName}>{name}</span>;
 }
 
 /** 選択中ポケモンの画像と名前を表示し、未選択時は同じ高さのプレースホルダーを出す。 */
@@ -1515,6 +1519,10 @@ function formatMoveUsageRate(move: DamageCalculatorMove) {
 
 function formatMovePower(move: DamageCalculatorMove) {
   return move.power > 0 ? String(move.power) : "変動";
+}
+
+function formatMoveAccuracy(move: DamageCalculatorMove) {
+  return move.accuracy === null ? "必中" : `${move.accuracy}`;
 }
 
 function MoveDescription({ description }: { description: string | null }) {
@@ -1667,6 +1675,7 @@ function MoveOptionContent({
       <MoveEffectivenessBadge effectiveness={effectiveness} />
       <small>
         威力 {formatMovePower(move)}
+        {" / "}命中 {formatMoveAccuracy(move)}
         {formatMoveUsageRate(move)}
       </small>
       <MoveDescription description={move.description} />
@@ -1835,7 +1844,7 @@ function MoveSummary({ move }: { move: DamageCalculatorMove }) {
   return (
     <p className={styles.moveSummary}>
       {move.typeName} / {move.damageClass === "physical" ? "物理" : "特殊"} /
-      威力 {formatMovePower(move)}
+      威力 {formatMovePower(move)} / 命中 {formatMoveAccuracy(move)}
     </p>
   );
 }

@@ -149,6 +149,20 @@
   object-fit: contain;
 }
 
+.smallPokemonName {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  color: #2857a4;
+  font-size: 0.56rem;
+  font-weight: 950;
+  line-height: 1.15;
+  text-align: center;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
 .versus {
   display: grid;
   gap: 0.6rem;

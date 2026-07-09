@@ -39,6 +39,7 @@ type PokemonMoveRow = SqliteRow & {
   description: string | null;
   damageClass: "physical" | "special";
   power: number;
+  accuracy: number | null;
   usageRate: number | null;
 };
 
@@ -184,6 +185,7 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
         COALESCE(moves.effect_ja, moves.effect_en) AS description,
         moves.damage_class_name AS damageClass,
         COALESCE(moves.power, 0) AS power,
+        moves.accuracy,
         champions_form_move_usage.usage_rate AS usageRate
       FROM latest_versions
       JOIN form_moves
