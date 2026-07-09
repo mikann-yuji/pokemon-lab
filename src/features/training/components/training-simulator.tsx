@@ -214,6 +214,7 @@ export function TrainingSimulator({
   const [matchupError, setMatchupError] = useState("");
   const [matchupSavingKind, setMatchupSavingKind] =
     useState<TrainingMatchupKind | null>(null);
+  const pendingMatchupNoteIdRef = useRef(-1);
   const [saveError, setSaveError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [toast, setToast] = useState<{
@@ -443,7 +444,25 @@ export function TrainingSimulator({
         contentKey,
         updatedAt: Date.now(),
       });
-      setActiveBuildId(savedBuild.id ?? null);
+      const savedBuildId = savedBuild.id ?? null;
+      if (savedBuildId) {
+        const pendingMatchupNotes = matchupNotes.filter(
+          (matchupNote) => (matchupNote.id ?? 0) < 0,
+        );
+        for (const pendingMatchupNote of pendingMatchupNotes) {
+          await saveTrainingMatchupNote({
+            sourceBuildId: savedBuildId,
+            matchupKind: pendingMatchupNote.matchupKind,
+            targetKind: pendingMatchupNote.targetKind,
+            targetPokemonId: pendingMatchupNote.targetPokemonId,
+            targetBuildId: pendingMatchupNote.targetBuildId,
+            targetName: pendingMatchupNote.targetName,
+            note: pendingMatchupNote.note,
+          });
+        }
+        setMatchupNotes(await getTrainingMatchupNotes(savedBuildId));
+      }
+      setActiveBuildId(savedBuildId);
       setTrainingBuilds(await getAllTrainingBuilds());
       setSaved(true);
       setSavedBuildName(normalizedName);
@@ -471,18 +490,39 @@ export function TrainingSimulator({
     target: MatchupSearchOption | null;
     note: string;
   }) {
-    if (!activeBuildId) {
-      setMatchupError("先にこの育成案を保存してください。");
-      return false;
-    }
     if (!target) {
       setMatchupError("対象ポケモンを選択してください。");
+      return false;
+    }
+    const normalizedNote = note.trim();
+    if (!normalizedNote) {
+      setMatchupError("メモを入力してください。");
       return false;
     }
 
     setMatchupError("");
     setMatchupSavingKind(matchupKind);
     try {
+      if (!activeBuildId) {
+        const pendingId = pendingMatchupNoteIdRef.current;
+        pendingMatchupNoteIdRef.current -= 1;
+        setMatchupNotes((current) => [
+          {
+            id: pendingId,
+            sourceBuildId: 0,
+            matchupKind,
+            targetKind: target.kind,
+            targetPokemonId: target.pokemonId,
+            targetBuildId: target.buildId,
+            targetName: target.name,
+            note: normalizedNote,
+            updatedAt: Date.now(),
+          },
+          ...current,
+        ]);
+        setToast({ type: "success", message: "育成案の保存時に一緒に保存します" });
+        return true;
+      }
       await saveTrainingMatchupNote({
         sourceBuildId: activeBuildId,
         matchupKind,
@@ -490,7 +530,7 @@ export function TrainingSimulator({
         targetPokemonId: target.pokemonId,
         targetBuildId: target.buildId,
         targetName: target.name,
-        note,
+        note: normalizedNote,
       });
       setMatchupNotes(await getTrainingMatchupNotes(activeBuildId));
       setToast({ type: "success", message: "相性メモを保存しました" });
@@ -510,6 +550,12 @@ export function TrainingSimulator({
   }
 
   async function deleteMatchupNote(noteId: number) {
+    if (noteId < 0) {
+      setMatchupNotes((current) =>
+        current.filter((matchupNote) => matchupNote.id !== noteId),
+      );
+      return;
+    }
     if (!activeBuildId) return;
     try {
       await deleteTrainingMatchupNote(noteId);
@@ -646,7 +692,7 @@ export function TrainingSimulator({
       <section className={styles.matchupNotes}>
         <div className={styles.matchupNotesHeader}>
           <h2>有利・不利メモ</h2>
-          <span>{activeBuildId ? "この育成案に保存" : "先に育成案を保存"}</span>
+          <span>{activeBuildId ? "この育成案に保存" : "育成案保存時に一緒に保存"}</span>
         </div>
         {matchupError ? (
           <p className={styles.matchupError} role="alert">
@@ -661,7 +707,7 @@ export function TrainingSimulator({
             notes={matchupNotes.filter(
               (note) => note.matchupKind === "favorable",
             )}
-            disabled={!activeBuildId}
+            disabled={false}
             saving={matchupSavingKind === "favorable"}
             onSave={saveMatchup}
             onDelete={(noteId) => void deleteMatchupNote(noteId)}
@@ -673,7 +719,7 @@ export function TrainingSimulator({
             notes={matchupNotes.filter(
               (note) => note.matchupKind === "unfavorable",
             )}
-            disabled={!activeBuildId}
+            disabled={false}
             saving={matchupSavingKind === "unfavorable"}
             onSave={saveMatchup}
             onDelete={(noteId) => void deleteMatchupNote(noteId)}
