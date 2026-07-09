@@ -7,7 +7,7 @@ import sqlite3InitModule from "/sqlite-wasm/index.mjs";
 
 const DATABASE_FILENAME = "/user.db";
 const CATALOG_DATABASE_FILENAME = "/catalog.db";
-const SUPPORTED_SCHEMA_VERSION = 2;
+const SUPPORTED_SCHEMA_VERSION = 3;
 const CATALOG_DATABASE_URL = "/sqlite-catalog.db.gz";
 const CATALOG_SEED_VERSION = "5";
 
@@ -124,7 +124,7 @@ function runTransaction(statements) {
  */
 function migrateSchema() {
   database.exec("PRAGMA foreign_keys = ON");
-  const currentVersion = Number(database.selectValue("PRAGMA user_version"));
+  let currentVersion = Number(database.selectValue("PRAGMA user_version"));
 
   if (currentVersion > SUPPORTED_SCHEMA_VERSION) {
     database.exec("BEGIN IMMEDIATE");
@@ -204,10 +204,27 @@ function migrateSchema() {
         CREATE INDEX damage_history_side_updated_at
           ON damage_history(side, updated_at DESC);
 
+        CREATE TABLE training_matchup_notes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          source_build_id INTEGER NOT NULL,
+          matchup_kind TEXT NOT NULL CHECK (matchup_kind IN ('favorable', 'unfavorable')),
+          target_kind TEXT NOT NULL CHECK (target_kind IN ('pokemon', 'build')),
+          target_pokemon_id INTEGER NOT NULL,
+          target_build_id INTEGER,
+          target_name TEXT NOT NULL,
+          note TEXT NOT NULL,
+          updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+          FOREIGN KEY (source_build_id) REFERENCES training_builds(id) ON DELETE CASCADE,
+          FOREIGN KEY (target_build_id) REFERENCES training_builds(id) ON DELETE SET NULL
+        );
+
+        CREATE INDEX training_matchup_notes_source_kind_updated_at
+          ON training_matchup_notes(source_build_id, matchup_kind, updated_at DESC);
+
         INSERT INTO schema_metadata (key, value)
         VALUES ('database_created_at', CAST(unixepoch() AS TEXT));
 
-        PRAGMA user_version = 2;
+        PRAGMA user_version = 3;
       `);
       database.exec("COMMIT");
     } catch (error) {
@@ -222,6 +239,37 @@ function migrateSchema() {
       database.exec(`
         ALTER TABLE training_builds ADD COLUMN ability_id TEXT;
         PRAGMA user_version = 2;
+      `);
+      database.exec("COMMIT");
+      currentVersion = 2;
+    } catch (error) {
+      database.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  if (currentVersion === 2) {
+    database.exec("BEGIN IMMEDIATE");
+    try {
+      database.exec(`
+        CREATE TABLE IF NOT EXISTS training_matchup_notes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          source_build_id INTEGER NOT NULL,
+          matchup_kind TEXT NOT NULL CHECK (matchup_kind IN ('favorable', 'unfavorable')),
+          target_kind TEXT NOT NULL CHECK (target_kind IN ('pokemon', 'build')),
+          target_pokemon_id INTEGER NOT NULL,
+          target_build_id INTEGER,
+          target_name TEXT NOT NULL,
+          note TEXT NOT NULL,
+          updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+          FOREIGN KEY (source_build_id) REFERENCES training_builds(id) ON DELETE CASCADE,
+          FOREIGN KEY (target_build_id) REFERENCES training_builds(id) ON DELETE SET NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS training_matchup_notes_source_kind_updated_at
+          ON training_matchup_notes(source_build_id, matchup_kind, updated_at DESC);
+
+        PRAGMA user_version = 3;
       `);
       database.exec("COMMIT");
     } catch (error) {

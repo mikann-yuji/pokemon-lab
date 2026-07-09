@@ -12,10 +12,17 @@ import {
 } from "@/presentation/pokemon-type-colors";
 import {
   createTrainingBuildContentKey,
+  deleteTrainingMatchupNote,
   findTrainingBuildByContentKey,
+  getAllTrainingBuilds,
+  getTrainingMatchupNotes,
   loadLatestTrainingBuild,
   loadTrainingBuild,
+  saveTrainingMatchupNote,
   saveTrainingBuild,
+  type TrainingBuild,
+  type TrainingMatchupKind,
+  type TrainingMatchupNote,
 } from "../infrastructure/training-build-repository";
 import type {
   HeldItem,
@@ -53,6 +60,25 @@ type DisplayStatRankingRow = {
   isTrainingTarget: boolean;
 };
 type StatCompareMode = "uninvested" | "maximum";
+type MatchupSearchOption =
+  | {
+      key: string;
+      kind: "pokemon";
+      pokemonId: number;
+      name: string;
+      subLabel: string;
+      searchName: string;
+      buildId: null;
+    }
+  | {
+      key: string;
+      kind: "build";
+      pokemonId: number;
+      name: string;
+      subLabel: string;
+      searchName: string;
+      buildId: number;
+    };
 
 const TYPE_LABELS: Record<TypeName, string> = {
   Normal: "ノーマル",
@@ -107,6 +133,41 @@ function compareMoveUsageRate(
   return left.name.localeCompare(right.name, "ja") || left.id.localeCompare(right.id);
 }
 
+function createMatchupSearchOptions(
+  pokemonCatalog: TrainingPokemonStatProfile[],
+  builds: TrainingBuild[],
+): MatchupSearchOption[] {
+  const pokemonById = new Map(pokemonCatalog.map((pokemon) => [pokemon.id, pokemon]));
+  const pokemonOptions: MatchupSearchOption[] = pokemonCatalog.map((pokemon) => ({
+    key: `pokemon-${pokemon.id}`,
+    kind: "pokemon",
+    pokemonId: pokemon.id,
+    name: pokemon.nameJa,
+    subLabel: pokemon.name,
+    searchName: normalizePokemonSearchText(`${pokemon.nameJa} ${pokemon.name}`),
+    buildId: null,
+  }));
+  const buildOptions: MatchupSearchOption[] = builds.flatMap((build) => {
+    if (build.id === undefined) return [];
+    const pokemon = pokemonById.get(build.pokemonId);
+    if (!pokemon) return [];
+    return [
+      {
+        key: `build-${build.id}`,
+        kind: "build" as const,
+        pokemonId: build.pokemonId,
+        name: build.name,
+        subLabel: `${pokemon.nameJa}の育成案`,
+        searchName: normalizePokemonSearchText(
+          `${build.name} ${pokemon.nameJa} ${pokemon.name}`,
+        ),
+        buildId: build.id,
+      },
+    ];
+  });
+  return [...buildOptions, ...pokemonOptions];
+}
+
 /**
  * Pokémon Champions向けの育成案編集画面。
  * 種族値、性格、能力ポイント、持ち物、技構成を編集し、user.dbへ保存する。
@@ -145,6 +206,14 @@ export function TrainingSimulator({
   const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
   const [buildName, setBuildName] = useState("");
   const [savedBuildName, setSavedBuildName] = useState<string | null>(null);
+  const [activeBuildId, setActiveBuildId] = useState<number | null>(
+    initialBuildId ?? null,
+  );
+  const [trainingBuilds, setTrainingBuilds] = useState<TrainingBuild[]>([]);
+  const [matchupNotes, setMatchupNotes] = useState<TrainingMatchupNote[]>([]);
+  const [matchupError, setMatchupError] = useState("");
+  const [matchupSavingKind, setMatchupSavingKind] =
+    useState<TrainingMatchupKind | null>(null);
   const [saveError, setSaveError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [toast, setToast] = useState<{
@@ -158,6 +227,21 @@ export function TrainingSimulator({
     const timer = window.setTimeout(() => setToast(null), 3000);
     return () => window.clearTimeout(timer);
   }, [toast]);
+
+  useEffect(() => {
+    let active = true;
+    void getAllTrainingBuilds()
+      .then((builds) => {
+        if (active) setTrainingBuilds(builds);
+      })
+      .catch((error: unknown) => {
+        console.error("保存済み育成案を読み込めませんでした。", error);
+        if (active) setMatchupError("保存済み育成案を読み込めませんでした。");
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // 先読みされていないカタログだけをブラウザ側で取得する。画面単体でも動けるようにする。
   useEffect(() => {
@@ -205,9 +289,26 @@ export function TrainingSimulator({
       );
       setBuildName(build.name ?? "");
       setSavedBuildName(build.name ?? "");
+      setActiveBuildId(build.id ?? null);
     });
     return () => { active = false; };
   }, [initialBuildId, natures, pokemon.abilities, pokemon.id]);
+
+  useEffect(() => {
+    if (!activeBuildId) return;
+    let active = true;
+    void getTrainingMatchupNotes(activeBuildId)
+      .then((notes) => {
+        if (active) setMatchupNotes(notes);
+      })
+      .catch((error: unknown) => {
+        console.error("相性メモを読み込めませんでした。", error);
+        if (active) setMatchupError("相性メモを読み込めませんでした。");
+      });
+    return () => {
+      active = false;
+    };
+  }, [activeBuildId]);
 
   // 性格IDが古い保存データなどで見つからない場合は、まじめ/先頭性格へフォールバックする。
   const selectedNature =
@@ -277,6 +378,10 @@ export function TrainingSimulator({
     () => [...pokemon.moves].sort(compareMoveUsageRate),
     [pokemon.moves],
   );
+  const matchupSearchOptions = useMemo(
+    () => createMatchupSearchOptions(statProfiles, trainingBuilds),
+    [statProfiles, trainingBuilds],
+  );
   const pointTotal = Object.values(abilityPoints).reduce((sum, value) => sum + value, 0);
 
   /**
@@ -331,13 +436,15 @@ export function TrainingSimulator({
         return;
       }
 
-      await saveTrainingBuild({
+      const savedBuild = await saveTrainingBuild({
         ...buildData,
         id: existing?.id,
         name: normalizedName,
         contentKey,
         updatedAt: Date.now(),
       });
+      setActiveBuildId(savedBuild.id ?? null);
+      setTrainingBuilds(await getAllTrainingBuilds());
       setSaved(true);
       setSavedBuildName(normalizedName);
       setSaveDialogOpen(false);
@@ -352,6 +459,64 @@ export function TrainingSimulator({
       setToast({ type: "error", message: "保存に失敗しました" });
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function saveMatchup({
+    matchupKind,
+    target,
+    note,
+  }: {
+    matchupKind: TrainingMatchupKind;
+    target: MatchupSearchOption | null;
+    note: string;
+  }) {
+    if (!activeBuildId) {
+      setMatchupError("先にこの育成案を保存してください。");
+      return false;
+    }
+    if (!target) {
+      setMatchupError("対象ポケモンを選択してください。");
+      return false;
+    }
+
+    setMatchupError("");
+    setMatchupSavingKind(matchupKind);
+    try {
+      await saveTrainingMatchupNote({
+        sourceBuildId: activeBuildId,
+        matchupKind,
+        targetKind: target.kind,
+        targetPokemonId: target.pokemonId,
+        targetBuildId: target.buildId,
+        targetName: target.name,
+        note,
+      });
+      setMatchupNotes(await getTrainingMatchupNotes(activeBuildId));
+      setToast({ type: "success", message: "相性メモを保存しました" });
+      return true;
+    } catch (error: unknown) {
+      console.error("相性メモを保存できませんでした。", error);
+      setMatchupError(
+        error instanceof Error
+          ? error.message
+          : "相性メモを保存できませんでした。",
+      );
+      setToast({ type: "error", message: "相性メモの保存に失敗しました" });
+      return false;
+    } finally {
+      setMatchupSavingKind(null);
+    }
+  }
+
+  async function deleteMatchupNote(noteId: number) {
+    if (!activeBuildId) return;
+    try {
+      await deleteTrainingMatchupNote(noteId);
+      setMatchupNotes(await getTrainingMatchupNotes(activeBuildId));
+    } catch (error: unknown) {
+      console.error("相性メモを削除できませんでした。", error);
+      setMatchupError("相性メモを削除できませんでした。");
     }
   }
 
@@ -478,6 +643,43 @@ export function TrainingSimulator({
         })}
       </section>
       <button className={styles.saveButton} type="button" onClick={openSaveDialog}>{saved ? "保存しました" : "この育成案を保存"}</button>
+      <section className={styles.matchupNotes}>
+        <div className={styles.matchupNotesHeader}>
+          <h2>有利・不利メモ</h2>
+          <span>{activeBuildId ? "この育成案に保存" : "先に育成案を保存"}</span>
+        </div>
+        {matchupError ? (
+          <p className={styles.matchupError} role="alert">
+            {matchupError}
+          </p>
+        ) : null}
+        <div className={styles.matchupColumns}>
+          <MatchupNotePanel
+            title="有利なポケモン"
+            matchupKind="favorable"
+            options={matchupSearchOptions}
+            notes={matchupNotes.filter(
+              (note) => note.matchupKind === "favorable",
+            )}
+            disabled={!activeBuildId}
+            saving={matchupSavingKind === "favorable"}
+            onSave={saveMatchup}
+            onDelete={(noteId) => void deleteMatchupNote(noteId)}
+          />
+          <MatchupNotePanel
+            title="不利なポケモン"
+            matchupKind="unfavorable"
+            options={matchupSearchOptions}
+            notes={matchupNotes.filter(
+              (note) => note.matchupKind === "unfavorable",
+            )}
+            disabled={!activeBuildId}
+            saving={matchupSavingKind === "unfavorable"}
+            onSave={saveMatchup}
+            onDelete={(noteId) => void deleteMatchupNote(noteId)}
+          />
+        </div>
+      </section>
       {toast ? (
         <div
           className={`${styles.toast} ${
@@ -735,6 +937,144 @@ function TrainingMoveSelect({
         ) : null}
       </div>
     </div>
+  );
+}
+
+function MatchupNotePanel({
+  title,
+  matchupKind,
+  options,
+  notes,
+  disabled,
+  saving,
+  onSave,
+  onDelete,
+}: {
+  title: string;
+  matchupKind: TrainingMatchupKind;
+  options: MatchupSearchOption[];
+  notes: TrainingMatchupNote[];
+  disabled: boolean;
+  saving: boolean;
+  onSave: (input: {
+    matchupKind: TrainingMatchupKind;
+    target: MatchupSearchOption | null;
+    note: string;
+  }) => Promise<boolean>;
+  onDelete: (noteId: number) => void;
+}) {
+  const [selectedTarget, setSelectedTarget] =
+    useState<MatchupSearchOption | null>(null);
+  const [inputValue, setInputValue] = useState("");
+  const [note, setNote] = useState("");
+  const normalizedInput = normalizePokemonSearchText(inputValue);
+  const filteredOptions = normalizedInput
+    ? options
+        .filter((option) => option.searchName.includes(normalizedInput))
+        .slice(0, 12)
+    : options.slice(0, 12);
+  const {
+    getInputProps,
+    getItemProps,
+    getLabelProps,
+    getMenuProps,
+    highlightedIndex,
+    isOpen,
+  } = useCombobox({
+    items: filteredOptions,
+    inputValue,
+    itemToString: (item) => item?.name ?? "",
+    selectedItem: selectedTarget,
+    onInputValueChange: ({ inputValue: nextInputValue = "" }) => {
+      setInputValue(nextInputValue);
+      if (selectedTarget && nextInputValue !== selectedTarget.name) {
+        setSelectedTarget(null);
+      }
+    },
+    onSelectedItemChange: ({ selectedItem }) => {
+      if (!selectedItem) return;
+      setSelectedTarget(selectedItem);
+      setInputValue(selectedItem.name);
+    },
+  });
+
+  async function submit() {
+    const saved = await onSave({ matchupKind, target: selectedTarget, note });
+    if (!saved) return;
+    setSelectedTarget(null);
+    setInputValue("");
+    setNote("");
+  }
+
+  return (
+    <section className={styles.matchupPanel}>
+      <h3>{title}</h3>
+      <label className={styles.matchupSearch}>
+        <span {...getLabelProps()}>ポケモン・育成案</span>
+        <input
+          {...getInputProps({
+            disabled,
+            placeholder: disabled ? "先に育成案を保存" : "名前で検索",
+          })}
+        />
+        <ul {...getMenuProps()}>
+          {isOpen
+            ? filteredOptions.map((option, index) => (
+                <li
+                  {...getItemProps({ item: option, index })}
+                  className={
+                    highlightedIndex === index
+                      ? styles.highlightedSuggestion
+                      : undefined
+                  }
+                  key={option.key}
+                >
+                  <strong>{option.name}</strong>
+                  <small>{option.subLabel}</small>
+                </li>
+              ))
+            : null}
+        </ul>
+      </label>
+      <label className={styles.matchupMemo}>
+        メモ
+        <textarea
+          disabled={disabled}
+          value={note}
+          onChange={(event) => setNote(event.target.value)}
+        />
+      </label>
+      <button
+        className={styles.matchupSaveButton}
+        type="button"
+        disabled={disabled || saving}
+        onClick={() => void submit()}
+      >
+        {saving ? "保存中..." : "メモを保存"}
+      </button>
+      <div className={styles.matchupList}>
+        {notes.length === 0 ? (
+          <p>保存したメモはありません。</p>
+        ) : (
+          notes.map((savedNote) => (
+            <article key={savedNote.id}>
+              <div>
+                <strong>{savedNote.targetName}</strong>
+                <small>
+                  {savedNote.targetKind === "build" ? "保存済み育成案" : "ポケモン"}
+                </small>
+              </div>
+              <p>{savedNote.note}</p>
+              {savedNote.id !== undefined ? (
+                <button type="button" onClick={() => onDelete(savedNote.id!)}>
+                  削除
+                </button>
+              ) : null}
+            </article>
+          ))
+        )}
+      </div>
+    </section>
   );
 }
 

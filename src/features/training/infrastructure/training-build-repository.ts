@@ -28,6 +28,22 @@ export type BattleTeam = {
   updatedAt: number;
 };
 
+export type TrainingMatchupKind = "favorable" | "unfavorable";
+
+export type TrainingMatchupTargetKind = "pokemon" | "build";
+
+export type TrainingMatchupNote = {
+  id?: number;
+  sourceBuildId: number;
+  matchupKind: TrainingMatchupKind;
+  targetKind: TrainingMatchupTargetKind;
+  targetPokemonId: number;
+  targetBuildId: number | null;
+  targetName: string;
+  note: string;
+  updatedAt: number;
+};
+
 type TrainingBuildRow = SqliteRow & {
   id: number;
   name: string;
@@ -46,6 +62,18 @@ type BattleTeamRow = SqliteRow & {
   name: string;
   updated_at: number;
   build_ids: string | null;
+};
+
+type TrainingMatchupNoteRow = SqliteRow & {
+  id: number;
+  source_build_id: number;
+  matchup_kind: TrainingMatchupKind;
+  target_kind: TrainingMatchupTargetKind;
+  target_pokemon_id: number;
+  target_build_id: number | null;
+  target_name: string;
+  note: string;
+  updated_at: number;
 };
 
 /** user.db内のJSON列が壊れていても画面全体を落とさず、空値で復旧する。 */
@@ -72,6 +100,23 @@ function toTrainingBuild(row: TrainingBuildRow): TrainingBuild {
       {},
     ),
     moveIds: parseJson<string[]>(String(row.move_ids_json), []),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
+function toTrainingMatchupNote(
+  row: TrainingMatchupNoteRow,
+): TrainingMatchupNote {
+  return {
+    id: Number(row.id),
+    sourceBuildId: Number(row.source_build_id),
+    matchupKind: row.matchup_kind,
+    targetKind: row.target_kind,
+    targetPokemonId: Number(row.target_pokemon_id),
+    targetBuildId:
+      row.target_build_id === null ? null : Number(row.target_build_id),
+    targetName: String(row.target_name),
+    note: String(row.note),
     updatedAt: Number(row.updated_at),
   };
 }
@@ -202,6 +247,69 @@ export async function saveTrainingBuild(build: TrainingBuild) {
     throw new Error("保存した育成案を確認できませんでした。");
   }
   return savedBuild;
+}
+
+export async function getTrainingMatchupNotes(sourceBuildId: number) {
+  const rows = await sqliteWorkerClient.query<TrainingMatchupNoteRow>(
+    `SELECT
+       id, source_build_id, matchup_kind, target_kind, target_pokemon_id,
+       target_build_id, target_name, note, updated_at
+     FROM training_matchup_notes
+     WHERE source_build_id = ?
+     ORDER BY matchup_kind, updated_at DESC, id DESC`,
+    [sourceBuildId],
+  );
+  return rows.map(toTrainingMatchupNote);
+}
+
+export async function saveTrainingMatchupNote(
+  note: Omit<TrainingMatchupNote, "id" | "updatedAt">,
+) {
+  const normalizedTargetName = note.targetName.trim();
+  const normalizedNote = note.note.trim();
+  if (!normalizedTargetName) {
+    throw new Error("対象ポケモンを選択してください。");
+  }
+  if (!normalizedNote) {
+    throw new Error("メモを入力してください。");
+  }
+
+  const now = Date.now();
+  const result = await sqliteWorkerClient.execute(
+    `INSERT INTO training_matchup_notes (
+       source_build_id, matchup_kind, target_kind, target_pokemon_id,
+       target_build_id, target_name, note, updated_at
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      note.sourceBuildId,
+      note.matchupKind,
+      note.targetKind,
+      note.targetPokemonId,
+      note.targetBuildId,
+      normalizedTargetName,
+      normalizedNote,
+      now,
+    ],
+  );
+
+  const rows = await sqliteWorkerClient.query<TrainingMatchupNoteRow>(
+    `SELECT
+       id, source_build_id, matchup_kind, target_kind, target_pokemon_id,
+       target_build_id, target_name, note, updated_at
+     FROM training_matchup_notes
+     WHERE id = ?
+     LIMIT 1`,
+    [result.lastInsertRowId],
+  );
+  if (!rows[0]) throw new Error("保存した相性メモを確認できませんでした。");
+  return toTrainingMatchupNote(rows[0]);
+}
+
+export async function deleteTrainingMatchupNote(id: number) {
+  await sqliteWorkerClient.execute(
+    "DELETE FROM training_matchup_notes WHERE id = ?",
+    [id],
+  );
 }
 
 /**
