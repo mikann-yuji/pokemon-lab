@@ -356,6 +356,17 @@ function clampNumber(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function parseObservedInput(value: string) {
+  if (value.trim() === "") return 0;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizeObservedInput(value: string, maximum: number) {
+  const parsed = parseObservedInput(value);
+  return String(clampNumber(parsed, 0, maximum));
+}
+
 export function ReverseDamageCalculator({
   pokemonCatalog,
   heldItems,
@@ -372,8 +383,8 @@ export function ReverseDamageCalculator({
   const attacker = attackerSelection.pokemon;
   const defender = defenderSelection.pokemon;
   const [unknownSide, setUnknownSide] = useState<UnknownSide>("attacker");
-  const [observedDamage, setObservedDamage] = useState(100);
-  const [observedPercent, setObservedPercent] = useState(50);
+  const [observedDamage, setObservedDamage] = useState("100");
+  const [observedPercent, setObservedPercent] = useState("50");
   const [percentTolerance, setPercentTolerance] = useState(0.1);
   const [moveId, setMoveId] = useState("");
   const [weatherId, setWeatherId] = useState("");
@@ -397,6 +408,8 @@ export function ReverseDamageCalculator({
     useState<StatAdjustmentState>(createDefaultAdjustmentState);
 
   const selectedMove = attacker?.moves.find(({ id }) => id === moveId) ?? null;
+  const observedDamageValue = parseObservedInput(observedDamage);
+  const observedPercentValue = parseObservedInput(observedPercent);
   const relevantStatIds = getRelevantStatIds(selectedMove);
   const selectedWeather = weathers.find(({ id }) => id === weatherId) ?? null;
   const selectedTerrain = terrains.find(({ id }) => id === terrainId) ?? null;
@@ -643,8 +656,8 @@ export function ReverseDamageCalculator({
               if (
                 observedValueMatches({
                   unknownSide,
-                  observedDamage,
-                  observedPercent,
+                  observedDamage: observedDamageValue,
+                  observedPercent: observedPercentValue,
                   tolerance: percentTolerance,
                   candidate,
                 })
@@ -710,8 +723,8 @@ export function ReverseDamageCalculator({
                 if (
                   observedValueMatches({
                     unknownSide,
-                    observedDamage,
-                    observedPercent,
+                    observedDamage: observedDamageValue,
+                    observedPercent: observedPercentValue,
                     tolerance: percentTolerance,
                     candidate,
                   })
@@ -752,8 +765,8 @@ export function ReverseDamageCalculator({
     defender,
     fieldOptions,
     heldItems,
-    observedDamage,
-    observedPercent,
+    observedDamageValue,
+    observedPercentValue,
     percentTolerance,
     relevantStatIds.attacker,
     relevantStatIds.defender,
@@ -800,11 +813,15 @@ export function ReverseDamageCalculator({
             ダメージ量
             <input
               type="number"
-              min="1"
+              min="0"
+              max="400"
               step="1"
               value={observedDamage}
               onChange={(event) =>
-                setObservedDamage(Math.max(1, Math.trunc(Number(event.target.value))))
+                setObservedDamage(event.target.value)
+              }
+              onBlur={() =>
+                setObservedDamage((current) => normalizeObservedInput(current, 400))
               }
             />
           </label>
@@ -819,8 +836,11 @@ export function ReverseDamageCalculator({
                 step="0.1"
                 value={observedPercent}
                 onChange={(event) =>
-                  setObservedPercent(
-                    clampNumber(Number(event.target.value), 0, 100),
+                  setObservedPercent(event.target.value)
+                }
+                onBlur={() =>
+                  setObservedPercent((current) =>
+                    normalizeObservedInput(current, 100),
                   )
                 }
               />
@@ -829,9 +849,9 @@ export function ReverseDamageCalculator({
                 min="0"
                 max="100"
                 step="0.1"
-                value={observedPercent}
+                value={clampNumber(observedPercentValue, 0, 100)}
                 onChange={(event) =>
-                  setObservedPercent(Number(event.target.value))
+                  setObservedPercent(event.target.value)
                 }
               />
             </div>
