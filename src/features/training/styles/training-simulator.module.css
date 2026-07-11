@@ -53,12 +53,13 @@
 .matchupPanel { display:grid; gap:.55rem; min-width:0; padding:.75rem; border:1px solid #d8e3f0; border-radius:12px; background:white; }
 .matchupPanel h3 { margin:0; color:#172b4d; font-size:.9rem; }
 .matchupSearch,.matchupMemo { position:relative; display:grid; gap:.35rem; color:#172b4d; font-size:.78rem; font-weight:850; }
-.matchupSearch input,.matchupMemo textarea { width:100%; min-width:0; border:2px solid #b9c7da; border-radius:9px; background:white; color:#172b4d; font:inherit; }
+.matchupSearch input,.matchupMemo textarea { box-sizing:border-box; width:100%; min-width:0; border:2px solid #b9c7da; border-radius:9px; background:white; color:#172b4d; font:inherit; }
 .matchupSearch input { min-height:38px; padding:.45rem .55rem; }
 .matchupMemo textarea { min-height:4.6rem; resize:vertical; padding:.55rem; line-height:1.45; }
 .matchupSearch input:focus,.matchupMemo textarea:focus { border-color:#2857a4; outline:3px solid rgb(40 87 164 / 16%); }
 .matchupSearch input:disabled,.matchupMemo textarea:disabled { background:#eef3f8; color:#8290a3; }
 .matchupSearch ul { position:absolute; z-index:12; top:100%; right:0; left:0; max-height:13rem; margin:.25rem 0 0; overflow:auto; padding:.25rem; border:1px solid #cad6e5; border-radius:10px; background:white; box-shadow:0 12px 30px rgb(23 43 77 / 18%); list-style:none; }
+.matchupSearch ul:empty { display:none; }
 .matchupSearch li { display:grid; gap:.08rem; padding:.45rem .55rem; border-radius:8px; cursor:pointer; }
 .matchupSearch li strong,.matchupSearch li small { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .matchupSearch li small { color:#52657e; font-size:.68rem; font-weight:750; }
