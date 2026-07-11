@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DamageCalculator } from "./damage-calculator";
+import { ReverseDamageCalculator } from "./reverse-damage-calculator";
 import type {
   DamageCalculatorHeldItem,
   DamageCalculatorPokemon,
@@ -14,6 +15,8 @@ import {
   getChampionsDamageCalculatorPokemon,
 } from "../infrastructure/damage-calculator-catalog-repository";
 import styles from "../styles/damage-calculator.module.css";
+
+type CalculatorMode = "normal" | "reverse";
 
 /**
  * ダメージ計算画面のClient Loader。
@@ -28,6 +31,7 @@ export function DamageCalculatorCatalogLoader() {
   const [terrains, setTerrains] = useState<DamageCalculatorTerrain[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const [mode, setMode] = useState<CalculatorMode>("normal");
 
   // ダメージ計算に必要な全カタログを1回だけ読み、以降の検索と計算はローカル配列で行う。
   useEffect(() => {
@@ -75,11 +79,38 @@ export function DamageCalculatorCatalogLoader() {
   }
 
   return (
-    <DamageCalculator
-      pokemonCatalog={pokemonCatalog}
-      heldItems={heldItems}
-      weathers={weathers}
-      terrains={terrains}
-    />
+    <>
+      <div className={styles.calculatorTabs} aria-label="ダメージ計算モード">
+        <button
+          type="button"
+          aria-pressed={mode === "normal"}
+          onClick={() => setMode("normal")}
+        >
+          通常計算
+        </button>
+        <button
+          type="button"
+          aria-pressed={mode === "reverse"}
+          onClick={() => setMode("reverse")}
+        >
+          逆引き計算
+        </button>
+      </div>
+      {mode === "normal" ? (
+        <DamageCalculator
+          pokemonCatalog={pokemonCatalog}
+          heldItems={heldItems}
+          weathers={weathers}
+          terrains={terrains}
+        />
+      ) : (
+        <ReverseDamageCalculator
+          pokemonCatalog={pokemonCatalog}
+          heldItems={heldItems}
+          weathers={weathers}
+          terrains={terrains}
+        />
+      )}
+    </>
   );
 }

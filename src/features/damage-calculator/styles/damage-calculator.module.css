@@ -47,6 +47,42 @@
   box-shadow: 0 12px 30px rgb(23 43 77 / 12%);
 }
 
+.calculatorTabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
+  width: min(100%, 32rem);
+  margin: 0 auto 1rem;
+  padding: 0.25rem;
+  border: 1px solid #b9cae0;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 86%);
+  box-shadow: 0 12px 30px rgb(23 43 77 / 10%);
+}
+
+.calculatorTabs button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #344760;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 950;
+}
+
+.calculatorTabs button[aria-pressed="true"] {
+  background: #2857a4;
+  color: white;
+}
+
+.calculatorTabs button:not([aria-pressed="true"]):hover,
+.calculatorTabs button:not([aria-pressed="true"]):focus-visible {
+  outline: 3px solid rgb(40 87 164 / 18%);
+  background: #eef6ff;
+}
+
 .calculator {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
