@@ -278,6 +278,25 @@ function migrateSchema() {
     }
   }
 
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS training_matchup_notes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      source_build_id INTEGER NOT NULL,
+      matchup_kind TEXT NOT NULL CHECK (matchup_kind IN ('favorable', 'unfavorable')),
+      target_kind TEXT NOT NULL CHECK (target_kind IN ('pokemon', 'build')),
+      target_pokemon_id INTEGER NOT NULL,
+      target_build_id INTEGER,
+      target_name TEXT NOT NULL,
+      note TEXT NOT NULL,
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      FOREIGN KEY (source_build_id) REFERENCES training_builds(id) ON DELETE CASCADE,
+      FOREIGN KEY (target_build_id) REFERENCES training_builds(id) ON DELETE SET NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS training_matchup_notes_source_kind_updated_at
+      ON training_matchup_notes(source_build_id, matchup_kind, updated_at DESC);
+  `);
+
 }
 
 /**
