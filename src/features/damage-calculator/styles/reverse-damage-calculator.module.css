@@ -1,0 +1,357 @@
+.page {
+  min-height: 100vh;
+  padding: clamp(1rem, 4vw, 2.5rem);
+  background:
+    radial-gradient(circle at 12% 8%, rgb(255 213 79 / 22%), transparent 20rem),
+    linear-gradient(145deg, #f3f8ff, #e9f1f9 58%, #f8fbff);
+  color: #172b4d;
+}
+
+.hero {
+  width: min(100%, 68rem);
+  margin: 1.25rem auto 1.5rem;
+  text-align: center;
+}
+
+.hero p,
+.resultsHeader p {
+  margin: 0 0 0.35rem;
+  color: #d93648;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3.6rem);
+}
+
+.hero span {
+  display: block;
+  max-width: 48rem;
+  margin: 0.65rem auto 0;
+  color: #536376;
+  font-weight: 750;
+  line-height: 1.75;
+}
+
+.statusMessage,
+.calculator {
+  width: min(100%, 68rem);
+  margin: 0 auto;
+}
+
+.statusMessage {
+  padding: 1rem 1.25rem;
+  border: 1px solid rgb(23 43 77 / 14%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 12px 30px rgb(23 43 77 / 12%);
+  font-weight: 850;
+  text-align: center;
+}
+
+.calculator {
+  display: grid;
+  gap: 1rem;
+}
+
+.toolbar,
+.sidePanel,
+.conditions,
+.results {
+  border: 1px solid rgb(23 43 77 / 14%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 94%);
+  box-shadow: 0 16px 42px rgb(23 43 77 / 11%);
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(18rem, 1fr) minmax(16rem, 0.8fr) minmax(8rem, 0.35fr);
+  gap: 0.8rem;
+  align-items: end;
+  padding: 1rem;
+}
+
+.toolbar label,
+.conditions label,
+.selectGrid label,
+.knownStats label {
+  display: grid;
+  gap: 0.4rem;
+  color: #344760;
+  font-size: 0.8rem;
+  font-weight: 850;
+}
+
+.segmentedControl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border: 1px solid #b9cae0;
+  border-radius: 10px;
+  background: #eef5fc;
+}
+
+.segmentedControl button,
+.inlineInputs select,
+.inlineInputs input,
+.toolbar input,
+.conditions select,
+.selectGrid select,
+.knownStats input[type="number"] {
+  min-height: 42px;
+  border: 2px solid #b9cae0;
+  border-radius: 9px;
+  background: white;
+  color: #172b4d;
+  font: inherit;
+}
+
+.segmentedControl button {
+  border: 0;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.segmentedControl button[aria-pressed="true"] {
+  background: #2857a4;
+  color: white;
+}
+
+.inlineInputs {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.8fr) minmax(7rem, 1fr);
+  gap: 0.5rem;
+}
+
+.inlineInputs select,
+.inlineInputs input,
+.toolbar input,
+.conditions select,
+.selectGrid select,
+.knownStats input[type="number"] {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+}
+
+.sides {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.sidePanel {
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+  padding: 1rem;
+}
+
+.sideHeader {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sideHeader h2,
+.resultsHeader h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.sideHeader span {
+  flex: 0 0 auto;
+  padding: 0.18rem 0.58rem;
+  border-radius: 999px;
+  background: #eef6ff;
+  color: #2857a4;
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.selectGrid,
+.knownStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.knownStats {
+  padding: 0.75rem;
+  border: 1px solid #c7d5e7;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+.checkboxLabel {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  align-self: end;
+  min-height: 42px;
+}
+
+.checkboxLabel input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #2857a4;
+}
+
+.unknownHint,
+.emptyState {
+  margin: 0;
+  padding: 0.8rem;
+  border-radius: 10px;
+  background: #f3f7fc;
+  color: #536376;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.conditions {
+  display: grid;
+  grid-template-columns: minmax(16rem, 1fr) minmax(10rem, 0.35fr) minmax(10rem, 0.35fr);
+  gap: 0.8rem;
+  padding: 1rem;
+}
+
+.results {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+}
+
+.resultsHeader {
+  display: flex;
+  gap: 1rem;
+  align-items: end;
+  justify-content: space-between;
+}
+
+.resultsHeader span {
+  color: #536376;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.resultTable {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid #c7d5e7;
+  border-radius: 10px;
+  background: white;
+}
+
+.resultHead,
+.resultRow {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.resultHead:has(span:nth-child(5):last-child),
+.resultRow:has(span:nth-child(5):last-child) {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.resultHead {
+  background: #eef6ff;
+  color: #2857a4;
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+.resultHead span,
+.resultRow span {
+  min-width: 0;
+  padding: 0.65rem;
+  border-bottom: 1px solid #dbe6f2;
+  overflow-wrap: anywhere;
+}
+
+.resultHead span + span,
+.resultRow span + span {
+  border-left: 1px solid #dbe6f2;
+}
+
+.resultRow:last-child span {
+  border-bottom: 0;
+}
+
+.resultRow {
+  color: #172b4d;
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.resultRow small {
+  display: block;
+  margin-top: 0.18rem;
+  color: #536376;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+@media (max-width: 48rem) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .hero {
+    margin: 0.65rem auto 1rem;
+  }
+
+  .hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .hero span {
+    font-size: 0.78rem;
+  }
+
+  .toolbar,
+  .sides,
+  .conditions,
+  .selectGrid,
+  .knownStats {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar,
+  .sidePanel,
+  .conditions,
+  .results {
+    padding: 0.75rem;
+  }
+
+  .segmentedControl button,
+  .inlineInputs select,
+  .inlineInputs input,
+  .toolbar input,
+  .conditions select,
+  .selectGrid select,
+  .knownStats input[type="number"] {
+    min-height: 38px;
+    font-size: 0.76rem;
+  }
+
+  .resultsHeader {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .resultTable {
+    overflow-x: auto;
+  }
+
+  .resultHead,
+  .resultRow {
+    min-width: 42rem;
+  }
+}
