@@ -255,8 +255,7 @@
   align-items: stretch;
 }
 
-.resultHead:has(span:nth-child(5):last-child),
-.resultRow:has(span:nth-child(5):last-child) {
+.fiveColumns {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
@@ -296,6 +295,100 @@
   color: #536376;
   font-size: 0.68rem;
   font-weight: 800;
+}
+
+.reverseCalculator {
+  width: min(100%, 68rem);
+}
+
+.reverseTarget {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border: 1px solid #b9cae0;
+  border-radius: 10px;
+  background: #eef5fc;
+}
+
+.reverseTarget button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #344760;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.reverseTarget button[aria-pressed="true"] {
+  background: #2857a4;
+  color: white;
+}
+
+.percentControl {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.percentControl input[type="range"] {
+  width: 100%;
+  accent-color: #2857a4;
+}
+
+.reverseCalculator input[type="number"] {
+  width: 100%;
+  min-height: 42px;
+  padding: 0.55rem 0.7rem;
+  border: 2px solid #b9cae0;
+  border-radius: 10px;
+  background: white;
+  color: #172b4d;
+  font: inherit;
+}
+
+.reverseResult {
+  position: static;
+  width: auto;
+  margin: 0;
+  color: white;
+}
+
+.reverseResult .resultTable {
+  max-height: 24rem;
+  overflow: auto;
+  border-color: rgb(255 255 255 / 18%);
+  background: rgb(255 255 255 / 10%);
+}
+
+.reverseResult .resultHead {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  background: rgb(255 255 255 / 18%);
+  color: white;
+}
+
+.reverseResult .resultRow {
+  color: white;
+}
+
+.reverseResult .resultHead span,
+.reverseResult .resultRow span {
+  border-color: rgb(255 255 255 / 14%);
+}
+
+.reverseResult .resultRow small {
+  color: rgb(255 255 255 / 72%);
+}
+
+.resultNotice {
+  margin: 0;
+  color: rgb(255 255 255 / 78%);
+  font-size: 0.82rem;
+  font-weight: 850;
 }
 
 @media (max-width: 48rem) {
@@ -353,5 +446,9 @@
   .resultHead,
   .resultRow {
     min-width: 42rem;
+  }
+
+  .reverseTarget {
+    grid-template-columns: 1fr;
   }
 }
