@@ -1043,6 +1043,7 @@ function MatchupNotePanel({
       setInputValue(selectedItem.name);
     },
   });
+  const showSuggestions = isOpen && filteredOptions.length > 0;
 
   async function submit() {
     const saved = await onSave({ matchupKind, target: selectedTarget, note });
@@ -1063,8 +1064,8 @@ function MatchupNotePanel({
             placeholder: disabled ? "先に育成案を保存" : "名前で検索",
           })}
         />
-        <ul {...getMenuProps()}>
-          {isOpen
+        <ul {...getMenuProps({ hidden: !showSuggestions })}>
+          {showSuggestions
             ? filteredOptions.map((option, index) => (
                 <li
                   {...getItemProps({ item: option, index })}
