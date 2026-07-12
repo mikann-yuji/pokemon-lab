@@ -3,1902 +3,2219 @@
     "id": 3,
     "name": "venusaur",
     "nameJa": "フシギバナ",
-    "iconPath": "/champions-icons/3.png"
+    "iconPath": "/champions-icons/3.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/3.png"
   },
   {
     "id": 6,
     "name": "charizard",
     "nameJa": "リザードン",
-    "iconPath": "/champions-icons/6.png"
+    "iconPath": "/champions-icons/6.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/6.png"
   },
   {
     "id": 9,
     "name": "blastoise",
     "nameJa": "カメックス",
-    "iconPath": "/champions-icons/9.png"
+    "iconPath": "/champions-icons/9.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/9.png"
   },
   {
     "id": 15,
     "name": "beedrill",
     "nameJa": "スピアー",
-    "iconPath": "/champions-icons/15.png"
+    "iconPath": "/champions-icons/15.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/15.png"
   },
   {
     "id": 18,
     "name": "pidgeot",
     "nameJa": "ピジョット",
-    "iconPath": "/champions-icons/18.png"
+    "iconPath": "/champions-icons/18.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/18.png"
   },
   {
     "id": 24,
     "name": "arbok",
     "nameJa": "アーボック",
-    "iconPath": "/champions-icons/24.png"
+    "iconPath": "/champions-icons/24.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/24.png"
   },
   {
     "id": 25,
     "name": "pikachu",
     "nameJa": "ピカチュウ",
-    "iconPath": "/champions-icons/25.png"
+    "iconPath": "/champions-icons/25.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/25.png"
   },
   {
     "id": 26,
     "name": "raichu",
     "nameJa": "ライチュウ",
-    "iconPath": "/champions-icons/26.png"
+    "iconPath": "/champions-icons/26.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/26.png"
   },
   {
     "id": 36,
     "name": "clefable",
     "nameJa": "ピクシー",
-    "iconPath": "/champions-icons/36.png"
+    "iconPath": "/champions-icons/36.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/36.png"
   },
   {
     "id": 38,
     "name": "ninetales",
     "nameJa": "キュウコン",
-    "iconPath": "/champions-icons/38.png"
+    "iconPath": "/champions-icons/38.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/38.png"
   },
   {
     "id": 45,
     "name": "vileplume",
     "nameJa": "ラフレシア",
-    "iconPath": "/champions-icons/45.png"
+    "iconPath": "/champions-icons/45.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/45.png"
   },
   {
     "id": 59,
     "name": "arcanine",
     "nameJa": "ウインディ",
-    "iconPath": "/champions-icons/59.png"
+    "iconPath": "/champions-icons/59.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/59.png"
   },
   {
     "id": 65,
     "name": "alakazam",
     "nameJa": "フーディン",
-    "iconPath": "/champions-icons/65.png"
+    "iconPath": "/champions-icons/65.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/65.png"
   },
   {
     "id": 68,
     "name": "machamp",
     "nameJa": "カイリキー",
-    "iconPath": "/champions-icons/68.png"
+    "iconPath": "/champions-icons/68.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/68.png"
   },
   {
     "id": 71,
     "name": "victreebel",
     "nameJa": "ウツボット",
-    "iconPath": "/champions-icons/71.png"
+    "iconPath": "/champions-icons/71.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/71.png"
   },
   {
     "id": 80,
     "name": "slowbro",
     "nameJa": "ヤドラン",
-    "iconPath": "/champions-icons/80.png"
+    "iconPath": "/champions-icons/80.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/80.png"
   },
   {
     "id": 94,
     "name": "gengar",
     "nameJa": "ゲンガー",
-    "iconPath": "/champions-icons/94.png"
+    "iconPath": "/champions-icons/94.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/94.png"
   },
   {
     "id": 115,
     "name": "kangaskhan",
     "nameJa": "ガルーラ",
-    "iconPath": "/champions-icons/115.png"
+    "iconPath": "/champions-icons/115.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/115.png"
   },
   {
     "id": 121,
     "name": "starmie",
     "nameJa": "スターミー",
-    "iconPath": "/champions-icons/121.png"
+    "iconPath": "/champions-icons/121.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/121.png"
   },
   {
     "id": 127,
     "name": "pinsir",
     "nameJa": "カイロス",
-    "iconPath": "/champions-icons/127.png"
+    "iconPath": "/champions-icons/127.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/127.png"
   },
   {
     "id": 128,
     "name": "tauros",
     "nameJa": "ケンタロス",
-    "iconPath": "/champions-icons/128.png"
+    "iconPath": "/champions-icons/128.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/128.png"
   },
   {
     "id": 130,
     "name": "gyarados",
     "nameJa": "ギャラドス",
-    "iconPath": "/champions-icons/130.png"
+    "iconPath": "/champions-icons/130.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/130.png"
   },
   {
     "id": 132,
     "name": "ditto",
     "nameJa": "メタモン",
-    "iconPath": "/champions-icons/132.png"
+    "iconPath": "/champions-icons/132.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/132.png"
   },
   {
     "id": 134,
     "name": "vaporeon",
     "nameJa": "シャワーズ",
-    "iconPath": "/champions-icons/134.png"
+    "iconPath": "/champions-icons/134.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/134.png"
   },
   {
     "id": 135,
     "name": "jolteon",
     "nameJa": "サンダース",
-    "iconPath": "/champions-icons/135.png"
+    "iconPath": "/champions-icons/135.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/135.png"
   },
   {
     "id": 136,
     "name": "flareon",
     "nameJa": "ブースター",
-    "iconPath": "/champions-icons/136.png"
+    "iconPath": "/champions-icons/136.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/136.png"
   },
   {
     "id": 142,
     "name": "aerodactyl",
     "nameJa": "プテラ",
-    "iconPath": "/champions-icons/142.png"
+    "iconPath": "/champions-icons/142.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/142.png"
   },
   {
     "id": 143,
     "name": "snorlax",
     "nameJa": "カビゴン",
-    "iconPath": "/champions-icons/143.png"
+    "iconPath": "/champions-icons/143.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/143.png"
   },
   {
     "id": 149,
     "name": "dragonite",
     "nameJa": "カイリュー",
-    "iconPath": "/champions-icons/149.png"
+    "iconPath": "/champions-icons/149.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/149.png"
   },
   {
     "id": 154,
     "name": "meganium",
     "nameJa": "メガニウム",
-    "iconPath": "/champions-icons/154.png"
+    "iconPath": "/champions-icons/154.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/154.png"
   },
   {
     "id": 157,
     "name": "typhlosion",
     "nameJa": "バクフーン",
-    "iconPath": "/champions-icons/157.png"
+    "iconPath": "/champions-icons/157.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/157.png"
   },
   {
     "id": 160,
     "name": "feraligatr",
     "nameJa": "オーダイル",
-    "iconPath": "/champions-icons/160.png"
+    "iconPath": "/champions-icons/160.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/160.png"
   },
   {
     "id": 168,
     "name": "ariados",
     "nameJa": "アリアドス",
-    "iconPath": "/champions-icons/168.png"
+    "iconPath": "/champions-icons/168.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/168.png"
   },
   {
     "id": 181,
     "name": "ampharos",
     "nameJa": "デンリュウ",
-    "iconPath": "/champions-icons/181.png"
+    "iconPath": "/champions-icons/181.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/181.png"
   },
   {
     "id": 184,
     "name": "azumarill",
     "nameJa": "マリルリ",
-    "iconPath": "/champions-icons/184.png"
+    "iconPath": "/champions-icons/184.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/184.png"
   },
   {
     "id": 186,
     "name": "politoed",
     "nameJa": "ニョロトノ",
-    "iconPath": "/champions-icons/186.png"
+    "iconPath": "/champions-icons/186.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/186.png"
   },
   {
     "id": 196,
     "name": "espeon",
     "nameJa": "エーフィ",
-    "iconPath": "/champions-icons/196.png"
+    "iconPath": "/champions-icons/196.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/196.png"
   },
   {
     "id": 197,
     "name": "umbreon",
     "nameJa": "ブラッキー",
-    "iconPath": "/champions-icons/197.png"
+    "iconPath": "/champions-icons/197.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/197.png"
   },
   {
     "id": 199,
     "name": "slowking",
     "nameJa": "ヤドキング",
-    "iconPath": "/champions-icons/199.png"
+    "iconPath": "/champions-icons/199.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/199.png"
   },
   {
     "id": 205,
     "name": "forretress",
     "nameJa": "フォレトス",
-    "iconPath": "/champions-icons/205.png"
+    "iconPath": "/champions-icons/205.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/205.png"
   },
   {
     "id": 208,
     "name": "steelix",
     "nameJa": "ハガネール",
-    "iconPath": "/champions-icons/208.png"
+    "iconPath": "/champions-icons/208.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/208.png"
   },
   {
     "id": 211,
     "name": "qwilfish",
     "nameJa": "ハリーセン",
-    "iconPath": "/champions-icons/211.png"
+    "iconPath": "/champions-icons/211.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/211.png"
   },
   {
     "id": 212,
     "name": "scizor",
     "nameJa": "ハッサム",
-    "iconPath": "/champions-icons/212.png"
+    "iconPath": "/champions-icons/212.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/212.png"
   },
   {
     "id": 214,
     "name": "heracross",
     "nameJa": "ヘラクロス",
-    "iconPath": "/champions-icons/214.png"
+    "iconPath": "/champions-icons/214.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/214.png"
   },
   {
     "id": 227,
     "name": "skarmory",
     "nameJa": "エアームド",
-    "iconPath": "/champions-icons/227.png"
+    "iconPath": "/champions-icons/227.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/227.png"
   },
   {
     "id": 229,
     "name": "houndoom",
     "nameJa": "ヘルガー",
-    "iconPath": "/champions-icons/229.png"
+    "iconPath": "/champions-icons/229.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/229.png"
   },
   {
     "id": 248,
     "name": "tyranitar",
     "nameJa": "バンギラス",
-    "iconPath": "/champions-icons/248.png"
+    "iconPath": "/champions-icons/248.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/248.png"
   },
   {
     "id": 254,
     "name": "sceptile",
     "nameJa": "ジュカイン",
-    "iconPath": "/champions-icons/254.png"
+    "iconPath": "/champions-icons/254.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/254.png"
   },
   {
     "id": 257,
     "name": "blaziken",
     "nameJa": "バシャーモ",
-    "iconPath": "/champions-icons/257.png"
+    "iconPath": "/champions-icons/257.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/257.png"
   },
   {
     "id": 260,
     "name": "swampert",
     "nameJa": "ラグラージ",
-    "iconPath": "/champions-icons/260.png"
+    "iconPath": "/champions-icons/260.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/260.png"
   },
   {
     "id": 279,
     "name": "pelipper",
     "nameJa": "ペリッパー",
-    "iconPath": "/champions-icons/279.png"
+    "iconPath": "/champions-icons/279.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/279.png"
   },
   {
     "id": 282,
     "name": "gardevoir",
     "nameJa": "サーナイト",
-    "iconPath": "/champions-icons/282.png"
+    "iconPath": "/champions-icons/282.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/282.png"
   },
   {
     "id": 302,
     "name": "sableye",
     "nameJa": "ヤミラミ",
-    "iconPath": "/champions-icons/302.png"
+    "iconPath": "/champions-icons/302.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/302.png"
   },
   {
     "id": 303,
     "name": "mawile",
     "nameJa": "クチート",
-    "iconPath": "/champions-icons/303.png"
+    "iconPath": "/champions-icons/303.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/303.png"
   },
   {
     "id": 306,
     "name": "aggron",
     "nameJa": "ボスゴドラ",
-    "iconPath": "/champions-icons/306.png"
+    "iconPath": "/champions-icons/306.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/306.png"
   },
   {
     "id": 308,
     "name": "medicham",
     "nameJa": "チャーレム",
-    "iconPath": "/champions-icons/308.png"
+    "iconPath": "/champions-icons/308.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/308.png"
   },
   {
     "id": 310,
     "name": "manectric",
     "nameJa": "ライボルト",
-    "iconPath": "/champions-icons/310.png"
+    "iconPath": "/champions-icons/310.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/310.png"
   },
   {
     "id": 319,
     "name": "sharpedo",
     "nameJa": "サメハダー",
-    "iconPath": "/champions-icons/319.png"
+    "iconPath": "/champions-icons/319.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/319.png"
   },
   {
     "id": 323,
     "name": "camerupt",
     "nameJa": "バクーダ",
-    "iconPath": "/champions-icons/323.png"
+    "iconPath": "/champions-icons/323.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/323.png"
   },
   {
     "id": 324,
     "name": "torkoal",
     "nameJa": "コータス",
-    "iconPath": "/champions-icons/324.png"
+    "iconPath": "/champions-icons/324.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/324.png"
   },
   {
     "id": 334,
     "name": "altaria",
     "nameJa": "チルタリス",
-    "iconPath": "/champions-icons/334.png"
+    "iconPath": "/champions-icons/334.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/334.png"
   },
   {
     "id": 350,
     "name": "milotic",
     "nameJa": "ミロカロス",
-    "iconPath": "/champions-icons/350.png"
+    "iconPath": "/champions-icons/350.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/350.png"
   },
   {
     "id": 351,
     "name": "castform",
     "nameJa": "ポワルン",
-    "iconPath": "/champions-icons/351.png"
+    "iconPath": "/champions-icons/351.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/351.png"
   },
   {
     "id": 354,
     "name": "banette",
     "nameJa": "ジュペッタ",
-    "iconPath": "/champions-icons/354.png"
+    "iconPath": "/champions-icons/354.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/354.png"
   },
   {
     "id": 358,
     "name": "chimecho",
     "nameJa": "チリーン",
-    "iconPath": "/champions-icons/358.png"
+    "iconPath": "/champions-icons/358.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/358.png"
   },
   {
     "id": 359,
     "name": "absol",
     "nameJa": "アブソル",
-    "iconPath": "/champions-icons/359.png"
+    "iconPath": "/champions-icons/359.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/359.png"
   },
   {
     "id": 362,
     "name": "glalie",
     "nameJa": "オニゴーリ",
-    "iconPath": "/champions-icons/362.png"
+    "iconPath": "/champions-icons/362.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/362.png"
   },
   {
     "id": 376,
     "name": "metagross",
     "nameJa": "メタグロス",
-    "iconPath": "/champions-icons/376.png"
+    "iconPath": "/champions-icons/376.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/376.png"
   },
   {
     "id": 389,
     "name": "torterra",
     "nameJa": "ドダイトス",
-    "iconPath": "/champions-icons/389.png"
+    "iconPath": "/champions-icons/389.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/389.png"
   },
   {
     "id": 392,
     "name": "infernape",
     "nameJa": "ゴウカザル",
-    "iconPath": "/champions-icons/392.png"
+    "iconPath": "/champions-icons/392.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/392.png"
   },
   {
     "id": 395,
     "name": "empoleon",
     "nameJa": "エンペルト",
-    "iconPath": "/champions-icons/395.png"
+    "iconPath": "/champions-icons/395.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/395.png"
   },
   {
     "id": 398,
     "name": "staraptor",
     "nameJa": "ムクホーク",
-    "iconPath": "/champions-icons/398.png"
+    "iconPath": "/champions-icons/398.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/398.png"
   },
   {
     "id": 405,
     "name": "luxray",
     "nameJa": "レントラー",
-    "iconPath": "/champions-icons/405.png"
+    "iconPath": "/champions-icons/405.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/405.png"
   },
   {
     "id": 407,
     "name": "roserade",
     "nameJa": "ロズレイド",
-    "iconPath": "/champions-icons/407.png"
+    "iconPath": "/champions-icons/407.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/407.png"
   },
   {
     "id": 409,
     "name": "rampardos",
     "nameJa": "ラムパルド",
-    "iconPath": "/champions-icons/409.png"
+    "iconPath": "/champions-icons/409.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/409.png"
   },
   {
     "id": 411,
     "name": "bastiodon",
     "nameJa": "トリデプス",
-    "iconPath": "/champions-icons/411.png"
+    "iconPath": "/champions-icons/411.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/411.png"
   },
   {
     "id": 428,
     "name": "lopunny",
     "nameJa": "ミミロップ",
-    "iconPath": "/champions-icons/428.png"
+    "iconPath": "/champions-icons/428.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/428.png"
   },
   {
     "id": 442,
     "name": "spiritomb",
     "nameJa": "ミカルゲ",
-    "iconPath": "/champions-icons/442.png"
+    "iconPath": "/champions-icons/442.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/442.png"
   },
   {
     "id": 445,
     "name": "garchomp",
     "nameJa": "ガブリアス",
-    "iconPath": "/champions-icons/445.png"
+    "iconPath": "/champions-icons/445.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/445.png"
   },
   {
     "id": 448,
     "name": "lucario",
     "nameJa": "ルカリオ",
-    "iconPath": "/champions-icons/448.png"
+    "iconPath": "/champions-icons/448.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/448.png"
   },
   {
     "id": 450,
     "name": "hippowdon",
     "nameJa": "カバルドン",
-    "iconPath": "/champions-icons/450.png"
+    "iconPath": "/champions-icons/450.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/450.png"
   },
   {
     "id": 454,
     "name": "toxicroak",
     "nameJa": "ドクロッグ",
-    "iconPath": "/champions-icons/454.png"
+    "iconPath": "/champions-icons/454.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/454.png"
   },
   {
     "id": 460,
     "name": "abomasnow",
     "nameJa": "ユキノオー",
-    "iconPath": "/champions-icons/460.png"
+    "iconPath": "/champions-icons/460.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/460.png"
   },
   {
     "id": 461,
     "name": "weavile",
     "nameJa": "マニューラ",
-    "iconPath": "/champions-icons/461.png"
+    "iconPath": "/champions-icons/461.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/461.png"
   },
   {
     "id": 464,
     "name": "rhyperior",
     "nameJa": "ドサイドン",
-    "iconPath": "/champions-icons/464.png"
+    "iconPath": "/champions-icons/464.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/464.png"
   },
   {
     "id": 470,
     "name": "leafeon",
     "nameJa": "リーフィア",
-    "iconPath": "/champions-icons/470.png"
+    "iconPath": "/champions-icons/470.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/470.png"
   },
   {
     "id": 471,
     "name": "glaceon",
     "nameJa": "グレイシア",
-    "iconPath": "/champions-icons/471.png"
+    "iconPath": "/champions-icons/471.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/471.png"
   },
   {
     "id": 472,
     "name": "gliscor",
     "nameJa": "グライオン",
-    "iconPath": "/champions-icons/472.png"
+    "iconPath": "/champions-icons/472.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/472.png"
   },
   {
     "id": 473,
     "name": "mamoswine",
     "nameJa": "マンムー",
-    "iconPath": "/champions-icons/473.png"
+    "iconPath": "/champions-icons/473.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/473.png"
   },
   {
     "id": 475,
     "name": "gallade",
     "nameJa": "エルレイド",
-    "iconPath": "/champions-icons/475.png"
+    "iconPath": "/champions-icons/475.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/475.png"
   },
   {
     "id": 478,
     "name": "froslass",
     "nameJa": "ユキメノコ",
-    "iconPath": "/champions-icons/478.png"
+    "iconPath": "/champions-icons/478.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/478.png"
   },
   {
     "id": 479,
     "name": "rotom",
     "nameJa": "ロトム",
-    "iconPath": "/champions-icons/479.png"
+    "iconPath": "/champions-icons/479.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/479.png"
   },
   {
     "id": 497,
     "name": "serperior",
     "nameJa": "ジャローダ",
-    "iconPath": "/champions-icons/497.png"
+    "iconPath": "/champions-icons/497.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/497.png"
   },
   {
     "id": 500,
     "name": "emboar",
     "nameJa": "エンブオー",
-    "iconPath": "/champions-icons/500.png"
+    "iconPath": "/champions-icons/500.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/500.png"
   },
   {
     "id": 503,
     "name": "samurott",
     "nameJa": "ダイケンキ",
-    "iconPath": "/champions-icons/503.png"
+    "iconPath": "/champions-icons/503.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/503.png"
   },
   {
     "id": 505,
     "name": "watchog",
     "nameJa": "ミルホッグ",
-    "iconPath": "/champions-icons/505.png"
+    "iconPath": "/champions-icons/505.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/505.png"
   },
   {
     "id": 510,
     "name": "liepard",
     "nameJa": "レパルダス",
-    "iconPath": "/champions-icons/510.png"
+    "iconPath": "/champions-icons/510.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/510.png"
   },
   {
     "id": 512,
     "name": "simisage",
     "nameJa": "ヤナッキー",
-    "iconPath": "/champions-icons/512.png"
+    "iconPath": "/champions-icons/512.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/512.png"
   },
   {
     "id": 514,
     "name": "simisear",
     "nameJa": "バオッキー",
-    "iconPath": "/champions-icons/514.png"
+    "iconPath": "/champions-icons/514.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/514.png"
   },
   {
     "id": 516,
     "name": "simipour",
     "nameJa": "ヒヤッキー",
-    "iconPath": "/champions-icons/516.png"
+    "iconPath": "/champions-icons/516.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/516.png"
   },
   {
     "id": 518,
     "name": "musharna",
     "nameJa": "ムシャーナ",
-    "iconPath": "/champions-icons/518.png"
+    "iconPath": "/champions-icons/518.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/518.png"
   },
   {
     "id": 530,
     "name": "excadrill",
     "nameJa": "ドリュウズ",
-    "iconPath": "/champions-icons/530.png"
+    "iconPath": "/champions-icons/530.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/530.png"
   },
   {
     "id": 531,
     "name": "audino",
     "nameJa": "タブンネ",
-    "iconPath": "/champions-icons/531.png"
+    "iconPath": "/champions-icons/531.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/531.png"
   },
   {
     "id": 534,
     "name": "conkeldurr",
     "nameJa": "ローブシン",
-    "iconPath": "/champions-icons/534.png"
+    "iconPath": "/champions-icons/534.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/534.png"
   },
   {
     "id": 545,
     "name": "scolipede",
     "nameJa": "ペンドラー",
-    "iconPath": "/champions-icons/545.png"
+    "iconPath": "/champions-icons/545.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/545.png"
   },
   {
     "id": 547,
     "name": "whimsicott",
     "nameJa": "エルフーン",
-    "iconPath": "/champions-icons/547.png"
+    "iconPath": "/champions-icons/547.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/547.png"
   },
   {
     "id": 553,
     "name": "krookodile",
     "nameJa": "ワルビアル",
-    "iconPath": "/champions-icons/553.png"
+    "iconPath": "/champions-icons/553.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/553.png"
   },
   {
     "id": 560,
     "name": "scrafty",
     "nameJa": "ズルズキン",
-    "iconPath": "/champions-icons/560.png"
+    "iconPath": "/champions-icons/560.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/560.png"
   },
   {
     "id": 563,
     "name": "cofagrigus",
     "nameJa": "デスカーン",
-    "iconPath": "/champions-icons/563.png"
+    "iconPath": "/champions-icons/563.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/563.png"
   },
   {
     "id": 569,
     "name": "garbodor",
     "nameJa": "ダストダス",
-    "iconPath": "/champions-icons/569.png"
+    "iconPath": "/champions-icons/569.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/569.png"
   },
   {
     "id": 571,
     "name": "zoroark",
     "nameJa": "ゾロアーク",
-    "iconPath": "/champions-icons/571.png"
+    "iconPath": "/champions-icons/571.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/571.png"
   },
   {
     "id": 579,
     "name": "reuniclus",
     "nameJa": "ランクルス",
-    "iconPath": "/champions-icons/579.png"
+    "iconPath": "/champions-icons/579.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/579.png"
   },
   {
     "id": 584,
     "name": "vanilluxe",
     "nameJa": "バイバニラ",
-    "iconPath": "/champions-icons/584.png"
+    "iconPath": "/champions-icons/584.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/584.png"
   },
   {
     "id": 587,
     "name": "emolga",
     "nameJa": "エモンガ",
-    "iconPath": "/champions-icons/587.png"
+    "iconPath": "/champions-icons/587.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/587.png"
   },
   {
     "id": 604,
     "name": "eelektross",
     "nameJa": "シビルドン",
-    "iconPath": "/champions-icons/604.png"
+    "iconPath": "/champions-icons/604.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/604.png"
   },
   {
     "id": 609,
     "name": "chandelure",
     "nameJa": "シャンデラ",
-    "iconPath": "/champions-icons/609.png"
+    "iconPath": "/champions-icons/609.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/609.png"
   },
   {
     "id": 614,
     "name": "beartic",
     "nameJa": "ツンベアー",
-    "iconPath": "/champions-icons/614.png"
+    "iconPath": "/champions-icons/614.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/614.png"
   },
   {
     "id": 618,
     "name": "stunfisk",
     "nameJa": "マッギョ",
-    "iconPath": "/champions-icons/618.png"
+    "iconPath": "/champions-icons/618.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/618.png"
   },
   {
     "id": 623,
     "name": "golurk",
     "nameJa": "ゴルーグ",
-    "iconPath": "/champions-icons/623.png"
+    "iconPath": "/champions-icons/623.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/623.png"
   },
   {
     "id": 635,
     "name": "hydreigon",
     "nameJa": "サザンドラ",
-    "iconPath": "/champions-icons/635.png"
+    "iconPath": "/champions-icons/635.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/635.png"
   },
   {
     "id": 637,
     "name": "volcarona",
     "nameJa": "ウルガモス",
-    "iconPath": "/champions-icons/637.png"
+    "iconPath": "/champions-icons/637.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/637.png"
   },
   {
     "id": 652,
     "name": "chesnaught",
     "nameJa": "ブリガロン",
-    "iconPath": "/champions-icons/652.png"
+    "iconPath": "/champions-icons/652.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/652.png"
   },
   {
     "id": 655,
     "name": "delphox",
     "nameJa": "マフォクシー",
-    "iconPath": "/champions-icons/655.png"
+    "iconPath": "/champions-icons/655.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/655.png"
   },
   {
     "id": 658,
     "name": "greninja",
     "nameJa": "ゲッコウガ",
-    "iconPath": "/champions-icons/658.png"
+    "iconPath": "/champions-icons/658.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/658.png"
   },
   {
     "id": 660,
     "name": "diggersby",
     "nameJa": "ホルード",
-    "iconPath": "/champions-icons/660.png"
+    "iconPath": "/champions-icons/660.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/660.png"
   },
   {
     "id": 663,
     "name": "talonflame",
     "nameJa": "ファイアロー",
-    "iconPath": "/champions-icons/663.png"
+    "iconPath": "/champions-icons/663.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/663.png"
   },
   {
     "id": 666,
     "name": "vivillon",
     "nameJa": "ビビヨン はなぞののもよう",
-    "iconPath": "/champions-icons/666.png"
+    "iconPath": "/champions-icons/666.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/666.png"
   },
   {
     "id": 668,
     "name": "pyroar-male",
     "nameJa": "カエンジシ オスのすがた",
-    "iconPath": "/champions-icons/668.png"
+    "iconPath": "/champions-icons/668.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/668.png"
   },
   {
     "id": 671,
     "name": "florges",
     "nameJa": "フラージェス あかいはな",
-    "iconPath": "/champions-icons/671.png"
+    "iconPath": "/champions-icons/671.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/671.png"
   },
   {
     "id": 675,
     "name": "pangoro",
     "nameJa": "ゴロンダ",
-    "iconPath": "/champions-icons/675.png"
+    "iconPath": "/champions-icons/675.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/675.png"
   },
   {
     "id": 676,
     "name": "furfrou",
     "nameJa": "トリミアン やせいのすがた",
-    "iconPath": "/champions-icons/676.png"
+    "iconPath": "/champions-icons/676.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/676.png"
   },
   {
     "id": 678,
     "name": "meowstic-male",
     "nameJa": "ニャオニクス オスのすがた",
-    "iconPath": "/champions-icons/678.png"
+    "iconPath": "/champions-icons/678.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/678.png"
   },
   {
     "id": 681,
     "name": "aegislash-shield",
     "nameJa": "ギルガルド シールドフォルム",
-    "iconPath": "/champions-icons/681.png"
+    "iconPath": "/champions-icons/681.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/681.png"
   },
   {
     "id": 683,
     "name": "aromatisse",
     "nameJa": "フレフワン",
-    "iconPath": "/champions-icons/683.png"
+    "iconPath": "/champions-icons/683.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/683.png"
   },
   {
     "id": 685,
     "name": "slurpuff",
     "nameJa": "ペロリーム",
-    "iconPath": "/champions-icons/685.png"
+    "iconPath": "/champions-icons/685.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/685.png"
   },
   {
     "id": 687,
     "name": "malamar",
     "nameJa": "カラマネロ",
-    "iconPath": "/champions-icons/687.png"
+    "iconPath": "/champions-icons/687.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/687.png"
   },
   {
     "id": 689,
     "name": "barbaracle",
     "nameJa": "ガメノデス",
-    "iconPath": "/champions-icons/689.png"
+    "iconPath": "/champions-icons/689.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/689.png"
   },
   {
     "id": 691,
     "name": "dragalge",
     "nameJa": "ドラミドロ",
-    "iconPath": "/champions-icons/691.png"
+    "iconPath": "/champions-icons/691.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/691.png"
   },
   {
     "id": 693,
     "name": "clawitzer",
     "nameJa": "ブロスター",
-    "iconPath": "/champions-icons/693.png"
+    "iconPath": "/champions-icons/693.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/693.png"
   },
   {
     "id": 695,
     "name": "heliolisk",
     "nameJa": "エレザード",
-    "iconPath": "/champions-icons/695.png"
+    "iconPath": "/champions-icons/695.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/695.png"
   },
   {
     "id": 697,
     "name": "tyrantrum",
     "nameJa": "ガチゴラス",
-    "iconPath": "/champions-icons/697.png"
+    "iconPath": "/champions-icons/697.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/697.png"
   },
   {
     "id": 699,
     "name": "aurorus",
     "nameJa": "アマルルガ",
-    "iconPath": "/champions-icons/699.png"
+    "iconPath": "/champions-icons/699.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/699.png"
   },
   {
     "id": 700,
     "name": "sylveon",
     "nameJa": "ニンフィア",
-    "iconPath": "/champions-icons/700.png"
+    "iconPath": "/champions-icons/700.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/700.png"
   },
   {
     "id": 701,
     "name": "hawlucha",
     "nameJa": "ルチャブル",
-    "iconPath": "/champions-icons/701.png"
+    "iconPath": "/champions-icons/701.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/701.png"
   },
   {
     "id": 702,
     "name": "dedenne",
     "nameJa": "デデンネ",
-    "iconPath": "/champions-icons/702.png"
+    "iconPath": "/champions-icons/702.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/702.png"
   },
   {
     "id": 706,
     "name": "goodra",
     "nameJa": "ヌメルゴン",
-    "iconPath": "/champions-icons/706.png"
+    "iconPath": "/champions-icons/706.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/706.png"
   },
   {
     "id": 707,
     "name": "klefki",
     "nameJa": "クレッフィ",
-    "iconPath": "/champions-icons/707.png"
+    "iconPath": "/champions-icons/707.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/707.png"
   },
   {
     "id": 709,
     "name": "trevenant",
     "nameJa": "オーロット",
-    "iconPath": "/champions-icons/709.png"
+    "iconPath": "/champions-icons/709.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/709.png"
   },
   {
     "id": 711,
     "name": "gourgeist-average",
     "nameJa": "パンプジン ふつうのサイズ",
-    "iconPath": "/champions-icons/711.png"
+    "iconPath": "/champions-icons/711.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/711.png"
   },
   {
     "id": 713,
     "name": "avalugg",
     "nameJa": "クレベース",
-    "iconPath": "/champions-icons/713.png"
+    "iconPath": "/champions-icons/713.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/713.png"
   },
   {
     "id": 715,
     "name": "noivern",
     "nameJa": "オンバーン",
-    "iconPath": "/champions-icons/715.png"
+    "iconPath": "/champions-icons/715.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/715.png"
   },
   {
     "id": 724,
     "name": "decidueye",
     "nameJa": "ジュナイパー",
-    "iconPath": "/champions-icons/724.png"
+    "iconPath": "/champions-icons/724.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/724.png"
   },
   {
     "id": 727,
     "name": "incineroar",
     "nameJa": "ガオガエン",
-    "iconPath": "/champions-icons/727.png"
+    "iconPath": "/champions-icons/727.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/727.png"
   },
   {
     "id": 730,
     "name": "primarina",
     "nameJa": "アシレーヌ",
-    "iconPath": "/champions-icons/730.png"
+    "iconPath": "/champions-icons/730.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/730.png"
   },
   {
     "id": 733,
     "name": "toucannon",
     "nameJa": "ドデカバシ",
-    "iconPath": "/champions-icons/733.png"
+    "iconPath": "/champions-icons/733.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/733.png"
   },
   {
     "id": 740,
     "name": "crabominable",
     "nameJa": "ケケンカニ",
-    "iconPath": "/champions-icons/740.png"
+    "iconPath": "/champions-icons/740.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/740.png"
   },
   {
     "id": 745,
     "name": "lycanroc-midday",
     "nameJa": "ルガルガン まひるのすがた",
-    "iconPath": "/champions-icons/745.png"
+    "iconPath": "/champions-icons/745.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/745.png"
   },
   {
     "id": 748,
     "name": "toxapex",
     "nameJa": "ドヒドイデ",
-    "iconPath": "/champions-icons/748.png"
+    "iconPath": "/champions-icons/748.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/748.png"
   },
   {
     "id": 750,
     "name": "mudsdale",
     "nameJa": "バンバドロ",
-    "iconPath": "/champions-icons/750.png"
+    "iconPath": "/champions-icons/750.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/750.png"
   },
   {
     "id": 752,
     "name": "araquanid",
     "nameJa": "オニシズクモ",
-    "iconPath": "/champions-icons/752.png"
+    "iconPath": "/champions-icons/752.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/752.png"
   },
   {
     "id": 758,
     "name": "salazzle",
     "nameJa": "エンニュート",
-    "iconPath": "/champions-icons/758.png"
+    "iconPath": "/champions-icons/758.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/758.png"
   },
   {
     "id": 763,
     "name": "tsareena",
     "nameJa": "アマージョ",
-    "iconPath": "/champions-icons/763.png"
+    "iconPath": "/champions-icons/763.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/763.png"
   },
   {
     "id": 765,
     "name": "oranguru",
     "nameJa": "ヤレユータン",
-    "iconPath": "/champions-icons/765.png"
+    "iconPath": "/champions-icons/765.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/765.png"
   },
   {
     "id": 766,
     "name": "passimian",
     "nameJa": "ナゲツケサル",
-    "iconPath": "/champions-icons/766.png"
+    "iconPath": "/champions-icons/766.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/766.png"
   },
   {
     "id": 778,
     "name": "mimikyu-disguised",
     "nameJa": "ミミッキュ ばけたすがた",
-    "iconPath": "/champions-icons/778.png"
+    "iconPath": "/champions-icons/778.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/778.png"
   },
   {
     "id": 780,
     "name": "drampa",
     "nameJa": "ジジーロン",
-    "iconPath": "/champions-icons/780.png"
+    "iconPath": "/champions-icons/780.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/780.png"
   },
   {
     "id": 784,
     "name": "kommo-o",
     "nameJa": "ジャラランガ",
-    "iconPath": "/champions-icons/784.png"
+    "iconPath": "/champions-icons/784.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/784.png"
   },
   {
     "id": 823,
     "name": "corviknight",
     "nameJa": "アーマーガア",
-    "iconPath": "/champions-icons/823.png"
+    "iconPath": "/champions-icons/823.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/823.png"
   },
   {
     "id": 841,
     "name": "flapple",
     "nameJa": "アップリュー",
-    "iconPath": "/champions-icons/841.png"
+    "iconPath": "/champions-icons/841.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/841.png"
   },
   {
     "id": 842,
     "name": "appletun",
     "nameJa": "タルップル",
-    "iconPath": "/champions-icons/842.png"
+    "iconPath": "/champions-icons/842.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/842.png"
   },
   {
     "id": 844,
     "name": "sandaconda",
     "nameJa": "サダイジャ",
-    "iconPath": "/champions-icons/844.png"
+    "iconPath": "/champions-icons/844.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/844.png"
   },
   {
     "id": 855,
     "name": "polteageist",
     "nameJa": "ポットデス がんさくフォルム",
-    "iconPath": "/champions-icons/855.png"
+    "iconPath": "/champions-icons/855.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/855.png"
   },
   {
     "id": 858,
     "name": "hatterene",
     "nameJa": "ブリムオン",
-    "iconPath": "/champions-icons/858.png"
+    "iconPath": "/champions-icons/858.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/858.png"
   },
   {
     "id": 861,
     "name": "grimmsnarl",
     "nameJa": "オーロンゲ",
-    "iconPath": "/champions-icons/861.png"
+    "iconPath": "/champions-icons/861.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/861.png"
   },
   {
     "id": 866,
     "name": "mr-rime",
     "nameJa": "バリコオル",
-    "iconPath": "/champions-icons/866.png"
+    "iconPath": "/champions-icons/866.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/866.png"
   },
   {
     "id": 867,
     "name": "runerigus",
     "nameJa": "デスバーン",
-    "iconPath": "/champions-icons/867.png"
+    "iconPath": "/champions-icons/867.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/867.png"
   },
   {
     "id": 869,
     "name": "alcremie",
     "nameJa": "マホイップ ミルキィバニラ",
-    "iconPath": "/champions-icons/869.png"
+    "iconPath": "/champions-icons/869.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/869.png"
   },
   {
     "id": 870,
     "name": "falinks",
     "nameJa": "タイレーツ",
-    "iconPath": "/champions-icons/870.png"
+    "iconPath": "/champions-icons/870.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/870.png"
   },
   {
     "id": 877,
     "name": "morpeko-full-belly",
     "nameJa": "モルペコ まんぷくもよう",
-    "iconPath": "/champions-icons/877.png"
+    "iconPath": "/champions-icons/877.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/877.png"
   },
   {
     "id": 887,
     "name": "dragapult",
     "nameJa": "ドラパルト",
-    "iconPath": "/champions-icons/887.png"
+    "iconPath": "/champions-icons/887.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/887.png"
   },
   {
     "id": 899,
     "name": "wyrdeer",
     "nameJa": "アヤシシ",
-    "iconPath": "/champions-icons/899.png"
+    "iconPath": "/champions-icons/899.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/899.png"
   },
   {
     "id": 900,
     "name": "kleavor",
     "nameJa": "バサギリ",
-    "iconPath": "/champions-icons/900.png"
+    "iconPath": "/champions-icons/900.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/900.png"
   },
   {
     "id": 902,
     "name": "basculegion-male",
     "nameJa": "イダイトウ オスのすがた",
-    "iconPath": "/champions-icons/902.png"
+    "iconPath": "/champions-icons/902.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/902.png"
   },
   {
     "id": 903,
     "name": "sneasler",
     "nameJa": "オオニューラ",
-    "iconPath": "/champions-icons/903.png"
+    "iconPath": "/champions-icons/903.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/903.png"
   },
   {
     "id": 904,
     "name": "overqwil",
     "nameJa": "ハリーマン",
-    "iconPath": "/champions-icons/904.png"
+    "iconPath": "/champions-icons/904.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/904.png"
   },
   {
     "id": 908,
     "name": "meowscarada",
     "nameJa": "マスカーニャ",
-    "iconPath": "/champions-icons/908.png"
+    "iconPath": "/champions-icons/908.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/908.png"
   },
   {
     "id": 911,
     "name": "skeledirge",
     "nameJa": "ラウドボーン",
-    "iconPath": "/champions-icons/911.png"
+    "iconPath": "/champions-icons/911.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/911.png"
   },
   {
     "id": 914,
     "name": "quaquaval",
     "nameJa": "ウェーニバル",
-    "iconPath": "/champions-icons/914.png"
+    "iconPath": "/champions-icons/914.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/914.png"
   },
   {
     "id": 925,
     "name": "maushold-family-of-four",
     "nameJa": "イッカネズミ ４ひきかぞく",
-    "iconPath": "/champions-icons/925.png"
+    "iconPath": "/champions-icons/925.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/925.png"
   },
   {
     "id": 934,
     "name": "garganacl",
     "nameJa": "キョジオーン",
-    "iconPath": "/champions-icons/934.png"
+    "iconPath": "/champions-icons/934.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/934.png"
   },
   {
     "id": 936,
     "name": "armarouge",
     "nameJa": "グレンアルマ",
-    "iconPath": "/champions-icons/936.png"
+    "iconPath": "/champions-icons/936.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/936.png"
   },
   {
     "id": 937,
     "name": "ceruledge",
     "nameJa": "ソウブレイズ",
-    "iconPath": "/champions-icons/937.png"
+    "iconPath": "/champions-icons/937.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/937.png"
   },
   {
     "id": 939,
     "name": "bellibolt",
     "nameJa": "ハラバリー",
-    "iconPath": "/champions-icons/939.png"
+    "iconPath": "/champions-icons/939.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/939.png"
   },
   {
     "id": 952,
     "name": "scovillain",
     "nameJa": "スコヴィラン",
-    "iconPath": "/champions-icons/952.png"
+    "iconPath": "/champions-icons/952.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/952.png"
   },
   {
     "id": 956,
     "name": "espathra",
     "nameJa": "クエスパトラ",
-    "iconPath": "/champions-icons/956.png"
+    "iconPath": "/champions-icons/956.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/956.png"
   },
   {
     "id": 959,
     "name": "tinkaton",
     "nameJa": "デカヌチャン",
-    "iconPath": "/champions-icons/959.png"
+    "iconPath": "/champions-icons/959.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/959.png"
   },
   {
     "id": 964,
     "name": "palafin-zero",
     "nameJa": "イルカマン ナイーブフォルム",
-    "iconPath": "/champions-icons/964.png"
+    "iconPath": "/champions-icons/964.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/964.png"
   },
   {
     "id": 968,
     "name": "orthworm",
     "nameJa": "ミミズズ",
-    "iconPath": "/champions-icons/968.png"
+    "iconPath": "/champions-icons/968.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/968.png"
   },
   {
     "id": 970,
     "name": "glimmora",
     "nameJa": "キラフロル",
-    "iconPath": "/champions-icons/970.png"
+    "iconPath": "/champions-icons/970.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/970.png"
   },
   {
     "id": 972,
     "name": "houndstone",
     "nameJa": "ハカドッグ",
-    "iconPath": "/champions-icons/972.png"
+    "iconPath": "/champions-icons/972.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/972.png"
   },
   {
     "id": 979,
     "name": "annihilape",
     "nameJa": "コノヨザル",
-    "iconPath": "/champions-icons/979.png"
+    "iconPath": "/champions-icons/979.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/979.png"
   },
   {
     "id": 981,
     "name": "farigiraf",
     "nameJa": "リキキリン",
-    "iconPath": "/champions-icons/981.png"
+    "iconPath": "/champions-icons/981.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/981.png"
   },
   {
     "id": 983,
     "name": "kingambit",
     "nameJa": "ドドゲザン",
-    "iconPath": "/champions-icons/983.png"
+    "iconPath": "/champions-icons/983.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/983.png"
   },
   {
     "id": 1000,
     "name": "gholdengo",
     "nameJa": "サーフゴー",
-    "iconPath": "/champions-icons/1000.png"
+    "iconPath": "/champions-icons/1000.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/1000.png"
   },
   {
     "id": 1013,
     "name": "sinistcha",
     "nameJa": "ヤバソチャ ボンサクのすがた",
-    "iconPath": "/champions-icons/1013.png"
+    "iconPath": "/champions-icons/1013.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/1013.png"
   },
   {
     "id": 1018,
     "name": "archaludon",
     "nameJa": "ブリジュラス",
-    "iconPath": "/champions-icons/1018.png"
+    "iconPath": "/champions-icons/1018.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/1018.png"
   },
   {
     "id": 1019,
     "name": "hydrapple",
     "nameJa": "カミツオロチ",
-    "iconPath": "/champions-icons/1019.png"
+    "iconPath": "/champions-icons/1019.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/1019.png"
   },
   {
     "id": 10008,
     "name": "rotom-heat",
     "nameJa": "ヒートロトム",
-    "iconPath": "/champions-icons/10008.png"
+    "iconPath": "/champions-icons/10008.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10008.png"
   },
   {
     "id": 10009,
     "name": "rotom-wash",
     "nameJa": "ウォッシュロトム",
-    "iconPath": "/champions-icons/10009.png"
+    "iconPath": "/champions-icons/10009.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10009.png"
   },
   {
     "id": 10010,
     "name": "rotom-frost",
     "nameJa": "フロストロトム",
-    "iconPath": "/champions-icons/10010.png"
+    "iconPath": "/champions-icons/10010.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10010.png"
   },
   {
     "id": 10011,
     "name": "rotom-fan",
     "nameJa": "スピンロトム",
-    "iconPath": "/champions-icons/10011.png"
+    "iconPath": "/champions-icons/10011.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10011.png"
   },
   {
     "id": 10012,
     "name": "rotom-mow",
     "nameJa": "カットロトム",
-    "iconPath": "/champions-icons/10012.png"
+    "iconPath": "/champions-icons/10012.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10012.png"
   },
   {
     "id": 10013,
     "name": "castform-sunny",
     "nameJa": "ポワルン たいようのすがた",
-    "iconPath": "/champions-icons/10013.png"
+    "iconPath": "/champions-icons/10013.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10013.png"
   },
   {
     "id": 10014,
     "name": "castform-rainy",
     "nameJa": "ポワルン あまみずのすがた",
-    "iconPath": "/champions-icons/10014.png"
+    "iconPath": "/champions-icons/10014.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10014.png"
   },
   {
     "id": 10015,
     "name": "castform-snowy",
     "nameJa": "ポワルン ゆきぐものすがた",
-    "iconPath": "/champions-icons/10015.png"
+    "iconPath": "/champions-icons/10015.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10015.png"
   },
   {
     "id": 10025,
     "name": "meowstic-female",
     "nameJa": "ニャオニクス メスのすがた",
-    "iconPath": "/champions-icons/10025.png"
+    "iconPath": "/champions-icons/10025.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10025.png"
   },
   {
     "id": 10026,
     "name": "aegislash-blade",
     "nameJa": "ギルガルド ブレードフォルム",
-    "iconPath": "/champions-icons/10026.png"
+    "iconPath": "/champions-icons/10026.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10026.png"
   },
   {
     "id": 10030,
     "name": "gourgeist-small",
     "nameJa": "パンプジン ちいさいサイズ",
-    "iconPath": "/champions-icons/10030.png"
+    "iconPath": "/champions-icons/10030.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10030.png"
   },
   {
     "id": 10031,
     "name": "gourgeist-large",
     "nameJa": "パンプジン おおきいサイズ",
-    "iconPath": "/champions-icons/10031.png"
+    "iconPath": "/champions-icons/10031.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10031.png"
   },
   {
     "id": 10032,
     "name": "gourgeist-super",
     "nameJa": "パンプジン とくだいサイズ",
-    "iconPath": "/champions-icons/10032.png"
+    "iconPath": "/champions-icons/10032.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10032.png"
   },
   {
     "id": 10033,
     "name": "venusaur-mega",
     "nameJa": "メガフシギバナ",
-    "iconPath": "/champions-icons/10033.png"
+    "iconPath": "/champions-icons/10033.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10033.png"
   },
   {
     "id": 10034,
     "name": "charizard-mega-x",
     "nameJa": "メガリザードンＸ",
-    "iconPath": "/champions-icons/10034.png"
+    "iconPath": "/champions-icons/10034.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10034.png"
   },
   {
     "id": 10035,
     "name": "charizard-mega-y",
     "nameJa": "メガリザードンＹ",
-    "iconPath": "/champions-icons/10035.png"
+    "iconPath": "/champions-icons/10035.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10035.png"
   },
   {
     "id": 10036,
     "name": "blastoise-mega",
     "nameJa": "メガカメックス",
-    "iconPath": "/champions-icons/10036.png"
+    "iconPath": "/champions-icons/10036.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10036.png"
   },
   {
     "id": 10037,
     "name": "alakazam-mega",
     "nameJa": "メガフーディン",
-    "iconPath": "/champions-icons/10037.png"
+    "iconPath": "/champions-icons/10037.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10037.png"
   },
   {
     "id": 10038,
     "name": "gengar-mega",
     "nameJa": "メガゲンガー",
-    "iconPath": "/champions-icons/10038.png"
+    "iconPath": "/champions-icons/10038.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10038.png"
   },
   {
     "id": 10039,
     "name": "kangaskhan-mega",
     "nameJa": "メガガルーラ",
-    "iconPath": "/champions-icons/10039.png"
+    "iconPath": "/champions-icons/10039.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10039.png"
   },
   {
     "id": 10040,
     "name": "pinsir-mega",
     "nameJa": "メガカイロス",
-    "iconPath": "/champions-icons/10040.png"
+    "iconPath": "/champions-icons/10040.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10040.png"
   },
   {
     "id": 10041,
     "name": "gyarados-mega",
     "nameJa": "メガギャラドス",
-    "iconPath": "/champions-icons/10041.png"
+    "iconPath": "/champions-icons/10041.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10041.png"
   },
   {
     "id": 10042,
     "name": "aerodactyl-mega",
     "nameJa": "メガプテラ",
-    "iconPath": "/champions-icons/10042.png"
+    "iconPath": "/champions-icons/10042.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10042.png"
   },
   {
     "id": 10045,
     "name": "ampharos-mega",
     "nameJa": "メガデンリュウ",
-    "iconPath": "/champions-icons/10045.png"
+    "iconPath": "/champions-icons/10045.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10045.png"
   },
   {
     "id": 10046,
     "name": "scizor-mega",
     "nameJa": "メガハッサム",
-    "iconPath": "/champions-icons/10046.png"
+    "iconPath": "/champions-icons/10046.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10046.png"
   },
   {
     "id": 10047,
     "name": "heracross-mega",
     "nameJa": "メガヘラクロス",
-    "iconPath": "/champions-icons/10047.png"
+    "iconPath": "/champions-icons/10047.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10047.png"
   },
   {
     "id": 10048,
     "name": "houndoom-mega",
     "nameJa": "メガヘルガー",
-    "iconPath": "/champions-icons/10048.png"
+    "iconPath": "/champions-icons/10048.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10048.png"
   },
   {
     "id": 10049,
     "name": "tyranitar-mega",
     "nameJa": "メガバンギラス",
-    "iconPath": "/champions-icons/10049.png"
+    "iconPath": "/champions-icons/10049.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10049.png"
   },
   {
     "id": 10050,
     "name": "blaziken-mega",
     "nameJa": "メガバシャーモ",
-    "iconPath": "/champions-icons/10050.png"
+    "iconPath": "/champions-icons/10050.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10050.png"
   },
   {
     "id": 10051,
     "name": "gardevoir-mega",
     "nameJa": "メガサーナイト",
-    "iconPath": "/champions-icons/10051.png"
+    "iconPath": "/champions-icons/10051.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10051.png"
   },
   {
     "id": 10052,
     "name": "mawile-mega",
     "nameJa": "メガクチート",
-    "iconPath": "/champions-icons/10052.png"
+    "iconPath": "/champions-icons/10052.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10052.png"
   },
   {
     "id": 10053,
     "name": "aggron-mega",
     "nameJa": "メガボスゴドラ",
-    "iconPath": "/champions-icons/10053.png"
+    "iconPath": "/champions-icons/10053.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10053.png"
   },
   {
     "id": 10054,
     "name": "medicham-mega",
     "nameJa": "メガチャーレム",
-    "iconPath": "/champions-icons/10054.png"
+    "iconPath": "/champions-icons/10054.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10054.png"
   },
   {
     "id": 10055,
     "name": "manectric-mega",
     "nameJa": "メガライボルト",
-    "iconPath": "/champions-icons/10055.png"
+    "iconPath": "/champions-icons/10055.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10055.png"
   },
   {
     "id": 10056,
     "name": "banette-mega",
     "nameJa": "メガジュペッタ",
-    "iconPath": "/champions-icons/10056.png"
+    "iconPath": "/champions-icons/10056.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10056.png"
   },
   {
     "id": 10057,
     "name": "absol-mega",
     "nameJa": "メガアブソル",
-    "iconPath": "/champions-icons/10057.png"
+    "iconPath": "/champions-icons/10057.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10057.png"
   },
   {
     "id": 10058,
     "name": "garchomp-mega",
     "nameJa": "メガガブリアス",
-    "iconPath": "/champions-icons/10058.png"
+    "iconPath": "/champions-icons/10058.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10058.png"
   },
   {
     "id": 10059,
     "name": "lucario-mega",
     "nameJa": "メガルカリオ",
-    "iconPath": "/champions-icons/10059.png"
+    "iconPath": "/champions-icons/10059.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10059.png"
   },
   {
     "id": 10060,
     "name": "abomasnow-mega",
     "nameJa": "メガユキノオー",
-    "iconPath": "/champions-icons/10060.png"
+    "iconPath": "/champions-icons/10060.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10060.png"
   },
   {
     "id": 10061,
     "name": "floette-eternal",
     "nameJa": "フラエッテ えいえんのはな",
-    "iconPath": "/champions-icons/10061.png"
+    "iconPath": "/champions-icons/10061.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10061.png"
   },
   {
     "id": 10064,
     "name": "swampert-mega",
     "nameJa": "メガラグラージ",
-    "iconPath": "/champions-icons/10064.png"
+    "iconPath": "/champions-icons/10064.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10064.png"
   },
   {
     "id": 10065,
     "name": "sceptile-mega",
     "nameJa": "メガジュカイン",
-    "iconPath": "/champions-icons/10065.png"
+    "iconPath": "/champions-icons/10065.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10065.png"
   },
   {
     "id": 10066,
     "name": "sableye-mega",
     "nameJa": "メガヤミラミ",
-    "iconPath": "/champions-icons/10066.png"
+    "iconPath": "/champions-icons/10066.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10066.png"
   },
   {
     "id": 10067,
     "name": "altaria-mega",
     "nameJa": "メガチルタリス",
-    "iconPath": "/champions-icons/10067.png"
+    "iconPath": "/champions-icons/10067.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10067.png"
   },
   {
     "id": 10068,
     "name": "gallade-mega",
     "nameJa": "メガエルレイド",
-    "iconPath": "/champions-icons/10068.png"
+    "iconPath": "/champions-icons/10068.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10068.png"
   },
   {
     "id": 10069,
     "name": "audino-mega",
     "nameJa": "メガタブンネ",
-    "iconPath": "/champions-icons/10069.png"
+    "iconPath": "/champions-icons/10069.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10069.png"
   },
   {
     "id": 10070,
     "name": "sharpedo-mega",
     "nameJa": "メガサメハダー",
-    "iconPath": "/champions-icons/10070.png"
+    "iconPath": "/champions-icons/10070.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10070.png"
   },
   {
     "id": 10071,
     "name": "slowbro-mega",
     "nameJa": "メガヤドラン",
-    "iconPath": "/champions-icons/10071.png"
+    "iconPath": "/champions-icons/10071.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10071.png"
   },
   {
     "id": 10072,
     "name": "steelix-mega",
     "nameJa": "メガハガネール",
-    "iconPath": "/champions-icons/10072.png"
+    "iconPath": "/champions-icons/10072.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10072.png"
   },
   {
     "id": 10073,
     "name": "pidgeot-mega",
     "nameJa": "メガピジョット",
-    "iconPath": "/champions-icons/10073.png"
+    "iconPath": "/champions-icons/10073.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10073.png"
   },
   {
     "id": 10074,
     "name": "glalie-mega",
     "nameJa": "メガオニゴーリ",
-    "iconPath": "/champions-icons/10074.png"
+    "iconPath": "/champions-icons/10074.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10074.png"
   },
   {
     "id": 10076,
     "name": "metagross-mega",
     "nameJa": "メガメタグロス",
-    "iconPath": "/champions-icons/10076.png"
+    "iconPath": "/champions-icons/10076.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10076.png"
   },
   {
     "id": 10087,
     "name": "camerupt-mega",
     "nameJa": "メガバクーダ",
-    "iconPath": "/champions-icons/10087.png"
+    "iconPath": "/champions-icons/10087.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10087.png"
   },
   {
     "id": 10088,
     "name": "lopunny-mega",
     "nameJa": "メガミミロップ",
-    "iconPath": "/champions-icons/10088.png"
+    "iconPath": "/champions-icons/10088.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10088.png"
   },
   {
     "id": 10090,
     "name": "beedrill-mega",
     "nameJa": "メガスピアー",
-    "iconPath": "/champions-icons/10090.png"
+    "iconPath": "/champions-icons/10090.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10090.png"
   },
   {
     "id": 10100,
     "name": "raichu-alola",
     "nameJa": "ライチュウ アローラのすがた",
-    "iconPath": "/champions-icons/10100.png"
+    "iconPath": "/champions-icons/10100.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10100.png"
   },
   {
     "id": 10104,
     "name": "ninetales-alola",
     "nameJa": "キュウコン アローラのすがた",
-    "iconPath": "/champions-icons/10104.png"
+    "iconPath": "/champions-icons/10104.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10104.png"
   },
   {
     "id": 10126,
     "name": "lycanroc-midnight",
     "nameJa": "ルガルガン まよなかのすがた",
-    "iconPath": "/champions-icons/10126.png"
+    "iconPath": "/champions-icons/10126.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10126.png"
   },
   {
     "id": 10152,
     "name": "lycanroc-dusk",
     "nameJa": "ルガルガン たそがれのすがた",
-    "iconPath": "/champions-icons/10152.png"
+    "iconPath": "/champions-icons/10152.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10152.png"
   },
   {
     "id": 10165,
     "name": "slowbro-galar",
     "nameJa": "ヤドラン ガラルのすがた",
-    "iconPath": "/champions-icons/10165.png"
+    "iconPath": "/champions-icons/10165.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10165.png"
   },
   {
     "id": 10172,
     "name": "slowking-galar",
     "nameJa": "ヤドキング ガラルのすがた",
-    "iconPath": "/champions-icons/10172.png"
+    "iconPath": "/champions-icons/10172.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10172.png"
   },
   {
     "id": 10180,
     "name": "stunfisk-galar",
     "nameJa": "マッギョ ガラルのすがた",
-    "iconPath": "/champions-icons/10180.png"
+    "iconPath": "/champions-icons/10180.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10180.png"
   },
   {
     "id": 10187,
     "name": "morpeko-hangry",
     "nameJa": "モルペコ はらぺこもよう",
-    "iconPath": "/champions-icons/10187.png"
+    "iconPath": "/champions-icons/10187.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10187.png"
   },
   {
     "id": 10230,
     "name": "arcanine-hisui",
     "nameJa": "ウインディ ヒスイのすがた",
-    "iconPath": "/champions-icons/10230.png"
+    "iconPath": "/champions-icons/10230.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10230.png"
   },
   {
     "id": 10233,
     "name": "typhlosion-hisui",
     "nameJa": "バクフーン ヒスイのすがた",
-    "iconPath": "/champions-icons/10233.png"
+    "iconPath": "/champions-icons/10233.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10233.png"
   },
   {
     "id": 10236,
     "name": "samurott-hisui",
     "nameJa": "ダイケンキ ヒスイのすがた",
-    "iconPath": "/champions-icons/10236.png"
+    "iconPath": "/champions-icons/10236.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10236.png"
   },
   {
     "id": 10239,
     "name": "zoroark-hisui",
     "nameJa": "ゾロアーク ヒスイのすがた",
-    "iconPath": "/champions-icons/10239.png"
+    "iconPath": "/champions-icons/10239.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10239.png"
   },
   {
     "id": 10242,
     "name": "goodra-hisui",
     "nameJa": "ヌメルゴン ヒスイのすがた",
-    "iconPath": "/champions-icons/10242.png"
+    "iconPath": "/champions-icons/10242.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10242.png"
   },
   {
     "id": 10243,
     "name": "avalugg-hisui",
     "nameJa": "クレベース ヒスイのすがた",
-    "iconPath": "/champions-icons/10243.png"
+    "iconPath": "/champions-icons/10243.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10243.png"
   },
   {
     "id": 10244,
     "name": "decidueye-hisui",
     "nameJa": "ジュナイパー ヒスイのすがた",
-    "iconPath": "/champions-icons/10244.png"
+    "iconPath": "/champions-icons/10244.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10244.png"
   },
   {
     "id": 10248,
     "name": "basculegion-female",
     "nameJa": "イダイトウ メスのすがた",
-    "iconPath": "/champions-icons/10248.png"
+    "iconPath": "/champions-icons/10248.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10248.png"
   },
   {
     "id": 10250,
     "name": "tauros-paldea-combat-breed",
     "nameJa": "ケンタロス パルデアのすがた",
-    "iconPath": "/champions-icons/10250.png"
+    "iconPath": "/champions-icons/10250.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10250.png"
   },
   {
     "id": 10251,
     "name": "tauros-paldea-blaze-breed",
     "nameJa": "ケンタロス パルデアのすがた",
-    "iconPath": "/champions-icons/10251.png"
+    "iconPath": "/champions-icons/10251.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10251.png"
   },
   {
     "id": 10252,
     "name": "tauros-paldea-aqua-breed",
     "nameJa": "ケンタロス パルデアのすがた",
-    "iconPath": "/champions-icons/10252.png"
+    "iconPath": "/champions-icons/10252.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10252.png"
   },
   {
     "id": 10256,
     "name": "palafin-hero",
     "nameJa": "イルカマン マイティフォルム",
-    "iconPath": "/champions-icons/10256.png"
+    "iconPath": "/champions-icons/10256.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10256.png"
   },
   {
     "id": 10257,
     "name": "maushold-family-of-three",
     "nameJa": "イッカネズミ ３びきかぞく",
-    "iconPath": "/champions-icons/10257.png"
+    "iconPath": "/champions-icons/10257.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10257.png"
   },
   {
     "id": 10278,
     "name": "clefable-mega",
     "nameJa": "メガピクシー",
-    "iconPath": "/champions-icons/10278.png"
+    "iconPath": "/champions-icons/10278.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10278.png"
   },
   {
     "id": 10279,
     "name": "victreebel-mega",
     "nameJa": "メガウツボット",
-    "iconPath": "/champions-icons/10279.png"
+    "iconPath": "/champions-icons/10279.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10279.png"
   },
   {
     "id": 10280,
     "name": "starmie-mega",
     "nameJa": "メガスターミー",
-    "iconPath": "/champions-icons/10280.png"
+    "iconPath": "/champions-icons/10280.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10280.png"
   },
   {
     "id": 10281,
     "name": "dragonite-mega",
     "nameJa": "メガカイリュー",
-    "iconPath": "/champions-icons/10281.png"
+    "iconPath": "/champions-icons/10281.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10281.png"
   },
   {
     "id": 10282,
     "name": "meganium-mega",
     "nameJa": "メガメガニウム",
-    "iconPath": "/champions-icons/10282.png"
+    "iconPath": "/champions-icons/10282.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10282.png"
   },
   {
     "id": 10283,
     "name": "feraligatr-mega",
     "nameJa": "メガオーダイル",
-    "iconPath": "/champions-icons/10283.png"
+    "iconPath": "/champions-icons/10283.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10283.png"
   },
   {
     "id": 10284,
     "name": "skarmory-mega",
     "nameJa": "メガエアームド",
-    "iconPath": "/champions-icons/10284.png"
+    "iconPath": "/champions-icons/10284.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10284.png"
   },
   {
     "id": 10285,
     "name": "froslass-mega",
     "nameJa": "メガユキメノコ",
-    "iconPath": "/champions-icons/10285.png"
+    "iconPath": "/champions-icons/10285.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10285.png"
   },
   {
     "id": 10286,
     "name": "emboar-mega",
     "nameJa": "メガエンブオー",
-    "iconPath": "/champions-icons/10286.png"
+    "iconPath": "/champions-icons/10286.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10286.png"
   },
   {
     "id": 10287,
     "name": "excadrill-mega",
     "nameJa": "メガドリュウズ",
-    "iconPath": "/champions-icons/10287.png"
+    "iconPath": "/champions-icons/10287.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10287.png"
   },
   {
     "id": 10288,
     "name": "scolipede-mega",
     "nameJa": "メガペンドラー",
-    "iconPath": "/champions-icons/10288.png"
+    "iconPath": "/champions-icons/10288.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10288.png"
   },
   {
     "id": 10289,
     "name": "scrafty-mega",
     "nameJa": "メガズルズキン",
-    "iconPath": "/champions-icons/10289.png"
+    "iconPath": "/champions-icons/10289.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10289.png"
   },
   {
     "id": 10290,
     "name": "eelektross-mega",
     "nameJa": "メガシビルドン",
-    "iconPath": "/champions-icons/10290.png"
+    "iconPath": "/champions-icons/10290.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10290.png"
   },
   {
     "id": 10291,
     "name": "chandelure-mega",
     "nameJa": "メガシャンデラ",
-    "iconPath": "/champions-icons/10291.png"
+    "iconPath": "/champions-icons/10291.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10291.png"
   },
   {
     "id": 10292,
     "name": "chesnaught-mega",
     "nameJa": "メガブリガロン",
-    "iconPath": "/champions-icons/10292.png"
+    "iconPath": "/champions-icons/10292.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10292.png"
   },
   {
     "id": 10293,
     "name": "delphox-mega",
     "nameJa": "メガマフォクシー",
-    "iconPath": "/champions-icons/10293.png"
+    "iconPath": "/champions-icons/10293.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10293.png"
   },
   {
     "id": 10294,
     "name": "greninja-mega",
     "nameJa": "メガゲッコウガ",
-    "iconPath": "/champions-icons/10294.png"
+    "iconPath": "/champions-icons/10294.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10294.png"
   },
   {
     "id": 10295,
     "name": "pyroar-mega",
     "nameJa": "メガカエンジシ",
-    "iconPath": "/champions-icons/10295.png"
+    "iconPath": "/champions-icons/10295.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10295.png"
   },
   {
     "id": 10296,
     "name": "floette-mega",
     "nameJa": "メガフラエッテ",
-    "iconPath": "/champions-icons/10296.png"
+    "iconPath": "/champions-icons/10296.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10296.png"
   },
   {
     "id": 10297,
     "name": "malamar-mega",
     "nameJa": "メガカラマネロ",
-    "iconPath": "/champions-icons/10297.png"
+    "iconPath": "/champions-icons/10297.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10297.png"
   },
   {
     "id": 10298,
     "name": "barbaracle-mega",
     "nameJa": "メガガメノデス",
-    "iconPath": "/champions-icons/10298.png"
+    "iconPath": "/champions-icons/10298.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10298.png"
   },
   {
     "id": 10299,
     "name": "dragalge-mega",
     "nameJa": "メガドラミドロ",
-    "iconPath": "/champions-icons/10299.png"
+    "iconPath": "/champions-icons/10299.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10299.png"
   },
   {
     "id": 10300,
     "name": "hawlucha-mega",
     "nameJa": "メガルチャブル",
-    "iconPath": "/champions-icons/10300.png"
+    "iconPath": "/champions-icons/10300.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10300.png"
   },
   {
     "id": 10302,
     "name": "drampa-mega",
     "nameJa": "メガジジーロン",
-    "iconPath": "/champions-icons/10302.png"
+    "iconPath": "/champions-icons/10302.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10302.png"
   },
   {
     "id": 10303,
     "name": "falinks-mega",
     "nameJa": "メガタイレーツ",
-    "iconPath": "/champions-icons/10303.png"
+    "iconPath": "/champions-icons/10303.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10303.png"
   },
   {
     "id": 10304,
     "name": "raichu-mega-x",
     "nameJa": "メガライチュウX",
-    "iconPath": "/champions-icons/10304.png"
+    "iconPath": "/champions-icons/10304.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10304.png"
   },
   {
     "id": 10305,
     "name": "raichu-mega-y",
     "nameJa": "メガライチュウY",
-    "iconPath": "/champions-icons/10305.png"
+    "iconPath": "/champions-icons/10305.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10305.png"
   },
   {
     "id": 10306,
     "name": "chimecho-mega",
     "nameJa": "メガチリーン",
-    "iconPath": "/champions-icons/10306.png"
+    "iconPath": "/champions-icons/10306.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10306.png"
   },
   {
     "id": 10308,
     "name": "staraptor-mega",
     "nameJa": "メガムクホーク",
-    "iconPath": "/champions-icons/10308.png"
+    "iconPath": "/champions-icons/10308.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10308.png"
   },
   {
     "id": 10313,
     "name": "golurk-mega",
     "nameJa": "メガゴルーグ",
-    "iconPath": "/champions-icons/10313.png"
+    "iconPath": "/champions-icons/10313.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10313.png"
   },
   {
     "id": 10314,
     "name": "meowstic-male-mega",
     "nameJa": "メガニャオニクス",
-    "iconPath": "/champions-icons/10314.png"
+    "iconPath": "/champions-icons/10314.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10314.png"
   },
   {
     "id": 10315,
     "name": "crabominable-mega",
     "nameJa": "メガケケンカニ",
-    "iconPath": "/champions-icons/10315.png"
+    "iconPath": "/champions-icons/10315.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10315.png"
   },
   {
     "id": 10320,
     "name": "scovillain-mega",
     "nameJa": "メガスコヴィラン",
-    "iconPath": "/champions-icons/10320.png"
+    "iconPath": "/champions-icons/10320.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10320.png"
   },
   {
     "id": 10321,
     "name": "glimmora-mega",
     "nameJa": "メガキラフロル",
-    "iconPath": "/champions-icons/10321.png"
+    "iconPath": "/champions-icons/10321.png",
+    "sourceUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10321.png"
   }
 ]

@@ -67,6 +67,21 @@ async function fetchBytes(url) {
   return new Uint8Array(await response.arrayBuffer());
 }
 
+async function fetchFirstAvailable(urls) {
+  let lastError;
+  for (const url of urls) {
+    try {
+      return {
+        bytes: await fetchBytes(url),
+        sourceUrl: url,
+      };
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
+}
+
 const [forms, championsForms] = await Promise.all([
   loadSeed("forms.csv"),
   loadSeed("champions_forms.csv"),
@@ -82,13 +97,19 @@ for (const championForm of championsForms) {
 
   const filename = `${form.id}.png`;
   const outputPath = path.join(outputDir, filename);
-  const bytes = await fetchBytes(form.sprite_default_url);
+  const preferredUrls = [
+    `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${form.id}.png`,
+    form.artwork_default_url,
+    form.sprite_default_url,
+  ].filter(Boolean);
+  const { bytes, sourceUrl } = await fetchFirstAvailable(preferredUrls);
   await writeFile(outputPath, bytes);
   manifest.push({
     id: Number(form.id),
     name: form.name,
     nameJa: form.name_ja || form.form_name_ja || form.name,
     iconPath: `/champions-icons/${filename}`,
+    sourceUrl,
   });
   console.log(`Fetched ${manifest.length}/${championsForms.length}: ${form.name}`);
 }

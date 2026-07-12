@@ -12,15 +12,15 @@ import styles from "../styles/battle-records.module.css";
 
 const MAX_IMAGE_WIDTH = 1280;
 const IMAGE_QUALITY = 0.82;
-const SIGNATURE_SIZE = 28;
+const SIGNATURE_SIZE = 36;
 const HUE_BUCKETS = 18;
 const OPPONENT_SLOT_RECTS = [
-  { x: 0.716, y: 0.153, width: 0.087, height: 0.087 },
-  { x: 0.716, y: 0.269, width: 0.087, height: 0.087 },
-  { x: 0.716, y: 0.386, width: 0.087, height: 0.087 },
-  { x: 0.716, y: 0.501, width: 0.087, height: 0.087 },
-  { x: 0.716, y: 0.617, width: 0.087, height: 0.087 },
-  { x: 0.716, y: 0.733, width: 0.087, height: 0.087 },
+  { x: 0.707, y: 0.155, width: 0.071, height: 0.087 },
+  { x: 0.707, y: 0.271, width: 0.071, height: 0.087 },
+  { x: 0.707, y: 0.388, width: 0.071, height: 0.087 },
+  { x: 0.707, y: 0.503, width: 0.071, height: 0.087 },
+  { x: 0.707, y: 0.619, width: 0.071, height: 0.087 },
+  { x: 0.707, y: 0.735, width: 0.071, height: 0.087 },
 ] as const;
 
 type DetectionCandidate = {
@@ -104,7 +104,10 @@ function shouldUsePixel(red: number, green: number, blue: number, alpha: number)
   if (alpha < 32) return false;
   const isRedPanel = red > 110 && green < 95 && blue < 130 && red > green * 1.3;
   const isWhiteUi = red > 220 && green > 220 && blue > 220;
-  return !isRedPanel && !isWhiteUi;
+  const isTypeIconBlue = blue > 165 && red < 120 && green > 120;
+  const isTypeIconOrange = red > 190 && green > 120 && green < 190 && blue < 90;
+  const isTypeIconRed = red > 185 && green < 100 && blue < 100;
+  return !isRedPanel && !isWhiteUi && !isTypeIconBlue && !isTypeIconOrange && !isTypeIconRed;
 }
 
 function createSignature(source: CanvasImageSource) {
@@ -115,7 +118,7 @@ function createSignature(source: CanvasImageSource) {
   if (!context) throw new Error("画像を解析できませんでした。");
   context.drawImage(source, 0, 0, SIGNATURE_SIZE, SIGNATURE_SIZE);
   const { data } = context.getImageData(0, 0, SIGNATURE_SIZE, SIGNATURE_SIZE);
-  const histogram = Array.from({ length: HUE_BUCKETS + 3 }, () => 0);
+  const histogram = Array.from({ length: HUE_BUCKETS + 3 + 16 }, () => 0);
 
   for (let index = 0; index < data.length; index += 4) {
     const red = data[index];
@@ -128,6 +131,13 @@ function createSignature(source: CanvasImageSource) {
     if (red + green + blue < 180) histogram[HUE_BUCKETS] += 1;
     if (red > 180 && green > 180 && blue < 150) histogram[HUE_BUCKETS + 1] += 1;
     if (red > 180 && blue > 180 && green < 170) histogram[HUE_BUCKETS + 2] += 1;
+
+    const pixel = index / 4;
+    const x = pixel % SIGNATURE_SIZE;
+    const y = Math.floor(pixel / SIGNATURE_SIZE);
+    const cellX = Math.min(3, Math.floor((x / SIGNATURE_SIZE) * 4));
+    const cellY = Math.min(3, Math.floor((y / SIGNATURE_SIZE) * 4));
+    histogram[HUE_BUCKETS + 3 + cellY * 4 + cellX] += 1;
   }
 
   const magnitude = Math.hypot(...histogram);
