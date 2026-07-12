@@ -108,6 +108,38 @@ async function importUserDatabase(bytes) {
   };
 }
 
+function compactUserDatabaseIfCatalogTablesExist() {
+  const existingCatalogTables = catalogTableNames.filter((tableName) =>
+    Boolean(
+      database.selectValue(
+        "SELECT 1 FROM sqlite_schema WHERE type = 'table' AND name = ?",
+        tableName,
+      ),
+    ),
+  );
+  if (existingCatalogTables.length === 0) return;
+
+  database.exec("PRAGMA foreign_keys = OFF");
+  database.exec("BEGIN IMMEDIATE");
+  try {
+    for (const tableName of existingCatalogTables) {
+      database.exec(`DROP TABLE IF EXISTS "${tableName}"`);
+    }
+    database.exec(`
+      DELETE FROM schema_metadata
+      WHERE key IN ('catalog_seed_version');
+    `);
+    database.exec("COMMIT");
+  } catch (error) {
+    database.exec("ROLLBACK");
+    throw error;
+  } finally {
+    database.exec("PRAGMA foreign_keys = ON");
+  }
+
+  database.exec("VACUUM");
+}
+
 /**
  * 複数のuser.db更新を不可分に実行する。
  * bindReferencesで前のINSERT結果を後続SQLへ渡し、チーム作成などの親子保存を1往復で完了させる。
@@ -374,6 +406,7 @@ function migrateSchema() {
       ON battle_records(battle_at DESC, id DESC);
   `);
 
+  compactUserDatabaseIfCatalogTablesExist();
 }
 
 /**
