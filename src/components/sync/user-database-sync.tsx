@@ -1,7 +1,7 @@
 "use client";
 
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   getFirebaseAuth,
   getGoogleRedirectResult,
@@ -62,6 +62,32 @@ function getSignInErrorMessage(error: unknown) {
   return code ? `ログイン失敗: ${code}` : "ログイン失敗";
 }
 
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
+function getSyncErrorMessage(error: unknown) {
+  const code = getFirebaseErrorCode(error);
+  const message = getErrorMessage(error);
+  if (code === "permission-denied") {
+    return "同期失敗: Firestore権限";
+  }
+  if (code === "resource-exhausted") {
+    return "同期失敗: Firestore容量/回数上限";
+  }
+  if (code === "unavailable") {
+    return "同期失敗: ネットワーク";
+  }
+  if (code) return `同期失敗: ${code}`;
+  return message ? `同期失敗: ${message}` : "同期失敗";
+}
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))}KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)}MB`;
+}
+
 export function UserDatabaseSync() {
   const [user, setUser] = useState<User | null>(null);
   const [online, setOnline] = useState(() =>
@@ -70,6 +96,8 @@ export function UserDatabaseSync() {
   const [syncing, setSyncing] = useState(false);
   const [lastSyncAt, setLastSyncAt] = useState(0);
   const [message, setMessage] = useState("未ログイン");
+  const [detailMessage, setDetailMessage] = useState("");
+  const syncingRef = useRef(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (nextUser) => {
@@ -96,15 +124,20 @@ export function UserDatabaseSync() {
   }, []);
 
   async function syncUserDatabase(activeUser = user) {
-    if (!activeUser || !navigator.onLine || syncing) return;
+    if (!activeUser || !navigator.onLine || syncingRef.current) return;
+    syncingRef.current = true;
     setSyncing(true);
     setMessage("同期中");
+    setDetailMessage("");
     try {
+      setMessage("DB準備中");
       await sqliteWorkerClient.initialize();
+      setMessage("クラウド確認中");
       const lastSync = getLastSync(activeUser.uid);
       const remoteMetadata = await getUserDatabaseBackupMetadata(activeUser.uid);
 
       if (remoteMetadata && remoteMetadata.updatedAt > lastSync) {
+        setMessage(`復元中 ${formatBytes(remoteMetadata.totalBytes)}`);
         const backup = await loadUserDatabaseBackup(activeUser.uid);
         if (backup) {
           await sqliteWorkerClient.importUserDatabase(backup.bytes);
@@ -115,15 +148,20 @@ export function UserDatabaseSync() {
         }
       }
 
+      setMessage("DB書き出し中");
       const bytes = await sqliteWorkerClient.exportUserDatabase();
+      setMessage(`アップロード中 ${formatBytes(bytes.byteLength)}`);
       const saved = await saveUserDatabaseBackup(activeUser.uid, bytes);
       setLastSync(activeUser.uid, saved.updatedAt);
       setLastSyncAt(saved.updatedAt);
       setMessage("クラウドへ同期");
     } catch (error) {
       console.warn("Failed to sync user.db.", error);
-      setMessage("同期失敗");
+      const syncErrorMessage = getSyncErrorMessage(error);
+      setMessage(syncErrorMessage);
+      setDetailMessage(getErrorMessage(error));
     } finally {
+      syncingRef.current = false;
       setSyncing(false);
     }
   }
@@ -157,6 +195,7 @@ export function UserDatabaseSync() {
     }
 
     setMessage("ログイン中");
+    setDetailMessage("");
     try {
       const result = await signInWithGoogle();
       await syncUserDatabase(result.user);
@@ -168,6 +207,7 @@ export function UserDatabaseSync() {
         return;
       }
       setMessage(getSignInErrorMessage(error));
+      setDetailMessage(getErrorMessage(error));
     }
   }
 
@@ -178,7 +218,7 @@ export function UserDatabaseSync() {
   return (
     <div className={styles.syncBox}>
       <span className={online ? styles.online : styles.offline} />
-      <span className={styles.status}>
+      <span className={styles.status} title={detailMessage || message}>
         {message}
         {lastSyncAt ? ` ${formatStatusDate(lastSyncAt)}` : ""}
       </span>
