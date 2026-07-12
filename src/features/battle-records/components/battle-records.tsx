@@ -211,6 +211,29 @@ function saveLearnedDetection(pokemonId: number, signature: number[]) {
   window.localStorage.setItem(LEARNING_STORAGE_KEY, JSON.stringify(next));
 }
 
+function mergeLearnedDetections(samples: LearnedDetection[]) {
+  const byKey = new Map<string, LearnedDetection>();
+  for (const sample of [...samples, ...loadLearnedDetections()]) {
+    const key = `${sample.pokemonId}:${sample.signature
+      .map((value) => value.toFixed(4))
+      .join(",")}`;
+    const current = byKey.get(key);
+    if (!current || sample.updatedAt > current.updatedAt) {
+      byKey.set(key, sample);
+    }
+  }
+  const next = [...byKey.values()]
+    .sort((left, right) => right.updatedAt - left.updatedAt)
+    .slice(0, 300);
+  window.localStorage.setItem(LEARNING_STORAGE_KEY, JSON.stringify(next));
+  return next;
+}
+
+async function syncRemoteDetectionSamplesToLocal() {
+  const remoteSamples = await loadRemoteDetectionSamples();
+  return mergeLearnedDetections(remoteSamples);
+}
+
 function getLearnedScore(
   signature: number[],
   pokemonId: number,
@@ -244,10 +267,9 @@ async function detectOpponentPokemon(imageDataUrl: string) {
     loadChampionsIcons(),
   ]);
   const learnedSamples = [
-    ...loadLearnedDetections(),
-    ...(await loadRemoteDetectionSamples().catch((error: unknown) => {
+    ...(await syncRemoteDetectionSamplesToLocal().catch((error: unknown) => {
       console.warn("Failed to load remote detection samples.", error);
-      return [];
+      return loadLearnedDetections();
     })),
   ];
   const selectableCatalog = catalog.filter(isSelectableBattlePreviewIcon);
@@ -314,6 +336,26 @@ export function BattleRecords() {
   const loadRecords = useCallback(async (active = true) => {
     const savedRecords = await getBattleRecords();
     if (active) setRecords(savedRecords);
+  }, []);
+
+  useEffect(() => {
+    if (!navigator.onLine) return;
+    let active = true;
+    const timer = window.setTimeout(() => {
+      void syncRemoteDetectionSamplesToLocal()
+        .then((samples) => {
+          if (active && samples.length > 0) {
+            setMessage(`検出補足データを同期しました: ${samples.length}件`);
+          }
+        })
+        .catch((syncError: unknown) => {
+          console.warn("Failed to sync detection learning samples.", syncError);
+        });
+    }, 0);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
   }, []);
 
   useEffect(() => {
