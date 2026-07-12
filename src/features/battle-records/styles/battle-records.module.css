@@ -211,6 +211,34 @@
   font-weight: 800;
 }
 
+.learningControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.learningControls select {
+  min-width: 0;
+  border: 1px solid rgba(24, 34, 54, 0.16);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #ffffff;
+  color: #182236;
+  font: inherit;
+}
+
+.learningControls button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #2e6f8f;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .recordsHeader {
   display: flex;
   align-items: baseline;

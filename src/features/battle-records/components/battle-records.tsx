@@ -14,6 +14,7 @@ const MAX_IMAGE_WIDTH = 1280;
 const IMAGE_QUALITY = 0.82;
 const SIGNATURE_SIZE = 36;
 const HUE_BUCKETS = 18;
+const LEARNING_STORAGE_KEY = "pokemon-lab:battle-record-detection-learning:v1";
 const OPPONENT_SLOT_RECTS = [
   { x: 0.707, y: 0.155, width: 0.071, height: 0.087 },
   { x: 0.707, y: 0.271, width: 0.071, height: 0.087 },
@@ -31,6 +32,7 @@ type DetectionCandidate = {
 type DetectionSlot = {
   slot: number;
   cropDataUrl: string;
+  signature: number[];
   candidates: DetectionCandidate[];
 };
 
@@ -44,6 +46,12 @@ type ChampionsIcon = {
   name: string;
   nameJa: string;
   iconPath: string;
+};
+
+type LearnedDetection = {
+  pokemonId: number;
+  signature: number[];
+  updatedAt: number;
 };
 
 function toDateTimeLocalValue(timestamp: number) {
@@ -107,7 +115,13 @@ function shouldUsePixel(red: number, green: number, blue: number, alpha: number)
   const isTypeIconBlue = blue > 165 && red < 120 && green > 120;
   const isTypeIconOrange = red > 190 && green > 120 && green < 190 && blue < 90;
   const isTypeIconRed = red > 185 && green < 100 && blue < 100;
-  return !isRedPanel && !isWhiteUi && !isTypeIconBlue && !isTypeIconOrange && !isTypeIconRed;
+  return (
+    !isRedPanel &&
+    !isWhiteUi &&
+    !isTypeIconBlue &&
+    !isTypeIconOrange &&
+    !isTypeIconRed
+  );
 }
 
 function createSignature(source: CanvasImageSource) {
@@ -167,6 +181,43 @@ async function loadChampionsIcons(): Promise<ChampionsIcon[]> {
   return response.json() as Promise<ChampionsIcon[]>;
 }
 
+function isSelectableBattlePreviewIcon(pokemon: ChampionsIcon) {
+  return !pokemon.name.includes("-mega");
+}
+
+function loadLearnedDetections(): LearnedDetection[] {
+  try {
+    const raw = window.localStorage.getItem(LEARNING_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as LearnedDetection[];
+    return parsed.filter(
+      (item) =>
+        Number.isFinite(item.pokemonId) &&
+        Array.isArray(item.signature) &&
+        item.signature.length > 0,
+    );
+  } catch {
+    return [];
+  }
+}
+
+function saveLearnedDetection(pokemonId: number, signature: number[]) {
+  const next = [
+    { pokemonId, signature, updatedAt: Date.now() },
+    ...loadLearnedDetections(),
+  ].slice(0, 300);
+  window.localStorage.setItem(LEARNING_STORAGE_KEY, JSON.stringify(next));
+}
+
+function getLearnedScore(signature: number[], pokemonId: number) {
+  return loadLearnedDetections()
+    .filter((item) => item.pokemonId === pokemonId)
+    .reduce(
+      (best, item) => Math.max(best, cosineSimilarity(signature, item.signature)),
+      0,
+    );
+}
+
 async function buildReferenceSignatures(catalog: ChampionsIcon[]) {
   const signatures: ReferenceSignature[] = [];
   const settled = await Promise.allSettled(
@@ -186,7 +237,8 @@ async function detectOpponentPokemon(imageDataUrl: string) {
     loadImageElement(imageDataUrl),
     loadChampionsIcons(),
   ]);
-  const references = await buildReferenceSignatures(catalog);
+  const selectableCatalog = catalog.filter(isSelectableBattlePreviewIcon);
+  const references = await buildReferenceSignatures(selectableCatalog);
   if (references.length === 0) {
     throw new Error("照合用の同梱アイコンを読み込めませんでした。");
   }
@@ -213,17 +265,21 @@ async function detectOpponentPokemon(imageDataUrl: string) {
     const candidates = references
       .map((reference) => ({
         pokemon: reference.pokemon,
-        score: cosineSimilarity(signature, reference.signature),
+        score: Math.max(
+          cosineSimilarity(signature, reference.signature),
+          getLearnedScore(signature, reference.pokemon.id) + 0.08,
+        ),
       }))
       .sort((left, right) => right.score - left.score)
       .slice(0, 3);
     slots.push({
       slot: index + 1,
       cropDataUrl: cropCanvas.toDataURL("image/jpeg", 0.86),
+      signature,
       candidates,
     });
   }
-  return slots;
+  return { catalog: selectableCatalog, slots };
 }
 
 export function BattleRecords() {
@@ -235,6 +291,10 @@ export function BattleRecords() {
   const [saving, setSaving] = useState(false);
   const [detecting, setDetecting] = useState(false);
   const [detections, setDetections] = useState<DetectionSlot[]>([]);
+  const [iconCatalog, setIconCatalog] = useState<ChampionsIcon[]>([]);
+  const [correctionBySlot, setCorrectionBySlot] = useState<Record<number, string>>(
+    {},
+  );
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -267,6 +327,7 @@ export function BattleRecords() {
     if (!file) {
       setImageDataUrl("");
       setDetections([]);
+      setCorrectionBySlot({});
       return;
     }
     if (!file.type.startsWith("image/")) {
@@ -276,6 +337,7 @@ export function BattleRecords() {
     try {
       setImageDataUrl(await resizeImage(file));
       setDetections([]);
+      setCorrectionBySlot({});
     } catch (resizeError: unknown) {
       console.error("Failed to resize battle image.", resizeError);
       setError("写真を読み込めませんでした。");
@@ -317,7 +379,18 @@ export function BattleRecords() {
     setMessage("");
     setDetecting(true);
     try {
-      setDetections(await detectOpponentPokemon(imageDataUrl));
+      const result = await detectOpponentPokemon(imageDataUrl);
+      setIconCatalog(result.catalog);
+      setDetections(result.slots);
+      setCorrectionBySlot(
+        Object.fromEntries(
+          result.slots.flatMap((slot) =>
+            slot.candidates[0]
+              ? [[slot.slot, String(slot.candidates[0].pokemon.id)]]
+              : [],
+          ),
+        ),
+      );
       setMessage("相手側6枠の候補を検出しました。");
     } catch (detectError: unknown) {
       console.error("Failed to detect opponent Pokemon.", detectError);
@@ -329,6 +402,14 @@ export function BattleRecords() {
     } finally {
       setDetecting(false);
     }
+  }
+
+  function registerCorrection(slot: DetectionSlot) {
+    const pokemonId = Number(correctionBySlot[slot.slot]);
+    if (!Number.isFinite(pokemonId)) return;
+    saveLearnedDetection(pokemonId, slot.signature);
+    const pokemon = iconCatalog.find((item) => item.id === pokemonId);
+    setMessage(`${pokemon?.nameJa ?? "選択したポケモン"}を正解として学習しました。`);
   }
 
   async function handleDelete(id: number) {
@@ -434,6 +515,30 @@ export function BattleRecords() {
                         </li>
                       ))}
                     </ol>
+                    <div className={styles.learningControls}>
+                      <select
+                        aria-label={`枠${slot.slot}の正解ポケモン`}
+                        value={correctionBySlot[slot.slot] ?? ""}
+                        onChange={(event) =>
+                          setCorrectionBySlot((current) => ({
+                            ...current,
+                            [slot.slot]: event.target.value,
+                          }))
+                        }
+                      >
+                        {iconCatalog.map((pokemon) => (
+                          <option key={pokemon.id} value={pokemon.id}>
+                            {pokemon.nameJa}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => registerCorrection(slot)}
+                      >
+                        正解登録
+                      </button>
+                    </div>
                   </div>
                 </article>
               ))}
