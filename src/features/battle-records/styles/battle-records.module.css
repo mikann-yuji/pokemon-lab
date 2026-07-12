@@ -118,6 +118,12 @@
   cursor: pointer;
 }
 
+.actions .secondaryButton {
+  border: 1px solid rgba(24, 34, 54, 0.18);
+  background: #ffffff;
+  color: #202f44;
+}
+
 .actions button:disabled {
   cursor: wait;
   opacity: 0.62;
@@ -135,6 +141,74 @@
 
 .records {
   margin-top: 26px;
+}
+
+.detectionPanel {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 14px;
+  border-top: 1px solid rgba(24, 34, 54, 0.12);
+  padding-top: 18px;
+}
+
+.detectionPanel h2 {
+  margin-bottom: 6px;
+  color: #102033;
+  font-size: 1.12rem;
+}
+
+.detectionPanel p {
+  color: #536376;
+  line-height: 1.6;
+}
+
+.detectionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detectionCard {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(24, 34, 54, 0.12);
+  border-radius: 8px;
+  padding: 10px;
+  background: #f8fbff;
+}
+
+.detectionCard img {
+  width: 92px;
+  height: 68px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.detectionCard strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #2e6f8f;
+}
+
+.detectionCard ol {
+  display: grid;
+  gap: 4px;
+  list-style-position: inside;
+}
+
+.detectionCard li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #182236;
+  font-size: 0.92rem;
+}
+
+.detectionCard small {
+  color: #5a697d;
+  font-weight: 800;
 }
 
 .recordsHeader {
@@ -204,7 +278,8 @@
   }
 
   .editor,
-  .recordGrid {
+  .recordGrid,
+  .detectionGrid {
     grid-template-columns: 1fr;
   }
 }

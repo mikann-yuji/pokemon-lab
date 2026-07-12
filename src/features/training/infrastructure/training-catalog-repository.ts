@@ -91,6 +91,25 @@ export async function getTrainingPokemonCatalog(): Promise<TrainingPokemon[]> {
   }));
 }
 
+export async function getTrainingPokemonIconCatalog(): Promise<TrainingPokemon[]> {
+  const rows = await sqliteWorkerClient.catalogQuery<TrainingPokemonRow>(`
+    SELECT
+      forms.id,
+      forms.name,
+      COALESCE(forms.name_ja, forms.form_name_ja, forms.name) AS nameJa,
+      COALESCE(forms.sprite_default_url, forms.artwork_default_url) AS imageUrl
+    FROM champions_forms
+    JOIN forms ON forms.id = champions_forms.form_id
+    ORDER BY forms.species_id, forms.is_default DESC, forms.form_order
+  `);
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    nameJa: row.nameJa,
+    imageUrl: row.imageUrl,
+  }));
+}
+
 /** Champions対象ポケモンの種族値順位・実数値比較に使う全フォームのステータス一覧を取得する。 */
 export async function getTrainingPokemonStatProfiles(): Promise<
   TrainingPokemonStatProfile[]
