@@ -15,7 +15,7 @@ import type {
 
 const DEFAULT_TIMEOUT_MS = 20_000;
 const STORAGE_API_TIMEOUT_MS = 3_000;
-const SQLITE_WORKER_VERSION = "6";
+const SQLITE_WORKER_VERSION = "7";
 
 /**
  * Workerへ送ったリクエストの待ち受け情報。
