@@ -4,7 +4,8 @@
  * このファイルの役割: クイズ全体の状態管理、回答判定、問題遷移、リスタートを担当するクライアントコンポーネント。
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
 import QuestionPanel from "./question-panel";
 import type { TypeMatchup, TypeName } from "@/domain/type-matchup";
 import {
@@ -66,26 +67,42 @@ export default function QuizGame({
   const [mistakesLoaded, setMistakesLoaded] = useState(false);
   const questionTopRef = useRef<HTMLDivElement>(null);
   const explanationRef = useRef<HTMLDivElement>(null);
+  const loadMistakes = useCallback(async (active = true) => {
+    const keys = await getMistakeKeys();
+    if (active) setMistakeKeys(new Set(keys));
+  }, []);
 
   // 復習モードの対象になる間違いキーはuser.dbから後読みする。
   useEffect(() => {
     let active = true;
-
-    getMistakeKeys()
-      .then((keys) => {
-        if (active) setMistakeKeys(new Set(keys));
-      })
-      .catch((error: unknown) => {
-        console.error("間違えた問題を読み込めませんでした。", error);
-      })
-      .finally(() => {
-        if (active) setMistakesLoaded(true);
-      });
-
+    const timer = window.setTimeout(() => {
+      void loadMistakes(active)
+        .catch((error: unknown) => {
+          console.error("間違えた問題を読み込めませんでした。", error);
+        })
+        .finally(() => {
+          if (active) setMistakesLoaded(true);
+        });
+    }, 0);
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
-  }, []);
+  }, [loadMistakes]);
+
+  useEffect(() => {
+    let active = true;
+    const handleSynced = () => {
+      void loadMistakes(active).catch((error: unknown) => {
+        console.error("同期後の間違えた問題を読み込めませんでした。", error);
+      });
+    };
+    window.addEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
+    return () => {
+      active = false;
+      window.removeEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
+    };
+  }, [loadMistakes]);
 
   /**
    * 現在の出題モードと複合タイプ設定から問題リストを作り直す。

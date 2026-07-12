@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useCombobox } from "downshift";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
 import { normalizePokemonSearchText } from "@/domain/pokemon-name-search";
 import type { TypeName } from "@/domain/type-matchup";
 import type { PokemonDetail } from "@/infrastructure/database/pokemon-search-repository";
@@ -228,21 +229,39 @@ export function TrainingSimulator({
     const timer = window.setTimeout(() => setToast(null), 3000);
     return () => window.clearTimeout(timer);
   }, [toast]);
+  const loadTrainingBuilds = useCallback(async (active = true) => {
+    const builds = await getAllTrainingBuilds();
+    if (active) setTrainingBuilds(builds);
+  }, []);
 
   useEffect(() => {
     let active = true;
-    void getAllTrainingBuilds()
-      .then((builds) => {
-        if (active) setTrainingBuilds(builds);
-      })
-      .catch((error: unknown) => {
+    const timer = window.setTimeout(() => {
+      void loadTrainingBuilds(active).catch((error: unknown) => {
         console.error("保存済み育成案を読み込めませんでした。", error);
         if (active) setMatchupError("保存済み育成案を読み込めませんでした。");
       });
+    }, 0);
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
-  }, []);
+  }, [loadTrainingBuilds]);
+
+  useEffect(() => {
+    let active = true;
+    const handleSynced = () => {
+      void loadTrainingBuilds(active).catch((error: unknown) => {
+        console.error("同期後の保存済み育成案を読み込めませんでした。", error);
+        if (active) setMatchupError("同期後の保存済み育成案を読み込めませんでした。");
+      });
+    };
+    window.addEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
+    return () => {
+      active = false;
+      window.removeEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
+    };
+  }, [loadTrainingBuilds]);
 
   // 先読みされていないカタログだけをブラウザ側で取得する。画面単体でも動けるようにする。
   useEffect(() => {

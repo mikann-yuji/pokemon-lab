@@ -4,12 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
   type RefObject,
 } from "react";
+import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
 import {
   getAllBattleTeams,
   getAllTrainingBuilds,
@@ -524,26 +526,43 @@ export function BattleSimulatorTeamSelect() {
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState("");
   const canStart = Boolean(selectedTeamIds.player1 && selectedTeamIds.player2);
+  const loadTeams = useCallback(async (active = true) => {
+    const loadedTeams = await getAllBattleTeams();
+    if (!active) return;
+    setTeams(loadedTeams);
+    setLoaded(true);
+  }, []);
 
   useEffect(() => {
     let active = true;
-    void getAllBattleTeams()
-      .then((loadedTeams) => {
-        if (!active) return;
-        setTeams(loadedTeams);
-        setLoaded(true);
-      })
-      .catch((error: unknown) => {
+    const timer = window.setTimeout(() => {
+      void loadTeams(active).catch((error: unknown) => {
         console.error("バトルチームを読み込めませんでした。", error);
         if (!active) return;
         setLoadError("バトルチームを読み込めませんでした。");
         setLoaded(true);
       });
-
+    }, 0);
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
-  }, []);
+  }, [loadTeams]);
+
+  useEffect(() => {
+    let active = true;
+    const handleSynced = () => {
+      void loadTeams(active).catch((error: unknown) => {
+        console.error("同期後のバトルチームを読み込めませんでした。", error);
+        if (active) setLoadError("同期後のバトルチームを読み込めませんでした。");
+      });
+    };
+    window.addEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
+    return () => {
+      active = false;
+      window.removeEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
+    };
+  }, [loadTeams]);
 
   function updateSelectedTeam(playerId: BattlePlayerId, teamId: number | "") {
     setSelectedTeamIds((current) => ({ ...current, [playerId]: teamId }));

@@ -14,6 +14,7 @@ import {
   searchPokemon,
   type PokemonSearchResult,
 } from "@/infrastructure/database/pokemon-search-repository";
+import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
 import type { TrainingBuild } from "@/features/training/infrastructure/training-build-repository";
 import {
   getPokemonCardStyle,
@@ -114,16 +115,22 @@ export function PokemonResults({
     if (!includeTrainingBuilds) return;
 
     let active = true;
-    void import("@/features/training/infrastructure/training-build-repository")
-      .then(({ getAllTrainingBuilds }) => getAllTrainingBuilds())
-      .then((savedBuilds) => {
-        if (active) setTrainingBuilds(savedBuilds);
-      })
-      .catch((caught: unknown) => {
-        console.error("保存した育成案を一覧へ統合できませんでした。", caught);
-      });
+    const loadTrainingBuilds = () =>
+      import("@/features/training/infrastructure/training-build-repository")
+        .then(({ getAllTrainingBuilds }) => getAllTrainingBuilds())
+        .then((savedBuilds) => {
+          if (active) setTrainingBuilds(savedBuilds);
+        })
+        .catch((caught: unknown) => {
+          console.error("保存した育成案を一覧へ統合できませんでした。", caught);
+        });
+    const timer = window.setTimeout(() => void loadTrainingBuilds(), 0);
+    const handleSynced = () => void loadTrainingBuilds();
+    window.addEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
     return () => {
       active = false;
+      window.clearTimeout(timer);
+      window.removeEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
     };
   }, [includeTrainingBuilds]);
 

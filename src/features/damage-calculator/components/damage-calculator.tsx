@@ -10,7 +10,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
 import {
   CHAMPIONS_DAMAGE_RULESET,
   championsDamageCalculator,
@@ -622,49 +623,59 @@ export function DamageCalculator({
       ? `/training/${pokemon.id}?build=${linkedBuildId}`
       : `/training/${pokemon.id}`;
   };
+  const loadUserData = useCallback(async (active = true) => {
+    const [
+      savedAttackers,
+      savedDefenders,
+      teams,
+      builds,
+      loadedNatures,
+    ] = await Promise.all([
+      getDamageHistory("attacker"),
+      getDamageHistory("defender"),
+      getAllBattleTeams(),
+      getAllTrainingBuilds(),
+      getNatures(),
+    ]);
+    if (!active) return;
+    setAttackerHistory(savedAttackers);
+    setDefenderHistory(savedDefenders);
+    setBattleTeams(teams);
+    setTrainingBuilds(builds);
+    setNatures(loadedNatures);
+  }, []);
 
   // user.dbはブラウザ専用なので、初回表示後に最近使った履歴を読み込む。
   useEffect(() => {
     let active = true;
-
-    Promise.all([
-      getDamageHistory("attacker"),
-      getDamageHistory("defender"),
-    ])
-      .then(([savedAttackers, savedDefenders]) => {
-        if (!active) return;
-        setAttackerHistory(savedAttackers);
-        setDefenderHistory(savedDefenders);
-      })
-      .catch((caught: unknown) => {
-        console.error("ダメージ計算履歴を読み込めませんでした。", caught);
+    const timer = window.setTimeout(() => {
+      void loadUserData(active).catch((caught: unknown) => {
+        console.error("ダメージ計算の保存データを読み込めませんでした。", caught);
+        if (active) {
+          setTeamLoadError("保存データを読み込めませんでした。");
+        }
       });
-
+    }, 0);
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
-  }, []);
+  }, [loadUserData]);
 
   useEffect(() => {
     let active = true;
-    void Promise.all([getAllBattleTeams(), getAllTrainingBuilds(), getNatures()])
-      .then(([teams, builds, loadedNatures]) => {
-        if (!active) return;
-        setBattleTeams(teams);
-        setTrainingBuilds(builds);
-        setNatures(loadedNatures);
-      })
-      .catch((caught: unknown) => {
-        console.error("バトルチームを読み込めませんでした。", caught);
-        if (active) {
-          setTeamLoadError("バトルチームを読み込めませんでした。");
-        }
+    const handleSynced = () => {
+      void loadUserData(active).catch((caught: unknown) => {
+        console.error("同期後のダメージ計算データを読み込めませんでした。", caught);
+        if (active) setTeamLoadError("同期後の保存データを読み込めませんでした。");
       });
-
+    };
+    window.addEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
     return () => {
       active = false;
+      window.removeEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
     };
-  }, []);
+  }, [loadUserData]);
 
   // 攻撃側を変更したら、前のポケモンの技や計算結果を残さない。
   function selectAttacker(pokemon: DamageCalculatorPokemon | null) {

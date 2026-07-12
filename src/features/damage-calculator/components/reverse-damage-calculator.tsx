@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
 import { championsDamageCalculator } from "../config/champions-damage-ruleset";
 import type {
   DamageCalculatorAbility,
@@ -456,42 +457,56 @@ export function ReverseDamageCalculator({
       defender: toMembers(selectedTeams.defender),
     };
   }, [buildById, pokemonCatalog, selectedTeams]);
-
-  useEffect(() => {
-    let active = true;
-    Promise.all([getDamageHistory("attacker"), getDamageHistory("defender")])
-      .then(([savedAttackers, savedDefenders]) => {
-        if (!active) return;
-        setAttackerHistory(savedAttackers);
-        setDefenderHistory(savedDefenders);
-      })
-      .catch((caught: unknown) => {
-        console.error("Failed to load damage history.", caught);
-      });
-
-    return () => {
-      active = false;
-    };
+  const loadUserData = useCallback(async (active = true) => {
+    const [
+      savedAttackers,
+      savedDefenders,
+      teams,
+      builds,
+      loadedNatures,
+    ] = await Promise.all([
+      getDamageHistory("attacker"),
+      getDamageHistory("defender"),
+      getAllBattleTeams(),
+      getAllTrainingBuilds(),
+      getNatures(),
+    ]);
+    if (!active) return;
+    setAttackerHistory(savedAttackers);
+    setDefenderHistory(savedDefenders);
+    setBattleTeams(teams);
+    setTrainingBuilds(builds);
+    setNatures(loadedNatures);
   }, []);
 
   useEffect(() => {
     let active = true;
-    void Promise.all([getAllBattleTeams(), getAllTrainingBuilds(), getNatures()])
-      .then(([teams, builds, loadedNatures]) => {
-        if (!active) return;
-        setBattleTeams(teams);
-        setTrainingBuilds(builds);
-        setNatures(loadedNatures);
-      })
-      .catch((caught: unknown) => {
-        console.error("Failed to load battle teams.", caught);
-        if (active) setTeamLoadError("バトルチームを読み込めませんでした。");
+    const timer = window.setTimeout(() => {
+      void loadUserData(active).catch((caught: unknown) => {
+        console.error("Failed to load reverse calculator user data.", caught);
+        if (active) setTeamLoadError("保存データを読み込めませんでした。");
       });
-
+    }, 0);
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
-  }, []);
+  }, [loadUserData]);
+
+  useEffect(() => {
+    let active = true;
+    const handleSynced = () => {
+      void loadUserData(active).catch((caught: unknown) => {
+        console.error("Failed to reload reverse calculator user data.", caught);
+        if (active) setTeamLoadError("同期後の保存データを読み込めませんでした。");
+      });
+    };
+    window.addEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
+    return () => {
+      active = false;
+      window.removeEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
+    };
+  }, [loadUserData]);
 
   useEffect(() => {
     if (!attacker || !defender || !selectedMove) return;

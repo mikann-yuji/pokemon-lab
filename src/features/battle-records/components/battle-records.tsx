@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
 import {
   deleteBattleRecord,
   getBattleRecords,
@@ -310,23 +311,43 @@ export function BattleRecords() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  const loadRecords = useCallback(async (active = true) => {
+    const savedRecords = await getBattleRecords();
+    if (active) setRecords(savedRecords);
+  }, []);
+
   useEffect(() => {
     let active = true;
-    void getBattleRecords()
-      .then((savedRecords) => {
-        if (active) setRecords(savedRecords);
-      })
-      .catch((loadError: unknown) => {
-        console.error("Failed to load battle records.", loadError);
-        if (active) setError("バトル記録を読み込めませんでした。");
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
+    const timer = window.setTimeout(() => {
+      void loadRecords(active)
+        .catch((loadError: unknown) => {
+          console.error("Failed to load battle records.", loadError);
+          if (active) setError("バトル記録を読み込めませんでした。");
+        })
+        .finally(() => {
+          if (active) setLoading(false);
+        });
+    }, 0);
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
-  }, []);
+  }, [loadRecords]);
+
+  useEffect(() => {
+    let active = true;
+    const handleSynced = () => {
+      void loadRecords(active).catch((loadError: unknown) => {
+        console.error("Failed to reload battle records after sync.", loadError);
+        if (active) setError("同期後のバトル記録を読み込めませんでした。");
+      });
+    };
+    window.addEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
+    return () => {
+      active = false;
+      window.removeEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
+    };
+  }, [loadRecords]);
 
   const previewLabel = useMemo(
     () => (imageDataUrl ? "選択中の写真" : "写真未選択"),
