@@ -4,7 +4,9 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import { useEffect, useState } from "react";
 import {
   getFirebaseAuth,
+  getGoogleRedirectResult,
   signInWithGoogle,
+  signInWithGoogleRedirect,
   signOutFirebaseUser,
 } from "@/infrastructure/firebase/firebase-client";
 import {
@@ -33,6 +35,31 @@ function formatStatusDate(timestamp: number) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(timestamp));
+}
+
+function getFirebaseErrorCode(error: unknown) {
+  if (!error || typeof error !== "object" || !("code" in error)) return "";
+  const code = (error as { code?: unknown }).code;
+  return typeof code === "string" ? code : "";
+}
+
+function shouldUseRedirectSignIn(error: unknown) {
+  return [
+    "auth/cancelled-popup-request",
+    "auth/operation-not-supported-in-this-environment",
+    "auth/popup-blocked",
+  ].includes(getFirebaseErrorCode(error));
+}
+
+function getSignInErrorMessage(error: unknown) {
+  const code = getFirebaseErrorCode(error);
+  if (code === "auth/unauthorized-domain") {
+    return "ログイン失敗: Firebaseの承認済みドメインを確認";
+  }
+  if (code === "auth/popup-closed-by-user") {
+    return "ログインがキャンセルされました";
+  }
+  return code ? `ログイン失敗: ${code}` : "ログイン失敗";
 }
 
 export function UserDatabaseSync() {
@@ -108,14 +135,39 @@ export function UserDatabaseSync() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, online]);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void getGoogleRedirectResult()
+        .then((result) => {
+          if (result?.user) void syncUserDatabase(result.user);
+        })
+        .catch((error: unknown) => {
+          console.warn("Failed to finish Google redirect sign in.", error);
+          setMessage(getSignInErrorMessage(error));
+        });
+    }, 0);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function handleSignIn() {
+    if (!navigator.onLine) {
+      setMessage("オフラインです");
+      return;
+    }
+
     setMessage("ログイン中");
     try {
       const result = await signInWithGoogle();
       await syncUserDatabase(result.user);
     } catch (error) {
       console.warn("Failed to sign in with Google.", error);
-      setMessage("ログイン失敗");
+      if (shouldUseRedirectSignIn(error)) {
+        setMessage("Googleへ移動します");
+        await signInWithGoogleRedirect();
+        return;
+      }
+      setMessage(getSignInErrorMessage(error));
     }
   }
 
@@ -140,7 +192,7 @@ export function UserDatabaseSync() {
           </button>
         </>
       ) : (
-        <button type="button" disabled={!online} onClick={() => void handleSignIn()}>
+        <button type="button" disabled={syncing} onClick={() => void handleSignIn()}>
           Googleログイン
         </button>
       )}

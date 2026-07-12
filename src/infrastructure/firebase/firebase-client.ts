@@ -1,9 +1,11 @@
 import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import {
   getAuth,
+  getRedirectResult,
   GoogleAuthProvider,
   signInAnonymously,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   type Auth,
   type User,
@@ -56,6 +58,16 @@ export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
   return signInWithPopup(getFirebaseAuth(), provider);
+}
+
+export async function signInWithGoogleRedirect() {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  await signInWithRedirect(getFirebaseAuth(), provider);
+}
+
+export async function getGoogleRedirectResult() {
+  return getRedirectResult(getFirebaseAuth());
 }
 
 export async function signOutFirebaseUser() {
