@@ -16,6 +16,7 @@ import { sqliteWorkerClient } from "@/infrastructure/sqlite-wasm/sqlite-client";
 import styles from "./user-database-sync.module.css";
 
 const LAST_SYNC_PREFIX = "pokemon-lab:user-db:last-sync:";
+export const USER_RECORDS_SYNCED_EVENT = "pokemon-lab:user-records-synced";
 
 function getLastSync(uid: string) {
   return Number(window.localStorage.getItem(`${LAST_SYNC_PREFIX}${uid}`) ?? 0);
@@ -133,6 +134,9 @@ export function UserDatabaseSync() {
       setLastSync(activeUser.uid, syncedAt);
       setLastSyncAt(syncedAt);
       setMessage(`同期済み ${result.uploaded}件`);
+      window.dispatchEvent(
+        new CustomEvent(USER_RECORDS_SYNCED_EVENT, { detail: result }),
+      );
     } catch (error) {
       console.warn("Failed to sync user.db.", error);
       const syncErrorMessage = getSyncErrorMessage(error);

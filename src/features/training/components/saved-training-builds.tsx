@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
 import {
   normalizePokemonSearchText,
   pokemonNameIncludes,
@@ -87,6 +88,32 @@ export function SavedTrainingBuilds({
     () => new Map(heldItems.map((item) => [item.id, item.name])),
     [heldItems],
   );
+  const loadSavedData = useCallback(
+    async (active = true) => {
+      const [savedBuilds, savedTeams] = await Promise.all([
+        getAllTrainingBuilds(),
+        teamBuilder ? getAllBattleTeams() : Promise.resolve([]),
+      ]);
+      if (!active) return;
+      setBuilds(savedBuilds);
+      if (teamBuilder) {
+        setTeams(savedTeams);
+        if (teamMode === "edit") {
+          const editingTeam = savedTeams.find(
+            (team) => team.id === initialEditingTeamId,
+          );
+          if (!editingTeam) {
+            setTeamError("編集するバトルチームが見つかりませんでした。");
+            return;
+          }
+          setTeamName(editingTeam.name);
+          setSelectedBuildIds(new Set(editingTeam.buildIds));
+          setEditingTeamId(editingTeam.id);
+        }
+      }
+    },
+    [initialEditingTeamId, teamBuilder, teamMode],
+  );
 
   // 一覧表示に必要なカタログ名は、未指定の場合だけcatalog.dbから後読みする。
   useEffect(() => {
@@ -122,57 +149,38 @@ export function SavedTrainingBuilds({
   // user.dbに保存済みの育成案を初回表示時に読み込む。
   useEffect(() => {
     let active = true;
-    void getAllTrainingBuilds()
-      .then((savedBuilds) => {
-        if (!active) return;
-        setBuilds(savedBuilds);
-      })
-      .catch((error: unknown) => {
-        console.error("保存した育成案を読み込めませんでした。", error);
-        if (active) {
-          setLoadError("保存した育成案を読み込めませんでした。");
-        }
-      })
-      .finally(() => {
-        if (active) setLoaded(true);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  // チーム編成画面でだけ、既存チーム一覧も読み込む。
-  useEffect(() => {
-    if (!teamBuilder) return;
-
-    let active = true;
-    void getAllBattleTeams()
-      .then((savedTeams) => {
-        if (!active) return;
-        setTeams(savedTeams);
-        if (teamMode === "edit") {
-          const editingTeam = savedTeams.find(
-            (team) => team.id === initialEditingTeamId,
-          );
-          if (!editingTeam) {
-            setTeamError("編集するバトルチームが見つかりませんでした。");
-            return;
+    const timer = window.setTimeout(() => {
+      void loadSavedData(active)
+        .catch((error: unknown) => {
+          console.error("保存した育成案/チームを読み込めませんでした。", error);
+          if (active) {
+            setLoadError("保存した育成案/チームを読み込めませんでした。");
           }
-          setTeamName(editingTeam.name);
-          setSelectedBuildIds(new Set(editingTeam.buildIds));
-          setEditingTeamId(editingTeam.id);
-        }
-      })
-      .catch((error: unknown) => {
-        console.error("保存したバトルチームを読み込めませんでした。", error);
-        if (active) {
-          setTeamError("保存したバトルチームを読み込めませんでした。");
-        }
-      });
+        })
+        .finally(() => {
+          if (active) setLoaded(true);
+        });
+    }, 0);
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
-  }, [initialEditingTeamId, teamBuilder, teamMode]);
+  }, [loadSavedData]);
+
+  useEffect(() => {
+    let active = true;
+    const handleSynced = () => {
+      void loadSavedData(active).catch((error: unknown) => {
+        console.error("同期後の保存データを読み込めませんでした。", error);
+        if (active) setLoadError("同期後の保存データを読み込めませんでした。");
+      });
+    };
+    window.addEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
+    return () => {
+      active = false;
+      window.removeEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
+    };
+  }, [loadSavedData]);
 
   function resetTeamForm() {
     setSelectedBuildIds(new Set());
