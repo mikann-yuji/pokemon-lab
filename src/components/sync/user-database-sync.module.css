@@ -1,0 +1,72 @@
+.syncBox {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 28px);
+  border: 1px solid rgba(24, 34, 54, 0.14);
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 12px 34px rgba(24, 34, 54, 0.14);
+  color: #182236;
+  font-size: 0.82rem;
+}
+
+.online,
+.offline {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+}
+
+.online {
+  background: #2f7d50;
+}
+
+.offline {
+  background: #9aa4b2;
+}
+
+.status {
+  min-width: 0;
+  max-width: 170px;
+  overflow: hidden;
+  color: #405167;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.syncBox button {
+  border: 1px solid rgba(24, 34, 54, 0.16);
+  border-radius: 8px;
+  padding: 6px 9px;
+  background: #ffffff;
+  color: #202f44;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.syncBox button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 560px) {
+  .syncBox {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    justify-content: flex-end;
+  }
+
+  .status {
+    margin-right: auto;
+  }
+}

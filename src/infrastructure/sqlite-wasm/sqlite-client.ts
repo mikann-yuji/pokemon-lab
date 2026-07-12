@@ -244,6 +244,14 @@ class SqliteWorkerClient {
     return this.request("transaction", { statements });
   }
 
+  exportUserDatabase(): Promise<Uint8Array> {
+    return this.request("exportUserDatabase", undefined, 60_000);
+  }
+
+  importUserDatabase(bytes: Uint8Array): Promise<SqliteWorkerInitialization> {
+    return this.request("importUserDatabase", bytes, 60_000);
+  }
+
   /** 診断画面からSQLite/OPFS/スキーマ/CRUDの状態をまとめて確認する。 */
   diagnose(): Promise<SqliteDatabaseDiagnostics> {
     return this.request("diagnose", undefined);

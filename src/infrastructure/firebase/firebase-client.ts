@@ -1,7 +1,10 @@
 import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import {
   getAuth,
+  GoogleAuthProvider,
   signInAnonymously,
+  signInWithPopup,
+  signOut,
   type Auth,
   type User,
 } from "firebase/auth";
@@ -47,4 +50,14 @@ export async function ensureAnonymousFirebaseUser() {
   if (auth.currentUser) return auth.currentUser;
   anonymousUserPromise ??= signInAnonymously(auth).then((result) => result.user);
   return anonymousUserPromise;
+}
+
+export async function signInWithGoogle() {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  return signInWithPopup(getFirebaseAuth(), provider);
+}
+
+export async function signOutFirebaseUser() {
+  await signOut(getFirebaseAuth());
 }

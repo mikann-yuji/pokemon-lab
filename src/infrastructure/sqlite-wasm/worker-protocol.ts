@@ -63,6 +63,8 @@ export type SqliteWorkerRequestMap = {
   catalogQuery: SqliteStatement;
   execute: SqliteStatement;
   transaction: { statements: SqliteStatement[] };
+  exportUserDatabase: undefined;
+  importUserDatabase: Uint8Array;
   diagnose: undefined;
   close: undefined;
 };
@@ -75,6 +77,8 @@ export type SqliteWorkerResultMap = {
   catalogQuery: SqliteRow[];
   execute: SqliteExecuteResult;
   transaction: SqliteExecuteResult[];
+  exportUserDatabase: Uint8Array;
+  importUserDatabase: SqliteWorkerInitialization;
   diagnose: SqliteDatabaseDiagnostics;
   close: undefined;
 };

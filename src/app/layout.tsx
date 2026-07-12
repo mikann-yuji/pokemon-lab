@@ -7,6 +7,7 @@ import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { BackButton } from "@/components/layout/back-button";
 import { SiteHeader } from "@/components/layout/site-header";
+import { UserDatabaseSync } from "@/components/sync/user-database-sync";
 
 export const metadata: Metadata = {
   title: "PokemonLab",
@@ -46,6 +47,7 @@ export default function RootLayout({
         <SiteHeader />
         <BackButton />
         {children}
+        <UserDatabaseSync />
       </body>
     </html>
   );

@@ -16,6 +16,7 @@ let database = null;
 let catalogDatabase = null;
 let sahPool = null;
 let initialization;
+let sqliteApi = null;
 
 // 旧user.dbにカタログ同梱テーブルが残っていた場合に削除するための一覧。
 const catalogTableNames = [
@@ -80,6 +81,31 @@ function queryCatalogRows({ sql, bind }) {
     rowMode: "object",
     returnValue: "resultRows",
   });
+}
+
+function exportUserDatabase() {
+  database.exec("PRAGMA wal_checkpoint(FULL)");
+  return sqliteApi.capi.sqlite3_js_db_export(database);
+}
+
+async function importUserDatabase(bytes) {
+  if (!(bytes instanceof Uint8Array)) {
+    throw new Error("インポートするuser.dbの形式が正しくありません。");
+  }
+
+  database?.close();
+  database = null;
+  sahPool.unlink(DATABASE_FILENAME);
+  await sahPool.importDb(DATABASE_FILENAME, bytes);
+  database = new sahPool.OpfsSAHPoolDb(DATABASE_FILENAME);
+  migrateSchema();
+  await ensureCatalogDatabase();
+  return {
+    sqliteVersion: sqliteApi.version.libVersion,
+    vfs: "opfs-sahpool",
+    databaseFilename: DATABASE_FILENAME,
+    ...runDiagnostics(),
+  };
 }
 
 /**
@@ -488,6 +514,7 @@ async function initializeSqlite() {
 
   initialization = (async () => {
     const sqlite3 = await sqlite3InitModule();
+    sqliteApi = sqlite3;
     const pool = await sqlite3.installOpfsSAHPoolVfs({
       directory: ".pokemon-lab-sahpool",
       initialCapacity: 8,
@@ -538,6 +565,10 @@ async function handleRequest(request) {
       return executeStatement(request.payload);
     case "transaction":
       return runTransaction(request.payload.statements);
+    case "exportUserDatabase":
+      return exportUserDatabase();
+    case "importUserDatabase":
+      return importUserDatabase(request.payload);
     case "diagnose":
       return runDiagnostics();
     case "close":

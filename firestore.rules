@@ -23,5 +23,13 @@ service cloud.firestore {
 
       allow update, delete: if false;
     }
+
+    match /users/{userId}/userDbBackup/current {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /chunks/{chunkId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
   }
 }
