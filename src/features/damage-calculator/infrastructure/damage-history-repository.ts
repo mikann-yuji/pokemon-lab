@@ -41,7 +41,7 @@ export async function getDamageHistory(
   const rows = await sqliteWorkerClient.query<DamageHistoryRow>(
     `SELECT side, pokemon_id, move_id, updated_at
      FROM damage_history
-     WHERE side = ?
+     WHERE side = ? AND deleted_at IS NULL
      ORDER BY updated_at DESC, id DESC
      LIMIT ?`,
     [side, HISTORY_LIMIT],
@@ -61,25 +61,28 @@ export async function saveDamageHistory(
   const now = Date.now();
   await sqliteWorkerClient.transaction([
     {
-      sql: "DELETE FROM damage_history WHERE side = ? AND pokemon_id = ?",
-      bind: [side, pokemonId],
+      sql: "UPDATE damage_history SET deleted_at = ?, updated_at = ? WHERE side = ? AND pokemon_id = ?",
+      bind: [now, now, side, pokemonId],
     },
     {
       sql: `INSERT INTO damage_history
-              (side, pokemon_id, move_id, updated_at)
-            VALUES (?, ?, ?, ?)`,
-      bind: [side, pokemonId, moveId ?? null, now],
+              (side, pokemon_id, move_id, created_at, updated_at, deleted_at)
+            VALUES (?, ?, ?, ?, ?, NULL)`,
+      bind: [side, pokemonId, moveId ?? null, now, now],
     },
     {
-      sql: `DELETE FROM damage_history
+      sql: `UPDATE damage_history
+            SET deleted_at = ?, updated_at = ?
             WHERE side = ?
+              AND deleted_at IS NULL
               AND id NOT IN (
                 SELECT id FROM damage_history
                 WHERE side = ?
+                  AND deleted_at IS NULL
                 ORDER BY updated_at DESC, id DESC
                 LIMIT ?
               )`,
-      bind: [side, side, HISTORY_LIMIT],
+      bind: [now, now, side, side, HISTORY_LIMIT],
     },
   ]);
   return getDamageHistory(side);

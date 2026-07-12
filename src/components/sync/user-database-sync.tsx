@@ -10,10 +10,8 @@ import {
   signOutFirebaseUser,
 } from "@/infrastructure/firebase/firebase-client";
 import {
-  getUserDatabaseBackupMetadata,
-  loadUserDatabaseBackup,
-  saveUserDatabaseBackup,
-} from "@/infrastructure/firebase/user-db-backup-repository";
+  syncUserRecords,
+} from "@/infrastructure/firebase/user-record-sync-repository";
 import { sqliteWorkerClient } from "@/infrastructure/sqlite-wasm/sqlite-client";
 import styles from "./user-database-sync.module.css";
 
@@ -83,11 +81,6 @@ function getSyncErrorMessage(error: unknown) {
   return message ? `同期失敗: ${message}` : "同期失敗";
 }
 
-function formatBytes(bytes: number) {
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))}KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)}MB`;
-}
-
 export function UserDatabaseSync() {
   const [user, setUser] = useState<User | null>(null);
   const [online, setOnline] = useState(() =>
@@ -134,29 +127,12 @@ export function UserDatabaseSync() {
     try {
       setMessage("DB準備中");
       await sqliteWorkerClient.initialize();
-      setMessage("クラウド確認中");
-      const lastSync = getLastSync(activeUser.uid);
-      const remoteMetadata = await getUserDatabaseBackupMetadata(activeUser.uid);
-
-      if (remoteMetadata && remoteMetadata.updatedAt > lastSync) {
-        setMessage(`復元中 ${formatBytes(remoteMetadata.totalBytes)}`);
-        const backup = await loadUserDatabaseBackup(activeUser.uid);
-        if (backup) {
-          await sqliteWorkerClient.importUserDatabase(backup.bytes);
-          setLastSync(activeUser.uid, backup.metadata.updatedAt);
-          setLastSyncAt(backup.metadata.updatedAt);
-          setMessage("クラウドから復元");
-          return;
-        }
-      }
-
-      setMessage("DB書き出し中");
-      const bytes = await sqliteWorkerClient.exportUserDatabase();
-      setMessage(`アップロード中 ${formatBytes(bytes.byteLength)}`);
-      const saved = await saveUserDatabaseBackup(activeUser.uid, bytes);
-      setLastSync(activeUser.uid, saved.updatedAt);
-      setLastSyncAt(saved.updatedAt);
-      setMessage("クラウドへ同期");
+      setMessage("レコード同期中");
+      const result = await syncUserRecords(activeUser.uid);
+      const syncedAt = Date.now();
+      setLastSync(activeUser.uid, syncedAt);
+      setLastSyncAt(syncedAt);
+      setMessage(`同期済み ${result.uploaded}件`);
     } catch (error) {
       console.warn("Failed to sync user.db.", error);
       const syncErrorMessage = getSyncErrorMessage(error);

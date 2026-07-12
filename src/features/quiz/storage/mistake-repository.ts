@@ -14,6 +14,7 @@ export async function getMistakeKeys(): Promise<string[]> {
   const rows = await sqliteWorkerClient.query<MistakeRow>(
     `SELECT question_key
      FROM quiz_mistakes
+     WHERE deleted_at IS NULL
      ORDER BY updated_at DESC`,
   );
   return rows.map(({ question_key }) => String(question_key));
@@ -24,23 +25,30 @@ export async function saveMistake(questionKey: string): Promise<void> {
   await sqliteWorkerClient.execute(
     `INSERT INTO quiz_mistakes (question_key, updated_at)
      VALUES (?, ?)
-     ON CONFLICT(question_key) DO UPDATE SET updated_at = excluded.updated_at`,
+     ON CONFLICT(question_key) DO UPDATE SET
+       updated_at = excluded.updated_at,
+       deleted_at = NULL`,
     [questionKey, Date.now()],
   );
 }
 
 /** 正解できた復習問題を、間違いリストから削除する。 */
 export async function removeMistake(questionKey: string): Promise<void> {
+  const now = Date.now();
   await sqliteWorkerClient.execute(
-    "DELETE FROM quiz_mistakes WHERE question_key = ?",
-    [questionKey],
+    `INSERT INTO quiz_mistakes (question_key, updated_at, deleted_at)
+     VALUES (?, ?, ?)
+     ON CONFLICT(question_key) DO UPDATE SET
+       updated_at = excluded.updated_at,
+       deleted_at = excluded.deleted_at`,
+    [questionKey, now, now],
   );
 }
 
 /** 問題ごとのメモ/ヒントを取得する。未保存なら空文字を返して入力欄にそのまま渡す。 */
 export async function getHint(questionKey: string): Promise<string> {
   const rows = await sqliteWorkerClient.query<HintRow>(
-    "SELECT text FROM quiz_hints WHERE question_key = ?",
+    "SELECT text FROM quiz_hints WHERE question_key = ? AND deleted_at IS NULL",
     [questionKey],
   );
   return rows[0] ? String(rows[0].text) : "";
@@ -55,20 +63,27 @@ export async function saveHint(
   text: string,
 ): Promise<void> {
   const normalizedText = text.trim();
+  const now = Date.now();
   if (!normalizedText) {
     await sqliteWorkerClient.execute(
-      "DELETE FROM quiz_hints WHERE question_key = ?",
-      [questionKey],
+      `INSERT INTO quiz_hints (question_key, text, created_at, updated_at, deleted_at)
+       VALUES (?, '', ?, ?, ?)
+       ON CONFLICT(question_key) DO UPDATE SET
+         text = '',
+         updated_at = excluded.updated_at,
+         deleted_at = excluded.deleted_at`,
+      [questionKey, now, now, now],
     );
     return;
   }
 
   await sqliteWorkerClient.execute(
-    `INSERT INTO quiz_hints (question_key, text, updated_at)
-     VALUES (?, ?, ?)
+    `INSERT INTO quiz_hints (question_key, text, created_at, updated_at, deleted_at)
+     VALUES (?, ?, ?, ?, NULL)
      ON CONFLICT(question_key) DO UPDATE SET
        text = excluded.text,
-       updated_at = excluded.updated_at`,
-    [questionKey, normalizedText, Date.now()],
+       updated_at = excluded.updated_at,
+       deleted_at = NULL`,
+    [questionKey, normalizedText, now, now],
   );
 }

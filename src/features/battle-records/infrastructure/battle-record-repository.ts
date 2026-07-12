@@ -34,6 +34,7 @@ export async function getBattleRecords(): Promise<BattleRecord[]> {
   const rows = await sqliteWorkerClient.query<BattleRecordRow>(
     `SELECT id, battle_at, memo, image_data_url, created_at, updated_at
      FROM battle_records
+     WHERE deleted_at IS NULL
      ORDER BY battle_at DESC, id DESC`,
   );
   return rows.map(toBattleRecord);
@@ -59,9 +60,9 @@ export async function saveBattleRecord({
   const now = Date.now();
   const result = await sqliteWorkerClient.execute(
     `INSERT INTO battle_records
-       (battle_at, memo, image_data_url, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?)`,
-    [battleAt, normalizedMemo, imageDataUrl, now, now],
+       (sync_id, battle_at, memo, image_data_url, created_at, updated_at, deleted_at)
+     VALUES (?, ?, ?, ?, ?, ?, NULL)`,
+    [crypto.randomUUID(), battleAt, normalizedMemo, imageDataUrl, now, now],
   );
 
   const rows = await sqliteWorkerClient.query<BattleRecordRow>(
@@ -78,7 +79,9 @@ export async function saveBattleRecord({
 }
 
 export async function deleteBattleRecord(id: number) {
-  await sqliteWorkerClient.execute("DELETE FROM battle_records WHERE id = ?", [
-    id,
-  ]);
+  const now = Date.now();
+  await sqliteWorkerClient.execute(
+    "UPDATE battle_records SET deleted_at = ?, updated_at = ? WHERE id = ?",
+    [now, now, id],
+  );
 }

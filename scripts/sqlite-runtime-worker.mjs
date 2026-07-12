@@ -7,7 +7,7 @@ import sqlite3InitModule from "/sqlite-wasm/index.mjs";
 
 const DATABASE_FILENAME = "/user.db";
 const CATALOG_DATABASE_FILENAME = "/catalog.db";
-const SUPPORTED_SCHEMA_VERSION = 4;
+const SUPPORTED_SCHEMA_VERSION = 5;
 const CATALOG_DATABASE_URL = "/sqlite-catalog.db.gz";
 const CATALOG_SEED_VERSION = "6";
 
@@ -140,6 +140,48 @@ function compactUserDatabaseIfCatalogTablesExist() {
   database.exec("VACUUM");
 }
 
+function getTableColumnNames(tableName) {
+  return new Set(
+    database
+      .exec({
+        sql: `PRAGMA table_info("${tableName}")`,
+        rowMode: "object",
+        returnValue: "resultRows",
+      })
+      .map((row) => row.name),
+  );
+}
+
+function addColumnIfMissing(tableName, columnName, definition) {
+  if (getTableColumnNames(tableName).has(columnName)) return;
+  database.exec(`ALTER TABLE "${tableName}" ADD COLUMN ${columnName} ${definition}`);
+}
+
+function backfillSyncColumns(tableName) {
+  const columns = getTableColumnNames(tableName);
+  if (columns.has("sync_id")) {
+    database.exec(`
+      UPDATE "${tableName}"
+      SET sync_id = lower(hex(randomblob(16)))
+      WHERE sync_id IS NULL OR sync_id = '';
+    `);
+  }
+  if (columns.has("created_at") && columns.has("updated_at")) {
+    database.exec(`
+      UPDATE "${tableName}"
+      SET created_at = updated_at
+      WHERE created_at IS NULL OR created_at = 0;
+    `);
+  }
+  if (columns.has("deleted_at")) {
+    database.exec(`
+      UPDATE "${tableName}"
+      SET deleted_at = NULL
+      WHERE deleted_at = 0;
+    `);
+  }
+}
+
 /**
  * 複数のuser.db更新を不可分に実行する。
  * bindReferencesで前のINSERT結果を後続SQLへ渡し、チーム作成などの親子保存を1往復で完了させる。
@@ -213,6 +255,7 @@ function migrateSchema() {
 
         CREATE TABLE training_builds (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          sync_id TEXT UNIQUE,
           name TEXT NOT NULL,
           content_key TEXT NOT NULL UNIQUE,
           pokemon_id INTEGER NOT NULL,
@@ -221,13 +264,18 @@ function migrateSchema() {
           ability_id TEXT,
           ability_points_json TEXT NOT NULL,
           move_ids_json TEXT NOT NULL,
-          updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+          created_at INTEGER,
+          updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+          deleted_at INTEGER
         );
 
         CREATE TABLE battle_teams (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          sync_id TEXT UNIQUE,
           name TEXT NOT NULL,
-          updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+          created_at INTEGER,
+          updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+          deleted_at INTEGER
         );
 
         CREATE TABLE battle_team_members (
@@ -242,13 +290,16 @@ function migrateSchema() {
 
         CREATE TABLE quiz_mistakes (
           question_key TEXT PRIMARY KEY,
-          updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+          updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+          deleted_at INTEGER
         );
 
         CREATE TABLE quiz_hints (
           question_key TEXT PRIMARY KEY,
           text TEXT NOT NULL,
-          updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+          created_at INTEGER,
+          updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+          deleted_at INTEGER
         );
 
         CREATE TABLE damage_history (
@@ -256,7 +307,9 @@ function migrateSchema() {
           side TEXT NOT NULL CHECK (side IN ('attacker', 'defender')),
           pokemon_id INTEGER NOT NULL,
           move_id INTEGER,
-          updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+          created_at INTEGER,
+          updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+          deleted_at INTEGER
         );
 
         CREATE INDEX damage_history_side_updated_at
@@ -264,6 +317,7 @@ function migrateSchema() {
 
         CREATE TABLE training_matchup_notes (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          sync_id TEXT UNIQUE,
           source_build_id INTEGER NOT NULL,
           matchup_kind TEXT NOT NULL CHECK (matchup_kind IN ('favorable', 'unfavorable')),
           target_kind TEXT NOT NULL CHECK (target_kind IN ('pokemon', 'build')),
@@ -271,7 +325,9 @@ function migrateSchema() {
           target_build_id INTEGER,
           target_name TEXT NOT NULL,
           note TEXT NOT NULL,
+          created_at INTEGER,
           updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+          deleted_at INTEGER,
           FOREIGN KEY (source_build_id) REFERENCES training_builds(id) ON DELETE CASCADE,
           FOREIGN KEY (target_build_id) REFERENCES training_builds(id) ON DELETE SET NULL
         );
@@ -281,11 +337,13 @@ function migrateSchema() {
 
         CREATE TABLE battle_records (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          sync_id TEXT UNIQUE,
           battle_at INTEGER NOT NULL,
           memo TEXT NOT NULL,
           image_data_url TEXT NOT NULL,
           created_at INTEGER NOT NULL,
-          updated_at INTEGER NOT NULL
+          updated_at INTEGER NOT NULL,
+          deleted_at INTEGER
         );
 
         CREATE INDEX battle_records_battle_at
@@ -294,7 +352,7 @@ function migrateSchema() {
         INSERT INTO schema_metadata (key, value)
         VALUES ('database_created_at', CAST(unixepoch() AS TEXT));
 
-        PRAGMA user_version = 4;
+        PRAGMA user_version = 5;
       `);
       database.exec("COMMIT");
     } catch (error) {
@@ -324,6 +382,7 @@ function migrateSchema() {
       database.exec(`
         CREATE TABLE IF NOT EXISTS training_matchup_notes (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          sync_id TEXT UNIQUE,
           source_build_id INTEGER NOT NULL,
           matchup_kind TEXT NOT NULL CHECK (matchup_kind IN ('favorable', 'unfavorable')),
           target_kind TEXT NOT NULL CHECK (target_kind IN ('pokemon', 'build')),
@@ -331,7 +390,9 @@ function migrateSchema() {
           target_build_id INTEGER,
           target_name TEXT NOT NULL,
           note TEXT NOT NULL,
+          created_at INTEGER,
           updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+          deleted_at INTEGER,
           FOREIGN KEY (source_build_id) REFERENCES training_builds(id) ON DELETE CASCADE,
           FOREIGN KEY (target_build_id) REFERENCES training_builds(id) ON DELETE SET NULL
         );
@@ -355,11 +416,13 @@ function migrateSchema() {
       database.exec(`
         CREATE TABLE IF NOT EXISTS battle_records (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          sync_id TEXT UNIQUE,
           battle_at INTEGER NOT NULL,
           memo TEXT NOT NULL,
           image_data_url TEXT NOT NULL,
           created_at INTEGER NOT NULL,
-          updated_at INTEGER NOT NULL
+          updated_at INTEGER NOT NULL,
+          deleted_at INTEGER
         );
 
         CREATE INDEX IF NOT EXISTS battle_records_battle_at
@@ -375,9 +438,61 @@ function migrateSchema() {
     }
   }
 
+  if (currentVersion === 4) {
+    database.exec("BEGIN IMMEDIATE");
+    try {
+      addColumnIfMissing("training_builds", "sync_id", "TEXT");
+      addColumnIfMissing("training_builds", "created_at", "INTEGER");
+      addColumnIfMissing("training_builds", "deleted_at", "INTEGER");
+      addColumnIfMissing("battle_teams", "sync_id", "TEXT");
+      addColumnIfMissing("battle_teams", "created_at", "INTEGER");
+      addColumnIfMissing("battle_teams", "deleted_at", "INTEGER");
+      addColumnIfMissing("quiz_mistakes", "deleted_at", "INTEGER");
+      addColumnIfMissing("quiz_hints", "created_at", "INTEGER");
+      addColumnIfMissing("quiz_hints", "deleted_at", "INTEGER");
+      addColumnIfMissing("damage_history", "created_at", "INTEGER");
+      addColumnIfMissing("damage_history", "deleted_at", "INTEGER");
+      addColumnIfMissing("training_matchup_notes", "sync_id", "TEXT");
+      addColumnIfMissing("training_matchup_notes", "created_at", "INTEGER");
+      addColumnIfMissing("training_matchup_notes", "deleted_at", "INTEGER");
+      addColumnIfMissing("battle_records", "sync_id", "TEXT");
+      addColumnIfMissing("battle_records", "deleted_at", "INTEGER");
+
+      for (const tableName of [
+        "training_builds",
+        "battle_teams",
+        "quiz_mistakes",
+        "quiz_hints",
+        "damage_history",
+        "training_matchup_notes",
+        "battle_records",
+      ]) {
+        backfillSyncColumns(tableName);
+      }
+
+      database.exec(`
+        CREATE UNIQUE INDEX IF NOT EXISTS training_builds_sync_id
+          ON training_builds(sync_id);
+        CREATE UNIQUE INDEX IF NOT EXISTS battle_teams_sync_id
+          ON battle_teams(sync_id);
+        CREATE UNIQUE INDEX IF NOT EXISTS training_matchup_notes_sync_id
+          ON training_matchup_notes(sync_id);
+        CREATE UNIQUE INDEX IF NOT EXISTS battle_records_sync_id
+          ON battle_records(sync_id);
+        PRAGMA user_version = 5;
+      `);
+      database.exec("COMMIT");
+      currentVersion = 5;
+    } catch (error) {
+      database.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
   database.exec(`
     CREATE TABLE IF NOT EXISTS training_matchup_notes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      sync_id TEXT UNIQUE,
       source_build_id INTEGER NOT NULL,
       matchup_kind TEXT NOT NULL CHECK (matchup_kind IN ('favorable', 'unfavorable')),
       target_kind TEXT NOT NULL CHECK (target_kind IN ('pokemon', 'build')),
@@ -385,7 +500,9 @@ function migrateSchema() {
       target_build_id INTEGER,
       target_name TEXT NOT NULL,
       note TEXT NOT NULL,
+      created_at INTEGER,
       updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      deleted_at INTEGER,
       FOREIGN KEY (source_build_id) REFERENCES training_builds(id) ON DELETE CASCADE,
       FOREIGN KEY (target_build_id) REFERENCES training_builds(id) ON DELETE SET NULL
     );
@@ -395,11 +512,13 @@ function migrateSchema() {
 
     CREATE TABLE IF NOT EXISTS battle_records (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      sync_id TEXT UNIQUE,
       battle_at INTEGER NOT NULL,
       memo TEXT NOT NULL,
       image_data_url TEXT NOT NULL,
       created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
+      updated_at INTEGER NOT NULL,
+      deleted_at INTEGER
     );
 
     CREATE INDEX IF NOT EXISTS battle_records_battle_at

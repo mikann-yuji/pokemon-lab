@@ -163,7 +163,7 @@ export async function loadLatestTrainingBuild(pokemonId: number) {
   const rows = await sqliteWorkerClient.query<TrainingBuildRow>(
     `SELECT ${BUILD_COLUMNS}
      FROM training_builds
-     WHERE pokemon_id = ?
+     WHERE pokemon_id = ? AND deleted_at IS NULL
      ORDER BY updated_at DESC, id DESC
      LIMIT 1`,
     [pokemonId],
@@ -174,7 +174,9 @@ export async function loadLatestTrainingBuild(pokemonId: number) {
 /** URLの[id]やチーム表示から、特定の育成案を1件読み込む。 */
 export async function loadTrainingBuild(id: number) {
   const rows = await sqliteWorkerClient.query<TrainingBuildRow>(
-    `SELECT ${BUILD_COLUMNS} FROM training_builds WHERE id = ?`,
+    `SELECT ${BUILD_COLUMNS}
+     FROM training_builds
+     WHERE id = ? AND deleted_at IS NULL`,
     [id],
   );
   return rows[0] ? toTrainingBuild(rows[0]) : undefined;
@@ -185,6 +187,7 @@ export async function getAllTrainingBuilds() {
   const rows = await sqliteWorkerClient.query<TrainingBuildRow>(
     `SELECT ${BUILD_COLUMNS}
      FROM training_builds
+     WHERE deleted_at IS NULL
      ORDER BY updated_at DESC, id DESC`,
   );
   return rows.map(toTrainingBuild);
@@ -195,7 +198,7 @@ export async function findTrainingBuildByContentKey(contentKey: string) {
   const rows = await sqliteWorkerClient.query<TrainingBuildRow>(
     `SELECT ${BUILD_COLUMNS}
      FROM training_builds
-     WHERE content_key = ?
+     WHERE content_key = ? AND deleted_at IS NULL
      LIMIT 1`,
     [contentKey],
   );
@@ -223,17 +226,17 @@ export async function saveTrainingBuild(build: TrainingBuild) {
   if (id === undefined) {
     const result = await sqliteWorkerClient.execute(
       `INSERT INTO training_builds (
-         name, content_key, pokemon_id, nature, item_id, ability_id,
-         ability_points_json, move_ids_json, updated_at
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      bind,
+         sync_id, name, content_key, pokemon_id, nature, item_id, ability_id,
+         ability_points_json, move_ids_json, created_at, updated_at, deleted_at
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
+      [crypto.randomUUID(), ...bind.slice(0, -1), build.updatedAt, build.updatedAt],
     );
     id = result.lastInsertRowId;
   } else {
     const result = await sqliteWorkerClient.execute(
       `UPDATE training_builds SET
          name = ?, content_key = ?, pokemon_id = ?, nature = ?, item_id = ?, ability_id = ?,
-         ability_points_json = ?, move_ids_json = ?, updated_at = ?
+         ability_points_json = ?, move_ids_json = ?, updated_at = ?, deleted_at = NULL
        WHERE id = ?`,
       [...bind, id],
     );
@@ -255,7 +258,7 @@ export async function getTrainingMatchupNotes(sourceBuildId: number) {
        id, source_build_id, matchup_kind, target_kind, target_pokemon_id,
        target_build_id, target_name, note, updated_at
      FROM training_matchup_notes
-     WHERE source_build_id = ?
+     WHERE source_build_id = ? AND deleted_at IS NULL
      ORDER BY matchup_kind, updated_at DESC, id DESC`,
     [sourceBuildId],
   );
@@ -277,10 +280,11 @@ export async function saveTrainingMatchupNote(
   const now = Date.now();
   const result = await sqliteWorkerClient.execute(
     `INSERT INTO training_matchup_notes (
-       source_build_id, matchup_kind, target_kind, target_pokemon_id,
-       target_build_id, target_name, note, updated_at
-     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+       sync_id, source_build_id, matchup_kind, target_kind, target_pokemon_id,
+       target_build_id, target_name, note, created_at, updated_at, deleted_at
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
     [
+      crypto.randomUUID(),
       note.sourceBuildId,
       note.matchupKind,
       note.targetKind,
@@ -288,6 +292,7 @@ export async function saveTrainingMatchupNote(
       note.targetBuildId,
       normalizedTargetName,
       normalizedNote,
+      now,
       now,
     ],
   );
@@ -307,8 +312,8 @@ export async function saveTrainingMatchupNote(
 
 export async function deleteTrainingMatchupNote(id: number) {
   await sqliteWorkerClient.execute(
-    "DELETE FROM training_matchup_notes WHERE id = ?",
-    [id],
+    "UPDATE training_matchup_notes SET deleted_at = ?, updated_at = ? WHERE id = ?",
+    [Date.now(), Date.now(), id],
   );
 }
 
@@ -350,11 +355,14 @@ export async function getAllBattleTeams(): Promise<BattleTeam[]> {
          FROM (
            SELECT build_id
            FROM battle_team_members
+           JOIN training_builds ON training_builds.id = battle_team_members.build_id
            WHERE team_id = teams.id
+             AND training_builds.deleted_at IS NULL
            ORDER BY position
          ) AS ordered
        ) AS build_ids
      FROM battle_teams AS teams
+     WHERE teams.deleted_at IS NULL
      ORDER BY teams.updated_at DESC, teams.id DESC`,
   );
   return rows.map((row) => ({
@@ -386,7 +394,7 @@ export async function saveBattleTeam(name: string, buildIds: number[]) {
       : await sqliteWorkerClient.query<TrainingBuildRow>(
           `SELECT ${BUILD_COLUMNS}
            FROM training_builds
-           WHERE id IN (${placeholders})`,
+           WHERE id IN (${placeholders}) AND deleted_at IS NULL`,
           uniqueBuildIds,
         );
   const builds = rows.map(toTrainingBuild);
@@ -397,8 +405,10 @@ export async function saveBattleTeam(name: string, buildIds: number[]) {
 
   const statements: SqliteStatement[] = [
     {
-      sql: "INSERT INTO battle_teams (name, updated_at) VALUES (?, ?)",
-      bind: [normalizedName, Date.now()],
+      sql: `INSERT INTO battle_teams
+              (sync_id, name, created_at, updated_at, deleted_at)
+            VALUES (?, ?, ?, ?, NULL)`,
+      bind: [crypto.randomUUID(), normalizedName, Date.now(), Date.now()],
     },
     ...uniqueBuildIds.map(
       (buildId, position): SqliteStatement => ({
@@ -438,7 +448,7 @@ export async function updateBattleTeam(
       : await sqliteWorkerClient.query<TrainingBuildRow>(
           `SELECT ${BUILD_COLUMNS}
            FROM training_builds
-           WHERE id IN (${placeholders})`,
+           WHERE id IN (${placeholders}) AND deleted_at IS NULL`,
           uniqueBuildIds,
         );
   const builds = rows.map(toTrainingBuild);
@@ -450,7 +460,7 @@ export async function updateBattleTeam(
   const now = Date.now();
   const statements: SqliteStatement[] = [
     {
-      sql: "UPDATE battle_teams SET name = ?, updated_at = ? WHERE id = ?",
+      sql: "UPDATE battle_teams SET name = ?, updated_at = ?, deleted_at = NULL WHERE id = ?",
       bind: [normalizedName, now, id],
     },
     {
@@ -472,9 +482,10 @@ export async function updateBattleTeam(
   }
 }
 
-/** battle_team_membersは外部キーON DELETE CASCADEで一緒に消える。 */
 export async function deleteBattleTeam(id: number) {
-  await sqliteWorkerClient.execute("DELETE FROM battle_teams WHERE id = ?", [
-    id,
-  ]);
+  const now = Date.now();
+  await sqliteWorkerClient.execute(
+    "UPDATE battle_teams SET deleted_at = ?, updated_at = ? WHERE id = ?",
+    [now, now, id],
+  );
 }
