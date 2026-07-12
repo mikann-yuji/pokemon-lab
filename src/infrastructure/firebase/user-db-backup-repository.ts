@@ -11,6 +11,8 @@ import {
 import { getFirebaseFirestore } from "./firebase-client";
 
 const CHUNK_SIZE = 700 * 1024;
+const MAX_BATCH_BYTES = 6 * 1024 * 1024;
+const MAX_BATCH_WRITES = 450;
 const BACKUP_ROOT = "userDbBackup";
 const CURRENT_BACKUP_ID = "current";
 
@@ -65,15 +67,24 @@ export async function saveUserDatabaseBackup(uid: string, bytes: Uint8Array) {
   const existingChunks = await getDocs(chunksRef);
   let batch = writeBatch(database);
   let writeCount = 0;
+  let batchBytes = 0;
+
+  async function commitBatchIfNeeded(nextBytes = 0) {
+    if (
+      writeCount > 0 &&
+      (writeCount >= MAX_BATCH_WRITES || batchBytes + nextBytes > MAX_BATCH_BYTES)
+    ) {
+      await batch.commit();
+      batch = writeBatch(database);
+      writeCount = 0;
+      batchBytes = 0;
+    }
+  }
 
   for (const snapshot of existingChunks.docs) {
     batch.delete(snapshot.ref);
     writeCount += 1;
-    if (writeCount >= 450) {
-      await batch.commit();
-      batch = writeBatch(database);
-      writeCount = 0;
-    }
+    await commitBatchIfNeeded();
   }
 
   const chunkCount = Math.ceil(bytes.byteLength / CHUNK_SIZE);
@@ -81,20 +92,19 @@ export async function saveUserDatabaseBackup(uid: string, bytes: Uint8Array) {
     const start = index * CHUNK_SIZE;
     const end = Math.min(bytes.byteLength, start + CHUNK_SIZE);
     const chunk = bytes.slice(start, end);
+    const estimatedWriteBytes = chunk.byteLength + 1024;
+    await commitBatchIfNeeded(estimatedWriteBytes);
     batch.set(doc(chunksRef, chunkId(index)), {
       index,
       bytes: Bytes.fromUint8Array(chunk),
       size: chunk.byteLength,
     });
     writeCount += 1;
-    if (writeCount >= 450) {
-      await batch.commit();
-      batch = writeBatch(database);
-      writeCount = 0;
-    }
+    batchBytes += estimatedWriteBytes;
   }
 
   const updatedAt = Date.now();
+  await commitBatchIfNeeded(1024);
   batch.set(getBackupDoc(database, uid), {
     chunkCount,
     totalBytes: bytes.byteLength,
