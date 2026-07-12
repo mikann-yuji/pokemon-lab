@@ -3,17 +3,23 @@
   right: 14px;
   bottom: 14px;
   z-index: 40;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: grid;
+  gap: 6px;
+  width: max-content;
   max-width: calc(100vw - 28px);
   border: 1px solid rgba(24, 34, 54, 0.14);
   border-radius: 8px;
   padding: 8px;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 12px 34px rgba(24, 34, 54, 0.14);
   color: #182236;
   font-size: 0.82rem;
+}
+
+.summaryRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .online,
@@ -32,17 +38,21 @@
   background: #9aa4b2;
 }
 
-.status {
+.statusButton {
   min-width: 0;
   max-width: 170px;
   overflow: hidden;
+  border: 0;
+  padding: 0;
+  background: transparent;
   color: #405167;
+  font: inherit;
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.syncBox button {
+.syncBox button:not(.statusButton) {
   border: 1px solid rgba(24, 34, 54, 0.16);
   border-radius: 8px;
   padding: 6px 9px;
@@ -51,6 +61,19 @@
   font: inherit;
   font-weight: 800;
   cursor: pointer;
+}
+
+.detailMessage {
+  max-width: min(420px, calc(100vw - 48px));
+  margin: 0;
+  border-top: 1px solid rgba(24, 34, 54, 0.1);
+  padding-top: 6px;
+  color: #5a2030;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .syncBox button:disabled {
@@ -63,10 +86,14 @@
     left: 10px;
     right: 10px;
     bottom: 10px;
+    width: auto;
+  }
+
+  .summaryRow {
     justify-content: flex-end;
   }
 
-  .status {
+  .statusButton {
     margin-right: auto;
   }
 }

@@ -97,6 +97,7 @@ export function UserDatabaseSync() {
   const [lastSyncAt, setLastSyncAt] = useState(0);
   const [message, setMessage] = useState("未ログイン");
   const [detailMessage, setDetailMessage] = useState("");
+  const [detailOpen, setDetailOpen] = useState(false);
   const syncingRef = useRef(false);
 
   useEffect(() => {
@@ -129,6 +130,7 @@ export function UserDatabaseSync() {
     setSyncing(true);
     setMessage("同期中");
     setDetailMessage("");
+    setDetailOpen(false);
     try {
       setMessage("DB準備中");
       await sqliteWorkerClient.initialize();
@@ -160,6 +162,7 @@ export function UserDatabaseSync() {
       const syncErrorMessage = getSyncErrorMessage(error);
       setMessage(syncErrorMessage);
       setDetailMessage(getErrorMessage(error));
+      setDetailOpen(true);
     } finally {
       syncingRef.current = false;
       setSyncing(false);
@@ -196,6 +199,7 @@ export function UserDatabaseSync() {
 
     setMessage("ログイン中");
     setDetailMessage("");
+    setDetailOpen(false);
     try {
       const result = await signInWithGoogle();
       await syncUserDatabase(result.user);
@@ -208,6 +212,7 @@ export function UserDatabaseSync() {
       }
       setMessage(getSignInErrorMessage(error));
       setDetailMessage(getErrorMessage(error));
+      setDetailOpen(true);
     }
   }
 
@@ -217,25 +222,35 @@ export function UserDatabaseSync() {
 
   return (
     <div className={styles.syncBox}>
-      <span className={online ? styles.online : styles.offline} />
-      <span className={styles.status} title={detailMessage || message}>
-        {message}
-        {lastSyncAt ? ` ${formatStatusDate(lastSyncAt)}` : ""}
-      </span>
-      {user ? (
-        <>
-          <button type="button" disabled={syncing || !online} onClick={() => void syncUserDatabase()}>
-            同期
-          </button>
-          <button type="button" onClick={() => void handleSignOut()}>
-            ログアウト
-          </button>
-        </>
-      ) : (
-        <button type="button" disabled={syncing} onClick={() => void handleSignIn()}>
-          Googleログイン
+      <div className={styles.summaryRow}>
+        <span className={online ? styles.online : styles.offline} />
+        <button
+          type="button"
+          className={styles.statusButton}
+          title={detailMessage || message}
+          onClick={() => detailMessage && setDetailOpen((current) => !current)}
+        >
+          {message}
+          {lastSyncAt ? ` ${formatStatusDate(lastSyncAt)}` : ""}
         </button>
-      )}
+        {user ? (
+          <>
+            <button type="button" disabled={syncing || !online} onClick={() => void syncUserDatabase()}>
+              同期
+            </button>
+            <button type="button" onClick={() => void handleSignOut()}>
+              ログアウト
+            </button>
+          </>
+        ) : (
+          <button type="button" disabled={syncing} onClick={() => void handleSignIn()}>
+            Googleログイン
+          </button>
+        )}
+      </div>
+      {detailMessage && detailOpen ? (
+        <p className={styles.detailMessage}>{detailMessage}</p>
+      ) : null}
     </div>
   );
 }
