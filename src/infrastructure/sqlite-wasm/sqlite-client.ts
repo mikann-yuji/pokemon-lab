@@ -15,6 +15,7 @@ import type {
 
 const DEFAULT_TIMEOUT_MS = 20_000;
 const STORAGE_API_TIMEOUT_MS = 3_000;
+const SQLITE_WORKER_VERSION = "6";
 
 /**
  * Workerへ送ったリクエストの待ち受け情報。
@@ -71,7 +72,7 @@ function settleWithin<Value>(promise: Promise<Value>, fallback: Value) {
  * Next.jsのClient ComponentからはこのWorkerだけがSQLite WASMへ直接触る。
  */
 function createWorker() {
-  return new Worker("/sqlite-runtime-worker.mjs", {
+  return new Worker(`/sqlite-runtime-worker.mjs?v=${SQLITE_WORKER_VERSION}`, {
     type: "module",
     name: "pokemon-lab-sqlite",
   });

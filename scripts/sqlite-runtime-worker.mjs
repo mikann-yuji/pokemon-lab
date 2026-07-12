@@ -182,6 +182,56 @@ function backfillSyncColumns(tableName) {
   }
 }
 
+function ensureUserSyncSchema() {
+  database.exec("BEGIN IMMEDIATE");
+  try {
+    addColumnIfMissing("training_builds", "sync_id", "TEXT");
+    addColumnIfMissing("training_builds", "created_at", "INTEGER");
+    addColumnIfMissing("training_builds", "deleted_at", "INTEGER");
+    addColumnIfMissing("battle_teams", "sync_id", "TEXT");
+    addColumnIfMissing("battle_teams", "created_at", "INTEGER");
+    addColumnIfMissing("battle_teams", "deleted_at", "INTEGER");
+    addColumnIfMissing("quiz_mistakes", "deleted_at", "INTEGER");
+    addColumnIfMissing("quiz_hints", "created_at", "INTEGER");
+    addColumnIfMissing("quiz_hints", "deleted_at", "INTEGER");
+    addColumnIfMissing("damage_history", "created_at", "INTEGER");
+    addColumnIfMissing("damage_history", "deleted_at", "INTEGER");
+    addColumnIfMissing("training_matchup_notes", "sync_id", "TEXT");
+    addColumnIfMissing("training_matchup_notes", "created_at", "INTEGER");
+    addColumnIfMissing("training_matchup_notes", "deleted_at", "INTEGER");
+    addColumnIfMissing("battle_records", "sync_id", "TEXT");
+    addColumnIfMissing("battle_records", "deleted_at", "INTEGER");
+
+    for (const tableName of [
+      "training_builds",
+      "battle_teams",
+      "quiz_mistakes",
+      "quiz_hints",
+      "damage_history",
+      "training_matchup_notes",
+      "battle_records",
+    ]) {
+      backfillSyncColumns(tableName);
+    }
+
+    database.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS training_builds_sync_id
+        ON training_builds(sync_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS battle_teams_sync_id
+        ON battle_teams(sync_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS training_matchup_notes_sync_id
+        ON training_matchup_notes(sync_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS battle_records_sync_id
+        ON battle_records(sync_id);
+      PRAGMA user_version = ${SUPPORTED_SCHEMA_VERSION};
+    `);
+    database.exec("COMMIT");
+  } catch (error) {
+    database.exec("ROLLBACK");
+    throw error;
+  }
+}
+
 /**
  * 複数のuser.db更新を不可分に実行する。
  * bindReferencesで前のINSERT結果を後続SQLへ渡し、チーム作成などの親子保存を1往復で完了させる。
@@ -439,54 +489,8 @@ function migrateSchema() {
   }
 
   if (currentVersion === 4) {
-    database.exec("BEGIN IMMEDIATE");
-    try {
-      addColumnIfMissing("training_builds", "sync_id", "TEXT");
-      addColumnIfMissing("training_builds", "created_at", "INTEGER");
-      addColumnIfMissing("training_builds", "deleted_at", "INTEGER");
-      addColumnIfMissing("battle_teams", "sync_id", "TEXT");
-      addColumnIfMissing("battle_teams", "created_at", "INTEGER");
-      addColumnIfMissing("battle_teams", "deleted_at", "INTEGER");
-      addColumnIfMissing("quiz_mistakes", "deleted_at", "INTEGER");
-      addColumnIfMissing("quiz_hints", "created_at", "INTEGER");
-      addColumnIfMissing("quiz_hints", "deleted_at", "INTEGER");
-      addColumnIfMissing("damage_history", "created_at", "INTEGER");
-      addColumnIfMissing("damage_history", "deleted_at", "INTEGER");
-      addColumnIfMissing("training_matchup_notes", "sync_id", "TEXT");
-      addColumnIfMissing("training_matchup_notes", "created_at", "INTEGER");
-      addColumnIfMissing("training_matchup_notes", "deleted_at", "INTEGER");
-      addColumnIfMissing("battle_records", "sync_id", "TEXT");
-      addColumnIfMissing("battle_records", "deleted_at", "INTEGER");
-
-      for (const tableName of [
-        "training_builds",
-        "battle_teams",
-        "quiz_mistakes",
-        "quiz_hints",
-        "damage_history",
-        "training_matchup_notes",
-        "battle_records",
-      ]) {
-        backfillSyncColumns(tableName);
-      }
-
-      database.exec(`
-        CREATE UNIQUE INDEX IF NOT EXISTS training_builds_sync_id
-          ON training_builds(sync_id);
-        CREATE UNIQUE INDEX IF NOT EXISTS battle_teams_sync_id
-          ON battle_teams(sync_id);
-        CREATE UNIQUE INDEX IF NOT EXISTS training_matchup_notes_sync_id
-          ON training_matchup_notes(sync_id);
-        CREATE UNIQUE INDEX IF NOT EXISTS battle_records_sync_id
-          ON battle_records(sync_id);
-        PRAGMA user_version = 5;
-      `);
-      database.exec("COMMIT");
-      currentVersion = 5;
-    } catch (error) {
-      database.exec("ROLLBACK");
-      throw error;
-    }
+    ensureUserSyncSchema();
+    currentVersion = 5;
   }
 
   database.exec(`
@@ -525,6 +529,7 @@ function migrateSchema() {
       ON battle_records(battle_at DESC, id DESC);
   `);
 
+  ensureUserSyncSchema();
   compactUserDatabaseIfCatalogTablesExist();
 }
 
