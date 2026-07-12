@@ -16,6 +16,7 @@ const navigationItems = [
   { href: "/training", label: "育成シミュレーター" },
   { href: "/battle-team", label: "バトルチーム編成" },
   { href: "/battle-simulator", label: "対戦シミュレータ" },
+  { href: "/battle-records", label: "バトル記録" },
   { href: "/quiz", label: "タイプ相性クイズ" },
 ] as const;
 

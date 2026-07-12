@@ -1,0 +1,210 @@
+.page {
+  min-height: 100vh;
+  padding: 40px 20px 64px;
+  background:
+    linear-gradient(135deg, rgba(239, 83, 80, 0.12), transparent 34rem),
+    linear-gradient(180deg, #f8fbff 0%, #eef6f5 100%);
+  color: #182236;
+}
+
+.header,
+.editor,
+.records {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.header {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.header p,
+.recordsHeader span {
+  color: #2e6f8f;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  color: #102033;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1.05;
+}
+
+.editor {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
+  gap: 20px;
+  align-items: start;
+  border: 1px solid rgba(24, 34, 54, 0.12);
+  border-radius: 8px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 16px 42px rgba(24, 34, 54, 0.1);
+}
+
+.formGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  color: #405167;
+  font-weight: 700;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  border: 1px solid rgba(24, 34, 54, 0.16);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #ffffff;
+  color: #182236;
+  font: inherit;
+}
+
+.field textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.memoField {
+  min-width: 0;
+}
+
+.preview {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px dashed rgba(24, 34, 54, 0.22);
+  border-radius: 8px;
+  background: #edf3f6;
+  color: #5a697d;
+  font-weight: 800;
+}
+
+.preview img,
+.recordCard img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.actions {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.actions button,
+.recordBody button {
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 18px;
+  background: #ef5350;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.actions button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.success {
+  color: #2f7d50;
+  font-weight: 700;
+}
+
+.error {
+  color: #b3261e;
+  font-weight: 700;
+}
+
+.records {
+  margin-top: 26px;
+}
+
+.recordsHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.recordsHeader h2 {
+  color: #102033;
+  font-size: 1.35rem;
+}
+
+.empty {
+  border: 1px solid rgba(24, 34, 54, 0.12);
+  border-radius: 8px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #536376;
+}
+
+.recordGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.recordCard {
+  overflow: hidden;
+  border: 1px solid rgba(24, 34, 54, 0.12);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.recordCard > img {
+  display: block;
+  aspect-ratio: 16 / 9;
+}
+
+.recordBody {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.recordBody time {
+  color: #2e6f8f;
+  font-weight: 800;
+}
+
+.recordBody p {
+  white-space: pre-wrap;
+  color: #405167;
+  line-height: 1.65;
+}
+
+.recordBody button {
+  justify-self: start;
+  background: #202f44;
+}
+
+@media (max-width: 820px) {
+  .page {
+    padding-top: 28px;
+  }
+
+  .editor,
+  .recordGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -7,7 +7,7 @@ import sqlite3InitModule from "/sqlite-wasm/index.mjs";
 
 const DATABASE_FILENAME = "/user.db";
 const CATALOG_DATABASE_FILENAME = "/catalog.db";
-const SUPPORTED_SCHEMA_VERSION = 3;
+const SUPPORTED_SCHEMA_VERSION = 4;
 const CATALOG_DATABASE_URL = "/sqlite-catalog.db.gz";
 const CATALOG_SEED_VERSION = "6";
 
@@ -221,10 +221,22 @@ function migrateSchema() {
         CREATE INDEX training_matchup_notes_source_kind_updated_at
           ON training_matchup_notes(source_build_id, matchup_kind, updated_at DESC);
 
+        CREATE TABLE battle_records (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          battle_at INTEGER NOT NULL,
+          memo TEXT NOT NULL,
+          image_data_url TEXT NOT NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL
+        );
+
+        CREATE INDEX battle_records_battle_at
+          ON battle_records(battle_at DESC, id DESC);
+
         INSERT INTO schema_metadata (key, value)
         VALUES ('database_created_at', CAST(unixepoch() AS TEXT));
 
-        PRAGMA user_version = 3;
+        PRAGMA user_version = 4;
       `);
       database.exec("COMMIT");
     } catch (error) {
@@ -272,6 +284,33 @@ function migrateSchema() {
         PRAGMA user_version = 3;
       `);
       database.exec("COMMIT");
+      currentVersion = 3;
+    } catch (error) {
+      database.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  if (currentVersion === 3) {
+    database.exec("BEGIN IMMEDIATE");
+    try {
+      database.exec(`
+        CREATE TABLE IF NOT EXISTS battle_records (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          battle_at INTEGER NOT NULL,
+          memo TEXT NOT NULL,
+          image_data_url TEXT NOT NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS battle_records_battle_at
+          ON battle_records(battle_at DESC, id DESC);
+
+        PRAGMA user_version = 4;
+      `);
+      database.exec("COMMIT");
+      currentVersion = 4;
     } catch (error) {
       database.exec("ROLLBACK");
       throw error;
@@ -295,6 +334,18 @@ function migrateSchema() {
 
     CREATE INDEX IF NOT EXISTS training_matchup_notes_source_kind_updated_at
       ON training_matchup_notes(source_build_id, matchup_kind, updated_at DESC);
+
+    CREATE TABLE IF NOT EXISTS battle_records (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      battle_at INTEGER NOT NULL,
+      memo TEXT NOT NULL,
+      image_data_url TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS battle_records_battle_at
+      ON battle_records(battle_at DESC, id DESC);
   `);
 
 }
@@ -409,6 +460,7 @@ function runDiagnostics() {
           + (SELECT COUNT(*) FROM quiz_mistakes)
           + (SELECT COUNT(*) FROM quiz_hints)
           + (SELECT COUNT(*) FROM damage_history)
+          + (SELECT COUNT(*) FROM battle_records)
       `),
     ),
     catalogDatabaseFilename: CATALOG_DATABASE_FILENAME,

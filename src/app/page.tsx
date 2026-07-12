@@ -33,6 +33,11 @@ const researchCards = [
     link: "/battle-simulator",
   },
   {
+    title: "Battle Records",
+    body: "Save team preview screenshots, battle dates, and quick notes for later review.",
+    link: "/battle-records",
+  },
+  {
     title: "Type Quiz",
     body: "Test your knowledge of Pokémon type matchups with an interactive quiz.",
     link: "/quiz",
