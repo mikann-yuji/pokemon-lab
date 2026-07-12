@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /battleDetectionSamples/{sampleId} {
+      allow read: if true;
+
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly([
+          'pokemonId',
+          'signature',
+          'source',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.pokemonId is int
+        && request.resource.data.pokemonId > 0
+        && request.resource.data.signature is list
+        && request.resource.data.signature.size() > 0
+        && request.resource.data.signature.size() <= 64
+        && request.resource.data.source == 'battle-records'
+        && request.resource.data.updatedAt is int;
+
+      allow update, delete: if false;
+    }
+  }
+}

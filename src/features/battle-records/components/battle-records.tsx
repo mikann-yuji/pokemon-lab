@@ -8,6 +8,11 @@ import {
   saveBattleRecord,
   type BattleRecord,
 } from "../infrastructure/battle-record-repository";
+import {
+  loadRemoteDetectionSamples,
+  saveRemoteDetectionSample,
+  type DetectionLearningSample,
+} from "../infrastructure/detection-learning-repository";
 import styles from "../styles/battle-records.module.css";
 
 const MAX_IMAGE_WIDTH = 1280;
@@ -48,11 +53,7 @@ type ChampionsIcon = {
   iconPath: string;
 };
 
-type LearnedDetection = {
-  pokemonId: number;
-  signature: number[];
-  updatedAt: number;
-};
+type LearnedDetection = DetectionLearningSample;
 
 function toDateTimeLocalValue(timestamp: number) {
   const date = new Date(timestamp);
@@ -209,8 +210,12 @@ function saveLearnedDetection(pokemonId: number, signature: number[]) {
   window.localStorage.setItem(LEARNING_STORAGE_KEY, JSON.stringify(next));
 }
 
-function getLearnedScore(signature: number[], pokemonId: number) {
-  return loadLearnedDetections()
+function getLearnedScore(
+  signature: number[],
+  pokemonId: number,
+  samples: LearnedDetection[],
+) {
+  return samples
     .filter((item) => item.pokemonId === pokemonId)
     .reduce(
       (best, item) => Math.max(best, cosineSimilarity(signature, item.signature)),
@@ -237,6 +242,13 @@ async function detectOpponentPokemon(imageDataUrl: string) {
     loadImageElement(imageDataUrl),
     loadChampionsIcons(),
   ]);
+  const learnedSamples = [
+    ...loadLearnedDetections(),
+    ...(await loadRemoteDetectionSamples().catch((error: unknown) => {
+      console.warn("Failed to load remote detection samples.", error);
+      return [];
+    })),
+  ];
   const selectableCatalog = catalog.filter(isSelectableBattlePreviewIcon);
   const references = await buildReferenceSignatures(selectableCatalog);
   if (references.length === 0) {
@@ -267,7 +279,7 @@ async function detectOpponentPokemon(imageDataUrl: string) {
         pokemon: reference.pokemon,
         score: Math.max(
           cosineSimilarity(signature, reference.signature),
-          getLearnedScore(signature, reference.pokemon.id) + 0.08,
+          getLearnedScore(signature, reference.pokemon.id, learnedSamples) + 0.08,
         ),
       }))
       .sort((left, right) => right.score - left.score)
@@ -404,12 +416,27 @@ export function BattleRecords() {
     }
   }
 
-  function registerCorrection(slot: DetectionSlot) {
+  async function registerCorrection(slot: DetectionSlot) {
     const pokemonId = Number(correctionBySlot[slot.slot]);
     if (!Number.isFinite(pokemonId)) return;
-    saveLearnedDetection(pokemonId, slot.signature);
+    const sample = {
+      pokemonId,
+      signature: slot.signature,
+      updatedAt: 0,
+    };
+    saveLearnedDetection(sample.pokemonId, sample.signature);
     const pokemon = iconCatalog.find((item) => item.id === pokemonId);
-    setMessage(`${pokemon?.nameJa ?? "選択したポケモン"}を正解として学習しました。`);
+    try {
+      await saveRemoteDetectionSample(sample);
+      setMessage(
+        `${pokemon?.nameJa ?? "選択したポケモン"}を正解として共有学習しました。`,
+      );
+    } catch (error: unknown) {
+      console.warn("Failed to save remote detection sample.", error);
+      setMessage(
+        `${pokemon?.nameJa ?? "選択したポケモン"}を端末内に学習しました。`,
+      );
+    }
   }
 
   async function handleDelete(id: number) {
@@ -534,7 +561,7 @@ export function BattleRecords() {
                       </select>
                       <button
                         type="button"
-                        onClick={() => registerCorrection(slot)}
+                        onClick={() => void registerCorrection(slot)}
                       >
                         正解登録
                       </button>
