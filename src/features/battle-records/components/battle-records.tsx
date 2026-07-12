@@ -8,10 +8,6 @@ import {
   saveBattleRecord,
   type BattleRecord,
 } from "../infrastructure/battle-record-repository";
-import {
-  getTrainingPokemonIconCatalog,
-  type TrainingPokemon,
-} from "@/features/training/infrastructure/training-catalog-repository";
 import styles from "../styles/battle-records.module.css";
 
 const MAX_IMAGE_WIDTH = 1280;
@@ -28,7 +24,7 @@ const OPPONENT_SLOT_RECTS = [
 ] as const;
 
 type DetectionCandidate = {
-  pokemon: TrainingPokemon;
+  pokemon: ChampionsIcon;
   score: number;
 };
 
@@ -39,8 +35,15 @@ type DetectionSlot = {
 };
 
 type ReferenceSignature = {
-  pokemon: TrainingPokemon;
+  pokemon: ChampionsIcon;
   signature: number[];
+};
+
+type ChampionsIcon = {
+  id: number;
+  name: string;
+  nameJa: string;
+  iconPath: string;
 };
 
 function toDateTimeLocalValue(timestamp: number) {
@@ -146,12 +149,19 @@ function loadImageElement(src: string): Promise<HTMLImageElement> {
   });
 }
 
-async function buildReferenceSignatures(catalog: TrainingPokemon[]) {
+async function loadChampionsIcons(): Promise<ChampionsIcon[]> {
+  const response = await fetch("/champions-icons/manifest.json");
+  if (!response.ok) {
+    throw new Error("同梱アイコンの一覧を読み込めませんでした。");
+  }
+  return response.json() as Promise<ChampionsIcon[]>;
+}
+
+async function buildReferenceSignatures(catalog: ChampionsIcon[]) {
   const signatures: ReferenceSignature[] = [];
-  const candidates = catalog.filter((pokemon) => pokemon.imageUrl).slice(0, 260);
   const settled = await Promise.allSettled(
-    candidates.map(async (pokemon) => {
-      const image = await loadImageElement(pokemon.imageUrl!);
+    catalog.map(async (pokemon) => {
+      const image = await loadImageElement(pokemon.iconPath);
       return { pokemon, signature: createSignature(image) };
     }),
   );
@@ -164,11 +174,11 @@ async function buildReferenceSignatures(catalog: TrainingPokemon[]) {
 async function detectOpponentPokemon(imageDataUrl: string) {
   const [sourceImage, catalog] = await Promise.all([
     loadImageElement(imageDataUrl),
-    getTrainingPokemonIconCatalog(),
+    loadChampionsIcons(),
   ]);
   const references = await buildReferenceSignatures(catalog);
   if (references.length === 0) {
-    throw new Error("照合用のポケモン画像を読み込めませんでした。オンライン時に一度画像を表示してキャッシュしてください。");
+    throw new Error("照合用の同梱アイコンを読み込めませんでした。");
   }
 
   const slots: DetectionSlot[] = [];

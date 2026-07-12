@@ -16,7 +16,8 @@
     "champions:fetch": "node scripts/fetch-champions-seed.mjs && node scripts/fetch-champions-items.mjs && node scripts/fetch-champions-move-usage.mjs",
     "items:fetch": "node scripts/fetch-pokeapi-items.mjs && node scripts/fetch-champions-items.mjs",
     "champions-items:fetch": "node scripts/fetch-champions-items.mjs",
-    "champions-moves:fetch": "node scripts/fetch-champions-move-usage.mjs"
+    "champions-moves:fetch": "node scripts/fetch-champions-move-usage.mjs",
+    "champions-icons:fetch": "node scripts/fetch-champions-icons.mjs"
   },
   "dependencies": {
     "@smogon/calc": "^0.11.0",

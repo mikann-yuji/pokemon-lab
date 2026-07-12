@@ -1,4 +1,4 @@
-const CACHE_NAME = "pokemon-lab-v9";
+const CACHE_NAME = "pokemon-lab-v10";
 const IMAGE_CACHE_NAME = "pokemon-lab-images-v1";
 const IMAGE_CACHE_LIMIT = 300;
 
@@ -13,6 +13,7 @@ const APP_ROUTES = [
   "/battle-team/new",
   "/battle-simulator",
   "/battle-simulator/battle",
+  "/battle-records",
   "/sqlite-diagnostics",
 ];
 
@@ -24,6 +25,7 @@ const CORE_ASSETS = [
   "/screenshots/mobile.png",
   "/sqlite-runtime-worker.mjs",
   "/sqlite-catalog.db.gz",
+  "/champions-icons/manifest.json",
   "/sqlite-wasm/index.mjs",
   "/sqlite-wasm/sqlite3.wasm",
   "/sqlite-wasm/sqlite3-worker1.mjs",
@@ -69,9 +71,23 @@ async function cacheNextStaticAssets(cache) {
   }
 }
 
+async function cacheChampionIcons(cache) {
+  const manifestResponse = await cache.match("/champions-icons/manifest.json");
+  if (!manifestResponse) return;
+
+  const manifest = await manifestResponse.json();
+  const iconPaths = manifest
+    .map((entry) => entry.iconPath)
+    .filter((path) => typeof path === "string");
+  if (iconPaths.length > 0) {
+    await cacheRequests(cache, iconPaths);
+  }
+}
+
 async function cacheAppShell() {
   const cache = await caches.open(CACHE_NAME);
   await cacheRequests(cache, [...APP_ROUTES, ...CORE_ASSETS]);
+  await cacheChampionIcons(cache);
   await cacheNextStaticAssets(cache);
 }
 
@@ -200,6 +216,7 @@ self.addEventListener("fetch", (event) => {
     url.pathname.startsWith("/_next/static/") ||
     url.pathname.startsWith("/icons/") ||
     url.pathname.startsWith("/screenshots/") ||
+    url.pathname.startsWith("/champions-icons/") ||
     url.pathname.startsWith("/sqlite-wasm/") ||
     url.pathname === "/manifest.webmanifest" ||
     url.pathname === "/sqlite-runtime-worker.mjs" ||
