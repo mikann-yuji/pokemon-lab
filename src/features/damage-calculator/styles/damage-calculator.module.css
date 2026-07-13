@@ -199,6 +199,38 @@
   -webkit-line-clamp: 3;
 }
 
+.battleActions {
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: center;
+}
+
+.battleActions button {
+  min-height: 34px;
+  padding: 0.35rem 0.8rem;
+  border: 2px solid #2857a4;
+  border-radius: 9px;
+  background: white;
+  color: #2857a4;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.battleActions button:disabled {
+  border-color: #c5d1df;
+  color: #8796a8;
+  cursor: not-allowed;
+}
+
+.battleActions button:not(:disabled):hover,
+.battleActions button:not(:disabled):focus-visible {
+  outline: 3px solid rgb(40 87 164 / 18%);
+  background: #eef6ff;
+}
+
 .combobox {
   position: relative;
 }
@@ -1327,6 +1359,7 @@ a.pokemonSummary:focus-visible {
   }
 
   .teamPicker button,
+  .battleActions button,
   .combobox input,
   .moveField select,
   .moveField input,

@@ -1,4 +1,4 @@
-const CACHE_NAME = "pokemon-lab-v13";
+const CACHE_NAME = "pokemon-lab-v14";
 const IMAGE_CACHE_NAME = "pokemon-lab-images-v1";
 const IMAGE_CACHE_LIMIT = 300;
 
@@ -131,7 +131,8 @@ async function cacheImage(cache, request, response) {
 
 async function respondWithCachedImage(event) {
   const cache = await caches.open(IMAGE_CACHE_NAME);
-  const cached = await cache.match(event.request);
+  const cached =
+    (await cache.match(event.request)) ?? (await caches.match(event.request));
 
   if (cached) {
     const refresh = fetch(event.request)
@@ -144,9 +145,15 @@ async function respondWithCachedImage(event) {
     return cached;
   }
 
-  const response = await fetch(event.request);
-  event.waitUntil(cacheImage(cache, event.request, response));
-  return response;
+  try {
+    const response = await fetch(event.request);
+    event.waitUntil(cacheImage(cache, event.request, response));
+    return response;
+  } catch {
+    const fallback = await caches.match(event.request);
+    if (fallback) return fallback;
+    throw new Error("Image is unavailable offline.");
+  }
 }
 
 async function respondWithCachedFirst(request) {

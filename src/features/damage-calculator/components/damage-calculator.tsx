@@ -772,6 +772,35 @@ export function DamageCalculator({
     }
   }
 
+  function swapBattleSides() {
+    attackerSelection.select(defender);
+    defenderSelection.select(attacker);
+    setStatAdjustments((current) => ({
+      attacker: current.defender,
+      defender: current.attacker,
+    }));
+    setAbilityConditionEnabled((current) => ({
+      attacker: current.defender,
+      defender: current.attacker,
+    }));
+    setSelectedTeamIds((current) => ({
+      attacker: current.defender,
+      defender: current.attacker,
+    }));
+    setSelectedBuildIds((current) => ({
+      attacker: current.defender,
+      defender: current.attacker,
+    }));
+    setMoveId(
+      defender?.moves.some(({ id }) => id === moveId)
+        ? moveId
+        : (defender?.moves[0]?.id ?? ""),
+    );
+    if (defender?.heldItem?.id !== "metronome") {
+      setMetronomeConsecutiveUseCount(1);
+    }
+  }
+
   /**
    * 履歴画像からポケモンを復元する。
    * SQLite由来の最新カタログに存在しない古いIDは何もせず無視する。
@@ -1135,6 +1164,16 @@ export function DamageCalculator({
           />
         ) : null}
       </section>
+
+      <div className={styles.battleActions}>
+        <button
+          type="button"
+          onClick={swapBattleSides}
+          disabled={!attacker && !defender}
+        >
+          攻守交代
+        </button>
+      </div>
 
       <section className={styles.fieldConditions}>
         <div>

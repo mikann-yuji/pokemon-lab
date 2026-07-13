@@ -20,7 +20,7 @@ const championsIconManifestPath = path.join(
   "manifest.json",
 );
 
-const seedVersion = 8;
+const seedVersion = 9;
 
 // publicへ配布するcatalog.dbにも、通常DBと同じ親子関係順でCSVを投入する。
 const seedTableOrder = [
