@@ -16,7 +16,11 @@ import { sqliteWorkerClient } from "@/infrastructure/sqlite-wasm/sqlite-client";
 import styles from "./user-database-sync.module.css";
 
 const LAST_SYNC_PREFIX = "pokemon-lab:user-db:last-sync:";
+const AUTO_SYNC_INTERVAL_MS = 5 * 60 * 1000;
+const AUTO_SYNC_MIN_INTERVAL_MS = 30 * 1000;
 export const USER_RECORDS_SYNCED_EVENT = "pokemon-lab:user-records-synced";
+export const USER_RECORDS_LOCAL_CHANGED_EVENT =
+  "pokemon-lab:user-records-local-changed";
 
 function getLastSync(uid: string) {
   return Number(window.localStorage.getItem(`${LAST_SYNC_PREFIX}${uid}`) ?? 0);
@@ -93,6 +97,7 @@ export function UserDatabaseSync() {
   const [detailMessage, setDetailMessage] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
   const syncingRef = useRef(false);
+  const lastAutoSyncAttemptRef = useRef(0);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (nextUser) => {
@@ -120,6 +125,7 @@ export function UserDatabaseSync() {
 
   async function syncUserDatabase(activeUser = user) {
     if (!activeUser || !navigator.onLine || syncingRef.current) return;
+    lastAutoSyncAttemptRef.current = Date.now();
     syncingRef.current = true;
     setSyncing(true);
     setMessage("同期中");
@@ -149,10 +155,50 @@ export function UserDatabaseSync() {
     }
   }
 
+  function requestAutoSync(
+    activeUser = user,
+    minimumIntervalMs = AUTO_SYNC_MIN_INTERVAL_MS,
+  ) {
+    if (!activeUser || !navigator.onLine) return;
+    const now = Date.now();
+    if (now - lastAutoSyncAttemptRef.current < minimumIntervalMs) return;
+    lastAutoSyncAttemptRef.current = now;
+    void syncUserDatabase(activeUser);
+  }
+
   useEffect(() => {
     if (!user || !online) return;
     const timer = window.setTimeout(() => void syncUserDatabase(user), 0);
     return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, online]);
+
+  useEffect(() => {
+    if (!user || !online) return;
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "hidden") return;
+      requestAutoSync(user, AUTO_SYNC_INTERVAL_MS);
+    }, AUTO_SYNC_INTERVAL_MS);
+    const handleFocus = () => requestAutoSync(user);
+    const handlePageShow = () => requestAutoSync(user);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") requestAutoSync(user);
+    };
+    const handleLocalChanged = () => requestAutoSync(user, 0);
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("pageshow", handlePageShow);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener(USER_RECORDS_LOCAL_CHANGED_EVENT, handleLocalChanged);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("pageshow", handlePageShow);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener(
+        USER_RECORDS_LOCAL_CHANGED_EVENT,
+        handleLocalChanged,
+      );
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, online]);
 

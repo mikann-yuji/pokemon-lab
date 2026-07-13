@@ -252,6 +252,45 @@ export async function saveTrainingBuild(build: TrainingBuild) {
   return savedBuild;
 }
 
+export async function deleteTrainingBuild(id: number) {
+  const now = Date.now();
+  await sqliteWorkerClient.transaction([
+    {
+      sql: `UPDATE battle_teams
+            SET updated_at = ?
+            WHERE id IN (
+              SELECT team_id
+              FROM battle_team_members
+              WHERE build_id = ?
+            )
+              AND deleted_at IS NULL`,
+      bind: [now, id],
+    },
+    {
+      sql: "DELETE FROM battle_team_members WHERE build_id = ?",
+      bind: [id],
+    },
+    {
+      sql: `UPDATE training_matchup_notes
+            SET target_build_id = NULL, updated_at = ?
+            WHERE target_build_id = ?
+              AND deleted_at IS NULL`,
+      bind: [now, id],
+    },
+    {
+      sql: `UPDATE training_matchup_notes
+            SET deleted_at = ?, updated_at = ?
+            WHERE source_build_id = ?
+              AND deleted_at IS NULL`,
+      bind: [now, now, id],
+    },
+    {
+      sql: "UPDATE training_builds SET deleted_at = ?, updated_at = ? WHERE id = ?",
+      bind: [now, now, id],
+    },
+  ]);
+}
+
 export async function getTrainingMatchupNotes(sourceBuildId: number) {
   const rows = await sqliteWorkerClient.query<TrainingMatchupNoteRow>(
     `SELECT

@@ -4,13 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
+import {
+  USER_RECORDS_LOCAL_CHANGED_EVENT,
+  USER_RECORDS_SYNCED_EVENT,
+} from "@/components/sync/user-database-sync";
 import {
   normalizePokemonSearchText,
   pokemonNameIncludes,
 } from "@/domain/pokemon-name-search";
 import {
   deleteBattleTeam,
+  deleteTrainingBuild,
   getAllTrainingBuilds,
   getAllBattleTeams,
   saveBattleTeam,
@@ -80,6 +84,7 @@ export function SavedTrainingBuilds({
     initialPokemonCatalog !== undefined && initialHeldItems !== undefined,
   );
   const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
   const pokemonById = useMemo(
     () => new Map(pokemonCatalog.map((pokemon) => [pokemon.id, pokemon])),
     [pokemonCatalog],
@@ -251,6 +256,24 @@ export function SavedTrainingBuilds({
     if (editingTeamId === id) showTeamList();
   }
 
+  async function removeBuild(id: number) {
+    if (!window.confirm("この育成案を削除しますか？")) return;
+    setActionError("");
+    try {
+      await deleteTrainingBuild(id);
+      setSelectedBuildIds((current) => {
+        const next = new Set(current);
+        next.delete(id);
+        return next;
+      });
+      await loadSavedData();
+      window.dispatchEvent(new CustomEvent(USER_RECORDS_LOCAL_CHANGED_EVENT));
+    } catch (error: unknown) {
+      console.error("Failed to delete training build.", error);
+      setActionError("育成案を削除できませんでした。");
+    }
+  }
+
   // 表示上の検索はDBへ再問い合わせせず、読み込み済みの育成案とカタログ名で絞り込む。
   const normalizedQuery = normalizePokemonSearchText(query.trim());
   const filteredBuilds = builds.filter((build) => {
@@ -311,6 +334,11 @@ export function SavedTrainingBuilds({
         </div>
         <span>{headerCount}件</span>
       </div>
+      {actionError ? (
+        <p className={styles.actionError} role="alert">
+          {actionError}
+        </p>
+      ) : null}
       {teamListVisible ? (
         <>
           <div className={styles.teamActions}>
@@ -460,6 +488,15 @@ export function SavedTrainingBuilds({
                     </small>
                   </span>
                 </Link>
+                {!teamBuilder && build.id !== undefined ? (
+                  <button
+                    className={styles.buildDeleteButton}
+                    type="button"
+                    onClick={() => void removeBuild(build.id!)}
+                  >
+                    削除
+                  </button>
+                ) : null}
               </article>
             );
           })}
