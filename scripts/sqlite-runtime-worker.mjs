@@ -9,7 +9,7 @@ const DATABASE_FILENAME = "/user.db";
 const CATALOG_DATABASE_FILENAME = "/catalog.db";
 const SUPPORTED_SCHEMA_VERSION = 5;
 const CATALOG_DATABASE_URL = "/sqlite-catalog.db.gz";
-const CATALOG_SEED_VERSION = "7";
+const CATALOG_SEED_VERSION = "8";
 
 // OPFS上のSQLite接続はWorker内でだけ保持し、UIスレッドへDBオブジェクトを渡さない。
 let database = null;

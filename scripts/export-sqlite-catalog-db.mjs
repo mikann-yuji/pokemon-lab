@@ -14,8 +14,13 @@ const publicDirectory = path.join(rootDirectory, "public");
 const temporaryDirectory = path.join(rootDirectory, ".tmp");
 const databasePath = path.join(temporaryDirectory, "sqlite-catalog.db");
 const outputPath = path.join(publicDirectory, "sqlite-catalog.db.gz");
+const championsIconManifestPath = path.join(
+  publicDirectory,
+  "champions-icons",
+  "manifest.json",
+);
 
-const seedVersion = 7;
+const seedVersion = 8;
 
 // publicへ配布するcatalog.dbにも、通常DBと同じ親子関係順でCSVを投入する。
 const seedTableOrder = [
@@ -213,11 +218,21 @@ const championsFormIdIndex = columnIndex("champions_forms", "form_id");
 const championFormIds = new Set(
   tables.champions_forms.rows.map((row) => row[championsFormIdIndex]),
 );
+const championsIconPathByFormId = existsSync(championsIconManifestPath)
+  ? new Map(
+      JSON.parse(readFileSync(championsIconManifestPath, "utf8")).map((entry) => [
+        Number(entry.id),
+        entry.iconPath,
+      ]),
+    )
+  : new Map();
 
 const formsIdIndex = columnIndex("forms", "id");
 const formsSpeciesIndex = columnIndex("forms", "species_id");
 const formsIsDefaultIndex = columnIndex("forms", "is_default");
 const formsIsMegaIndex = columnIndex("forms", "is_mega");
+const formsSpriteDefaultUrlIndex = columnIndex("forms", "sprite_default_url");
+const formsArtworkDefaultUrlIndex = columnIndex("forms", "artwork_default_url");
 
 const defaultFormIdBySpeciesId = new Map(
   tables.forms.rows
@@ -245,6 +260,11 @@ const catalogFormRows = tables.forms.rows.filter((row) =>
 
 for (const row of catalogFormRows) {
   selectedSpeciesIds.add(row[formsSpeciesIndex]);
+  const localIconPath = championsIconPathByFormId.get(row[formsIdIndex]);
+  if (localIconPath) {
+    row[formsSpriteDefaultUrlIndex] = localIconPath;
+    row[formsArtworkDefaultUrlIndex] = localIconPath;
+  }
 }
 
 filterRows("species", (row) =>
