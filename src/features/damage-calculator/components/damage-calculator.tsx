@@ -1061,6 +1061,16 @@ export function DamageCalculator({
         ) : null}
       </section>
 
+      <div className={styles.battleActions}>
+        <button
+          type="button"
+          onClick={swapBattleSides}
+          disabled={!attacker && !defender}
+        >
+          攻守交代
+        </button>
+      </div>
+
       <section className={styles.side}>
         <h2>防御側</h2>
         <div className={styles.teamPicker}>
@@ -1164,16 +1174,6 @@ export function DamageCalculator({
           />
         ) : null}
       </section>
-
-      <div className={styles.battleActions}>
-        <button
-          type="button"
-          onClick={swapBattleSides}
-          disabled={!attacker && !defender}
-        >
-          攻守交代
-        </button>
-      </div>
 
       <section className={styles.fieldConditions}>
         <div>

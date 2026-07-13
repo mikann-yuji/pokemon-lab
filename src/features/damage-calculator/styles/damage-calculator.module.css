@@ -85,8 +85,8 @@
 
 .calculator {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.55rem;
   width: min(100%, 72rem);
   margin: 0 auto;
   padding: clamp(0.55rem, 1.5vw, 0.9rem);
@@ -201,20 +201,20 @@
 
 .battleActions {
   display: flex;
-  grid-column: 1 / -1;
+  align-self: center;
   justify-content: center;
 }
 
 .battleActions button {
-  min-height: 34px;
-  padding: 0.35rem 0.8rem;
+  min-height: 32px;
+  padding: 0.32rem 0.55rem;
   border: 2px solid #2857a4;
   border-radius: 9px;
   background: white;
   color: #2857a4;
   cursor: pointer;
   font: inherit;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 900;
   white-space: nowrap;
 }
