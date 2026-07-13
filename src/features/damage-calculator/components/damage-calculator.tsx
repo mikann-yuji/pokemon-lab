@@ -1000,12 +1000,14 @@ export function DamageCalculator({
           onInputValueChange={attackerSelection.setQuery}
           onSelect={selectAttacker}
         />
-        <RecentPokemonList
-          side="attacker"
-          history={attackerHistory}
-          pokemonCatalog={pokemonCatalog}
-          onRestore={restoreHistory}
-        />
+        {selectedTeams.attacker ? null : (
+          <RecentPokemonList
+            side="attacker"
+            history={attackerHistory}
+            pokemonCatalog={pokemonCatalog}
+            onRestore={restoreHistory}
+          />
+        )}
         <PokemonSummary
           pokemon={attacker}
           href={getTrainingDetailHref(attacker, selectedBuildIds.attacker)}
@@ -1114,12 +1116,14 @@ export function DamageCalculator({
           onInputValueChange={defenderSelection.setQuery}
           onSelect={selectDefender}
         />
-        <RecentPokemonList
-          side="defender"
-          history={defenderHistory}
-          pokemonCatalog={pokemonCatalog}
-          onRestore={restoreHistory}
-        />
+        {selectedTeams.defender ? null : (
+          <RecentPokemonList
+            side="defender"
+            history={defenderHistory}
+            pokemonCatalog={pokemonCatalog}
+            onRestore={restoreHistory}
+          />
+        )}
         <PokemonSummary
           pokemon={defender}
           href={getTrainingDetailHref(defender, selectedBuildIds.defender)}
@@ -1515,11 +1519,11 @@ function PokemonSummary({
           <PokemonImage
             pokemon={pokemon}
             alt={pokemon.nameJa}
-            size={112}
+            size={52}
           />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src="" alt={pokemon.nameJa} width={112} height={112} />
+          <img src="" alt={pokemon.nameJa} width={52} height={52} />
         )}
       </div>
       <div className={styles.pokemonSummaryBody}>
@@ -1994,14 +1998,6 @@ function DamageStatControls({
               +
             </button>
           </div>
-          <input
-            type="range"
-            min="-6"
-            max="6"
-            step="1"
-            value={value.rank}
-            onChange={(event) => changeRank(Number(event.target.value))}
-          />
         </label>
       ) : null}
       {showNature ? (

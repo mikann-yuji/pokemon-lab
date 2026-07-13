@@ -86,47 +86,47 @@
 .calculator {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 1.25rem;
-  width: min(100%, 64rem);
+  gap: 0.8rem;
+  width: min(100%, 72rem);
   margin: 0 auto;
-  padding: clamp(1rem, 3vw, 2rem);
+  padding: clamp(0.75rem, 2vw, 1.2rem);
   border: 1px solid rgb(23 43 77 / 14%);
-  border-radius: 24px;
+  border-radius: 18px;
   background: rgb(255 255 255 / 92%);
   box-shadow: 0 20px 55px rgb(23 43 77 / 14%);
 }
 
 .side {
   min-width: 0;
-  padding: clamp(0.9rem, 2vw, 1.35rem);
+  padding: clamp(0.65rem, 1.4vw, 0.9rem);
   border: 2px solid #d7e2f0;
-  border-radius: 18px;
+  border-radius: 14px;
   background: #f8fbff;
 }
 
 .side h2 {
-  margin: 0 0 1rem;
-  font-size: 1.15rem;
+  margin: 0 0 0.55rem;
+  font-size: 1rem;
 }
 
 .teamPicker {
   display: flex;
-  gap: 0.55rem;
+  gap: 0.45rem;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.5rem;
 }
 
 .teamPicker button {
-  min-height: 40px;
-  padding: 0.5rem 0.75rem;
+  min-height: 34px;
+  padding: 0.36rem 0.58rem;
   border: 2px solid #2857a4;
   border-radius: 9px;
   background: #2857a4;
   color: white;
   cursor: pointer;
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   font-weight: 900;
 }
 
@@ -149,9 +149,9 @@
 
 .teamPokemon {
   display: flex;
-  gap: 0.4rem;
-  min-height: 2.75rem;
-  margin-bottom: 0.8rem;
+  gap: 0.32rem;
+  min-height: 2.25rem;
+  margin-bottom: 0.5rem;
   overflow-x: auto;
   scrollbar-width: thin;
 }
@@ -160,8 +160,8 @@
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   padding: 2px;
   overflow: hidden;
   border: 1px solid #b9cae0;
@@ -180,8 +180,8 @@
 }
 
 .teamPokemon img {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 
@@ -201,18 +201,18 @@
 
 .versus {
   display: grid;
-  gap: 0.6rem;
+  gap: 0.4rem;
   align-self: center;
   justify-items: center;
-  padding: 0.5rem;
+  padding: 0.25rem;
   color: #e63946;
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 950;
 }
 
 .versus button {
-  min-height: 40px;
-  padding: 0.5rem 0.7rem;
+  min-height: 34px;
+  padding: 0.35rem 0.55rem;
   border: 2px solid #e63946;
   border-radius: 9px;
   background: white;
@@ -243,9 +243,9 @@
 .combobox label,
 .moveField {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.28rem;
   color: #344760;
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   font-weight: 850;
 }
 
@@ -253,8 +253,8 @@
 .moveField select,
 .moveField input {
   width: 100%;
-  min-height: 46px;
-  padding: 0.65rem 0.75rem;
+  min-height: 38px;
+  padding: 0.45rem 0.58rem;
   border: 2px solid #b9cae0;
   border-radius: 10px;
   background: white;
@@ -306,7 +306,7 @@
 }
 
 .recentPokemon {
-  margin-top: 0.65rem;
+  margin-top: 0.45rem;
 }
 
 .recentPokemon > small {
@@ -319,8 +319,8 @@
 
 .recentPokemonList {
   display: flex;
-  gap: 0.4rem;
-  min-height: 2.75rem;
+  gap: 0.32rem;
+  min-height: 2.25rem;
   overflow-x: auto;
   scrollbar-width: thin;
 }
@@ -329,8 +329,8 @@
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   padding: 2px;
   overflow: hidden;
   border: 1px solid #b9cae0;
@@ -358,15 +358,15 @@
 }
 
 .recentPokemonList img {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 
 .pokemonSummary,
 .placeholder {
-  min-height: 8.5rem;
-  margin: 0.8rem 0;
+  min-height: 4.35rem;
+  margin: 0.5rem 0;
   border: 1px dashed #c7d5e7;
   border-radius: 12px;
 }
@@ -381,9 +381,9 @@
 .pokemonSummary {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  padding: 0.42rem 0.5rem;
   color: inherit;
   text-decoration: none;
   transition:
@@ -403,7 +403,7 @@ a.pokemonSummary:focus-visible {
 
 .pokemonArtwork {
   display: grid;
-  flex: 0 0 7rem;
+  flex: 0 0 3.25rem;
   place-items: center;
 }
 
@@ -414,7 +414,7 @@ a.pokemonSummary:focus-visible {
 .pokemonSummaryBody {
   display: grid;
   min-width: 0;
-  gap: 0.55rem;
+  gap: 0.28rem;
 }
 
 .pokemonSummary strong,
@@ -423,8 +423,9 @@ a.pokemonSummary:focus-visible {
 }
 
 .pokemonSummary small {
-  margin-top: 0.25rem;
+  margin-top: 0.1rem;
   color: #6b778c;
+  font-size: 0.72rem;
 }
 
 .typeBadges {
@@ -437,13 +438,13 @@ a.pokemonSummary:focus-visible {
 .typeBadge {
   display: inline-grid;
   place-items: center;
-  min-width: 3.2rem;
-  min-height: 1.35rem;
-  padding: 0.12rem 0.45rem;
+  min-width: 2.75rem;
+  min-height: 1.18rem;
+  padding: 0.08rem 0.34rem;
   border-radius: 999px;
   background: var(--type-color);
   color: var(--type-foreground);
-  font-size: 0.66rem;
+  font-size: 0.58rem;
   font-weight: 950;
   line-height: 1;
   white-space: nowrap;
@@ -451,8 +452,8 @@ a.pokemonSummary:focus-visible {
 
 .baseStats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(2.35rem, 1fr));
-  gap: 0.3rem;
+  grid-template-columns: repeat(6, minmax(1.9rem, 1fr));
+  gap: 0.2rem;
   margin: 0;
 }
 
@@ -462,7 +463,7 @@ a.pokemonSummary:focus-visible {
   gap: 0.22rem;
   align-items: center;
   min-height: 1.5rem;
-  padding: 0.18rem 0.35rem;
+  padding: 0.12rem 0.22rem;
   border: 1px solid #d7e2f0;
   border-radius: 6px;
   background: white;
@@ -476,28 +477,28 @@ a.pokemonSummary:focus-visible {
 
 .baseStats dt {
   color: #6b778c;
-  font-size: 0.65rem;
+  font-size: 0.56rem;
   font-weight: 950;
 }
 
 .baseStats dd {
   color: #172b4d;
-  font-size: 0.78rem;
+  font-size: 0.66rem;
   font-weight: 950;
   text-align: right;
 }
 
 .moveSummary {
-  margin: 0.65rem 0 0;
+  margin: 0.42rem 0 0;
   color: #536376;
   font-size: 0.8rem;
 }
 
 .moveSelectField {
   display: grid;
-  gap: 0.38rem;
+  gap: 0.26rem;
   color: #344760;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 850;
 }
 
@@ -507,8 +508,8 @@ a.pokemonSummary:focus-visible {
 
 .moveSelectButton {
   width: 100%;
-  min-height: 42px;
-  padding: 0.48rem 0.62rem;
+  min-height: 38px;
+  padding: 0.4rem 0.52rem;
   border: 2px solid #b9cae0;
   border-radius: 10px;
   background: white;
@@ -668,7 +669,7 @@ a.pokemonSummary:focus-visible {
 
 .abilityField {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.32rem;
 }
 
 .conditionToggle {
@@ -690,9 +691,9 @@ a.pokemonSummary:focus-visible {
 
 .statControls {
   display: grid;
-  gap: 0.65rem;
-  margin-top: 0.8rem;
-  padding: 0.75rem;
+  gap: 0.42rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
   border: 1px solid #c7d5e7;
   border-radius: 12px;
   background: white;
@@ -707,7 +708,7 @@ a.pokemonSummary:focus-visible {
 
 .statControlsHeader strong {
   color: #172b4d;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
 }
 
 .statControlsHeader span,
@@ -717,22 +718,22 @@ a.pokemonSummary:focus-visible {
   border-radius: 999px;
   background: #eef6ff;
   color: #2857a4;
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   font-weight: 900;
 }
 
 .statControls label {
   display: grid;
-  gap: 0.35rem;
+  gap: 0.24rem;
   color: #344760;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 850;
 }
 
 .statControls input[type="number"] {
   width: 100%;
-  min-height: 40px;
-  padding: 0.45rem 0.55rem;
+  min-height: 34px;
+  padding: 0.32rem 0.45rem;
   border: 2px solid #b9cae0;
   border-radius: 9px;
   background: #f8fbff;
@@ -743,14 +744,14 @@ a.pokemonSummary:focus-visible {
 .pointControl {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.45rem;
+  gap: 0.32rem;
   align-items: center;
 }
 
 .pointControl button,
 .rankStepper button {
-  min-width: 2.4rem;
-  min-height: 36px;
+  min-width: 2rem;
+  min-height: 32px;
   border: 1px solid #b9cae0;
   border-radius: 8px;
   background: #eef6ff;
@@ -775,8 +776,8 @@ a.pokemonSummary:focus-visible {
 
 .rankStepper {
   display: grid;
-  grid-template-columns: auto minmax(3rem, 1fr) auto;
-  gap: 0.45rem;
+  grid-template-columns: auto minmax(2.4rem, 1fr) auto;
+  gap: 0.32rem;
   align-items: center;
 }
 
@@ -1338,19 +1339,19 @@ a.pokemonSummary:focus-visible {
 
   .calculator {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
-    padding: 0.7rem;
-    border-radius: 16px;
-  }
-
-  .side {
-    padding: 0.7rem;
+    gap: 0.55rem;
+    padding: 0.55rem;
     border-radius: 14px;
   }
 
+  .side {
+    padding: 0.55rem;
+    border-radius: 12px;
+  }
+
   .side h2 {
-    margin-bottom: 0.65rem;
-    font-size: 0.95rem;
+    margin-bottom: 0.45rem;
+    font-size: 0.9rem;
   }
 
   .teamPicker button,
@@ -1374,16 +1375,16 @@ a.pokemonSummary:focus-visible {
 
   .pokemonSummary,
   .placeholder {
-    min-height: 6.6rem;
-    margin: 0.55rem 0;
+    min-height: 4rem;
+    margin: 0.42rem 0;
   }
 
   .pokemonArtwork {
-    flex-basis: 5.2rem;
+    flex-basis: 3.1rem;
   }
 
   .baseStats {
-    grid-template-columns: repeat(3, minmax(2rem, 1fr));
+    grid-template-columns: repeat(6, minmax(1.7rem, 1fr));
   }
 
   .baseStats div {
