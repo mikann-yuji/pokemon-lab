@@ -1044,7 +1044,6 @@ export function DamageCalculator({
           disabled={!attacker}
           onChange={setMoveId}
         />
-        {selectedMove ? <MoveSummary move={selectedMove} /> : null}
         {selectedMove && relevantStatIds.attacker ? (
           <DamageStatControls
             title="攻撃側の補正"
@@ -1533,19 +1532,21 @@ function PokemonSummary({
         <div>
           <strong>{pokemon.nameJa}</strong>
         </div>
-        <div className={styles.typeBadges} aria-label={`${pokemon.nameJa}のタイプ`}>
-          {pokemon.types.map((typeName) => (
-            <TypeBadge typeName={typeName} key={typeName} />
-          ))}
+        <div className={styles.pokemonMeta}>
+          <div className={styles.typeBadges} aria-label={`${pokemon.nameJa}のタイプ`}>
+            {pokemon.types.map((typeName) => (
+              <TypeBadge typeName={typeName} key={typeName} />
+            ))}
+          </div>
+          <dl className={styles.baseStats}>
+            {STAT_IDS.map((statId) => (
+              <div key={statId}>
+                <dt>{BASE_STAT_LABELS[statId]}</dt>
+                <dd>{pokemon.stats[statId] ?? "-"}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
-        <dl className={styles.baseStats}>
-          {STAT_IDS.map((statId) => (
-            <div key={statId}>
-              <dt>{BASE_STAT_LABELS[statId]}</dt>
-              <dd>{pokemon.stats[statId] ?? "-"}</dd>
-            </div>
-          ))}
-        </dl>
       </div>
     </>
   );
@@ -1890,16 +1891,6 @@ function HeldItemField({
         ))}
       </select>
     </label>
-  );
-}
-
-/** 技のタイプ、分類、威力を選択欄の直下に確認用として表示する。 */
-function MoveSummary({ move }: { move: DamageCalculatorMove }) {
-  return (
-    <p className={styles.moveSummary}>
-      {TYPE_LABELS[move.typeName]} / {move.damageClass === "physical" ? "物理" : "特殊"} /
-      威力 {formatMovePower(move)} / 命中 {formatMoveAccuracy(move)}
-    </p>
   );
 }
 
