@@ -543,6 +543,8 @@ export function DamageCalculator({
   const attacker = attackerSelection.pokemon;
   const defender = defenderSelection.pokemon;
   const [moveId, setMoveId] = useState("");
+  const [preservedMove, setPreservedMove] =
+    useState<DamageCalculatorMove | null>(null);
   const [weatherId, setWeatherId] = useState("");
   const [terrainId, setTerrainId] = useState("");
   const [attackerHistory, setAttackerHistory] = useState<
@@ -688,6 +690,7 @@ export function DamageCalculator({
     setAbilityConditionEnabled((current) => ({ ...current, attacker: false }));
     setMetronomeConsecutiveUseCount(1);
     setMoveId("");
+    setPreservedMove(null);
   }
 
   // 防御側を変更した場合も、古い相手に対する結果を消す。
@@ -766,6 +769,7 @@ export function DamageCalculator({
     setAbilityConditionEnabled((current) => ({ ...current, [side]: false }));
     if (side === "attacker") {
       setMoveId(trainedPokemon.moves[0]?.id ?? "");
+      setPreservedMove(null);
       if (trainedPokemon.heldItem?.id !== "metronome") {
         setMetronomeConsecutiveUseCount(1);
       }
@@ -791,11 +795,13 @@ export function DamageCalculator({
       attacker: current.defender,
       defender: current.attacker,
     }));
-    setMoveId(
-      defender?.moves.some(({ id }) => id === moveId)
-        ? moveId
-        : (defender?.moves[0]?.id ?? ""),
-    );
+    const nextMove =
+      defender?.moves.find(({ id }) => id === moveId) ??
+      defender?.moves[0] ??
+      selectedMove ??
+      null;
+    setMoveId(nextMove?.id ?? "");
+    setPreservedMove(nextMove && !defender?.moves.some(({ id }) => id === nextMove.id) ? nextMove : null);
     if (defender?.heldItem?.id !== "metronome") {
       setMetronomeConsecutiveUseCount(1);
     }
@@ -816,6 +822,7 @@ export function DamageCalculator({
     if (side === "attacker") {
       attackerSelection.select(pokemon);
       setSelectedBuildIds((current) => ({ ...current, attacker: null }));
+      setPreservedMove(null);
       setMoveId(
         pokemon.moves.some(({ id }) => id === history.moveId)
           ? (history.moveId ?? "")
@@ -827,7 +834,9 @@ export function DamageCalculator({
     }
   }
 
-  const selectedMove = attacker?.moves.find(({ id }) => id === moveId);
+  const selectedMove =
+    attacker?.moves.find(({ id }) => id === moveId) ??
+    (preservedMove?.id === moveId ? preservedMove : undefined);
   const selectedWeather =
     weathers.find(({ id }) => id === weatherId) ?? null;
   const selectedTerrain =
@@ -1041,8 +1050,12 @@ export function DamageCalculator({
           moves={attacker?.moves ?? []}
           defenderTypes={defender?.types ?? []}
           selectedMoveId={moveId}
+          selectedMoveFallback={selectedMove}
           disabled={!attacker}
-          onChange={setMoveId}
+          onChange={(nextMoveId) => {
+            setPreservedMove(null);
+            setMoveId(nextMoveId);
+          }}
         />
         {selectedMove && relevantStatIds.attacker ? (
           <DamageStatControls
@@ -1592,6 +1605,7 @@ function MoveSelect({
   moves,
   defenderTypes,
   selectedMoveId,
+  selectedMoveFallback,
   disabled,
   onChange,
 }: {
@@ -1599,12 +1613,14 @@ function MoveSelect({
   moves: DamageCalculatorMove[];
   defenderTypes: DamageCalculatorPokemon["types"];
   selectedMoveId: string;
+  selectedMoveFallback: DamageCalculatorMove | undefined;
   disabled: boolean;
   onChange: (moveId: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const selectedMove =
-    moves.find((move) => move.id === selectedMoveId) ?? null;
+    moves.find((move) => move.id === selectedMoveId) ??
+    (selectedMoveFallback?.id === selectedMoveId ? selectedMoveFallback : null);
   const buttonLabel = selectedMove
     ? `${selectedMove.name} 威力 ${formatMovePower(selectedMove)}`
     : "技を選択";
