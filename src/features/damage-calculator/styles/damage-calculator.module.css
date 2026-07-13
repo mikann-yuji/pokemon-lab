@@ -85,11 +85,11 @@
 
 .calculator {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 0.8rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
   width: min(100%, 72rem);
   margin: 0 auto;
-  padding: clamp(0.75rem, 2vw, 1.2rem);
+  padding: clamp(0.55rem, 1.5vw, 0.9rem);
   border: 1px solid rgb(23 43 77 / 14%);
   border-radius: 18px;
   background: rgb(255 255 255 / 92%);
@@ -98,7 +98,7 @@
 
 .side {
   min-width: 0;
-  padding: clamp(0.65rem, 1.4vw, 0.9rem);
+  padding: clamp(0.52rem, 1.1vw, 0.75rem);
   border: 2px solid #d7e2f0;
   border-radius: 14px;
   background: #f8fbff;
@@ -197,43 +197,6 @@
   overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
-}
-
-.versus {
-  display: grid;
-  gap: 0.4rem;
-  align-self: center;
-  justify-items: center;
-  padding: 0.25rem;
-  color: #e63946;
-  font-size: 1rem;
-  font-weight: 950;
-}
-
-.versus button {
-  min-height: 34px;
-  padding: 0.35rem 0.55rem;
-  border: 2px solid #e63946;
-  border-radius: 9px;
-  background: white;
-  color: #e63946;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.76rem;
-  font-weight: 900;
-  white-space: nowrap;
-}
-
-.versus button:disabled {
-  border-color: #c5d1df;
-  color: #8796a8;
-  cursor: not-allowed;
-}
-
-.versus button:not(:disabled):hover,
-.versus button:not(:disabled):focus-visible {
-  outline: 3px solid rgb(230 57 70 / 18%);
-  background: #fff5f6;
 }
 
 .combobox {
@@ -452,8 +415,8 @@ a.pokemonSummary:focus-visible {
 
 .baseStats {
   display: grid;
-  grid-template-columns: repeat(6, minmax(1.9rem, 1fr));
-  gap: 0.2rem;
+  grid-template-columns: repeat(3, minmax(2.2rem, 1fr));
+  gap: 0.16rem;
   margin: 0;
 }
 
@@ -492,6 +455,14 @@ a.pokemonSummary:focus-visible {
   margin: 0.42rem 0 0;
   color: #536376;
   font-size: 0.8rem;
+}
+
+.quickFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  align-items: start;
+  margin-top: 0.45rem;
 }
 
 .moveSelectField {
@@ -595,18 +566,6 @@ a.pokemonSummary:focus-visible {
   color: #536376;
   font-size: 0.66rem;
   font-weight: 850;
-}
-
-.moveDescription {
-  display: -webkit-box;
-  grid-column: 2 / -1;
-  overflow: hidden;
-  color: #6b778c;
-  font-size: 0.63rem;
-  font-weight: 700;
-  line-height: 1.35;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 
 .effectivenessBadge {
@@ -730,6 +689,18 @@ a.pokemonSummary:focus-visible {
   font-weight: 850;
 }
 
+.statControlGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  align-items: start;
+}
+
+.pointField,
+.rankField {
+  min-width: 0;
+}
+
 .statControls input[type="number"] {
   width: 100%;
   min-height: 34px;
@@ -776,12 +747,13 @@ a.pokemonSummary:focus-visible {
 
 .rankStepper {
   display: grid;
-  grid-template-columns: auto minmax(2.4rem, 1fr) auto;
+  grid-template-columns: 1fr;
   gap: 0.32rem;
-  align-items: center;
+  align-items: stretch;
 }
 
 .natureToggle {
+  grid-column: 1 / -1;
   grid-template-columns: auto 1fr;
   align-items: center;
   width: fit-content;
@@ -1355,7 +1327,6 @@ a.pokemonSummary:focus-visible {
   }
 
   .teamPicker button,
-  .versus button,
   .combobox input,
   .moveField select,
   .moveField input,
@@ -1384,7 +1355,7 @@ a.pokemonSummary:focus-visible {
   }
 
   .baseStats {
-    grid-template-columns: repeat(6, minmax(1.7rem, 1fr));
+    grid-template-columns: repeat(3, minmax(1.7rem, 1fr));
   }
 
   .baseStats div {
@@ -1397,11 +1368,6 @@ a.pokemonSummary:focus-visible {
 
   .baseStats dd {
     font-size: 0.68rem;
-  }
-
-  .versus {
-    justify-self: center;
-    font-size: 0.92rem;
   }
 
   .fieldConditions {

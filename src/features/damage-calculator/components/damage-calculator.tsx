@@ -772,35 +772,6 @@ export function DamageCalculator({
     }
   }
 
-  function swapBattleSides() {
-    attackerSelection.select(defender);
-    defenderSelection.select(attacker);
-    setStatAdjustments((current) => ({
-      attacker: current.defender,
-      defender: current.attacker,
-    }));
-    setAbilityConditionEnabled((current) => ({
-      attacker: current.defender,
-      defender: current.attacker,
-    }));
-    setSelectedTeamIds((current) => ({
-      attacker: current.defender,
-      defender: current.attacker,
-    }));
-    setSelectedBuildIds((current) => ({
-      attacker: current.defender,
-      defender: current.attacker,
-    }));
-    setMoveId(
-      defender?.moves.some(({ id }) => id === moveId)
-        ? moveId
-        : (defender?.moves[0]?.id ?? ""),
-    );
-    if (defender?.heldItem?.id !== "metronome") {
-      setMetronomeConsecutiveUseCount(1);
-    }
-  }
-
   /**
    * 履歴画像からポケモンを復元する。
    * SQLite由来の最新カタログに存在しない古いIDは何もせず無視する。
@@ -1012,22 +983,24 @@ export function DamageCalculator({
           pokemon={attacker}
           href={getTrainingDetailHref(attacker, selectedBuildIds.attacker)}
         />
-        <AbilityField
-          pokemon={attacker}
-          conditionEnabled={abilityConditionEnabled.attacker}
-          onAbilityChange={(abilityId) => changeAbility("attacker", abilityId)}
-          onConditionChange={(enabled) =>
-            setAbilityConditionEnabled((current) => ({
-              ...current,
-              attacker: enabled,
-            }))
-          }
-        />
-        <HeldItemField
-          pokemon={attacker}
-          heldItems={heldItems}
-          onChange={(itemId) => changeHeldItem("attacker", itemId)}
-        />
+        <div className={styles.quickFields}>
+          <AbilityField
+            pokemon={attacker}
+            conditionEnabled={abilityConditionEnabled.attacker}
+            onAbilityChange={(abilityId) => changeAbility("attacker", abilityId)}
+            onConditionChange={(enabled) =>
+              setAbilityConditionEnabled((current) => ({
+                ...current,
+                attacker: enabled,
+              }))
+            }
+          />
+          <HeldItemField
+            pokemon={attacker}
+            heldItems={heldItems}
+            onChange={(itemId) => changeHeldItem("attacker", itemId)}
+          />
+        </div>
         {attacker?.heldItem?.id === "metronome" ? (
           <MetronomeUseControl
             value={metronomeConsecutiveUseCount}
@@ -1058,17 +1031,6 @@ export function DamageCalculator({
           />
         ) : null}
       </section>
-
-      <div className={styles.versus}>
-        <span>VS</span>
-        <button
-          type="button"
-          onClick={swapBattleSides}
-          disabled={!attacker && !defender}
-        >
-          攻守交代
-        </button>
-      </div>
 
       <section className={styles.side}>
         <h2>防御側</h2>
@@ -1128,25 +1090,27 @@ export function DamageCalculator({
           pokemon={defender}
           href={getTrainingDetailHref(defender, selectedBuildIds.defender)}
         />
-        <AbilityField
-          pokemon={defender}
-          conditionEnabled={abilityConditionEnabled.defender}
-          onAbilityChange={(abilityId) => changeAbility("defender", abilityId)}
-          onConditionChange={(enabled) =>
-            setAbilityConditionEnabled((current) => ({
-              ...current,
-              defender: enabled,
-            }))
-          }
-        />
-        <HeldItemField
-          pokemon={defender}
-          heldItems={heldItems}
-          onChange={(itemId) => changeHeldItem("defender", itemId)}
-        />
+        <div className={styles.quickFields}>
+          <AbilityField
+            pokemon={defender}
+            conditionEnabled={abilityConditionEnabled.defender}
+            onAbilityChange={(abilityId) => changeAbility("defender", abilityId)}
+            onConditionChange={(enabled) =>
+              setAbilityConditionEnabled((current) => ({
+                ...current,
+                defender: enabled,
+              }))
+            }
+          />
+          <HeldItemField
+            pokemon={defender}
+            heldItems={heldItems}
+            onChange={(itemId) => changeHeldItem("defender", itemId)}
+          />
+        </div>
         {selectedMove ? (
           <DamageStatControls
-            title="髦ｲ蠕｡蛛ｴ縺ｮHP"
+            title="防御側のHP"
             statLabel={STAT_LABELS.hp}
             value={statAdjustments.defender.hp}
             showRank={false}
@@ -1529,7 +1493,6 @@ function PokemonSummary({
       <div className={styles.pokemonSummaryBody}>
         <div>
           <strong>{pokemon.nameJa}</strong>
-          <small>{pokemon.name}</small>
         </div>
         <div className={styles.typeBadges} aria-label={`${pokemon.nameJa}のタイプ`}>
           {pokemon.types.map((typeName) => (
@@ -1582,12 +1545,6 @@ function formatMovePower(move: DamageCalculatorMove) {
 
 function formatMoveAccuracy(move: DamageCalculatorMove) {
   return move.accuracy === null ? "必中" : `${move.accuracy}`;
-}
-
-function MoveDescription({ description }: { description: string | null }) {
-  return description ? (
-    <span className={styles.moveDescription}>{description}</span>
-  ) : null;
 }
 
 function MoveSelect({
@@ -1737,7 +1694,6 @@ function MoveOptionContent({
         {" / "}命中 {formatMoveAccuracy(move)}
         {formatMoveUsageRate(move)}
       </small>
-      <MoveDescription description={move.description} />
     </span>
   );
 }
@@ -1902,7 +1858,7 @@ function HeldItemField({
 function MoveSummary({ move }: { move: DamageCalculatorMove }) {
   return (
     <p className={styles.moveSummary}>
-      {move.typeName} / {move.damageClass === "physical" ? "物理" : "特殊"} /
+      {TYPE_LABELS[move.typeName]} / {move.damageClass === "physical" ? "物理" : "特殊"} /
       威力 {formatMovePower(move)} / 命中 {formatMoveAccuracy(move)}
     </p>
   );
@@ -1961,55 +1917,57 @@ function DamageStatControls({
         <strong>{title}</strong>
         <span>{statLabel}</span>
       </div>
-      <label>
-        能力ポイント
-        <div className={styles.pointControl}>
+      <div className={styles.statControlGrid}>
+        <label className={styles.pointField}>
+          能力ポイント
+          <div className={styles.pointControl}>
+            <input
+              type="number"
+              min="0"
+              max="32"
+              value={value.point}
+              onChange={(event) => changePoint(Number(event.target.value))}
+            />
+            <button type="button" onClick={() => changePoint(32)}>
+              32
+            </button>
+          </div>
           <input
-            type="number"
+            type="range"
             min="0"
             max="32"
+            step="1"
             value={value.point}
             onChange={(event) => changePoint(Number(event.target.value))}
           />
-          <button type="button" onClick={() => changePoint(32)}>
-            32
-          </button>
-        </div>
-        <input
-          type="range"
-          min="0"
-          max="32"
-          step="1"
-          value={value.point}
-          onChange={(event) => changePoint(Number(event.target.value))}
-        />
-      </label>
-      {showRank ? (
-        <label>
-          能力ランク
-          <div className={styles.rankStepper}>
-            <button type="button" onClick={() => changeRank(value.rank - 1)}>
-              -
-            </button>
-            <span className={styles.rankValue}>
-              {value.rank > 0 ? `+${value.rank}` : value.rank}
-            </span>
-            <button type="button" onClick={() => changeRank(value.rank + 1)}>
-              +
-            </button>
-          </div>
         </label>
-      ) : null}
-      {showNature ? (
-        <label className={styles.natureToggle}>
-          <input
-            type="checkbox"
-            checked={value.nature}
-            onChange={(event) => onChange({ nature: event.target.checked })}
-          />
-          性格補正あり
-        </label>
-      ) : null}
+        {showRank ? (
+          <label className={styles.rankField}>
+            能力ランク
+            <div className={styles.rankStepper}>
+              <button type="button" onClick={() => changeRank(value.rank - 1)}>
+                -
+              </button>
+              <span className={styles.rankValue}>
+                {value.rank > 0 ? `+${value.rank}` : value.rank}
+              </span>
+              <button type="button" onClick={() => changeRank(value.rank + 1)}>
+                +
+              </button>
+            </div>
+          </label>
+        ) : null}
+        {showNature ? (
+          <label className={styles.natureToggle}>
+            <input
+              type="checkbox"
+              checked={value.nature}
+              onChange={(event) => onChange({ nature: event.target.checked })}
+            />
+            性格補正あり
+          </label>
+        ) : null}
+      </div>
     </div>
   );
 }

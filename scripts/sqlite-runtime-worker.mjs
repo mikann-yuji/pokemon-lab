@@ -538,10 +538,18 @@ function migrateSchema() {
  * カタログは配布物なので、ユーザーDBとは別ファイルとしてOPFSへimportする。
  */
 async function fetchCompressedCatalogDatabase() {
-  const response = await fetch(CATALOG_DATABASE_URL, { cache: "no-store" });
-  if (!response.ok) {
+  let response = null;
+  try {
+    response = await fetch(CATALOG_DATABASE_URL, { cache: "no-store" });
+  } catch {
+    response = null;
+  }
+  if ((!response || !response.ok) && typeof caches !== "undefined") {
+    response = await caches.match(CATALOG_DATABASE_URL);
+  }
+  if (!response || !response.ok) {
     throw new Error(
-      `配布用カタログDBを取得できませんでした: ${response.status} ${response.statusText}`,
+      `配布用カタログDBを取得できませんでした: ${response?.status ?? "offline"} ${response?.statusText ?? ""}`,
     );
   }
 
@@ -576,7 +584,14 @@ async function ensureCatalogDatabase() {
 
   catalogDatabase.close();
   catalogDatabase = null;
-  const catalogDatabaseBytes = await fetchCompressedCatalogDatabase();
+  let catalogDatabaseBytes;
+  try {
+    catalogDatabaseBytes = await fetchCompressedCatalogDatabase();
+  } catch (error) {
+    catalogDatabase = new sahPool.OpfsSAHPoolDb(CATALOG_DATABASE_FILENAME);
+    if (currentSeedVersion !== null) return false;
+    throw error;
+  }
   sahPool.unlink(CATALOG_DATABASE_FILENAME);
   await sahPool.importDb(CATALOG_DATABASE_FILENAME, catalogDatabaseBytes);
   catalogDatabase = new sahPool.OpfsSAHPoolDb(CATALOG_DATABASE_FILENAME);
