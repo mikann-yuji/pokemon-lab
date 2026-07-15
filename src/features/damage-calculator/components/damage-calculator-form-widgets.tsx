@@ -415,18 +415,18 @@ export function DamageStatControls({
             <div className={styles.rankStepper}>
               <button
                 type="button"
-                onClick={() => onChange({ rank: Math.max(-6, value.rank - 1) })}
+                onClick={() => onChange({ rank: Math.min(6, value.rank + 1) })}
               >
-                -
+                +
               </button>
               <span className={styles.rankValue}>
                 {value.rank > 0 ? `+${value.rank}` : value.rank}
               </span>
               <button
                 type="button"
-                onClick={() => onChange({ rank: Math.min(6, value.rank + 1) })}
+                onClick={() => onChange({ rank: Math.max(-6, value.rank - 1) })}
               >
-                +
+                -
               </button>
             </div>
           </label>
