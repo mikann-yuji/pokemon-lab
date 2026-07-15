@@ -35,10 +35,10 @@ function DamageOutcome({
   return (
     <div className={`${styles.outcome} ${critical ? styles.criticalOutcome : ""}`}>
       <span className={styles.outcomeTitle}>{title}</span>
-      <strong className={styles.damagePercent}>
+      <span className={styles.damagePercent}>
         {outcome.minimumPercent.toFixed(1)}-{outcome.maximumPercent.toFixed(1)}%
-      </strong>
-      <em className={styles.koLabel}>{outcome.koLabel}</em>
+      </span>
+      <span className={styles.koLabel}>{outcome.koLabel}</span>
       <span
         className={styles.damageBar}
         aria-label={`ダメージ ${minimumDamage.toFixed(1)}%から${maximumDamage.toFixed(1)}%`}
@@ -57,9 +57,9 @@ export function DamageResult({ result }: { result: CalculationResult }) {
   return (
     <section className={styles.result} aria-live="polite">
       <div className={styles.resultHeader}>
-        <strong>
+        <span className={styles.resultTitle}>
           {result.attackerName} の {result.moveName}
-        </strong>
+        </span>
         <span className={styles.resultMove}>
           {result.defenderName} に
           <small>x{result.moveEffectiveness}</small>

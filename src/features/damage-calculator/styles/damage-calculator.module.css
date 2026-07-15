@@ -994,7 +994,7 @@ a.pokemonSummary:focus-visible {
   margin-bottom: 0.38rem;
 }
 
-.resultHeader strong {
+.resultTitle {
   min-width: 0;
   overflow: hidden;
   font-size: 0.78rem;
@@ -1541,7 +1541,7 @@ a.pokemonSummary:focus-visible {
     margin-bottom: 0.3rem;
   }
 
-  .resultHeader strong {
+  .resultTitle {
     font-size: 0.7rem;
   }
 
