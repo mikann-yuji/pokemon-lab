@@ -351,9 +351,9 @@ export function applyTrainingBuildToPokemon(
 }
 
 /**
- * ダメージ計算ページのポケモン検索欄で、入力文字列と選択結果をまとめて扱う。
+ * ダメージ計算ページで、ポケモン検索欄の入力文字列と選択結果をまとめて扱う。
  *
- * @returns 選択済みポケモン、検索文字列、検索文字列setter、選択setter。
+ * @returns 選択中ポケモン、検索文字列、検索文字列setter、選択更新関数。
  */
 export function usePokemonSelection() {
   const [pokemon, setPokemon] = useState<DamageCalculatorPokemon | null>(null);

@@ -22,8 +22,8 @@ type PokemonSelectionState = Record<DamageSide, DamageCalculatorPokemon | null>;
 type PokemonQueryState = Record<DamageSide, string>;
 
 type DamageCalculatorStore = {
-  // Editable form state for the normal damage calculator.
-  // Derived calculation results are intentionally kept outside this store.
+  // 通常ダメージ計算ページの「ユーザーが直接編集する入力状態」だけを持つ。
+  // 計算結果やカタログデータは別hook/storeに分け、ここをフォーム状態の置き場に限定する。
   pokemon: PokemonSelectionState;
   query: PokemonQueryState;
   moveId: string;
@@ -178,6 +178,8 @@ type DamageCalculatorStore = {
  * @returns Zustand storeへ投入する初期状態。
  */
 function initialState() {
+  // 初期状態はresetでも使い回すため、store定義の外で毎回新しいオブジェクトとして作る。
+  // statAdjustmentsのネストしたオブジェクトを共有しないことが、片側更新の事故防止になる。
   return {
     pokemon: { attacker: null, defender: null },
     query: { attacker: "", defender: "" },
@@ -195,6 +197,11 @@ function initialState() {
   };
 }
 
+/**
+ * ダメージ計算ページで、通常計算フォームの入力状態を共有するZustand hook。
+ *
+ * @returns selectorで切り出したフォーム状態、またはフォーム更新アクション。
+ */
 export const useDamageCalculatorStore = create<DamageCalculatorStore>((set) => ({
   ...initialState(),
 
@@ -203,6 +210,8 @@ export const useDamageCalculatorStore = create<DamageCalculatorStore>((set) => (
 
   selectPokemon: (side, pokemon) =>
     set((state) => ({
+      // ポケモン選択と検索欄表示は常に同時更新する。
+      // 片方だけ更新すると、候補リストの表示名と計算対象がズレるため。
       pokemon: { ...state.pokemon, [side]: pokemon },
       query: { ...state.query, [side]: pokemon?.nameJa ?? "" },
     })),
@@ -236,6 +245,8 @@ export const useDamageCalculatorStore = create<DamageCalculatorStore>((set) => (
 
   setStatAdjustment: (side, statId, values) =>
     set((state) => ({
+      // 能力補正は能力IDごとに部分更新する。
+      // point/rank/natureのどれかだけを触っても、他の入力値は保持する。
       statAdjustments: {
         ...state.statAdjustments,
         [side]: {
@@ -255,6 +266,8 @@ export const useDamageCalculatorStore = create<DamageCalculatorStore>((set) => (
 
   swapSides: () =>
     set((state) => ({
+      // 攻守交代では、ポケモンだけでなく育成案・補正・特性条件も左右ごと入れ替える。
+      // 技IDは攻撃側の技一覧に依存するため、親コンポーネント側で保存/復元を扱う。
       pokemon: {
         attacker: state.pokemon.defender,
         defender: state.pokemon.attacker,
@@ -283,6 +296,8 @@ export const useDamageCalculatorStore = create<DamageCalculatorStore>((set) => (
 
   resetSideForDirectPokemon: (side) =>
     set((state) => ({
+      // 直接ポケモンを選び直した側は、育成案から持ってきた補正を残さない。
+      // 手入力として再スタートできるよう、その側だけ初期化する。
       selectedBuildIds: { ...state.selectedBuildIds, [side]: null },
       statAdjustments: {
         ...state.statAdjustments,

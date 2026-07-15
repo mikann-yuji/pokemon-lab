@@ -23,6 +23,8 @@ import {
  * @returns 履歴、バトルチーム、育成案、性格、履歴setter、読み込みエラー。
  */
 export function useDamageCalculatorUserData() {
+  // 攻撃側/防御側の履歴は画面上で別々に表示・更新するため、stateも分けて持つ。
+  // Firestore同期後の再取得でも、片側だけの表示更新がしやすい形にしている。
   const [attackerHistory, setAttackerHistory] = useState<
     DamageHistoryRecord[]
   >([]);
@@ -67,6 +69,7 @@ export function useDamageCalculatorUserData() {
   useEffect(() => {
     let active = true;
     // 初回描画を軽くするため、保存データ読み込みは1tick遅らせる。
+    // ダメージ計算の主要UIを先に表示し、その後で履歴やチーム一覧を差し込む。
     const timer = window.setTimeout(() => {
       void loadUserData(active).catch((caught: unknown) => {
         console.error("ダメージ計算の保存データを読み込めませんでした。", caught);
@@ -82,6 +85,7 @@ export function useDamageCalculatorUserData() {
   useEffect(() => {
     let active = true;
     // Firestore同期が終わったらuser.dbが更新されるため、画面の保存データも読み直す。
+    // 同じログインIDで別端末から保存した育成案やチームを、このページにも反映する入口。
     const handleSynced = () => {
       void loadUserData(active).catch((caught: unknown) => {
         console.error("同期後のダメージ計算データを読み込めませんでした。", caught);
@@ -95,6 +99,8 @@ export function useDamageCalculatorUserData() {
     };
   }, [loadUserData]);
 
+  // 画面側では、履歴setterだけを履歴保存hookへ渡す。
+  // それ以外の配列は読み取り専用の表示候補として扱う。
   return {
     attackerHistory,
     setAttackerHistory,

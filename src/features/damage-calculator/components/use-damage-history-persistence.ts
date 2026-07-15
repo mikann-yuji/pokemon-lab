@@ -30,6 +30,8 @@ export function useDamageHistoryPersistence({
   setDefenderHistory: (history: DamageHistoryRecord[]) => void;
 }) {
   useEffect(() => {
+    // 履歴は「攻撃側・防御側・技」が揃って初めて意味を持つ。
+    // 未選択状態では保存せず、入力途中のポケモンを履歴に混ぜない。
     if (!attacker || !defender || !selectedMove) return;
 
     // 技まで選ばれて初めて、攻撃側の履歴に「どの技を使ったか」を残せる。
@@ -45,6 +47,8 @@ export function useDamageHistoryPersistence({
         setDefenderHistory(savedDefenders);
       })
       .catch((caught: unknown) => {
+        // 履歴保存に失敗しても計算自体は続けられるため、画面のエラー状態にはしない。
+        // 開発時に原因を追えるようconsoleへだけ残す。
         console.error("ダメージ計算履歴を保存できませんでした。", caught);
       });
 

@@ -273,6 +273,11 @@ export function applyTrainingBuildToPokemon(
   };
 }
 
+/**
+ * 逆引きダメージ計算ページで、ポケモン検索欄の入力文字列と選択結果をまとめて扱う。
+ *
+ * @returns 選択中ポケモン、検索文字列、検索文字列setter、選択更新関数。
+ */
 export function usePokemonSelection() {
   // コンボボックスの入力文字列と選択済みポケモンをまとめて扱う。
   // 選択時に検索欄も日本語名へ揃え、表示と内部状態のズレを防ぐ。

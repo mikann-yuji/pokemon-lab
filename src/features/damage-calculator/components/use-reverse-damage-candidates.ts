@@ -26,9 +26,12 @@ import {
 
 type FieldOptions = DamageCalculationInput["field"];
 
-// 逆引き候補の全探索を担当するhook。
-// 画面側は「観測値・未知側・現在のポケモン条件」を渡すだけにして、
-// 重い探索ループと候補の並び替えはこのファイルに閉じ込める。
+/**
+ * 逆引きダメージ計算ページで、観測値に一致する能力補正候補を全探索する。
+ *
+ * @param params - 攻撃側/防御側、選択技、未知側、補正入力、観測値、場の条件。
+ * @returns 観測値に合う能力ポイント、性格補正、ランク、急所有無の候補一覧。
+ */
 export function useReverseDamageCandidates({
   attacker,
   defender,
@@ -57,6 +60,8 @@ export function useReverseDamageCandidates({
   typeEffectivenessSource: TypeEffectivenessSource | null;
 }) {
   return useMemo(() => {
+    // ポケモンか技が不足している間は探索できない。
+    // 空配列にしておくと、画面側は候補表を単純に非表示/空表示へ切り替えられる。
     if (!attacker || !defender || !selectedMove) return [];
 
     const rows: Candidate[] = [];
@@ -74,6 +79,8 @@ export function useReverseDamageCandidates({
       });
 
       for (let point = POINT_MIN; point <= POINT_MAX; point += 1) {
+        // 攻撃側逆引きは、A/Cの能力ポイント・性格・ランクを全組み合わせで試す。
+        // HPはダメージ量に影響しないため、この分岐では探索しない。
         for (const nature of [false, true]) {
           for (let rank = RANK_MIN; rank <= RANK_MAX; rank += 1) {
             // 1候補ごとに攻撃側だけを差し替え、通常のダメージ計算に流す。
@@ -144,6 +151,8 @@ export function useReverseDamageCandidates({
       });
 
       for (let hpPoint = POINT_MIN; hpPoint <= POINT_MAX; hpPoint += 1) {
+        // 防御側逆引きは「受け側HP」と「受け側B/D」の両方で割合が変わる。
+        // そのため攻撃側より探索範囲が広く、HPポイントも外側のループで試す。
         for (let point = POINT_MIN; point <= POINT_MAX; point += 1) {
           for (const nature of [false, true]) {
             for (let rank = RANK_MIN; rank <= RANK_MAX; rank += 1) {

@@ -23,6 +23,8 @@ import {
  * @returns 履歴、バトルチーム、育成案、性格、履歴setter、読み込みエラー。
  */
 export function useReverseDamageUserData() {
+  // 逆引きページも通常計算ページと同じ保存データを使う。
+  // ただし候補探索の入力として使うため、このhook内では読み込みと同期追従に責務を絞る。
   const [attackerHistory, setAttackerHistory] = useState<DamageHistoryRecord[]>([]);
   const [defenderHistory, setDefenderHistory] = useState<DamageHistoryRecord[]>([]);
   const [battleTeams, setBattleTeams] = useState<BattleTeam[]>([]);
@@ -37,6 +39,8 @@ export function useReverseDamageUserData() {
    * @returns 読み込み完了を表すPromise。
    */
   const loadUserData = useCallback(async (active = true) => {
+    // user.db由来のデータは互いに依存しないため並列で読む。
+    // 読み込み順ではなく、揃った後にまとめて画面へ反映する。
     const [savedAttackers, savedDefenders, teams, builds, loadedNatures] =
       await Promise.all([
         getDamageHistory("attacker"),
@@ -55,6 +59,8 @@ export function useReverseDamageUserData() {
 
   useEffect(() => {
     let active = true;
+    // 初回描画直後に保存データを読む。
+    // 逆引きフォームそのものは先に触れるよう、同期的な読み込みでブロックしない。
     const timer = window.setTimeout(() => {
       void loadUserData(active).catch((caught: unknown) => {
         console.error("Failed to load reverse calculator user data.", caught);
@@ -69,6 +75,8 @@ export function useReverseDamageUserData() {
 
   useEffect(() => {
     let active = true;
+    // Firestore同期後はuser.dbの保存済み育成案やチームが増える可能性がある。
+    // 逆引き候補に反映できるよう、同期イベントを受けて再取得する。
     const handleSynced = () => {
       void loadUserData(active).catch((caught: unknown) => {
         console.error("Failed to reload reverse calculator user data.", caught);
@@ -82,6 +90,8 @@ export function useReverseDamageUserData() {
     };
   }, [loadUserData]);
 
+  // 戻り値は画面表示用の配列と、履歴保存hookへ渡すsetterをまとめたもの。
+  // 逆引き計算そのものはuseReverseDamageCandidatesに分離している。
   return {
     attackerHistory,
     battleTeams,

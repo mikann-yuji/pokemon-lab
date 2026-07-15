@@ -16,6 +16,12 @@ import {
 // 育成シミュレータが起動時に必要とする外部データ読み込みをまとめるhook群。
 // 画面本体からFirestore/SQLite同期後の再読み込み処理を追い出すためのファイル。
 
+/**
+ * 育成シミュレータページで、性格と持ち物の選択肢を読み込む。
+ *
+ * @param params - Server Componentで先読み済みの性格/持ち物。未指定ならブラウザで読む。
+ * @returns 性格一覧、持ち物一覧、性格setter、カタログ読み込みエラー。
+ */
 export function useTrainingCatalogOptions({
   initialNatures,
   initialHeldItems,
@@ -24,6 +30,7 @@ export function useTrainingCatalogOptions({
   initialHeldItems?: HeldItem[];
 }) {
   // Server Component側で先読みされていればそれを使い、無ければブラウザ側でcatalog.dbから読む。
+  // 初期値を受け取れるようにしておくと、ページ初回表示時のちらつきを抑えられる。
   const [natures, setNatures] = useState<Nature[]>(initialNatures ?? []);
   const [heldItems, setHeldItems] = useState<HeldItem[]>(initialHeldItems ?? []);
   const [catalogError, setCatalogError] = useState("");
@@ -53,12 +60,19 @@ export function useTrainingCatalogOptions({
   return { catalogError, heldItems, natures, setNatures };
 }
 
+/**
+ * 育成シミュレータページで、保存済み育成案をuser.dbから読み込んで同期イベントにも追従する。
+ *
+ * @returns 保存済み育成案、育成案setter、エラーsetter、読み込みエラー。
+ */
 export function useTrainingBuildList() {
   // 保存済み育成案はuser.db/Firestore同期で変わるため、初回と同期完了イベントの両方で読む。
   const [trainingBuilds, setTrainingBuilds] = useState<TrainingBuild[]>([]);
   const [matchupError, setMatchupError] = useState("");
 
   const loadTrainingBuilds = useCallback(async (active = true) => {
+    // 一覧取得はuser.dbの現在値をそのまま画面へ反映する。
+    // active=falseなら、ページ遷移後に遅れて解決した結果を捨てる。
     const builds = await getAllTrainingBuilds();
     if (active) setTrainingBuilds(builds);
   }, []);
