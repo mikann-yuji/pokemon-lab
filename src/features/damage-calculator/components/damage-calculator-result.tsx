@@ -4,16 +4,14 @@ import type { CalculationResult } from "./damage-calculator-types";
 import styles from "../styles/damage-calculator.module.css";
 
 type HpBarStyle = CSSProperties & {
-  "--minimum-damage": string;
-  "--maximum-damage": string;
+  "--remaining-hp": string;
+  "--remaining-hp-after-minimum-damage": string;
 };
 
 function clampPercent(value: number) {
   return Math.max(0, Math.min(100, value));
 }
 
-// 通常ダメージ計算の結果表示。
-// 計算処理は持たず、最小/最大ダメージと割合を読みやすい形に整えるだけ。
 function DamageOutcome({
   title,
   outcome,
@@ -23,37 +21,33 @@ function DamageOutcome({
   outcome: DamageCalculation;
   critical?: boolean;
 }) {
-  // ダメージ幅をHPバー上に重ねる。
-  // 薄い最大乱数バーの上に濃い最低乱数バーを描くと、乱数の広がりを小さい面積で読める。
-  const minimumDamage = clampPercent(outcome.minimumPercent);
-  const maximumDamage = clampPercent(outcome.maximumPercent);
+  const damagePercentLabel = `${outcome.minimumPercent.toFixed(1)}-${outcome.maximumPercent.toFixed(1)}%`;
+  const remainingHpAfterMinimumDamage = clampPercent(100 - outcome.minimumPercent);
+  const remainingHpAfterMaximumDamage = clampPercent(100 - outcome.maximumPercent);
+  const remainingHpLabel = `${remainingHpAfterMaximumDamage.toFixed(1)}-${remainingHpAfterMinimumDamage.toFixed(1)}%`;
   const barStyle: HpBarStyle = {
-    "--minimum-damage": `${minimumDamage}%`,
-    "--maximum-damage": `${maximumDamage}%`,
+    "--remaining-hp": `${remainingHpAfterMaximumDamage}%`,
+    "--remaining-hp-after-minimum-damage": `${remainingHpAfterMinimumDamage}%`,
   };
 
   return (
     <div className={`${styles.outcome} ${critical ? styles.criticalOutcome : ""}`}>
       <span className={styles.outcomeTitle}>{title}</span>
-      <span className={styles.damagePercent}>
-        {outcome.minimumPercent.toFixed(1)}-{outcome.maximumPercent.toFixed(1)}%
-      </span>
+      <span className={styles.damagePercent}>{damagePercentLabel}</span>
       <span className={styles.koLabel}>{outcome.koLabel}</span>
       <span
         className={styles.damageBar}
-        aria-label={`ダメージ ${minimumDamage.toFixed(1)}%から${maximumDamage.toFixed(1)}%`}
+        aria-label={`残りHP ${remainingHpLabel}`}
         key={`${title}-${outcome.minimum}-${outcome.maximum}-${outcome.maximumPercent}`}
       >
-        <span className={styles.maximumDamageBar} style={barStyle} />
-        <span className={styles.minimumDamageBar} style={barStyle} />
+        <span className={styles.remainingHpBar} style={barStyle} />
+        <span className={styles.minimumDamageMarker} style={barStyle} />
       </span>
     </div>
   );
 }
 
 export function DamageResult({ result }: { result: CalculationResult }) {
-  // 通常ダメージと急所ダメージを同じ見た目で並べる。
-  // 急所結果がない技や条件では通常結果だけを表示する。
   return (
     <section className={styles.result} aria-live="polite">
       <div className={styles.resultHeader}>

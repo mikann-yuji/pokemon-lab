@@ -33,6 +33,8 @@ import {
   type UnknownSide,
   type BuildSelectionState,
 } from "./reverse-damage-calculator-state";
+
+const USER_RECORDS_LOCAL_CHANGED_EVENT = "pokemon-lab:user-records-local-changed";
 import { ReverseDamageObservationSection } from "./reverse-damage-observation-section";
 import { MoveSelect, MoveSummary } from "./reverse-damage-calculator-form";
 import { ReverseResultTable } from "./reverse-damage-calculator-result";
@@ -158,6 +160,7 @@ export function ReverseDamageCalculator({
         if (!active) return;
         setAttackerHistory(savedAttackers);
         setDefenderHistory(savedDefenders);
+        window.dispatchEvent(new CustomEvent(USER_RECORDS_LOCAL_CHANGED_EVENT));
       })
       .catch((caught: unknown) => {
         console.error("Failed to save damage history.", caught);

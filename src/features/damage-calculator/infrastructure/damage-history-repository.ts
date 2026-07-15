@@ -19,7 +19,7 @@ type DamageHistoryRow = SqliteRow & {
   updated_at: number;
 };
 
-const HISTORY_LIMIT = 6;
+const HISTORY_LIMIT = 10;
 
 /**
  * ダメージ計算ページで、user.dbの履歴行をUI用レコードへ変換する。
@@ -75,8 +75,12 @@ export async function saveDamageHistory(
   const now = Date.now();
   await sqliteWorkerClient.transaction([
     {
-      sql: "UPDATE damage_history SET deleted_at = ?, updated_at = ? WHERE side = ? AND pokemon_id = ?",
-      bind: [now, now, side, pokemonId],
+      sql: "DELETE FROM damage_history WHERE deleted_at IS NOT NULL",
+      bind: [],
+    },
+    {
+      sql: "DELETE FROM damage_history WHERE side = ? AND pokemon_id = ?",
+      bind: [side, pokemonId],
     },
     {
       sql: `INSERT INTO damage_history
@@ -85,18 +89,15 @@ export async function saveDamageHistory(
       bind: [side, pokemonId, moveId ?? null, now, now],
     },
     {
-      sql: `UPDATE damage_history
-            SET deleted_at = ?, updated_at = ?
+      sql: `DELETE FROM damage_history
             WHERE side = ?
-              AND deleted_at IS NULL
               AND id NOT IN (
                 SELECT id FROM damage_history
                 WHERE side = ?
-                  AND deleted_at IS NULL
                 ORDER BY updated_at DESC, id DESC
                 LIMIT ?
               )`,
-      bind: [now, now, side, side, HISTORY_LIMIT],
+      bind: [side, side, HISTORY_LIMIT],
     },
   ]);
   return getDamageHistory(side);

@@ -1084,9 +1084,11 @@ a.pokemonSummary:focus-visible {
 }
 
 .minimumDamageMarker {
+  left: var(--remaining-hp-after-minimum-damage);
   width: 2px;
   background: rgb(255 255 255 / 76%);
   box-shadow: 0 0 0 1px rgb(23 43 77 / 18%);
+  transform: translateX(-1px);
 }
 
 @keyframes hpDrain {

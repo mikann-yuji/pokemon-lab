@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDocs,
   serverTimestamp,
@@ -36,6 +37,7 @@ type UserSyncRecord = {
 type SyncResult = {
   downloaded: number;
   uploaded: number;
+  deleted: number;
 };
 
 function recordCollection(database: Firestore, uid: string, table: SyncTable) {
@@ -106,6 +108,97 @@ async function writeRemoteRecords(uid: string, records: UserSyncRecord[]) {
   }
 
   if (writeCount > 0) await batch.commit();
+}
+
+function pruneDamageHistoryRecords(records: UserSyncRecord[]) {
+  const keptKeys = new Set<string>();
+  const deletedRecords: UserSyncRecord[] = [];
+  const damageHistoryBySide = new Map<string, UserSyncRecord[]>();
+
+  for (const record of records) {
+    if (record.table !== "damage_history") continue;
+    if (record.deletedAt !== null) {
+      deletedRecords.push(record);
+      continue;
+    }
+    const side = String(record.data.side ?? record.recordId.split(":")[0] ?? "");
+    damageHistoryBySide.set(side, [...(damageHistoryBySide.get(side) ?? []), record]);
+  }
+
+  for (const sideRecords of damageHistoryBySide.values()) {
+    const sorted = [...sideRecords].sort((a, b) => {
+      const timestampDiff = latestTimestamp(b) - latestTimestamp(a);
+      return timestampDiff === 0 ? b.recordId.localeCompare(a.recordId) : timestampDiff;
+    });
+
+    for (const record of sorted.slice(0, 10)) {
+      keptKeys.add(`${record.table}:${record.recordId}`);
+    }
+
+    deletedRecords.push(...sorted.slice(10));
+  }
+
+  return {
+    keptRecords: records.filter(
+      (record) =>
+        record.table !== "damage_history" ||
+        keptKeys.has(`${record.table}:${record.recordId}`),
+    ),
+    deletedRecords,
+  };
+}
+
+async function deleteRemoteRecords(uid: string, records: UserSyncRecord[]) {
+  const database = getFirebaseFirestore();
+  const uniqueRecords = new Map<string, Pick<UserSyncRecord, "table" | "recordId">>();
+  for (const record of records) {
+    uniqueRecords.set(`${record.table}:${record.recordId}`, {
+      table: record.table,
+      recordId: record.recordId,
+    });
+  }
+
+  await Promise.all(
+    [...uniqueRecords.values()].map(({ table, recordId }) =>
+      deleteDoc(doc(recordCollection(database, uid, table), recordId)),
+    ),
+  );
+  return uniqueRecords.size;
+}
+
+async function pruneLocalDamageHistory() {
+  await sqliteWorkerClient.transaction([
+    {
+      sql: "DELETE FROM damage_history WHERE deleted_at IS NOT NULL",
+      bind: [],
+    },
+    {
+      sql: `DELETE FROM damage_history
+            WHERE side = 'attacker'
+              AND deleted_at IS NULL
+              AND id NOT IN (
+                SELECT id FROM damage_history
+                WHERE side = 'attacker'
+                  AND deleted_at IS NULL
+                ORDER BY updated_at DESC, id DESC
+                LIMIT 10
+              )`,
+      bind: [],
+    },
+    {
+      sql: `DELETE FROM damage_history
+            WHERE side = 'defender'
+              AND deleted_at IS NULL
+              AND id NOT IN (
+                SELECT id FROM damage_history
+                WHERE side = 'defender'
+                  AND deleted_at IS NULL
+                ORDER BY updated_at DESC, id DESC
+                LIMIT 10
+              )`,
+      bind: [],
+    },
+  ]);
 }
 
 async function exportLocalRecords(): Promise<UserSyncRecord[]> {
@@ -405,6 +498,13 @@ async function importRemoteRecords(records: UserSyncRecord[]) {
 
     if (record.table === "damage_history") {
       statements.push({
+        sql: "DELETE FROM damage_history WHERE side = ? AND pokemon_id = ?",
+        bind: [
+          String(data.side ?? "attacker"),
+          Number(data.pokemonId ?? 0),
+        ],
+      });
+      statements.push({
         sql: `INSERT INTO damage_history
                 (side, pokemon_id, move_id, created_at, updated_at, deleted_at)
               VALUES (?, ?, ?, ?, ?, ?)`,
@@ -553,8 +653,18 @@ async function importRemoteRecords(records: UserSyncRecord[]) {
 
 export async function syncUserRecords(uid: string): Promise<SyncResult> {
   const remoteRecords = await loadRemoteRecords(uid);
-  await importRemoteRecords(remoteRecords);
+  const prunedRemote = pruneDamageHistoryRecords(remoteRecords);
+  const remoteDeleted = await deleteRemoteRecords(uid, prunedRemote.deletedRecords);
+  await importRemoteRecords(prunedRemote.keptRecords);
+  await pruneLocalDamageHistory();
   const mergedRecords = await exportLocalRecords();
-  await writeRemoteRecords(uid, mergedRecords);
-  return { downloaded: remoteRecords.length, uploaded: mergedRecords.length };
+  const prunedMerged = pruneDamageHistoryRecords(mergedRecords);
+  await writeRemoteRecords(uid, prunedMerged.keptRecords);
+  const mergedDeleted = await deleteRemoteRecords(uid, prunedMerged.deletedRecords);
+  await pruneLocalDamageHistory();
+  return {
+    downloaded: prunedRemote.keptRecords.length,
+    uploaded: prunedMerged.keptRecords.length,
+    deleted: remoteDeleted + mergedDeleted,
+  };
 }

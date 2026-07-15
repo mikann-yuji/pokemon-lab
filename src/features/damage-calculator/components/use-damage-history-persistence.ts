@@ -10,6 +10,8 @@ import {
   type DamageHistoryRecord,
 } from "../infrastructure/damage-history-repository";
 
+const USER_RECORDS_LOCAL_CHANGED_EVENT = "pokemon-lab:user-records-local-changed";
+
 /**
  * ダメージ計算ページで、攻撃側/防御側の最近使ったポケモン履歴を保存する。
  *
@@ -45,6 +47,7 @@ export function useDamageHistoryPersistence({
         if (!active) return;
         setAttackerHistory(savedAttackers);
         setDefenderHistory(savedDefenders);
+        window.dispatchEvent(new CustomEvent(USER_RECORDS_LOCAL_CHANGED_EVENT));
       })
       .catch((caught: unknown) => {
         // 履歴保存に失敗しても計算自体は続けられるため、画面のエラー状態にはしない。
