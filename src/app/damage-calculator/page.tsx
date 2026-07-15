@@ -12,11 +12,7 @@ export default function DamageCalculatorPage() {
   return (
     <main className={styles.page}>
       <header className={styles.hero}>
-        <p>Battle Simulator</p>
-        <h1>ダメージ計算</h1>
-        <span>
-          Pokémon Champions登場ポケモンと技を選んで、相手のHPをどれだけ削れるか調べよう。
-        </span>
+        <h3>ダメージ計算</h3>
       </header>
       <DamageCalculatorCatalogLoader />
     </main>

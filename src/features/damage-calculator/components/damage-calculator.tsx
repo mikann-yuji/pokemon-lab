@@ -1,384 +1,55 @@
-"use client";
+﻿"use client";
 
-/**
- * このファイルの役割:
- * ダメージ計算ページの入力状態を管理し、検索欄・技選択・計算結果を組み立てる。
- *
- * 実際の計算式やDBアクセスはこのコンポーネントへ書かず、
- * application層の計算機と、Server Componentから渡されたカタログを利用する。
- */
+/** Page-level state controller for the damage calculator. */
 
-import Image from "next/image";
-import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
-import {
-  CHAMPIONS_DAMAGE_RULESET,
-  championsDamageCalculator,
-} from "../config/champions-damage-ruleset";
-import type { DamageCalculation } from "../application/smogon-damage-calculator";
+import { useEffect, useMemo, useState } from "react";
+import { championsDamageCalculator } from "../config/champions-damage-ruleset";
 import type {
-  DamageCalculatorAbility,
   DamageCalculatorHeldItem,
   DamageCalculatorMove,
   DamageCalculatorPokemon,
   DamageCalculatorTerrain,
   DamageCalculatorWeather,
 } from "../domain/damage-calculator-types";
-import { PokemonCombobox } from "./pokemon-combobox";
 import {
-  getDamageHistory,
-  saveDamageHistory,
   type DamageHistoryRecord,
   type DamageHistorySide,
 } from "../infrastructure/damage-history-repository";
 import { loadTypeEffectivenessFromCatalog } from "../infrastructure/type-effectiveness-repository";
 import {
-  getAllBattleTeams,
-  getAllTrainingBuilds,
   type BattleTeam,
   type TrainingBuild,
 } from "@/features/training/infrastructure/training-build-repository";
 import {
-  getNatures,
-  type Nature,
-} from "@/features/training/infrastructure/training-catalog-repository";
-import {
   getTypeEffectiveness,
   type TypeEffectivenessSource,
-  type TypeName,
 } from "@/domain/type-matchup";
-import { getTypeBadgeStyle } from "@/presentation/pokemon-type-colors";
-import styles from "../styles/damage-calculator.module.css";
-
-type CalculationResult = {
-  /** 通常ヒット時のダメージ範囲。 */
-  normal: DamageCalculation;
-  /** 急所ヒット時のダメージ範囲。通常結果と並べて比較表示する。 */
-  critical: DamageCalculation;
-  attackerName: string;
-  defenderName: string;
-  moveName: string;
-  moveEffectiveness: number;
-};
-
-const STAT_IDS = [
-  "hp",
-  "attack",
-  "defense",
-  "special-attack",
-  "special-defense",
-  "speed",
-] as const;
-
-type AdjustableStatId =
-  | "hp"
-  | "attack"
-  | "defense"
-  | "special-attack"
-  | "special-defense";
-type DamageSide = "attacker" | "defender";
-type StatAdjustment = {
-  point: number;
-  rank: number;
-  nature: boolean;
-};
-type StatAdjustmentState = Record<
+import { DamageCalculatorView } from "./damage-calculator-view";
+import type {
+  AdjustableStatId,
   DamageSide,
-  Record<AdjustableStatId, StatAdjustment>
->;
+  StatAdjustment,
+} from "./damage-calculator-types";
+import {
+  applyAbility,
+  applyHeldItem,
+  applyStatAdjustment,
+  applyTrainingBuildToPokemon,
+  createDefaultAdjustmentState,
+  createSpeedComparisonRows,
+  createStatAdjustmentsFromBuild,
+  getRelevantStatIds,
+  usePokemonSelection,
+  type StatAdjustmentState,
+} from "./damage-calculator-state";
+import { useDamageCalculatorUserData } from "./use-damage-calculator-user-data";
+import { useDamageHistoryPersistence } from "./use-damage-history-persistence";
+
 type TeamSelectionState = Record<DamageSide, number | null>;
 type BuildSelectionState = Record<DamageSide, number | null>;
-type SpeedComparisonRow = {
-  id: string;
-  label: string;
-  attacker: number | null;
-  defender: number | null;
-};
-
-const STAT_LABELS: Record<AdjustableStatId, string> = {
-  hp: "HP",
-  attack: "こうげき",
-  defense: "ぼうぎょ",
-  "special-attack": "とくこう",
-  "special-defense": "とくぼう",
-};
-
-const ADJUSTABLE_STAT_IDS = [
-  "hp",
-  "attack",
-  "defense",
-  "special-attack",
-  "special-defense",
-] as const satisfies readonly AdjustableStatId[];
-
-const BASE_STAT_LABELS: Record<(typeof STAT_IDS)[number], string> = {
-  hp: "H",
-  attack: "A",
-  defense: "B",
-  "special-attack": "C",
-  "special-defense": "D",
-  speed: "S",
-};
-
-const TYPE_LABELS: Record<TypeName, string> = {
-  Normal: "ノーマル",
-  Fire: "ほのお",
-  Water: "みず",
-  Electric: "でんき",
-  Grass: "くさ",
-  Ice: "こおり",
-  Fighting: "かくとう",
-  Poison: "どく",
-  Ground: "じめん",
-  Flying: "ひこう",
-  Psychic: "エスパー",
-  Bug: "むし",
-  Rock: "いわ",
-  Ghost: "ゴースト",
-  Dragon: "ドラゴン",
-  Dark: "あく",
-  Steel: "はがね",
-  Fairy: "フェアリー",
-};
-
-function createDefaultAdjustment(): StatAdjustment {
-  return { point: 0, rank: 0, nature: false };
-}
-
-function createDefaultAdjustmentState(): StatAdjustmentState {
-  return {
-    attacker: {
-      hp: createDefaultAdjustment(),
-      attack: createDefaultAdjustment(),
-      defense: createDefaultAdjustment(),
-      "special-attack": createDefaultAdjustment(),
-      "special-defense": createDefaultAdjustment(),
-    },
-    defender: {
-      hp: createDefaultAdjustment(),
-      attack: createDefaultAdjustment(),
-      defense: createDefaultAdjustment(),
-      "special-attack": createDefaultAdjustment(),
-      "special-defense": createDefaultAdjustment(),
-    },
-  };
-}
-
-function calculateActualStat(
-  pokemon: DamageCalculatorPokemon,
-  statId: (typeof STAT_IDS)[number],
-  point = 0,
-  nature = false,
-) {
-  const baseStat = pokemon.stats[statId] ?? 1;
-  const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
-  if (statId === "hp") return baseStat === 1 ? 1 : base + 50 + 10 + point;
-  return Math.floor((base + 5 + point) * (nature ? 1.1 : 1));
-}
-
-function calculateSpeedValue(
-  pokemon: DamageCalculatorPokemon | null,
-  point: number,
-  nature: boolean,
-  scarf = false,
-) {
-  if (!pokemon) return null;
-
-  const speed = calculateActualStat(pokemon, "speed", point, nature);
-  return scarf ? Math.floor(speed * 1.5) : speed;
-}
-
-function createSpeedComparisonRows(
-  attacker: DamageCalculatorPokemon | null,
-  defender: DamageCalculatorPokemon | null,
-): SpeedComparisonRow[] {
-  return [
-    {
-      id: "scarf-fastest",
-      label: "スカーフ最速",
-      attacker: calculateSpeedValue(attacker, 32, true, true),
-      defender: calculateSpeedValue(defender, 32, true, true),
-    },
-    {
-      id: "fastest",
-      label: "最速",
-      attacker: calculateSpeedValue(attacker, 32, true),
-      defender: calculateSpeedValue(defender, 32, true),
-    },
-    {
-      id: "semi-fast",
-      label: "準速",
-      attacker: calculateSpeedValue(attacker, 32, false),
-      defender: calculateSpeedValue(defender, 32, false),
-    },
-    {
-      id: "uninvested",
-      label: "無振",
-      attacker: calculateSpeedValue(attacker, 0, false),
-      defender: calculateSpeedValue(defender, 0, false),
-    },
-  ];
-}
-
-function createNeutralActualStats(pokemon: DamageCalculatorPokemon) {
-  return Object.fromEntries(
-    STAT_IDS.map((statId) => [statId, calculateActualStat(pokemon, statId)]),
-  );
-}
-
-function applyStatAdjustment(
-  pokemon: DamageCalculatorPokemon | null,
-  statId: AdjustableStatId | null,
-  adjustment: StatAdjustment | null,
-): DamageCalculatorPokemon | null {
-  if (!pokemon || !statId || !adjustment) return pokemon;
-
-  return {
-    ...pokemon,
-    actualStats: {
-      ...createNeutralActualStats(pokemon),
-      ...pokemon.actualStats,
-      [statId]: calculateActualStat(
-        pokemon,
-        statId,
-        adjustment.point,
-        adjustment.nature,
-      ),
-    },
-    boosts:
-      statId === "hp"
-        ? pokemon.boosts
-        : {
-            ...pokemon.boosts,
-            [statId]: adjustment.rank,
-          },
-  };
-}
-
-function applyHeldItem(
-  pokemon: DamageCalculatorPokemon | null,
-  item: DamageCalculatorHeldItem | null,
-): DamageCalculatorPokemon | null {
-  return pokemon ? { ...pokemon, heldItem: item } : pokemon;
-}
-
-function applyAbility(
-  pokemon: DamageCalculatorPokemon | null,
-  ability: DamageCalculatorAbility | null,
-): DamageCalculatorPokemon | null {
-  return pokemon ? { ...pokemon, selectedAbility: ability } : pokemon;
-}
-
-function getRelevantStatIds(move: DamageCalculatorMove | undefined) {
-  if (!move) return { attacker: null, defender: null };
-  return move.damageClass === "physical"
-    ? ({ attacker: "attack", defender: "defense" } as const)
-    : ({ attacker: "special-attack", defender: "special-defense" } as const);
-}
-
-function hasPositiveNatureForStat(
-  build: TrainingBuild,
-  statId: AdjustableStatId,
-  natures: Nature[],
-) {
-  const selectedNature = natures.find(({ id }) => id === build.nature);
-  return (
-    selectedNature?.increasedStatId === statId &&
-    selectedNature.increasedStatId !== selectedNature.decreasedStatId
-  );
-}
-
-function createStatAdjustmentsFromBuild(
-  build: TrainingBuild,
-  natures: Nature[],
-): Record<AdjustableStatId, StatAdjustment> {
-  return Object.fromEntries(
-    ADJUSTABLE_STAT_IDS.map((statId) => [
-      statId,
-      {
-        point: build.abilityPoints[statId] ?? 0,
-        rank: 0,
-        nature: hasPositiveNatureForStat(build, statId, natures),
-      },
-    ]),
-  ) as Record<AdjustableStatId, StatAdjustment>;
-}
-
-function toActualStats(
-  pokemon: DamageCalculatorPokemon,
-  build: TrainingBuild,
-  natures: Nature[],
-) {
-  const selectedNature = natures.find(({ id }) => id === build.nature) ?? null;
-  const hasNatureModifier = Boolean(
-    selectedNature &&
-      selectedNature.increasedStatId !== selectedNature.decreasedStatId,
-  );
-
-  return Object.fromEntries(
-    STAT_IDS.map((id) => {
-      const baseStat = pokemon.stats[id] ?? 1;
-      const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
-      const point = build.abilityPoints[id] ?? 0;
-      if (id === "hp") {
-        return [id, baseStat === 1 ? 1 : base + 50 + 10 + point];
-      }
-      const modifier =
-        hasNatureModifier && selectedNature?.increasedStatId === id
-          ? 1.1
-          : hasNatureModifier && selectedNature?.decreasedStatId === id
-            ? 0.9
-            : 1;
-      return [id, Math.floor((base + 5 + point) * modifier)];
-    }),
-  );
-}
-
-function applyTrainingBuildToPokemon(
-  pokemon: DamageCalculatorPokemon,
-  build: TrainingBuild,
-  natures: Nature[],
-  heldItems: DamageCalculatorHeldItem[],
-): DamageCalculatorPokemon {
-  const learnedMoveIds = new Set(build.moveIds.filter(Boolean));
-  const learnedDamageMoves =
-    learnedMoveIds.size === 0
-      ? []
-      : pokemon.moves.filter((move) => learnedMoveIds.has(move.id));
-
-  return {
-    ...pokemon,
-    nameJa: build.name || pokemon.nameJa,
-    actualStats: toActualStats(pokemon, build, natures),
-    heldItem: heldItems.find(({ id }) => id === build.itemId) ?? null,
-    selectedAbility:
-      pokemon.abilities.find(({ id }) => id === build.abilityId) ?? null,
-    moves: learnedDamageMoves,
-  };
-}
 
 /**
- * ポケモン選択欄1つ分の状態をまとめる小さなhook。
- * 選択済みポケモンと入力中テキストを常に同期させる。
- */
-function usePokemonSelection() {
-  const [pokemon, setPokemon] = useState<DamageCalculatorPokemon | null>(null);
-  const [query, setQuery] = useState("");
-
-  function select(nextPokemon: DamageCalculatorPokemon | null) {
-    setPokemon(nextPokemon);
-    setQuery(nextPokemon?.nameJa ?? "");
-  }
-
-  return { pokemon, query, setQuery, select };
-}
-
-/**
- * ダメージ計算画面の本体。
- *
- * pokemonCatalogはページ生成時にSQLiteから読み込まれている。
- * ブラウザ内では通信せず、この配列だけで検索・技選択・計算を完結させる。
+ * Coordinates battle-side selections, user data, and damage calculation.
  */
 export function DamageCalculator({
   pokemonCatalog,
@@ -386,7 +57,7 @@ export function DamageCalculator({
   weathers,
   terrains,
 }: {
-  /** Server Component側でcatalog.dbから読み込んだ、計算対象ポケモンの全データ。 */
+  /** Full damage-calculator catalog loaded from catalog.db by the page. */
   pokemonCatalog: DamageCalculatorPokemon[];
   heldItems: DamageCalculatorHeldItem[];
   weathers: DamageCalculatorWeather[];
@@ -403,15 +74,16 @@ export function DamageCalculator({
   const [terrainId, setTerrainId] = useState("");
   const [typeEffectivenessSource, setTypeEffectivenessSource] =
     useState<TypeEffectivenessSource | null>(null);
-  const [attackerHistory, setAttackerHistory] = useState<
-    DamageHistoryRecord[]
-  >([]);
-  const [defenderHistory, setDefenderHistory] = useState<
-    DamageHistoryRecord[]
-  >([]);
-  const [battleTeams, setBattleTeams] = useState<BattleTeam[]>([]);
-  const [trainingBuilds, setTrainingBuilds] = useState<TrainingBuild[]>([]);
-  const [natures, setNatures] = useState<Nature[]>([]);
+  const {
+    attackerHistory,
+    setAttackerHistory,
+    defenderHistory,
+    setDefenderHistory,
+    battleTeams,
+    trainingBuilds,
+    natures,
+    teamLoadError,
+  } = useDamageCalculatorUserData();
   const [selectedTeamIds, setSelectedTeamIds] = useState<TeamSelectionState>({
     attacker: null,
     defender: null,
@@ -422,7 +94,6 @@ export function DamageCalculator({
   });
   const [teamModalSide, setTeamModalSide] = useState<DamageSide | null>(null);
   const [speedModalOpen, setSpeedModalOpen] = useState(false);
-  const [teamLoadError, setTeamLoadError] = useState("");
   const [metronomeConsecutiveUseCount, setMetronomeConsecutiveUseCount] =
     useState(1);
   const [abilityConditionEnabled, setAbilityConditionEnabled] = useState({
@@ -481,29 +152,8 @@ export function DamageCalculator({
       ? `/training/${pokemon.id}?build=${linkedBuildId}`
       : `/training/${pokemon.id}`;
   };
-  const loadUserData = useCallback(async (active = true) => {
-    const [
-      savedAttackers,
-      savedDefenders,
-      teams,
-      builds,
-      loadedNatures,
-    ] = await Promise.all([
-      getDamageHistory("attacker"),
-      getDamageHistory("defender"),
-      getAllBattleTeams(),
-      getAllTrainingBuilds(),
-      getNatures(),
-    ]);
-    if (!active) return;
-    setAttackerHistory(savedAttackers);
-    setDefenderHistory(savedDefenders);
-    setBattleTeams(teams);
-    setTrainingBuilds(builds);
-    setNatures(loadedNatures);
-  }, []);
 
-  // user.dbはブラウザ専用なので、初回表示後に最近使った履歴を読み込む。
+  // user.db is browser-local, so user-specific records are loaded after mount.
   useEffect(() => {
     let active = true;
     void loadTypeEffectivenessFromCatalog()
@@ -518,38 +168,8 @@ export function DamageCalculator({
     };
   }, []);
 
-  useEffect(() => {
-    let active = true;
-    const timer = window.setTimeout(() => {
-      void loadUserData(active).catch((caught: unknown) => {
-        console.error("ダメージ計算の保存データを読み込めませんでした。", caught);
-        if (active) {
-          setTeamLoadError("保存データを読み込めませんでした。");
-        }
-      });
-    }, 0);
-    return () => {
-      active = false;
-      window.clearTimeout(timer);
-    };
-  }, [loadUserData]);
 
-  useEffect(() => {
-    let active = true;
-    const handleSynced = () => {
-      void loadUserData(active).catch((caught: unknown) => {
-        console.error("同期後のダメージ計算データを読み込めませんでした。", caught);
-        if (active) setTeamLoadError("同期後の保存データを読み込めませんでした。");
-      });
-    };
-    window.addEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
-    return () => {
-      active = false;
-      window.removeEventListener(USER_RECORDS_SYNCED_EVENT, handleSynced);
-    };
-  }, [loadUserData]);
-
-  // 攻撃側を変更したら、前のポケモンの技や計算結果を残さない。
+  // Changing the attacker invalidates the previously selected move and result.
   function selectAttacker(pokemon: DamageCalculatorPokemon | null) {
     attackerSelection.select(pokemon);
     setSelectedBuildIds((current) => ({ ...current, attacker: null }));
@@ -563,7 +183,7 @@ export function DamageCalculator({
     setPreservedMove(null);
   }
 
-  // 防御側を変更した場合も、古い相手に対する結果を消す。
+  // Changing the defender also invalidates the result for the old matchup.
   function selectDefender(pokemon: DamageCalculatorPokemon | null) {
     defenderSelection.select(pokemon);
     setSelectedBuildIds((current) => ({ ...current, defender: null }));
@@ -678,8 +298,8 @@ export function DamageCalculator({
   }
 
   /**
-   * 履歴画像からポケモンを復元する。
-   * SQLite由来の最新カタログに存在しない古いIDは何もせず無視する。
+   * Restores a pokemon from local history.
+   * Missing IDs are ignored because the static catalog may have changed.
    */
   function restoreHistory(
     side: DamageHistorySide,
@@ -810,1158 +430,71 @@ export function DamageCalculator({
     selectedMove,
     typeEffectivenessSource,
   ]);
-  useEffect(() => {
-    if (!attacker || !defender || !selectedMove) return;
-
-    let active = true;
-    void Promise.all([
-      saveDamageHistory("attacker", attacker.id, selectedMove.id),
-      saveDamageHistory("defender", defender.id),
-    ])
-      .then(([savedAttackers, savedDefenders]) => {
-        if (!active) return;
-        setAttackerHistory(savedAttackers);
-        setDefenderHistory(savedDefenders);
-      })
-      .catch((caught: unknown) => {
-        console.error("ダメージ計算履歴を保存できませんでした。", caught);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [attacker, defender, selectedMove]);
-
-  return (
-    <form
-      className={styles.calculator}
-      onSubmit={(event) => event.preventDefault()}
-    >
-      <section className={styles.side}>
-        <h2>攻撃側</h2>
-        <div className={styles.teamPicker}>
-          <button type="button" onClick={() => setTeamModalSide("attacker")}>
-            バトルチームを選択
-          </button>
-          <span>{selectedTeams.attacker?.name ?? "未選択"}</span>
-        </div>
-        {teamLoadError ? (
-          <p className={styles.teamError} role="alert">
-            {teamLoadError}
-          </p>
-        ) : null}
-        {selectedTeamMembers.attacker.length > 0 ? (
-          <div className={styles.teamPokemon}>
-            {selectedTeamMembers.attacker.map(({ build, pokemon }) => (
-              <button
-                type="button"
-                title={`${build.name || pokemon.nameJa}を攻撃側に反映`}
-                aria-label={`${build.name || pokemon.nameJa}を攻撃側に反映`}
-                onClick={() => selectTeamMember("attacker", build)}
-                key={build.id}
-              >
-                {pokemon.imageUrl ? (
-                  <PokemonImage
-                    pokemon={pokemon}
-                    alt=""
-                    size={48}
-                    preferFallback
-                  />
-                ) : (
-                  <SmallPokemonName name={pokemon.nameJa} />
-                )}
-              </button>
-            ))}
-          </div>
-        ) : null}
-        <PokemonCombobox
-          id="attacker"
-          label="攻撃するポケモン"
-          pokemonCatalog={pokemonCatalog}
-          selectedPokemon={attacker}
-          inputValue={attackerSelection.query}
-          onInputValueChange={attackerSelection.setQuery}
-          onSelect={selectAttacker}
-        />
-        {selectedTeams.attacker ? null : (
-          <RecentPokemonList
-            side="attacker"
-            history={attackerHistory}
-            pokemonCatalog={pokemonCatalog}
-            onRestore={restoreHistory}
-          />
-        )}
-        <PokemonSummary
-          pokemon={attacker}
-          href={getTrainingDetailHref(attacker, selectedBuildIds.attacker)}
-        />
-        <div className={styles.quickFields}>
-          <AbilityField
-            pokemon={attacker}
-            conditionEnabled={abilityConditionEnabled.attacker}
-            onAbilityChange={(abilityId) => changeAbility("attacker", abilityId)}
-            onConditionChange={(enabled) =>
-              setAbilityConditionEnabled((current) => ({
-                ...current,
-                attacker: enabled,
-              }))
-            }
-          />
-          <HeldItemField
-            pokemon={attacker}
-            heldItems={heldItems}
-            onChange={(itemId) => changeHeldItem("attacker", itemId)}
-          />
-        </div>
-        {attacker?.heldItem?.id === "metronome" ? (
-          <MetronomeUseControl
-            value={metronomeConsecutiveUseCount}
-            onChange={setMetronomeConsecutiveUseCount}
-          />
-        ) : null}
-        <MoveSelect
-          label="使用する技"
-          moves={attacker?.moves ?? []}
-          defenderTypes={defender?.types ?? []}
-          typeEffectivenessSource={typeEffectivenessSource}
-          selectedMoveId={moveId}
-          selectedMoveFallback={selectedMove}
-          disabled={!attacker}
-          onChange={(nextMoveId) => {
-            setPreservedMove(null);
-            setMoveId(nextMoveId);
-          }}
-        />
-        {selectedMove && relevantStatIds.attacker ? (
-          <DamageStatControls
-            title="攻撃側の補正"
-            statLabel={STAT_LABELS[relevantStatIds.attacker]}
-            value={statAdjustments.attacker[relevantStatIds.attacker]}
-            onChange={(values) =>
-              changeStatAdjustment(
-                "attacker",
-                relevantStatIds.attacker,
-                values,
-              )
-            }
-          />
-        ) : null}
-      </section>
-
-      <div className={styles.battleActions}>
-        <button
-          type="button"
-          onClick={swapBattleSides}
-          disabled={!attacker && !defender}
-        >
-          攻守交代
-        </button>
-      </div>
-
-      <section className={styles.side}>
-        <h2>防御側</h2>
-        <div className={styles.teamPicker}>
-          <button type="button" onClick={() => setTeamModalSide("defender")}>
-            バトルチームを選択
-          </button>
-          <span>{selectedTeams.defender?.name ?? "未選択"}</span>
-        </div>
-        {teamLoadError ? (
-          <p className={styles.teamError} role="alert">
-            {teamLoadError}
-          </p>
-        ) : null}
-        {selectedTeamMembers.defender.length > 0 ? (
-          <div className={styles.teamPokemon}>
-            {selectedTeamMembers.defender.map(({ build, pokemon }) => (
-              <button
-                type="button"
-                title={`${build.name || pokemon.nameJa}を防御側に反映`}
-                aria-label={`${build.name || pokemon.nameJa}を防御側に反映`}
-                onClick={() => selectTeamMember("defender", build)}
-                key={build.id}
-              >
-                {pokemon.imageUrl ? (
-                  <PokemonImage
-                    pokemon={pokemon}
-                    alt=""
-                    size={48}
-                    preferFallback
-                  />
-                ) : (
-                  <SmallPokemonName name={pokemon.nameJa} />
-                )}
-              </button>
-            ))}
-          </div>
-        ) : null}
-        <PokemonCombobox
-          id="defender"
-          label="攻撃を受けるポケモン"
-          pokemonCatalog={pokemonCatalog}
-          selectedPokemon={defender}
-          inputValue={defenderSelection.query}
-          onInputValueChange={defenderSelection.setQuery}
-          onSelect={selectDefender}
-        />
-        {selectedTeams.defender ? null : (
-          <RecentPokemonList
-            side="defender"
-            history={defenderHistory}
-            pokemonCatalog={pokemonCatalog}
-            onRestore={restoreHistory}
-          />
-        )}
-        <PokemonSummary
-          pokemon={defender}
-          href={getTrainingDetailHref(defender, selectedBuildIds.defender)}
-        />
-        <div className={styles.quickFields}>
-          <AbilityField
-            pokemon={defender}
-            conditionEnabled={abilityConditionEnabled.defender}
-            onAbilityChange={(abilityId) => changeAbility("defender", abilityId)}
-            onConditionChange={(enabled) =>
-              setAbilityConditionEnabled((current) => ({
-                ...current,
-                defender: enabled,
-              }))
-            }
-          />
-          <HeldItemField
-            pokemon={defender}
-            heldItems={heldItems}
-            onChange={(itemId) => changeHeldItem("defender", itemId)}
-          />
-        </div>
-        {selectedMove ? (
-          <DamageStatControls
-            title="防御側のHP"
-            statLabel={STAT_LABELS.hp}
-            value={statAdjustments.defender.hp}
-            showRank={false}
-            showNature={false}
-            onChange={(values) =>
-              changeStatAdjustment("defender", "hp", values)
-            }
-          />
-        ) : null}
-        {selectedMove && relevantStatIds.defender ? (
-          <DamageStatControls
-            title="防御側の補正"
-            statLabel={STAT_LABELS[relevantStatIds.defender]}
-            value={statAdjustments.defender[relevantStatIds.defender]}
-            onChange={(values) =>
-              changeStatAdjustment(
-                "defender",
-                relevantStatIds.defender,
-                values,
-              )
-            }
-          />
-        ) : null}
-      </section>
-
-      <section className={styles.fieldConditions}>
-        <div>
-          <p>BATTLE CONDITIONS</p>
-          <h2>場の条件</h2>
-        </div>
-        <label>
-          天候
-          <select
-            value={weatherId}
-            onChange={(event) => setWeatherId(event.target.value)}
-          >
-            <option value="">なし</option>
-            {weathers.map((weather) => (
-              <option value={weather.id} key={weather.id}>
-                {weather.name}
-                {weather.normallyAvailable ? "" : " (特殊)"}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          フィールド
-          <select
-            value={terrainId}
-            onChange={(event) => setTerrainId(event.target.value)}
-          >
-            <option value="">なし</option>
-            {terrains.map((terrain) => (
-              <option value={terrain.id} key={terrain.id}>
-                {terrain.name}
-                {terrain.normallyAvailable ? "" : " (特殊)"}
-              </option>
-            ))}
-          </select>
-        </label>
-      </section>
-
-      <div className={styles.conditions}>
-        基準式 第{CHAMPIONS_DAMAGE_RULESET.generation}世代・レベル
-        {CHAMPIONS_DAMAGE_RULESET.level}
-        ・個体値31・努力値0・性格補正なし・HP満タン
-      </div>
-
-      {error ? <p className={styles.error}>{error}</p> : null}
-      {result ? <DamageResult result={result} /> : null}
-      <button
-        className={styles.speedCompareButton}
-        type="button"
-        disabled={!attacker && !defender}
-        onClick={() => setSpeedModalOpen(true)}
-      >
-        かんたん素早さ比較
-      </button>
-      {speedModalOpen ? (
-        <SpeedComparisonModal
-          attackerName={attacker?.nameJa ?? "攻撃側未選択"}
-          defenderName={defender?.nameJa ?? "防御側未選択"}
-          rows={speedComparisonRows}
-          onClose={() => setSpeedModalOpen(false)}
-        />
-      ) : null}
-      {teamModalSide ? (
-        <BattleTeamModal
-          teams={battleTeams}
-          selectedTeamId={selectedTeamIds[teamModalSide]}
-          onSelect={(team) => selectBattleTeam(teamModalSide, team)}
-          onClose={() => setTeamModalSide(null)}
-        />
-      ) : null}
-    </form>
-  );
-}
-
-function SpeedComparisonModal({
-  attackerName,
-  defenderName,
-  rows,
-  onClose,
-}: {
-  attackerName: string;
-  defenderName: string;
-  rows: SpeedComparisonRow[];
-  onClose: () => void;
-}) {
-  return (
-    <div
-      className={styles.speedModalOverlay}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="speed-comparison-modal-title"
-    >
-      <button
-        className={styles.speedModalBackdrop}
-        type="button"
-        aria-label="素早さ比較を閉じる"
-        onClick={onClose}
-      />
-      <section className={styles.speedModalPanel}>
-        <div className={styles.speedModalHeader}>
-          <div>
-            <p>SPEED CHECK</p>
-            <h2 id="speed-comparison-modal-title">かんたん素早さ比較</h2>
-          </div>
-          <button type="button" onClick={onClose}>
-            閉じる
-          </button>
-        </div>
-        <div className={styles.speedTable} role="table">
-          <div className={styles.speedTableHead} role="row">
-            <span role="columnheader">条件</span>
-            <strong role="columnheader">{attackerName}</strong>
-            <strong role="columnheader">{defenderName}</strong>
-          </div>
-          {rows.map((row) => (
-            <div className={styles.speedTableRow} role="row" key={row.id}>
-              <span role="rowheader">{row.label}</span>
-              <SpeedValue
-                value={row.attacker}
-                comparedValue={row.defender}
-                sideLabel="攻撃側"
-              />
-              <SpeedValue
-                value={row.defender}
-                comparedValue={row.attacker}
-                sideLabel="防御側"
-              />
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function SpeedValue({
-  value,
-  comparedValue,
-  sideLabel,
-}: {
-  value: number | null;
-  comparedValue: number | null;
-  sideLabel: string;
-}) {
-  const comparison =
-    value === null || comparedValue === null
-      ? ""
-      : value === comparedValue
-        ? "同速"
-        : value > comparedValue
-          ? `${sideLabel}が速い`
-          : "";
-
-  return (
-    <span
-      className={`${styles.speedValue} ${
-        comparison && comparison !== "同速" ? styles.fasterSpeedValue : ""
-      }`}
-      role="cell"
-    >
-      <strong>{value ?? "-"}</strong>
-      {comparison ? <small>{comparison}</small> : null}
-    </span>
-  );
-}
-
-function BattleTeamModal({
-  teams,
-  selectedTeamId,
-  onSelect,
-  onClose,
-}: {
-  teams: BattleTeam[];
-  selectedTeamId: number | null;
-  onSelect: (team: BattleTeam) => void;
-  onClose: () => void;
-}) {
-  return (
-    <div
-      className={styles.teamModalOverlay}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="battle-team-modal-title"
-    >
-      <button
-        className={styles.teamModalBackdrop}
-        type="button"
-        aria-label="バトルチーム一覧を閉じる"
-        onClick={onClose}
-      />
-      <section className={styles.teamModalPanel}>
-        <div className={styles.teamModalHeader}>
-          <div>
-            <p>BATTLE TEAMS</p>
-            <h2 id="battle-team-modal-title">バトルチーム一覧</h2>
-          </div>
-          <button type="button" onClick={onClose}>
-            閉じる
-          </button>
-        </div>
-        {teams.length === 0 ? (
-          <p className={styles.teamModalEmpty}>
-            保存したバトルチームはありません。
-          </p>
-        ) : (
-          <div className={styles.teamModalList}>
-            {teams.map((team) => (
-              <button
-                className={
-                  team.id === selectedTeamId ? styles.selectedTeamButton : ""
-                }
-                type="button"
-                onClick={() => onSelect(team)}
-                key={team.id}
-              >
-                <strong>{team.name}</strong>
-                <small>{team.buildIds.length}体</small>
-              </button>
-            ))}
-          </div>
-        )}
-      </section>
-    </div>
-  );
-}
-
-function RecentPokemonList({
-  side,
-  history,
-  pokemonCatalog,
-  onRestore,
-}: {
-  /** 攻撃側/防御側のどちらの履歴を復元するか。 */
-  side: DamageHistorySide;
-  /** user.dbから読み込んだ最近使った履歴。 */
-  history: DamageHistoryRecord[];
-  /** 履歴のpokemonIdを現在のカタログ情報へ解決するために使う。 */
-  pokemonCatalog: DamageCalculatorPokemon[];
-  /** 履歴ボタンを押した時、親コンポーネントの選択状態へ反映する。 */
-  onRestore: (
-    side: DamageHistorySide,
-    history: DamageHistoryRecord,
-  ) => void;
-}) {
-  // 履歴に残っていても現在のcatalog.dbに存在しないフォームは表示しない。
-  const availableHistory = history.flatMap((record) => {
-    const pokemon = pokemonCatalog.find(({ id }) => id === record.pokemonId);
-    return pokemon ? [{ record, pokemon }] : [];
+  useDamageHistoryPersistence({
+    attacker,
+    defender,
+    selectedMove,
+    setAttackerHistory,
+    setDefenderHistory,
   });
 
-  if (availableHistory.length === 0) return null;
-
   return (
-    <div className={styles.recentPokemon}>
-      <small>最近使ったポケモン</small>
-      <div className={styles.recentPokemonList}>
-        {availableHistory.map(({ record, pokemon }) => (
-          <button
-            type="button"
-            title={`${pokemon.nameJa}を選択`}
-            aria-label={`${pokemon.nameJa}を選択`}
-            onClick={() => onRestore(side, record)}
-            key={record.id}
-          >
-            {pokemon.imageUrl ? (
-              <PokemonImage
-                pokemon={pokemon}
-                alt=""
-                size={48}
-                preferFallback
-              />
-            ) : (
-              <SmallPokemonName name={pokemon.nameJa} />
-            )}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SmallPokemonName({ name }: { name: string }) {
-  return <span className={styles.smallPokemonName}>{name}</span>;
-}
-
-function PokemonImage({
-  pokemon,
-  size,
-  alt,
-  preferFallback = false,
-}: {
-  pokemon: DamageCalculatorPokemon;
-  size: number;
-  alt: string;
-  preferFallback?: boolean;
-}) {
-  const primaryUrl =
-    preferFallback && pokemon.fallbackImageUrl
-      ? pokemon.fallbackImageUrl
-      : pokemon.imageUrl;
-  const fallbackUrl =
-    primaryUrl === pokemon.fallbackImageUrl
-      ? pokemon.imageUrl
-      : pokemon.fallbackImageUrl;
-  const [failedPrimaryUrl, setFailedPrimaryUrl] = useState<string | null>(null);
-  const src =
-    primaryUrl && failedPrimaryUrl === primaryUrl && fallbackUrl
-      ? fallbackUrl
-      : primaryUrl;
-
-  if (!src) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src="" alt={alt} width={size} height={size} />;
-  }
-
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      width={size}
-      height={size}
-      onError={() => {
-        if (primaryUrl && fallbackUrl && src === primaryUrl) {
-          setFailedPrimaryUrl(primaryUrl);
-        }
+    <DamageCalculatorView
+      pokemonCatalog={pokemonCatalog}
+      heldItems={heldItems}
+      weathers={weathers}
+      terrains={terrains}
+      attackerSelection={attackerSelection}
+      defenderSelection={defenderSelection}
+      attacker={attacker}
+      defender={defender}
+      selectedMove={selectedMove}
+      moveId={moveId}
+      typeEffectivenessSource={typeEffectivenessSource}
+      selectedTeams={selectedTeams}
+      selectedTeamMembers={selectedTeamMembers}
+      selectedBuildIds={selectedBuildIds}
+      attackerHistory={attackerHistory}
+      defenderHistory={defenderHistory}
+      battleTeams={battleTeams}
+      selectedTeamIds={selectedTeamIds}
+      teamModalSide={teamModalSide}
+      teamLoadError={teamLoadError}
+      abilityConditionEnabled={abilityConditionEnabled}
+      metronomeConsecutiveUseCount={metronomeConsecutiveUseCount}
+      statAdjustments={statAdjustments}
+      relevantStatIds={relevantStatIds}
+      weatherId={weatherId}
+      terrainId={terrainId}
+      result={result}
+      error={error}
+      speedModalOpen={speedModalOpen}
+      speedComparisonRows={speedComparisonRows}
+      getTrainingDetailHref={getTrainingDetailHref}
+      onOpenTeamModal={setTeamModalSide}
+      onSelectTeam={(team) => {
+        if (teamModalSide) selectBattleTeam(teamModalSide, team);
       }}
+      onCloseTeamModal={() => setTeamModalSide(null)}
+      onSelectTeamMember={selectTeamMember}
+      onSelectAttacker={selectAttacker}
+      onSelectDefender={selectDefender}
+      onRestoreHistory={restoreHistory}
+      onAbilityChange={changeAbility}
+      onAbilityConditionChange={(side, enabled) =>
+        setAbilityConditionEnabled((current) => ({ ...current, [side]: enabled }))
+      }
+      onHeldItemChange={changeHeldItem}
+      onMetronomeCountChange={setMetronomeConsecutiveUseCount}
+      onMoveChange={(nextMoveId) => {
+        setPreservedMove(null);
+        setMoveId(nextMoveId);
+      }}
+      onStatAdjustmentChange={changeStatAdjustment}
+      onSwapSides={swapBattleSides}
+      onWeatherChange={setWeatherId}
+      onTerrainChange={setTerrainId}
+      onSpeedModalOpenChange={setSpeedModalOpen}
     />
-  );
-}
-
-/** 選択中ポケモンの画像と名前を表示し、未選択時は同じ高さのプレースホルダーを出す。 */
-function PokemonSummary({
-  pokemon,
-  href,
-}: {
-  pokemon: DamageCalculatorPokemon | null;
-  href?: string;
-}) {
-  // 未選択時も同じ高さの枠を出し、左右のレイアウトが跳ねないようにする。
-  if (!pokemon) return <div className={styles.placeholder}>ポケモンを選択</div>;
-
-  const content = (
-    <>
-      <div className={styles.pokemonArtwork}>
-        {pokemon.imageUrl ? (
-          <PokemonImage
-            pokemon={pokemon}
-            alt={pokemon.nameJa}
-            size={52}
-          />
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src="" alt={pokemon.nameJa} width={52} height={52} />
-        )}
-      </div>
-      <div className={styles.pokemonSummaryBody}>
-        <div>
-          <strong>{pokemon.nameJa}</strong>
-        </div>
-        <div className={styles.pokemonMeta}>
-          <div className={styles.typeBadges} aria-label={`${pokemon.nameJa}のタイプ`}>
-            {pokemon.types.map((typeName) => (
-              <TypeBadge typeName={typeName} key={typeName} />
-            ))}
-          </div>
-          <dl className={styles.baseStats}>
-            {STAT_IDS.map((statId) => (
-              <div key={statId}>
-                <dt>{BASE_STAT_LABELS[statId]}</dt>
-                <dd>{pokemon.stats[statId] ?? "-"}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </div>
-    </>
-  );
-
-  return href ? (
-    <Link className={styles.pokemonSummary} href={href}>
-      {content}
-    </Link>
-  ) : (
-    <div className={styles.pokemonSummary}>
-      {content}
-    </div>
-  );
-}
-
-function TypeBadge({ typeName }: { typeName: DamageCalculatorPokemon["types"][number] }) {
-  return (
-    <span className={styles.typeBadge} style={getTypeBadgeStyle(typeName)}>
-      {TYPE_LABELS[typeName]}
-    </span>
-  );
-}
-
-function formatItemModifier(item: DamageCalculatorHeldItem) {
-  const modifier = item.damageModifier;
-  return modifier ? ` x${modifier.multiplier}` : "";
-}
-
-function formatMoveUsageRate(move: DamageCalculatorMove) {
-  return move.usageRate === null ? "" : ` / 採用率 ${move.usageRate.toFixed(1)}%`;
-}
-
-function formatMovePower(move: DamageCalculatorMove) {
-  return move.power > 0 ? String(move.power) : "変動";
-}
-
-function formatMoveAccuracy(move: DamageCalculatorMove) {
-  return move.accuracy === null ? "必中" : `${move.accuracy}`;
-}
-
-function MoveSelect({
-  label,
-  moves,
-  defenderTypes,
-  typeEffectivenessSource,
-  selectedMoveId,
-  selectedMoveFallback,
-  disabled,
-  onChange,
-}: {
-  label: string;
-  moves: DamageCalculatorMove[];
-  defenderTypes: DamageCalculatorPokemon["types"];
-  typeEffectivenessSource: TypeEffectivenessSource | null;
-  selectedMoveId: string;
-  selectedMoveFallback: DamageCalculatorMove | undefined;
-  disabled: boolean;
-  onChange: (moveId: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const selectedMove =
-    moves.find((move) => move.id === selectedMoveId) ??
-    (selectedMoveFallback?.id === selectedMoveId ? selectedMoveFallback : null);
-  const buttonLabel = selectedMove
-    ? `${selectedMove.name} 威力 ${formatMovePower(selectedMove)}`
-    : "技を選択";
-
-  function selectMove(moveId: string) {
-    onChange(moveId);
-    setOpen(false);
-  }
-
-  return (
-    <div className={styles.moveSelectField}>
-      <span>{label}</span>
-      <div
-        className={styles.moveSelect}
-        onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) {
-            setOpen(false);
-          }
-        }}
-      >
-        <button
-          type="button"
-          className={styles.moveSelectButton}
-          disabled={disabled}
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          onClick={() => setOpen((current) => !current)}
-        >
-          {selectedMove ? (
-            <MoveOptionContent
-              move={selectedMove}
-              defenderTypes={defenderTypes}
-              typeEffectivenessSource={typeEffectivenessSource}
-            />
-          ) : (
-            <span className={styles.movePlaceholder}>{buttonLabel}</span>
-          )}
-        </button>
-        {open && !disabled ? (
-          <div className={styles.moveOptions} role="listbox" aria-label={label}>
-            <button
-              type="button"
-              role="option"
-              aria-selected={selectedMoveId === ""}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => selectMove("")}
-            >
-              <span className={styles.movePlaceholder}>技を選択</span>
-            </button>
-            {moves.map((move) => (
-              <button
-                type="button"
-                role="option"
-                aria-selected={move.id === selectedMoveId}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => selectMove(move.id)}
-                key={move.id}
-              >
-                <MoveOptionContent
-                  move={move}
-                  defenderTypes={defenderTypes}
-                  typeEffectivenessSource={typeEffectivenessSource}
-                />
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function getEffectivenessLabel(effectiveness: number) {
-  if (effectiveness >= 4) return "ちょうばつぐん";
-  if (effectiveness === 2) return "ばつぐん";
-  if (effectiveness === 0.5) return "いまひとつ";
-  if (effectiveness > 0 && effectiveness <= 0.25) return "かなりいまひとつ";
-  if (effectiveness === 0) return "効果なし";
-  return "";
-}
-
-function MoveEffectivenessBadge({
-  effectiveness,
-}: {
-  effectiveness: number;
-}) {
-  const label = getEffectivenessLabel(effectiveness);
-  if (!label) return null;
-
-  return (
-    <span
-      className={`${styles.effectivenessBadge} ${
-        effectiveness >= 2
-          ? styles.effectivenessStrong
-          : effectiveness === 0
-            ? styles.effectivenessNone
-            : styles.effectivenessWeak
-      }`}
-    >
-      {label}
-    </span>
-  );
-}
-
-function MoveOptionContent({
-  move,
-  defenderTypes,
-  typeEffectivenessSource,
-}: {
-  move: DamageCalculatorMove;
-  defenderTypes: DamageCalculatorPokemon["types"];
-  typeEffectivenessSource: TypeEffectivenessSource | null;
-}) {
-  const effectiveness =
-    defenderTypes.length === 0
-      ? 1
-      : getTypeEffectiveness(
-          move.typeName,
-          defenderTypes,
-          typeEffectivenessSource,
-        );
-
-  return (
-    <span className={styles.moveOptionContent}>
-      <TypeBadge typeName={move.typeName} />
-      <strong>{move.name}</strong>
-      <MoveEffectivenessBadge effectiveness={effectiveness} />
-      <small>
-        威力 {formatMovePower(move)}
-        {" / "}命中 {formatMoveAccuracy(move)}
-        {formatMoveUsageRate(move)}
-      </small>
-    </span>
-  );
-}
-
-function hasManualAbilityCondition(ability: DamageCalculatorAbility | null) {
-  return Boolean(
-    ability?.damageModifiers.some((modifier) =>
-      [
-        "low_power_move",
-        "not_very_effective",
-        "manual",
-        "manual_type_match",
-        "manual_physical",
-        "manual_special",
-      ].includes(modifier.condition),
-    ),
-  );
-}
-
-function formatAbilityModifier(ability: DamageCalculatorAbility) {
-  if (ability.damageModifiers.length === 0) return "";
-  const strongestMultiplier = ability.damageModifiers.reduce(
-    (maximum, modifier) => Math.max(maximum, modifier.multiplier),
-    1,
-  );
-  return strongestMultiplier === 1 ? "" : ` x${strongestMultiplier}`;
-}
-
-function AbilityField({
-  pokemon,
-  conditionEnabled,
-  onAbilityChange,
-  onConditionChange,
-}: {
-  pokemon: DamageCalculatorPokemon | null;
-  conditionEnabled: boolean;
-  onAbilityChange: (abilityId: string) => void;
-  onConditionChange: (enabled: boolean) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const selectedAbility = pokemon?.selectedAbility ?? null;
-  const showCondition = hasManualAbilityCondition(selectedAbility);
-
-  function selectAbility(abilityId: string) {
-    onAbilityChange(abilityId);
-    setOpen(false);
-  }
-
-  return (
-    <div className={styles.abilityField}>
-      <div className={styles.moveSelectField}>
-        <span>特性</span>
-        <div
-          className={styles.moveSelect}
-          onBlur={(event) => {
-            if (!event.currentTarget.contains(event.relatedTarget)) {
-              setOpen(false);
-            }
-          }}
-        >
-          <button
-            type="button"
-            className={styles.moveSelectButton}
-            disabled={!pokemon}
-            aria-haspopup="listbox"
-            aria-expanded={open}
-            onClick={() => setOpen((current) => !current)}
-          >
-            {selectedAbility ? (
-              <AbilityOptionContent ability={selectedAbility} />
-            ) : (
-              <span className={styles.movePlaceholder}>特性なし</span>
-            )}
-          </button>
-          {open ? (
-            <div className={styles.moveOptions} role="listbox" aria-label="特性">
-              <button
-                type="button"
-                role="option"
-                aria-selected={!selectedAbility}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => selectAbility("")}
-              >
-                <span className={styles.movePlaceholder}>特性なし</span>
-              </button>
-              {pokemon?.abilities.map((ability) => (
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={selectedAbility?.id === ability.id}
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => selectAbility(ability.id)}
-                  key={ability.id}
-                >
-                  <AbilityOptionContent ability={ability} />
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </div>
-      {showCondition ? (
-        <label className={styles.conditionToggle}>
-          <input
-            type="checkbox"
-            checked={conditionEnabled}
-            onChange={(event) => onConditionChange(event.target.checked)}
-          />
-          条件を適用
-        </label>
-      ) : null}
-    </div>
-  );
-}
-
-function AbilityOptionContent({
-  ability,
-}: {
-  ability: DamageCalculatorAbility;
-}) {
-  return (
-    <span className={styles.abilityOptionContent}>
-      <strong>
-        {ability.name}
-        {formatAbilityModifier(ability)}
-      </strong>
-      {ability.effect ? <small>{ability.effect}</small> : null}
-    </span>
-  );
-}
-
-function HeldItemField({
-  pokemon,
-  heldItems,
-  onChange,
-}: {
-  pokemon: DamageCalculatorPokemon | null;
-  heldItems: DamageCalculatorHeldItem[];
-  onChange: (itemId: string) => void;
-}) {
-  return (
-    <label className={styles.moveField}>
-      持ち物
-      <select
-        value={pokemon?.heldItem?.id ?? ""}
-        disabled={!pokemon}
-        onChange={(event) => onChange(event.target.value)}
-      >
-        <option value="">持ち物なし</option>
-        {heldItems.map((item) => (
-          <option value={item.id} key={item.id}>
-            {item.name}
-            {formatItemModifier(item)}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function MetronomeUseControl({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  const changeValue = (nextValue: number) => {
-    onChange(Math.min(6, Math.max(1, nextValue)));
-  };
-
-  return (
-    <label className={styles.moveField}>
-      メトロノーム連続使用回数
-      <input
-        type="number"
-        min="1"
-        max="6"
-        value={value}
-        onChange={(event) => changeValue(Number(event.target.value))}
-      />
-    </label>
-  );
-}
-
-function DamageStatControls({
-  title,
-  statLabel,
-  value,
-  showRank = true,
-  showNature = true,
-  onChange,
-}: {
-  title: string;
-  statLabel: string;
-  value: StatAdjustment;
-  showRank?: boolean;
-  showNature?: boolean;
-  onChange: (values: Partial<StatAdjustment>) => void;
-}) {
-  const changePoint = (point: number) => {
-    onChange({ point: Math.min(32, Math.max(0, point)) });
-  };
-  const changeRank = (rank: number) => {
-    onChange({ rank: Math.min(6, Math.max(-6, rank)) });
-  };
-
-  return (
-    <div className={styles.statControls}>
-      <div className={styles.statControlsHeader}>
-        <strong>{title}</strong>
-        <span>{statLabel}</span>
-      </div>
-      <div className={styles.statControlGrid}>
-        <label className={styles.pointField}>
-          能力ポイント
-          <div className={styles.pointControl}>
-            <input
-              type="number"
-              min="0"
-              max="32"
-              value={value.point}
-              onChange={(event) => changePoint(Number(event.target.value))}
-            />
-            <button type="button" onClick={() => changePoint(32)}>
-              32
-            </button>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="32"
-            step="1"
-            value={value.point}
-            onChange={(event) => changePoint(Number(event.target.value))}
-          />
-        </label>
-        {showRank ? (
-          <label className={styles.rankField}>
-            能力ランク
-            <div className={styles.rankStepper}>
-              <button type="button" onClick={() => changeRank(value.rank - 1)}>
-                -
-              </button>
-              <span className={styles.rankValue}>
-                {value.rank > 0 ? `+${value.rank}` : value.rank}
-              </span>
-              <button type="button" onClick={() => changeRank(value.rank + 1)}>
-                +
-              </button>
-            </div>
-          </label>
-        ) : null}
-        {showNature ? (
-          <label className={styles.natureToggle}>
-            <input
-              type="checkbox"
-              checked={value.nature}
-              onChange={(event) => onChange({ nature: event.target.checked })}
-            />
-            性格補正あり
-          </label>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-/** 通常ダメージと急所ダメージをまとめて表示する結果パネル。 */
-function DamageResult({ result }: { result: CalculationResult }) {
-  const moveEffectivenessLabel = getEffectivenessLabel(result.moveEffectiveness);
-
-  return (
-    <section className={styles.result} aria-live="polite">
-      <div className={styles.resultHeader}>
-        <strong>
-          {result.attackerName}→{result.defenderName}
-        </strong>
-        <span className={styles.resultMove}>
-          {result.moveName}
-          {moveEffectivenessLabel ? <small>{moveEffectivenessLabel}</small> : null}
-        </span>
-      </div>
-      <div className={styles.outcomeGrid}>
-        <DamageOutcome title="通常" calculation={result.normal} />
-        <DamageOutcome title="急所" calculation={result.critical} critical />
-      </div>
-    </section>
-  );
-}
-
-function DamageOutcome({
-  title,
-  calculation,
-  critical = false,
-}: {
-  title: string;
-  calculation: DamageCalculation;
-  critical?: boolean;
-}) {
-  const minimumRemainingPercent = Math.max(
-    0,
-    Math.min(100, 100 - calculation.maximumPercent),
-  );
-  const maximumRemainingPercent = Math.max(
-    0,
-    Math.min(100, 100 - calculation.minimumPercent),
-  );
-
-  return (
-    <article
-      className={`${styles.outcome} ${critical ? styles.criticalOutcome : ""}`}
-    >
-      <span className={styles.outcomeTitle}>{title}</span>
-      <strong className={styles.damagePercent}>
-        {minimumRemainingPercent.toFixed(1)}~
-        {maximumRemainingPercent.toFixed(1)}%
-      </strong>
-      <span className={styles.koLabel}>{calculation.koLabel}</span>
-      <div
-        className={styles.damageBar}
-        role="img"
-        aria-label={`防御側の残りHP ${minimumRemainingPercent.toFixed(1)}から${maximumRemainingPercent.toFixed(1)}%`}
-      >
-        <span
-          className={styles.maximumDamageBar}
-          style={{ width: `${maximumRemainingPercent}%` }}
-        />
-        <span
-          className={styles.minimumDamageBar}
-          style={{ width: `${minimumRemainingPercent}%` }}
-        />
-      </div>
-    </article>
   );
 }

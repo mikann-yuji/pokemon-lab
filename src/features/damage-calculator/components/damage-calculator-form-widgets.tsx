@@ -1,0 +1,373 @@
+"use client";
+
+import { useState } from "react";
+import {
+  getTypeEffectiveness,
+  type TypeEffectivenessSource,
+} from "@/domain/type-matchup";
+import type {
+  DamageCalculatorAbility,
+  DamageCalculatorHeldItem,
+  DamageCalculatorMove,
+  DamageCalculatorPokemon,
+} from "../domain/damage-calculator-types";
+import { TYPE_LABELS } from "./damage-calculator-display";
+import { TypeBadge } from "./damage-calculator-pokemon-widgets";
+import type { StatAdjustment } from "./damage-calculator-types";
+import styles from "../styles/damage-calculator.module.css";
+
+export function formatMovePower(move: DamageCalculatorMove) {
+  return move.power > 0 ? String(move.power) : "変動";
+}
+
+function formatMoveAccuracy(move: DamageCalculatorMove) {
+  return move.accuracy === null ? "必中" : `${move.accuracy}`;
+}
+
+function formatMoveUsageRate(move: DamageCalculatorMove) {
+  return move.usageRate === null ? "" : ` / 採用率 ${move.usageRate.toFixed(1)}%`;
+}
+
+function getEffectivenessLabel(effectiveness: number) {
+  if (effectiveness >= 4) return "ちょうばつぐん";
+  if (effectiveness === 2) return "ばつぐん";
+  if (effectiveness === 0.5) return "いまひとつ";
+  if (effectiveness > 0 && effectiveness <= 0.25) return "かなりいまひとつ";
+  if (effectiveness === 0) return "効果なし";
+  return "";
+}
+
+function MoveEffectivenessBadge({ effectiveness }: { effectiveness: number }) {
+  const label = getEffectivenessLabel(effectiveness);
+  if (!label) return null;
+
+  return (
+    <span
+      className={`${styles.effectivenessBadge} ${
+        effectiveness >= 2
+          ? styles.effectivenessStrong
+          : effectiveness === 0
+            ? styles.effectivenessNone
+            : styles.effectivenessWeak
+      }`}
+    >
+      {label}
+    </span>
+  );
+}
+
+function MoveOptionContent({
+  move,
+  defenderTypes,
+  typeEffectivenessSource,
+}: {
+  move: DamageCalculatorMove;
+  defenderTypes: DamageCalculatorPokemon["types"];
+  typeEffectivenessSource: TypeEffectivenessSource | null;
+}) {
+  const effectiveness =
+    defenderTypes.length === 0
+      ? 1
+      : getTypeEffectiveness(
+          move.typeName,
+          defenderTypes,
+          typeEffectivenessSource,
+        );
+
+  return (
+    <span className={styles.moveOptionContent}>
+      <TypeBadge typeName={move.typeName} />
+      <strong>{move.name}</strong>
+      <MoveEffectivenessBadge effectiveness={effectiveness} />
+      <small>
+        威力 {formatMovePower(move)}
+        {" / "}命中 {formatMoveAccuracy(move)}
+        {formatMoveUsageRate(move)}
+      </small>
+    </span>
+  );
+}
+
+export function MoveSelect({
+  label,
+  moves,
+  defenderTypes,
+  typeEffectivenessSource,
+  selectedMoveId,
+  selectedMoveFallback,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  moves: DamageCalculatorMove[];
+  defenderTypes: DamageCalculatorPokemon["types"];
+  typeEffectivenessSource: TypeEffectivenessSource | null;
+  selectedMoveId: string;
+  selectedMoveFallback?: DamageCalculatorMove;
+  disabled: boolean;
+  onChange: (moveId: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selectedMove =
+    moves.find((move) => move.id === selectedMoveId) ??
+    (selectedMoveFallback?.id === selectedMoveId ? selectedMoveFallback : null);
+  const buttonLabel = selectedMove
+    ? `${selectedMove.name} 威力 ${formatMovePower(selectedMove)}`
+    : "技を選択";
+
+  function selectMove(moveId: string) {
+    onChange(moveId);
+    setOpen(false);
+  }
+
+  return (
+    <div className={styles.moveSelectField}>
+      <span>{label}</span>
+      <div
+        className={styles.moveSelect}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+        }}
+      >
+        <button
+          type="button"
+          className={styles.moveSelectButton}
+          disabled={disabled}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          onClick={() => setOpen((current) => !current)}
+        >
+          {selectedMove ? (
+            <MoveOptionContent
+              move={selectedMove}
+              defenderTypes={defenderTypes}
+              typeEffectivenessSource={typeEffectivenessSource}
+            />
+          ) : (
+            <span className={styles.movePlaceholder}>{buttonLabel}</span>
+          )}
+        </button>
+        {open && !disabled ? (
+          <div className={styles.moveOptions} role="listbox" aria-label={label}>
+            <button
+              type="button"
+              role="option"
+              aria-selected={selectedMoveId === ""}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => selectMove("")}
+            >
+              <span className={styles.movePlaceholder}>技を選択</span>
+            </button>
+            {moves.map((move) => (
+              <button
+                type="button"
+                role="option"
+                aria-selected={move.id === selectedMoveId}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => selectMove(move.id)}
+                key={move.id}
+              >
+                <MoveOptionContent
+                  move={move}
+                  defenderTypes={defenderTypes}
+                  typeEffectivenessSource={typeEffectivenessSource}
+                />
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function formatAbilityModifier(ability: DamageCalculatorAbility) {
+  return ability.damageModifiers.length > 0 ? " / ダメージ補正あり" : "";
+}
+
+function hasManualAbilityCondition(ability: DamageCalculatorAbility | null) {
+  return Boolean(
+    ability?.damageModifiers.some((modifier) =>
+      [
+        "low_power_move",
+        "not_very_effective",
+        "manual",
+        "manual_type_match",
+        "manual_physical",
+        "manual_special",
+      ].includes(modifier.condition),
+    ),
+  );
+}
+
+function AbilityOptionContent({ ability }: { ability: DamageCalculatorAbility }) {
+  return (
+    <span>
+      {ability.name}
+      <small>{formatAbilityModifier(ability)}</small>
+    </span>
+  );
+}
+
+export function AbilityField({
+  pokemon,
+  conditionEnabled,
+  onAbilityChange,
+  onConditionChange,
+}: {
+  pokemon: DamageCalculatorPokemon | null;
+  conditionEnabled: boolean;
+  onAbilityChange: (abilityId: string) => void;
+  onConditionChange: (enabled: boolean) => void;
+}) {
+  const selectedAbility = pokemon?.selectedAbility ?? null;
+  return (
+    <label>
+      特性
+      <select
+        value={selectedAbility?.id ?? ""}
+        disabled={!pokemon}
+        onChange={(event) => onAbilityChange(event.target.value)}
+      >
+        <option value="">特性なし</option>
+        {pokemon?.abilities.map((ability) => (
+          <option value={ability.id} key={ability.id}>
+            {ability.name}
+          </option>
+        ))}
+      </select>
+      {selectedAbility ? <AbilityOptionContent ability={selectedAbility} /> : null}
+      {hasManualAbilityCondition(selectedAbility) ? (
+        <label className={styles.conditionToggle}>
+          <input
+            type="checkbox"
+            checked={conditionEnabled}
+            onChange={(event) => onConditionChange(event.target.checked)}
+          />
+          条件を有効
+        </label>
+      ) : null}
+    </label>
+  );
+}
+
+function formatItemModifier(item: DamageCalculatorHeldItem) {
+  const modifier = item.damageModifier;
+  return modifier ? ` x${modifier.multiplier}` : "";
+}
+
+export function HeldItemField({
+  pokemon,
+  heldItems,
+  onChange,
+}: {
+  pokemon: DamageCalculatorPokemon | null;
+  heldItems: DamageCalculatorHeldItem[];
+  onChange: (itemId: string) => void;
+}) {
+  return (
+    <label>
+      持ち物
+      <select
+        value={pokemon?.heldItem?.id ?? ""}
+        disabled={!pokemon}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        <option value="">持ち物なし</option>
+        {heldItems.map((item) => (
+          <option value={item.id} key={item.id}>
+            {item.name}
+            {formatItemModifier(item)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+export function MetronomeUseControl({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <label className={styles.metronomeControl}>
+      メトロノーム連続使用
+      <input
+        type="number"
+        min="1"
+        max="10"
+        value={value}
+        onChange={(event) => onChange(Math.max(1, Number(event.target.value)))}
+      />
+    </label>
+  );
+}
+
+export function DamageStatControls({
+  title,
+  statLabel,
+  value,
+  showRank = true,
+  showNature = true,
+  onChange,
+}: {
+  title: string;
+  statLabel: string;
+  value: StatAdjustment;
+  showRank?: boolean;
+  showNature?: boolean;
+  onChange: (values: Partial<StatAdjustment>) => void;
+}) {
+  return (
+    <div className={styles.statControlGroup}>
+      <div className={styles.statControlHeader}>
+        <strong>{title}</strong>
+        <span>{statLabel}</span>
+      </div>
+      <label>
+        能力ポイント
+        <input
+          type="number"
+          min="0"
+          max="32"
+          value={value.point}
+          onChange={(event) => onChange({ point: Number(event.target.value) })}
+        />
+      </label>
+      {showRank ? (
+        <label>
+          能力ランク
+          <input
+            type="number"
+            min="-6"
+            max="6"
+            value={value.rank}
+            onChange={(event) => onChange({ rank: Number(event.target.value) })}
+          />
+        </label>
+      ) : null}
+      {showNature ? (
+        <label className={styles.conditionToggle}>
+          <input
+            type="checkbox"
+            checked={value.nature}
+            onChange={(event) => onChange({ nature: event.target.checked })}
+          />
+          性格補正あり
+        </label>
+      ) : null}
+    </div>
+  );
+}
+
+export function MoveSummary({ move }: { move: DamageCalculatorMove }) {
+  return (
+    <p className={styles.moveSummary}>
+      {TYPE_LABELS[move.typeName]} / {move.damageClass === "physical" ? "物理" : "特殊"} /
+      威力 {formatMovePower(move)} / 命中 {formatMoveAccuracy(move)}
+    </p>
+  );
+}
