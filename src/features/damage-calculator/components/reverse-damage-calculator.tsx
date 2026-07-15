@@ -18,6 +18,7 @@ import {
   type DamageHistoryRecord,
   type DamageHistorySide,
 } from "../infrastructure/damage-history-repository";
+import { loadTypeEffectivenessFromCatalog } from "../infrastructure/type-effectiveness-repository";
 import {
   getAllBattleTeams,
   getAllTrainingBuilds,
@@ -28,7 +29,11 @@ import {
   getNatures,
   type Nature,
 } from "@/features/training/infrastructure/training-catalog-repository";
-import { getTypeEffectiveness, type TypeName } from "@/domain/type-matchup";
+import {
+  getTypeEffectiveness,
+  type TypeEffectivenessSource,
+  type TypeName,
+} from "@/domain/type-matchup";
 import { getTypeBadgeStyle } from "@/presentation/pokemon-type-colors";
 import { PokemonCombobox } from "./pokemon-combobox";
 import damageStyles from "../styles/damage-calculator.module.css";
@@ -366,6 +371,8 @@ export function ReverseDamageCalculator({
   const [moveId, setMoveId] = useState("");
   const [weatherId, setWeatherId] = useState("");
   const [terrainId, setTerrainId] = useState("");
+  const [typeEffectivenessSource, setTypeEffectivenessSource] =
+    useState<TypeEffectivenessSource | null>(null);
   const [attackerHistory, setAttackerHistory] = useState<DamageHistoryRecord[]>([]);
   const [defenderHistory, setDefenderHistory] = useState<DamageHistoryRecord[]>([]);
   const [battleTeams, setBattleTeams] = useState<BattleTeam[]>([]);
@@ -453,6 +460,20 @@ export function ReverseDamageCalculator({
     setBattleTeams(teams);
     setTrainingBuilds(builds);
     setNatures(loadedNatures);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    void loadTypeEffectivenessFromCatalog()
+      .then((source) => {
+        if (active) setTypeEffectivenessSource(source);
+      })
+      .catch((caught: unknown) => {
+        console.error("Failed to load type effectiveness from catalog.", caught);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -637,6 +658,7 @@ export function ReverseDamageCalculator({
                 move: selectedMove,
                 isCritical: critical,
                 field: fieldOptions,
+                typeEffectivenessSource,
               });
               const candidate = {
                 minimum: result.minimum,
@@ -704,6 +726,7 @@ export function ReverseDamageCalculator({
                   move: selectedMove,
                   isCritical: critical,
                   field: fieldOptions,
+                  typeEffectivenessSource,
                 });
                 const candidate = {
                   minimum: result.minimum,
@@ -764,6 +787,7 @@ export function ReverseDamageCalculator({
     selectedMove,
     statAdjustments.attacker,
     statAdjustments.defender,
+    typeEffectivenessSource,
     unknownSide,
   ]);
 
@@ -895,6 +919,7 @@ export function ReverseDamageCalculator({
             label="使用する技"
             moves={attacker?.moves ?? []}
             defenderTypes={defender?.types ?? []}
+            typeEffectivenessSource={typeEffectivenessSource}
             selectedMoveId={moveId}
             disabled={!attacker}
             onChange={setMoveId}
@@ -1402,14 +1427,20 @@ function MoveEffectivenessBadge({ effectiveness }: { effectiveness: number }) {
 function MoveOptionContent({
   move,
   defenderTypes,
+  typeEffectivenessSource,
 }: {
   move: DamageCalculatorMove;
   defenderTypes: DamageCalculatorPokemon["types"];
+  typeEffectivenessSource: TypeEffectivenessSource | null;
 }) {
   const effectiveness =
     defenderTypes.length === 0
       ? 1
-      : getTypeEffectiveness(move.typeName, defenderTypes);
+      : getTypeEffectiveness(
+          move.typeName,
+          defenderTypes,
+          typeEffectivenessSource,
+        );
 
   return (
     <span className={damageStyles.moveOptionContent}>
@@ -1432,6 +1463,7 @@ function MoveSelect({
   label,
   moves,
   defenderTypes,
+  typeEffectivenessSource,
   selectedMoveId,
   disabled,
   onChange,
@@ -1439,6 +1471,7 @@ function MoveSelect({
   label: string;
   moves: DamageCalculatorMove[];
   defenderTypes: DamageCalculatorPokemon["types"];
+  typeEffectivenessSource: TypeEffectivenessSource | null;
   selectedMoveId: string;
   disabled: boolean;
   onChange: (moveId: string) => void;
@@ -1471,7 +1504,11 @@ function MoveSelect({
           onClick={() => setOpen((current) => !current)}
         >
           {selectedMove ? (
-            <MoveOptionContent move={selectedMove} defenderTypes={defenderTypes} />
+            <MoveOptionContent
+              move={selectedMove}
+              defenderTypes={defenderTypes}
+              typeEffectivenessSource={typeEffectivenessSource}
+            />
           ) : (
             <span className={damageStyles.movePlaceholder}>技を選択</span>
           )}
@@ -1496,7 +1533,11 @@ function MoveSelect({
                 onClick={() => selectMove(move.id)}
                 key={move.id}
               >
-                <MoveOptionContent move={move} defenderTypes={defenderTypes} />
+                <MoveOptionContent
+                  move={move}
+                  defenderTypes={defenderTypes}
+                  typeEffectivenessSource={typeEffectivenessSource}
+                />
               </button>
             ))}
           </div>

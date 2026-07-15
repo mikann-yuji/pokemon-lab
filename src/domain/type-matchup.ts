@@ -26,10 +26,19 @@ export const TYPE_NAMES = [
 
 export type TypeName = (typeof TYPE_NAMES)[number];
 
-export const TYPE_EFFECTIVENESS: Record<
+type TypeEffectivenessValue = 0 | 0.5 | 1 | 2;
+export type TypeEffectivenessSource = Record<
   TypeName,
-  Partial<Record<TypeName, 0 | 0.5 | 2>>
-> = {
+  Partial<Record<TypeName, TypeEffectivenessValue>>
+>;
+
+type TypeEffectivenessRow = {
+  attackerType: TypeName;
+  defenderType: TypeName;
+  effectiveness: TypeEffectivenessValue;
+};
+
+const FALLBACK_TYPE_EFFECTIVENESS: TypeEffectivenessSource = {
   Normal: {
     Rock: 0.5,
     Ghost: 0,
@@ -188,13 +197,40 @@ export const TYPE_EFFECTIVENESS: Record<
   },
 };
 
+let catalogTypeEffectiveness: TypeEffectivenessSource | null = null;
+
+export function createTypeEffectivenessSource(
+  rows: readonly TypeEffectivenessRow[],
+) {
+  const source = TYPE_NAMES.reduce((table, typeName) => {
+    table[typeName] = {};
+    return table;
+  }, {} as TypeEffectivenessSource);
+
+  for (const row of rows) {
+    source[row.attackerType][row.defenderType] = row.effectiveness;
+  }
+
+  return source;
+}
+
+export function setTypeEffectivenessSource(source: TypeEffectivenessSource) {
+  catalogTypeEffectiveness = source;
+}
+
 export function getTypeEffectiveness(
   attackingType: TypeName,
   defendingTypes: readonly TypeName[],
+  preferredSource?: TypeEffectivenessSource | null,
 ) {
+  const source =
+    preferredSource ?? catalogTypeEffectiveness ?? FALLBACK_TYPE_EFFECTIVENESS;
   return defendingTypes.reduce(
     (multiplier, defendingType) =>
-      multiplier * (TYPE_EFFECTIVENESS[attackingType][defendingType] ?? 1),
+      multiplier *
+      (source[attackingType][defendingType] ??
+        FALLBACK_TYPE_EFFECTIVENESS[attackingType][defendingType] ??
+        1),
     1,
   );
 }

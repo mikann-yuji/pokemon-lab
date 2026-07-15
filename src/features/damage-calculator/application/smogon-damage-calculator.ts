@@ -17,7 +17,10 @@ import {
   type Result,
   type StatsTable,
 } from "@smogon/calc";
-import { getTypeEffectiveness as calculateTypeEffectiveness } from "@/domain/type-matchup";
+import {
+  getTypeEffectiveness as calculateTypeEffectiveness,
+  type TypeEffectivenessSource,
+} from "@/domain/type-matchup";
 import type {
   DamageCalculatorAbilityDamageModifier,
   DamageCalculatorItemDamageModifier,
@@ -62,6 +65,7 @@ export type DamageCalculationInput = {
   isCritical?: boolean;
   /** 画面から一時的な場の条件を追加したい時に渡す。 */
   field?: FieldOptions;
+  typeEffectivenessSource?: TypeEffectivenessSource | null;
 };
 
 /**
@@ -207,7 +211,11 @@ function toBoosts(pokemon: DamageCalculatorPokemon): Partial<StatsTable> {
 }
 
 function getTypeEffectiveness(input: DamageCalculationInput) {
-  return calculateTypeEffectiveness(input.move.typeName, input.defender.types);
+  return calculateTypeEffectiveness(
+    input.move.typeName,
+    input.defender.types,
+    input.typeEffectivenessSource,
+  );
 }
 
 function getWeightBasedMovePower(weightKg: number) {
