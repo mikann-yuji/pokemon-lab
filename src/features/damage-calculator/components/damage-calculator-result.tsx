@@ -4,8 +4,8 @@ import type { CalculationResult } from "./damage-calculator-types";
 import styles from "../styles/damage-calculator.module.css";
 
 type HpBarStyle = CSSProperties & {
-  "--remaining-hp": string;
-  "--remaining-hp-after-minimum-damage": string;
+  "--minimum-remaining-hp": string;
+  "--maximum-remaining-hp": string;
 };
 
 function clampPercent(value: number) {
@@ -26,8 +26,8 @@ function DamageOutcome({
   const remainingHpAfterMaximumDamage = clampPercent(100 - outcome.maximumPercent);
   const remainingHpLabel = `${remainingHpAfterMaximumDamage.toFixed(1)}-${remainingHpAfterMinimumDamage.toFixed(1)}%`;
   const barStyle: HpBarStyle = {
-    "--remaining-hp": `${remainingHpAfterMaximumDamage}%`,
-    "--remaining-hp-after-minimum-damage": `${remainingHpAfterMinimumDamage}%`,
+    "--minimum-remaining-hp": `${remainingHpAfterMaximumDamage}%`,
+    "--maximum-remaining-hp": `${remainingHpAfterMinimumDamage}%`,
   };
 
   return (
@@ -40,8 +40,8 @@ function DamageOutcome({
         aria-label={`残りHP ${remainingHpLabel}`}
         key={`${title}-${outcome.minimum}-${outcome.maximum}-${outcome.maximumPercent}`}
       >
-        <span className={styles.remainingHpBar} style={barStyle} />
-        <span className={styles.minimumDamageMarker} style={barStyle} />
+        <span className={styles.maximumRemainingHpBar} style={barStyle} />
+        <span className={styles.minimumRemainingHpBar} style={barStyle} />
       </span>
     </div>
   );

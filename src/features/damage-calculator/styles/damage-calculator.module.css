@@ -1077,18 +1077,16 @@ a.pokemonSummary:focus-visible {
   transition: width 0.32s ease;
 }
 
-.remainingHpBar {
-  width: var(--remaining-hp);
-  background: linear-gradient(90deg, #64d258, #91e687);
+.maximumRemainingHpBar {
+  width: var(--maximum-remaining-hp);
+  background: rgb(116 214 108 / 42%);
   animation: hpDrain 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.minimumDamageMarker {
-  left: var(--remaining-hp-after-minimum-damage);
-  width: 2px;
-  background: rgb(255 255 255 / 76%);
-  box-shadow: 0 0 0 1px rgb(23 43 77 / 18%);
-  transform: translateX(-1px);
+.minimumRemainingHpBar {
+  width: var(--minimum-remaining-hp);
+  background: #64d258;
+  animation: hpDrainMin 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes hpDrain {
@@ -1097,7 +1095,17 @@ a.pokemonSummary:focus-visible {
   }
 
   to {
-    width: var(--remaining-hp);
+    width: var(--maximum-remaining-hp);
+  }
+}
+
+@keyframes hpDrainMin {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: var(--minimum-remaining-hp);
   }
 }
 
@@ -1158,11 +1166,13 @@ a.pokemonSummary:focus-visible {
   background: rgb(239 69 82 / 48%);
 }
 
-.criticalOutcome .maximumDamageBar {
+.criticalOutcome .maximumDamageBar,
+.criticalOutcome .maximumRemainingHpBar {
   background: rgb(116 214 108 / 42%);
 }
 
-.criticalOutcome .minimumDamageBar {
+.criticalOutcome .minimumDamageBar,
+.criticalOutcome .minimumRemainingHpBar {
   background: #64d258;
 }
 
