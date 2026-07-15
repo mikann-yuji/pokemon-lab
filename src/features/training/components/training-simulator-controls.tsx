@@ -7,6 +7,9 @@ import { getTypeBadgeStyle } from "@/presentation/pokemon-type-colors";
 import styles from "../styles/training-simulator.module.css";
 import { TYPE_LABELS, formatMovePower, formatUsageRate } from "./training-simulator-model";
 
+// 育成シミュレータの「候補を開いて選ぶ」系UIを集めたファイル。
+// 特性と技は表示内容が似ているので、同じ自作セレクトの作法に揃える。
+
 export function TrainingTypeBadge({ typeName }: { typeName: TypeName }) {
   return (
     <span className={styles.typeBadge} style={getTypeBadgeStyle(typeName)}>
@@ -24,6 +27,7 @@ export function TrainingAbilitySelect({
   selectedAbilityId: string;
   onChange: (abilityId: string) => void;
 }) {
+  // 特性は効果説明も候補内に出すため、通常のselectではなく自作リストにする。
   const [open, setOpen] = useState(false);
   const selectedAbility =
     abilities.find((ability) => ability.id === selectedAbilityId) ?? null;
@@ -92,6 +96,7 @@ function TrainingAbilityOptionContent({
 }: {
   ability: PokemonDetail["abilities"][number];
 }) {
+  // 候補1行分。夢特性かどうかと効果説明をここでまとめて表示する。
   return (
     <span className={styles.abilityOptionContent}>
       <strong>
@@ -108,6 +113,7 @@ function TrainingMoveDescription({
 }: {
   description: string | null;
 }) {
+  // 技説明は長くなりやすいので、表示有無を小さな部品に閉じ込める。
   return description ? (
     <span className={styles.moveDescription}>{description}</span>
   ) : null;
@@ -124,6 +130,7 @@ export function TrainingMoveSelect({
   selectedMoveId: string;
   onChange: (moveId: string) => void;
 }) {
+  // 技選択も自作リスト。タイプ、威力、採用率、説明を候補内で確認できる。
   const [open, setOpen] = useState(false);
   const selectedMove =
     moves.find((move) => move.id === selectedMoveId) ?? null;
@@ -202,5 +209,4 @@ export function TrainingMoveSelect({
     </div>
   );
 }
-
 

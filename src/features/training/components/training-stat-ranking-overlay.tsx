@@ -6,6 +6,8 @@ import { normalizePokemonSearchText } from "@/domain/pokemon-name-search";
 import styles from "../styles/training-simulator.module.css";
 import { rankCurrentValue, type DisplayStatRankingRow, type StatCompareMode, type StatRankingRow } from "./training-simulator-model";
 
+// 能力実数値のランキングモーダル。
+// 育成中の実数値を全ポケモンの無振/最大値と並べて、抜ける相手・抜けない相手を見る。
 export function StatRankingOverlay({
   pokemonName,
   statName,
@@ -25,12 +27,15 @@ export function StatRankingOverlay({
   onPointChange: (value: number) => void;
   onClose: () => void;
 }) {
+  // 無振比較と最大値比較を切り替える。
+  // どちらを見るかで順位と検索対象の強さ基準が変わる。
   const [compareMode, setCompareMode] =
     useState<StatCompareMode>("uninvested");
   const [selectedRankRowId, setSelectedRankRowId] = useState("training-target");
   const rankRowRefs = useRef(new Map<string, HTMLTableRowElement>());
   const sortedRows = useMemo(
     () => {
+      // catalog由来の全ポケモンに、育成中のポケモン自身を1行追加して同じ表で比較する。
       const displayRows: DisplayStatRankingRow[] = [
         ...rows.map((row) => ({
           id: String(row.profile.id),
@@ -71,6 +76,7 @@ export function StatRankingOverlay({
       : null;
 
   useEffect(() => {
+    // 検索で選んだ行が表の中央付近に来るようにスクロールする。
     rankRowRefs.current.get(selectedRankRowId)?.scrollIntoView({ block: "center" });
   }, [selectedRankRowId, sortedRows]);
 
@@ -189,6 +195,8 @@ function RankingPokemonSearch({
   selectedRow: DisplayStatRankingRow | null;
   onSelect: (row: DisplayStatRankingRow) => void;
 }) {
+  // ランキング表の中からポケモン名で行を探す小さな検索ボックス。
+  // 選択した行は親へ返し、表側でスクロール対象にする。
   const [inputValue, setInputValue] = useState(selectedRow?.name ?? "");
   const suggestions = useMemo(() => {
     const normalizedQuery = normalizePokemonSearchText(inputValue);
@@ -250,4 +258,3 @@ function RankingPokemonSearch({
 }
 
 /** 性格補正の上昇/下降を小さな矢印アイコンとして表示する。 */
-

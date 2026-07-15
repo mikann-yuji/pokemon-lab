@@ -45,6 +45,9 @@ import type {
 import type { StatAdjustmentState, usePokemonSelection } from "./damage-calculator-state";
 import styles from "../styles/damage-calculator.module.css";
 
+// 通常ダメージ計算ページの見た目を組み立てるファイル。
+// 状態更新や計算は親へ任せ、ここでは「どの入力をどこに置くか」だけを扱う。
+
 type PokemonSelection = ReturnType<typeof usePokemonSelection>;
 type TeamMembersBySide = Record<
   DamageSide,
@@ -164,6 +167,7 @@ export function DamageCalculatorView({
 }: DamageCalculatorViewProps) {
   return (
     <form className={styles.calculator} onSubmit={(event) => event.preventDefault()}>
+      {/* 攻撃側。技選択と攻撃側補正はchildrenとしてこのパネルに差し込む。 */}
       <BattleSidePanel
         side="attacker"
         title="攻撃側"
@@ -216,12 +220,14 @@ export function DamageCalculatorView({
         ) : null}
       </BattleSidePanel>
 
+      {/* 攻守交代は左右の入力を入れ替える操作なので、2つのパネルの間に置く。 */}
       <div className={styles.battleActions}>
         <button type="button" onClick={onSwapSides} disabled={!attacker && !defender}>
           攻守交代
         </button>
       </div>
 
+      {/* 防御側。HP補正と防御能力補正の2種類をここで表示する。 */}
       <BattleSidePanel
         side="defender"
         title="防御側"
@@ -268,6 +274,7 @@ export function DamageCalculatorView({
         ) : null}
       </BattleSidePanel>
 
+      {/* 天候・フィールドは攻防どちらにも属さない共通条件。 */}
       <FieldConditionSection
         weathers={weathers}
         terrains={terrains}
@@ -364,6 +371,8 @@ function BattleSidePanel({
   onAbilityConditionChange: (enabled: boolean) => void;
   onHeldItemChange: (itemId: string) => void;
 }) {
+  // 攻撃側/防御側で共通する入力のまとまり。
+  // パネルごとの違いはchildrenで受け取り、同じ見た目を維持する。
   return (
     <section className={styles.side}>
       <h2>{title}</h2>
@@ -451,6 +460,7 @@ function FieldConditionSection({
   onWeatherChange: (weatherId: string) => void;
   onTerrainChange: (terrainId: string) => void;
 }) {
+  // 場の条件だけを扱う小さなセクション。今後条件が増えたらここに集約する。
   return (
     <section className={styles.fieldConditions}>
       <div>

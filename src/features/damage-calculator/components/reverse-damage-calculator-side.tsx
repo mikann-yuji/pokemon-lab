@@ -26,6 +26,9 @@ import {
 import { TypeBadge } from "./reverse-damage-calculator-type-badge";
 import damageStyles from "../styles/damage-calculator.module.css";
 import styles from "../styles/reverse-damage-calculator.module.css";
+
+// 逆引き画面の左右パネルを構成する表示部品。
+// 通常計算側と似ているが、未知側では補正入力を隠して「ここを逆引きする」と示す。
 export function SideContent({
   side,
   title,
@@ -77,6 +80,8 @@ export function SideContent({
   onStatChange: (values: Partial<StatAdjustment>) => void;
   onHpChange?: (values: Partial<StatAdjustment>) => void;
 }) {
+  // 攻撃側/防御側の共通レイアウト。
+  // チーム選択、ポケモン検索、履歴、特性/持ち物、補正欄を同じ順番で並べる。
   const pokemon = selection.pokemon;
   return (
     <>
@@ -176,6 +181,7 @@ export function BattleTeamModal({
   onSelect: (team: BattleTeam) => void;
   onClose: () => void;
 }) {
+  // 保存済みバトルチームから、逆引き条件へ使うメンバーを選ぶためのモーダル。
   return (
     <div
       className={damageStyles.teamModalOverlay}
@@ -236,6 +242,8 @@ function RecentPokemonList({
   pokemonCatalog: DamageCalculatorPokemon[];
   onRestore: (side: DamageHistorySide, history: DamageHistoryRecord) => void;
 }) {
+  // 逆引きでも履歴から素早くポケモンを戻せるようにする。
+  // historyにはIDしかないので、表示前にcatalogから名前と画像を引き直す。
   const availableHistory = history.flatMap((record) => {
     const pokemon = pokemonCatalog.find(({ id }) => id === record.pokemonId);
     return pokemon ? [{ record, pokemon }] : [];
@@ -282,6 +290,7 @@ function PokemonImage({
   alt: string;
   preferFallback?: boolean;
 }) {
+  // ローカル画像URLを優先し、読み込みに失敗したらfallbackへ切り替える。
   const primaryUrl =
     preferFallback && pokemon.fallbackImageUrl
       ? pokemon.fallbackImageUrl
@@ -317,6 +326,7 @@ function PokemonImage({
 }
 
 function PokemonSummary({ pokemon }: { pokemon: DamageCalculatorPokemon | null }) {
+  // 逆引き側の簡易ポケモン概要。候補探索前にタイプと種族値を確認できる。
   if (!pokemon) {
     return <div className={damageStyles.placeholder}>ポケモンを選択</div>;
   }

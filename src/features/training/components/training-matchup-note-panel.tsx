@@ -7,6 +7,8 @@ import type { TrainingMatchupKind, TrainingMatchupNote } from "../infrastructure
 import styles from "../styles/training-simulator.module.css";
 import type { MatchupSearchOption } from "./training-simulator-model";
 
+// 有利/不利メモを1種類ぶん編集するパネル。
+// 検索候補の選択、メモ本文、保存済みメモ一覧をこの部品内で完結させる。
 export function MatchupNotePanel({
   title,
   matchupKind,
@@ -40,6 +42,8 @@ export function MatchupNotePanel({
         .filter((option) => option.searchName.includes(normalizedInput))
         .slice(0, 12)
     : options.slice(0, 12);
+  // downshiftで候補のキーボード操作とハイライトを管理する。
+  // 保存対象はselectedTargetで持ち、入力文字だけ変わった場合は選択解除する。
   const {
     getInputProps,
     getItemProps,
@@ -67,6 +71,8 @@ export function MatchupNotePanel({
   const showSuggestions = isOpen && filteredOptions.length > 0;
 
   async function submit() {
+    // 保存が成功した時だけ入力欄を空にする。
+    // バリデーション失敗時はユーザーが直せるよう入力内容を残す。
     const saved = await onSave({ matchupKind, target: selectedTarget, note });
     if (!saved) return;
     setSelectedTarget(null);
@@ -145,5 +151,4 @@ export function MatchupNotePanel({
     </section>
   );
 }
-
 

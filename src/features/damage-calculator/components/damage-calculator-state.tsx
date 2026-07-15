@@ -17,15 +17,21 @@ import type {
   StatAdjustment,
 } from "./damage-calculator-types";
 
+// このファイルは「画面の入力値を計算エンジンへ渡せる形に整える」層。
+// Reactの表示部品からは切り離し、能力補正・育成案反映・履歴選択の状態だけを扱う。
+
 export type StatAdjustmentState = Record<
   DamageSide,
   Record<AdjustableStatId, StatAdjustment>
 >;
 
+// 補正入力の最小単位。能力ポイント、ランク、性格補正の3つを常に同じ形で持つ。
 function createDefaultAdjustment(): StatAdjustment {
   return { point: 0, rank: 0, nature: false };
 }
 
+// 攻撃側と防御側で同じ補正表を持たせる。
+// UI側は side/statId をキーにして、この表の一部だけを更新する。
 export function createDefaultAdjustmentState(): StatAdjustmentState {
   return {
     attacker: {
@@ -51,6 +57,8 @@ function calculateActualStat(
   point = 0,
   nature = false,
 ) {
+  // Champions想定のLv.50、個体値31固定の実数値。
+  // HPだけ式が違うので先に分岐し、その他能力は最後に性格補正を掛ける。
   const baseStat = pokemon.stats[statId] ?? 1;
   const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
   if (statId === "hp") return baseStat === 1 ? 1 : base + 50 + 10 + point;
@@ -72,6 +80,8 @@ export function createSpeedComparisonRows(
   attacker: DamageCalculatorPokemon | null,
   defender: DamageCalculatorPokemon | null,
 ): SpeedComparisonRow[] {
+  // すばやさ比較モーダル用の代表値。
+  // 実戦で見たい「スカーフ最速・最速・準速・無振」を固定で並べる。
   return [
     {
       id: "scarf-fastest",
@@ -101,6 +111,7 @@ export function createSpeedComparisonRows(
 }
 
 function createNeutralActualStats(pokemon: DamageCalculatorPokemon) {
+  // 指定能力だけを上書きする前に、全能力の無補正実数値を土台として用意する。
   return Object.fromEntries(
     STAT_IDS.map((statId) => [statId, calculateActualStat(pokemon, statId)]),
   );
@@ -112,6 +123,8 @@ export function applyStatAdjustment(
   adjustment: StatAdjustment | null,
 ): DamageCalculatorPokemon | null {
   if (!pokemon || !statId || !adjustment) return pokemon;
+  // ダメージ計算エンジンが読む actualStats と boosts の両方へ画面入力を反映する。
+  // HPはランク補正を持たないので boosts には書かない。
   return {
     ...pokemon,
     actualStats: {
@@ -146,6 +159,8 @@ export function applyAbility(
 }
 
 export function getRelevantStatIds(move: DamageCalculatorMove | undefined) {
+  // 技の分類から、攻撃側・防御側で編集すべき能力を決める。
+  // 物理ならA/B、特殊ならC/D。未選択時はUI側で補正欄を隠すため null にする。
   if (!move) return { attacker: null, defender: null };
   return move.damageClass === "physical"
     ? ({ attacker: "attack", defender: "defense" } as const)
@@ -168,6 +183,8 @@ export function createStatAdjustmentsFromBuild(
   build: TrainingBuild,
   natures: Nature[],
 ): Record<AdjustableStatId, StatAdjustment> {
+  // 保存済み育成案を選んだとき、能力ポイントと性格補正を画面の補正入力へ復元する。
+  // ランクは戦闘中の一時状態なので、育成案からは常に0で始める。
   return Object.fromEntries(
     ADJUSTABLE_STAT_IDS.map((statId) => [
       statId,
@@ -185,6 +202,8 @@ function toActualStats(
   build: TrainingBuild,
   natures: Nature[],
 ) {
+  // 育成案の能力ポイント・性格を、計算エンジンで使う実数値表へ変換する。
+  // ここで作った値が、ダメージ計算のポケモン個体値として扱われる。
   const selectedNature = natures.find(({ id }) => id === build.nature) ?? null;
   const hasNatureModifier = Boolean(
     selectedNature &&
@@ -214,6 +233,8 @@ export function applyTrainingBuildToPokemon(
   natures: Nature[],
   heldItems: DamageCalculatorHeldItem[],
 ): DamageCalculatorPokemon {
+  // バトルチームから育成案を選んだとき、カタログ上のポケモンにユーザー保存値を重ねる。
+  // 名前、実数値、持ち物、特性、技をまとめて差し替える入口。
   const learnedMoveIds = new Set(build.moveIds.filter(Boolean));
   const learnedDamageMoves =
     learnedMoveIds.size === 0
@@ -232,6 +253,8 @@ export function applyTrainingBuildToPokemon(
 }
 
 export function usePokemonSelection() {
+  // コンボボックスの入力文字列と選択済みポケモンをひとまとめにした小さな状態管理。
+  // 選択時に検索欄も日本語名へ揃えることで、画面表示と内部状態のズレを防ぐ。
   const [pokemon, setPokemon] = useState<DamageCalculatorPokemon | null>(null);
   const [query, setQuery] = useState("");
 

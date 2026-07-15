@@ -17,6 +17,8 @@ import {
   type Nature,
 } from "@/features/training/infrastructure/training-catalog-repository";
 
+// 通常ダメージ計算画面が使うユーザー保存データをまとめて読むhook。
+// 履歴、バトルチーム、育成案、性格を同じタイミングで読み、同期後も再取得する。
 export function useDamageCalculatorUserData() {
   const [attackerHistory, setAttackerHistory] = useState<
     DamageHistoryRecord[]
@@ -30,6 +32,8 @@ export function useDamageCalculatorUserData() {
   const [teamLoadError, setTeamLoadError] = useState("");
 
   const loadUserData = useCallback(async (active = true) => {
+    // 画面に必要なuser.db由来データを並列で読む。
+    // active=falseになった後は、遅れて解決したPromiseで画面を更新しない。
     const [
       savedAttackers,
       savedDefenders,
@@ -53,6 +57,7 @@ export function useDamageCalculatorUserData() {
 
   useEffect(() => {
     let active = true;
+    // 初回描画を軽くするため、保存データ読み込みは1tick遅らせる。
     const timer = window.setTimeout(() => {
       void loadUserData(active).catch((caught: unknown) => {
         console.error("ダメージ計算の保存データを読み込めませんでした。", caught);
@@ -67,6 +72,7 @@ export function useDamageCalculatorUserData() {
 
   useEffect(() => {
     let active = true;
+    // Firestore同期が終わったらuser.dbが更新されるため、画面の保存データも読み直す。
     const handleSynced = () => {
       void loadUserData(active).catch((caught: unknown) => {
         console.error("同期後のダメージ計算データを読み込めませんでした。", caught);

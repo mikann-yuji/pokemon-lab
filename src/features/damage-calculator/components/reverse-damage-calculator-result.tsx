@@ -1,5 +1,7 @@
 ﻿import { formatRange, formatRank, type Candidate, type UnknownSide } from "./reverse-damage-calculator-state";
 import styles from "../styles/reverse-damage-calculator.module.css";
+// 逆引き候補の結果表。
+// 候補探索hookが返した行を、攻撃側逆引き/防御側逆引きで列数を変えて表示する。
 export function ReverseResultTable({
   unknownSide,
   unknownStatLabel,
@@ -11,6 +13,7 @@ export function ReverseResultTable({
 }) {
   return (
     <div className={styles.resultTable}>
+      {/* 防御側を逆引きする時だけHPポイント列を追加する。 */}
       <div
         className={`${styles.resultHead} ${
           unknownSide === "attacker" ? styles.fiveColumns : ""

@@ -41,6 +41,8 @@ import { useReverseDamageUserData } from "./use-reverse-damage-user-data";
 import damageStyles from "../styles/damage-calculator.module.css";
 import styles from "../styles/reverse-damage-calculator.module.css";
 
+// 逆引きダメージ計算のcontroller。
+// 画面入力の状態を持ち、候補探索hookとview用部品へ必要な値を渡す。
 
 export function ReverseDamageCalculator({
   pokemonCatalog,
@@ -53,6 +55,7 @@ export function ReverseDamageCalculator({
   weathers: DamageCalculatorWeather[];
   terrains: DamageCalculatorTerrain[];
 }) {
+  // 攻撃側/防御側のポケモン選択状態。検索欄の文字列もこのhookに含める。
   const attackerSelection = usePokemonSelection();
   const defenderSelection = usePokemonSelection();
   const attacker = attackerSelection.pokemon;
@@ -94,6 +97,7 @@ export function ReverseDamageCalculator({
   const selectedWeather = weathers.find(({ id }) => id === weatherId) ?? null;
   const selectedTerrain = terrains.find(({ id }) => id === terrainId) ?? null;
   const fieldOptions = useMemo(
+    // 天候・フィールドは選ばれている時だけ計算エンジンへ渡す。
     () => ({
       ...(selectedWeather ? { weather: selectedWeather.smogonWeather } : {}),
       ...(selectedTerrain ? { terrain: selectedTerrain.smogonTerrain } : {}),
@@ -102,6 +106,7 @@ export function ReverseDamageCalculator({
   );
 
   const buildById = useMemo(
+    // バトルチームはbuildIdだけを持つので、表示時に育成案実体へ引き直す。
     () =>
       new Map(
         trainingBuilds.flatMap((build) =>
@@ -122,6 +127,7 @@ export function ReverseDamageCalculator({
     [battleTeams, selectedTeamIds],
   );
   const selectedTeamMembers = useMemo(() => {
+    // チーム内の育成案を、ポケモン画像付きの選択肢へ変換する。
     const toMembers = (team: BattleTeam | null) =>
       team?.buildIds
         .map((buildId) => buildById.get(buildId))
@@ -139,6 +145,8 @@ export function ReverseDamageCalculator({
   useEffect(() => {
     if (!attacker || !defender || !selectedMove) return;
 
+    // 攻撃側・防御側・技が揃った時点で履歴へ保存する。
+    // 保存後の一覧をそのまま画面へ戻して、次回選択を早くする。
     let active = true;
     void Promise.all([
       saveDamageHistory("attacker", attacker.id, selectedMove.id),
@@ -165,6 +173,7 @@ export function ReverseDamageCalculator({
   ]);
 
   function selectPokemon(side: DamageSide, pokemon: DamageCalculatorPokemon | null) {
+    // ポケモンを直接選び直した場合、育成案由来の補正や技選択はリセットする。
     if (side === "attacker") {
       attackerSelection.select(pokemon);
       setSelectedBuildIds((current) => ({ ...current, attacker: null }));
@@ -225,6 +234,7 @@ export function ReverseDamageCalculator({
   }
 
   function selectTeamMember(side: DamageSide, build: TrainingBuild) {
+    // バトルチームのメンバー選択時は、保存済み育成案の持ち物・特性・技・補正を反映する。
     const pokemon = pokemonCatalog.find(({ id }) => id === build.pokemonId);
     if (!pokemon) return;
 
@@ -262,6 +272,7 @@ export function ReverseDamageCalculator({
   }
 
   const candidates = useReverseDamageCandidates({
+    // ここで観測値と固定条件を探索hookへ渡し、表示用候補を得る。
     attacker,
     defender,
     fieldOptions,

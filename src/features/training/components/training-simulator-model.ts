@@ -4,17 +4,24 @@ import type { PokemonDetail } from "@/infrastructure/database/pokemon-search-rep
 import type { TrainingBuild } from "../infrastructure/training-build-repository";
 import type { TrainingPokemonStatProfile } from "../infrastructure/training-catalog-repository";
 
+// 育成シミュレータで共有する「表示名・計算式・検索候補生成」をまとめたモデル層。
+// UI部品から細かい式や検索用データ構築を追わなくて済むよう、このファイルに寄せている。
+
+// 画面の能力値は必ずこの順番で並べる。CSVやDBの並びに引っ張られないための固定順。
 export const STAT_IDS = ["hp", "attack", "defense", "special-attack", "special-defense", "speed"];
 export const STAT_NAMES: Record<string, string> = {
   hp: "HP", attack: "こうげき", defense: "ぼうぎょ",
   "special-attack": "とくこう", "special-defense": "とくぼう", speed: "すばやさ",
 };
 export type StatRankingRow = {
+  // 種族値ランキングの元データ。表示用の検索名などは後段で足す。
   profile: TrainingPokemonStatProfile;
   uninvested: number;
   maximum: number;
 };
 export type DisplayStatRankingRow = {
+  // ランキングモーダルで実際に表示・検索する1行。
+  // 育成中ポケモン自身も同じ表に混ぜるため、isTrainingTargetを持つ。
   id: string;
   name: string;
   searchName: string;
@@ -24,6 +31,7 @@ export type DisplayStatRankingRow = {
 };
 export type StatCompareMode = "uninvested" | "maximum";
 export type MatchupSearchOption =
+  // 相性メモの検索候補。素のポケモンと保存済み育成案を同じリストで扱う。
   | {
       key: string;
       kind: "pokemon";
@@ -69,12 +77,15 @@ export const initialStats = (value: number) =>
   Object.fromEntries(STAT_IDS.map((id) => [id, value]));
 
 export function calculateActualStat(baseStat: number, statId: string, point = 0, nature = false) {
+  // Champions用の簡易実数値。Lv.50、個体値31、能力ポイントを直接加算する前提。
+  // HPだけ式が違うので、先に分岐してから他能力へ性格補正を掛ける。
   const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
   if (statId === "hp") return baseStat === 1 ? 1 : base + 50 + 10 + point;
   return Math.floor((base + 5 + point) * (nature ? 1.1 : 1));
 }
 
 export function rankCurrentValue(values: number[], currentValue: number) {
+  // 自分より高い値の数+1が順位。タイは同順位として扱う。
   return 1 + values.filter((value) => value > currentValue).length;
 }
 
@@ -90,6 +101,7 @@ export function compareMoveUsageRate(
   left: PokemonDetail["moves"][number],
   right: PokemonDetail["moves"][number],
 ) {
+  // 技リストは採用率の高い順に並べ、採用率が同じなら名前で安定ソートする。
   const leftRate = left.usageRate ?? -1;
   const rightRate = right.usageRate ?? -1;
   if (leftRate !== rightRate) return rightRate - leftRate;
@@ -100,6 +112,8 @@ export function createMatchupSearchOptions(
   pokemonCatalog: TrainingPokemonStatProfile[],
   builds: TrainingBuild[],
 ): MatchupSearchOption[] {
+  // 相性メモの検索対象は「全ポケモン」と「保存済み育成案」の合算。
+  // どちらを選んでも同じUIでメモ保存できるよう、共通のoption型に変換する。
   const pokemonById = new Map(pokemonCatalog.map((pokemon) => [pokemon.id, pokemon]));
   const pokemonOptions: MatchupSearchOption[] = pokemonCatalog.map((pokemon) => ({
     key: `pokemon-${pokemon.id}`,
@@ -130,5 +144,4 @@ export function createMatchupSearchOptions(
   });
   return [...pokemonOptions, ...buildOptions];
 }
-
 

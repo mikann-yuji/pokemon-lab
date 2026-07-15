@@ -16,6 +16,9 @@ import { TypeBadge } from "./damage-calculator-pokemon-widgets";
 import type { StatAdjustment } from "./damage-calculator-types";
 import styles from "../styles/damage-calculator.module.css";
 
+// ダメージ計算画面の「入力フォーム系」だけを集めたファイル。
+// ポケモン表示や結果表示は別ファイルに分け、ここでは技・特性・持ち物・能力補正に集中する。
+
 export function formatMovePower(move: DamageCalculatorMove) {
   return move.power > 0 ? String(move.power) : "変動";
 }
@@ -65,6 +68,8 @@ function MoveOptionContent({
   defenderTypes: DamageCalculatorPokemon["types"];
   typeEffectivenessSource: TypeEffectivenessSource | null;
 }) {
+  // 技の候補行。タイプ、技名、相性、威力/命中/採用率を1行にまとめる。
+  // 選択済みボタンと候補リストの両方で同じ見た目を使う。
   const effectiveness =
     defenderTypes.length === 0
       ? 1
@@ -107,6 +112,7 @@ export function MoveSelect({
   disabled: boolean;
   onChange: (moveId: string) => void;
 }) {
+  // select要素ではなく自作リストにして、技タイプや相性バッジを候補内に表示する。
   const [open, setOpen] = useState(false);
   const selectedMove =
     moves.find((move) => move.id === selectedMoveId) ??
@@ -182,6 +188,8 @@ export function MoveSelect({
 }
 
 function hasManualAbilityCondition(ability: DamageCalculatorAbility | null) {
+  // 条件付きで発動する特性だけ、手動ON/OFFのチェックボックスを出す。
+  // 常時発動する補正は選択した時点で計算へ渡すので、追加UIは不要。
   return Boolean(
     ability?.damageModifiers.some((modifier) =>
       [
@@ -201,6 +209,8 @@ function formatAbilityModifier(ability: DamageCalculatorAbility) {
 }
 
 function AbilityOptionContent({ ability }: { ability: DamageCalculatorAbility }) {
+  // 特性候補リスト内だけで説明を見せる。
+  // 選択後の画面には説明を残さず、フォームをコンパクトに保つ。
   return (
     <span className={styles.abilityOptionContent}>
       <strong>{ability.name}</strong>
@@ -220,6 +230,8 @@ export function AbilityField({
   onAbilityChange: (abilityId: string) => void;
   onConditionChange: (enabled: boolean) => void;
 }) {
+  // 特性は技と同じ自作ドロップダウンにする。
+  // 通常のselectでは説明文や補正有無を候補内に出しにくいため。
   const [open, setOpen] = useState(false);
   const selectedAbility = pokemon?.selectedAbility ?? null;
 
@@ -301,6 +313,7 @@ export function HeldItemField({
   heldItems: DamageCalculatorHeldItem[];
   onChange: (itemId: string) => void;
 }) {
+  // 持ち物は説明を表示せず、名前とダメージ倍率だけをoptionに含める。
   return (
     <label>
       持ち物
@@ -328,6 +341,7 @@ export function MetronomeUseControl({
   value: number;
   onChange: (value: number) => void;
 }) {
+  // メトロノームは「連続使用回数」で倍率が変わるため、技や持ち物とは独立入力にする。
   return (
     <label className={styles.metronomeControl}>
       メトロノーム連続使用
@@ -357,6 +371,8 @@ export function DamageStatControls({
   showNature?: boolean;
   onChange: (values: Partial<StatAdjustment>) => void;
 }) {
+  // 能力ポイント、能力ランク、性格補正を1セットで編集する共通UI。
+  // 攻撃側/防御側/HPで同じ部品を使い、必要ない入力だけ showRank/showNature で隠す。
   return (
     <div className={styles.statControls}>
       <div className={styles.statControlsHeader}>

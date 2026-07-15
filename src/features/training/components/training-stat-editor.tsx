@@ -12,6 +12,8 @@ import { StatRankingOverlay } from "./training-stat-ranking-overlay";
 
 type DetailStat = PokemonDetail["stats"][number];
 
+// 育成シミュレータの能力値編集エリア。
+// 本体から切り出して、能力ポイント入力・実数値表示・ランキング起動を1か所にまとめる。
 export function TrainingStatEditor({
   pokemonName,
   orderedStats,
@@ -43,11 +45,13 @@ export function TrainingStatEditor({
 }) {
   return (
     <>
+      {/* 現在の能力ポイント合計。66上限の調整状況を常に見せる。 */}
       <div className={styles.statHeader}>
         <h2>能力値</h2>
         <span>能力ポイント {pointTotal} / 66</span>
       </div>
       <div className={styles.statTable}>
+        {/* 6能力を固定順で並べ、種族値・順位・入力・実数値を横に比較できるようにする。 */}
         <div className={styles.statLabels}>
           <b>能力</b>
           <b>種族値</b>
@@ -60,6 +64,7 @@ export function TrainingStatEditor({
           <div className={styles.statRow} key={stat.id}>
             <strong>
               {STAT_NAMES[stat.id] ?? stat.name}
+              {/* 性格で上がる/下がる能力だけ、小さな矢印で補正方向を示す。 */}
               {hasNatureModifier && selectedNature?.increasedStatId === stat.id ? (
                 <NatureCaret direction="up" />
               ) : hasNatureModifier && selectedNature?.decreasedStatId === stat.id ? (
@@ -71,6 +76,7 @@ export function TrainingStatEditor({
               {baseStatRanks[stat.id] ? `${baseStatRanks[stat.id]}位` : "-"}
             </span>
             <div className={styles.pointControl}>
+              {/* number入力とrange入力は同じ値を編集する。細かい入力と素早い調整の両方に対応する。 */}
               <input
                 aria-label={`${stat.name}の能力ポイント`}
                 type="number"
@@ -104,6 +110,7 @@ export function TrainingStatEditor({
         ))}
       </div>
       {rankingStatId && selectedRankingStat ? (
+        // ランキングはモーダルで開き、閉じると選択中statIdをnullへ戻す。
         <StatRankingOverlay
           pokemonName={pokemonName}
           statName={STAT_NAMES[rankingStatId] ?? selectedRankingStat.name}

@@ -2,6 +2,8 @@
 
 import styles from "../styles/training-simulator.module.css";
 
+// 育成案の保存名を入力するモーダル。
+// 保存処理そのものは親に任せ、この部品は入力とsubmitイベントだけを扱う。
 export function TrainingSaveDialog({
   buildName,
   saveError,

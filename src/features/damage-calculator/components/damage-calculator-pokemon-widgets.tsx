@@ -13,6 +13,9 @@ import { BASE_STAT_LABELS, STAT_IDS, TYPE_LABELS } from "./damage-calculator-dis
 import type { SpeedComparisonRow } from "./damage-calculator-types";
 import styles from "../styles/damage-calculator.module.css";
 
+// ダメージ計算画面の「ポケモンを見せる部品」を集めたファイル。
+// 入力フォームと分けることで、チーム選択・履歴・ヒーロー表示・モーダルをまとめて追える。
+
 export function SpeedComparisonModal({
   rows,
   attackerName,
@@ -24,16 +27,17 @@ export function SpeedComparisonModal({
   defenderName: string;
   onClose: () => void;
 }) {
+  // すばやさ比較は計算結果ではなく、選出中の判断材料として使う補助モーダル。
   return (
-    <div className={styles.teamModalOverlay} role="dialog" aria-modal="true">
+    <div className={styles.speedModalOverlay} role="dialog" aria-modal="true">
       <button
-        className={styles.teamModalBackdrop}
+        className={styles.speedModalBackdrop}
         type="button"
         aria-label="すばやさ比較を閉じる"
         onClick={onClose}
       />
-      <section className={styles.teamModalPanel}>
-        <div className={styles.teamModalHeader}>
+      <section className={styles.speedModalPanel}>
+        <div className={styles.speedModalHeader}>
           <div>
             <p>SPEED CHECK</p>
             <h2>すばやさ比較</h2>
@@ -43,16 +47,16 @@ export function SpeedComparisonModal({
           </button>
         </div>
         <div className={styles.speedTable}>
-          <div className={styles.speedHeader}>
+          <div className={styles.speedTableHead}>
             <span>条件</span>
-            <span>{attackerName}</span>
-            <span>{defenderName}</span>
+            <strong>{attackerName}</strong>
+            <strong>{defenderName}</strong>
           </div>
           {rows.map((row) => (
-            <div className={styles.speedRow} key={row.id}>
-              <strong>{row.label}</strong>
-              <SpeedValue value={row.attacker} />
-              <SpeedValue value={row.defender} />
+            <div className={styles.speedTableRow} key={row.id}>
+              <span>{row.label}</span>
+              <SpeedValue value={row.attacker} opponent={row.defender} />
+              <SpeedValue value={row.defender} opponent={row.attacker} />
             </div>
           ))}
         </div>
@@ -61,8 +65,24 @@ export function SpeedComparisonModal({
   );
 }
 
-function SpeedValue({ value }: { value: number | null }) {
-  return <span>{value ?? "-"}</span>;
+function SpeedValue({
+  value,
+  opponent,
+}: {
+  value: number | null;
+  opponent: number | null;
+}) {
+  const faster =
+    typeof value === "number" &&
+    typeof opponent === "number" &&
+    value > opponent;
+
+  return (
+    <span className={`${styles.speedValue} ${faster ? styles.fasterSpeedValue : ""}`}>
+      <strong>{value ?? "-"}</strong>
+      <small>{faster ? "先手" : " "}</small>
+    </span>
+  );
 }
 
 export function BattleTeamModal({
@@ -76,6 +96,8 @@ export function BattleTeamModal({
   onSelect: (team: BattleTeam) => void;
   onClose: () => void;
 }) {
+  // 保存済みバトルチームから攻撃側/防御側へ反映するための選択モーダル。
+  // チームの中身はこの後の teamMembers 表示でアイコンとして出す。
   return (
     <div className={styles.teamModalOverlay} role="dialog" aria-modal="true">
       <button
@@ -131,6 +153,8 @@ export function RecentPokemonList({
   pokemonCatalog: DamageCalculatorPokemon[];
   onRestore: (side: DamageHistorySide, history: DamageHistoryRecord) => void;
 }) {
+  // チーム未選択時だけ出す履歴ショートカット。
+  // 最近使ったポケモンをワンタップで戻せるようにする。
   const availableHistory = history.flatMap((record) => {
     const pokemon = pokemonCatalog.find(({ id }) => id === record.pokemonId);
     return pokemon ? [{ record, pokemon }] : [];
@@ -177,6 +201,8 @@ export function PokemonImage({
   alt: string;
   preferFallback?: boolean;
 }) {
+  // catalog.dbに保存されたローカル画像URLを優先し、必要ならfallbackへ倒す。
+  // 画像URLが無い場合でもレイアウトが崩れないよう名前表示にする。
   const primaryUrl =
     preferFallback && pokemon.fallbackImageUrl
       ? pokemon.fallbackImageUrl
@@ -201,6 +227,8 @@ export function PokemonSummary({
   pokemon: DamageCalculatorPokemon | null;
   href?: string;
 }) {
+  // 選択中ポケモンの小さなヒーロー表示。
+  // 英語名は出さず、画像・日本語名・タイプ・種族値だけに絞る。
   if (!pokemon) {
     return <div className={styles.placeholder}>ポケモンを選択</div>;
   }

@@ -10,6 +10,9 @@ import type {
 import type { Nature } from "@/features/training/infrastructure/training-catalog-repository";
 import type { TrainingBuild } from "@/features/training/infrastructure/training-build-repository";
 
+// 逆引きダメージ計算の状態・変換ロジックをまとめるファイル。
+// UIからは「候補探索に必要な形」へ整えた値だけを渡せるようにしている。
+
 export type DamageSide = "attacker" | "defender";
 export type UnknownSide = "attacker" | "defender";
 export type StatId =
@@ -31,6 +34,7 @@ export type StatAdjustmentState = Record<
 export type TeamSelectionState = Record<DamageSide, number | null>;
 export type BuildSelectionState = Record<DamageSide, number | null>;
 export type Candidate = {
+  // 候補表1行分。能力ポイント、実数値、急所有無、ダメージ範囲をまとめて持つ。
   id: string;
   hpPoint: number | null;
   statPoint: number;
@@ -107,6 +111,8 @@ function createDefaultAdjustment(): StatAdjustment {
 }
 
 export function createDefaultAdjustmentState(): StatAdjustmentState {
+  // 攻撃側/防御側の全能力に同じ初期補正を持たせる。
+  // 探索対象ではない能力も、画面の固定条件として同じ形で扱う。
   const createSide = () =>
     Object.fromEntries(
       ADJUSTABLE_STAT_IDS.map((statId) => [statId, createDefaultAdjustment()]),
@@ -120,6 +126,8 @@ export function calculateActualStat(
   point = 0,
   nature = false,
 ) {
+  // Lv.50、個体値31固定の実数値計算。
+  // 候補探索で大量に呼ぶため、外部状態を読まない純粋関数にしている。
   const baseStat = pokemon.stats[statId] ?? 1;
   const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
   if (statId === "hp") return baseStat === 1 ? 1 : base + 50 + 10 + point;
@@ -133,6 +141,8 @@ function createNeutralActualStats(pokemon: DamageCalculatorPokemon) {
 }
 
 export function getRelevantStatIds(move: DamageCalculatorMove | null) {
+  // 技分類から逆引き対象の能力を決める。
+  // 物理ならA/B、特殊ならC/D。未選択時は物理側を初期値にする。
   if (move?.damageClass === "physical") {
     return { attacker: "attack", defender: "defense" } as const;
   }
@@ -153,6 +163,8 @@ export function applyBattleOptions({
   adjustments: Record<StatId, StatAdjustment>;
   relevantStat: NonHpStatId;
 }): DamageCalculatorPokemon {
+  // 画面で固定入力された持ち物・特性・能力補正を、計算用ポケモンに反映する。
+  // 「既知側」のポケモンは候補探索前に必ずここを通す。
   return {
     ...pokemon,
     actualStats: {
@@ -191,6 +203,8 @@ export function withCandidateAdjustment({
   rank: number;
   hpPoint?: number;
 }) {
+  // 探索中の1候補をポケモンへ重ねる。
+  // 攻撃側探索なら攻撃能力、防御側探索ならHPと防御能力を候補値で上書きする。
   return applyBattleOptions({
     pokemon,
     heldItems,
@@ -222,6 +236,8 @@ export function createStatAdjustmentsFromBuild(
   build: TrainingBuild,
   natures: Nature[],
 ): Record<StatId, StatAdjustment> {
+  // 保存済み育成案を逆引き画面の補正入力に展開する。
+  // ランクは戦闘中の一時補正なので、育成案から復元せず0で初期化する。
   return Object.fromEntries(
     ADJUSTABLE_STAT_IDS.map((statId) => [
       statId,
@@ -239,6 +255,8 @@ export function applyTrainingBuildToPokemon(
   build: TrainingBuild,
   heldItems: DamageCalculatorHeldItem[],
 ) {
+  // バトルチームの育成案を選んだ時に、カタログ上のポケモンへ保存値を重ねる。
+  // 名前・持ち物・技・特性を一括で反映し、逆引きの条件として使える形にする。
   const learnedMoveIds = new Set(build.moveIds.filter(Boolean));
   const learnedDamageMoves =
     learnedMoveIds.size === 0
@@ -256,6 +274,8 @@ export function applyTrainingBuildToPokemon(
 }
 
 export function usePokemonSelection() {
+  // コンボボックスの入力文字列と選択済みポケモンをまとめて扱う。
+  // 選択時に検索欄も日本語名へ揃え、表示と内部状態のズレを防ぐ。
   const [pokemon, setPokemon] = useState<DamageCalculatorPokemon | null>(null);
   const [query, setQuery] = useState("");
 
@@ -283,6 +303,8 @@ export function observedValueMatches({
     "minimum" | "maximum" | "minimumPercent" | "maximumPercent"
   >;
 }) {
+  // 観測値と候補ダメージ範囲の照合。
+  // 攻撃側逆引きはダメージ量、防御側逆引きはHP割合で判定する。
   if (unknownSide === "attacker") {
     return observedDamage >= candidate.minimum && observedDamage <= candidate.maximum;
   }
@@ -314,6 +336,7 @@ export function parseObservedInput(value: string) {
 }
 
 export function normalizeObservedInput(value: string, maximum: number) {
+  // 空文字や不正値を0へ寄せ、上限を超えた入力は画面の許容範囲へ丸める。
   const parsed = parseObservedInput(value);
   return String(clampNumber(parsed, 0, maximum));
 }

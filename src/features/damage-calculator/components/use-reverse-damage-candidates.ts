@@ -26,6 +26,9 @@ import {
 
 type FieldOptions = DamageCalculationInput["field"];
 
+// 逆引き候補の全探索を担当するhook。
+// 画面側は「観測値・未知側・現在のポケモン条件」を渡すだけにして、
+// 重い探索ループと候補の並び替えはこのファイルに閉じ込める。
 export function useReverseDamageCandidates({
   attacker,
   defender,
@@ -57,9 +60,12 @@ export function useReverseDamageCandidates({
     if (!attacker || !defender || !selectedMove) return [];
 
     const rows: Candidate[] = [];
+    // 急所かどうかは画面入力に持たせず、両方の可能性を候補として出す。
     const criticalOptions = [false, true];
 
     if (unknownSide === "attacker") {
+      // 攻撃側を逆引きする場合、防御側は画面入力どおりに固定する。
+      // 探索対象は攻撃側の能力ポイント、性格補正、ランク補正。
       const knownDefender = applyBattleOptions({
         pokemon: defender,
         heldItems,
@@ -70,6 +76,7 @@ export function useReverseDamageCandidates({
       for (let point = POINT_MIN; point <= POINT_MAX; point += 1) {
         for (const nature of [false, true]) {
           for (let rank = RANK_MIN; rank <= RANK_MAX; rank += 1) {
+            // 1候補ごとに攻撃側だけを差し替え、通常のダメージ計算に流す。
             const candidateAttacker = withCandidateAdjustment({
               pokemon: attacker,
               heldItems,
@@ -104,6 +111,7 @@ export function useReverseDamageCandidates({
                   candidate,
                 })
               ) {
+                // 観測ダメージ範囲に一致した組み合わせだけを表へ残す。
                 rows.push({
                   id: `a-${point}-${nature}-${rank}-${critical}`,
                   hpPoint: null,
@@ -126,6 +134,8 @@ export function useReverseDamageCandidates({
         }
       }
     } else {
+      // 防御側を逆引きする場合、攻撃側は画面入力どおりに固定する。
+      // 防御側はHP実数値も効くため、HPポイントと防御能力ポイントの両方を探索する。
       const knownAttacker = applyBattleOptions({
         pokemon: attacker,
         heldItems,
@@ -137,6 +147,7 @@ export function useReverseDamageCandidates({
         for (let point = POINT_MIN; point <= POINT_MAX; point += 1) {
           for (const nature of [false, true]) {
             for (let rank = RANK_MIN; rank <= RANK_MAX; rank += 1) {
+              // 防御側候補は「HP」と「該当防御能力」を同時に差し替える。
               const candidateDefender = withCandidateAdjustment({
                 pokemon: defender,
                 heldItems,
@@ -172,6 +183,7 @@ export function useReverseDamageCandidates({
                     candidate,
                   })
                 ) {
+                  // 観測HP割合に合った候補だけを返す。許容誤差は observedValueMatches 側で見る。
                   rows.push({
                     id: `d-${hpPoint}-${point}-${nature}-${rank}-${critical}`,
                     hpPoint,
@@ -196,6 +208,8 @@ export function useReverseDamageCandidates({
       }
     }
 
+    // 表示は通常判定、HPポイント、能力ポイント、ランク、性格補正の順に安定ソートする。
+    // 入力値を少し変えたときに候補表が不必要に揺れないようにするため。
     return rows.sort((a, b) => {
       if (a.critical !== b.critical) return Number(a.critical) - Number(b.critical);
       if ((a.hpPoint ?? -1) !== (b.hpPoint ?? -1)) return (a.hpPoint ?? -1) - (b.hpPoint ?? -1);

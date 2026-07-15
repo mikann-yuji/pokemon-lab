@@ -8,6 +8,8 @@ import type {
 import styles from "../styles/training-simulator.module.css";
 import { TrainingAbilitySelect } from "./training-simulator-controls";
 
+// 性格・特性・持ち物の基本設定エリア。
+// 能力値や技とは更新頻度が違うため、本体から切り出して見通しをよくしている。
 export function TrainingSettingsSection({
   abilities,
   heldItems,

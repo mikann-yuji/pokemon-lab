@@ -14,6 +14,10 @@ import {
   type StatAdjustment,
 } from "./reverse-damage-calculator-state";
 import damageStyles from "../styles/damage-calculator.module.css";
+
+// 逆引き画面の入力フォーム部品。
+// 技選択、技概要、特性、持ち物、能力補正を小さく分けて左右パネルから使う。
+
 function formatItemModifier(item: DamageCalculatorHeldItem) {
   const modifier = item.damageModifier;
   return modifier ? ` x${modifier.multiplier}` : "";
@@ -68,6 +72,7 @@ function MoveOptionContent({
   defenderTypes: DamageCalculatorPokemon["types"];
   typeEffectivenessSource: TypeEffectivenessSource | null;
 }) {
+  // 技候補1行分。通常計算と同じく、タイプ・技名・相性・威力などをまとめて表示する。
   const effectiveness =
     defenderTypes.length === 0
       ? 1
@@ -111,6 +116,8 @@ export function MoveSelect({
   disabled: boolean;
   onChange: (moveId: string) => void;
 }) {
+  // 逆引きで使う技を選ぶ自作セレクト。
+  // 相手タイプが分かっている時は、候補内に相性バッジを出す。
   const [open, setOpen] = useState(false);
   const selectedMove = moves.find((move) => move.id === selectedMoveId) ?? null;
 
@@ -198,6 +205,8 @@ export function AbilityField({
   pokemon: DamageCalculatorPokemon | null;
   onAbilityChange: (abilityId: string) => void;
 }) {
+  // 逆引き側の特性入力はシンプルなselect。
+  // 候補探索の条件に使うだけなので、説明表示は持たせない。
   return (
     <label className={damageStyles.moveField}>
       特性
@@ -261,6 +270,8 @@ export function DamageStatControls({
   showNature?: boolean;
   onChange: (values: Partial<StatAdjustment>) => void;
 }) {
+  // 既知側の能力補正を固定条件として入力するUI。
+  // 未知側は候補探索で変化させるため、SideContent側でこの部品を隠す。
   const changePoint = (point: number) => {
     onChange({ point: Math.min(POINT_MAX, Math.max(POINT_MIN, Math.trunc(point))) });
   };

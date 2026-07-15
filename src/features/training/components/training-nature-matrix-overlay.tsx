@@ -5,6 +5,9 @@ import type { Nature } from "../infrastructure/training-catalog-repository";
 import styles from "../styles/training-simulator.module.css";
 import { STAT_IDS, STAT_NAMES } from "./training-simulator-model";
 
+// 性格補正選択で使う小さな表示部品。
+// このファイルを見るだけで「矢印」と「性格表」の関係が分かるようにまとめている。
+
 export function NatureCaret({ direction }: { direction: "up" | "down" }) {
   return (
     <i className={direction === "up" ? styles.statUp : styles.statDown} aria-label={direction === "up" ? "上昇補正" : "下降補正"}>
@@ -31,6 +34,7 @@ export function NatureMatrixOverlay({
   onSelect: (natureId: string) => void;
   onClose: () => void;
 }) {
+  // HPは性格補正の対象外なので、表の行/列から除外する。
   const stats = STAT_IDS.filter((id) => id !== "hp");
   /** 上昇能力と下降能力の組み合わせから性格を1件探す。 */
   function natureFor(increasedStatId: string, decreasedStatId: string) {
@@ -51,10 +55,12 @@ export function NatureMatrixOverlay({
           <button type="button" onClick={onClose}>閉じる</button>
         </div>
         <div className={styles.natureMatrixGrid}>
+          {/* 左上セルで表の読み方を示す。縦軸が上昇、横軸が下降。 */}
           <div className={styles.cornerCell}>上がる能力 ↓<br />下がる能力 →</div>
           {stats.map((statId) => <div className={styles.matrixAxis} key={statId}>{STAT_NAMES[statId]} <NatureCaret direction="down" /></div>)}
           {stats.map((increasedStatId) => (
             <Fragment key={increasedStatId}>
+              {/* 1行につき「上がる能力」を固定し、列ごとに「下がる能力」を変える。 */}
               <div className={styles.matrixAxis}>{STAT_NAMES[increasedStatId]} <NatureCaret direction="up" /></div>
               {stats.map((decreasedStatId) => {
                 const item = natureFor(increasedStatId, decreasedStatId);

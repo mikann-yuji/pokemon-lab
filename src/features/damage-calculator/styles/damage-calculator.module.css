@@ -1021,6 +1021,35 @@ a.pokemonSummary:focus-visible {
   transition: width 0.32s ease;
 }
 
+.remainingHpBar {
+  width: var(--remaining-hp);
+  background: linear-gradient(90deg, #64d258, #91e687);
+  animation: hpDrain 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.minimumDamageMarker {
+  width: 2px;
+  background: rgb(255 255 255 / 76%);
+  box-shadow: 0 0 0 1px rgb(23 43 77 / 18%);
+}
+
+.damageRange {
+  grid-column: 2 / -1;
+  color: rgb(255 255 255 / 68%);
+  font-size: 0.62rem;
+  font-weight: 850;
+}
+
+@keyframes hpDrain {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: var(--remaining-hp);
+  }
+}
+
 .maximumDamageBar {
   background: rgb(116 214 108 / 42%);
 }
