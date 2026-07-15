@@ -41,12 +41,6 @@ const STAT_NAMES: Record<string, string> = {
   hp: "HP", attack: "こうげき", defense: "ぼうぎょ",
   "special-attack": "とくこう", "special-defense": "とくぼう", speed: "すばやさ",
 };
-const DEFAULT_NATURE: Nature = {
-  id: "serious",
-  name: "まじめ",
-  increasedStatId: "attack",
-  decreasedStatId: "attack",
-};
 type StatRankingRow = {
   profile: TrainingPokemonStatProfile;
   uninvested: number;
@@ -294,11 +288,7 @@ export function TrainingSimulator({
     void buildPromise.then((build) => {
       if (!active || !build) return;
       if (build.pokemonId !== pokemon.id) return;
-      setNature(
-        natures.some(({ id }) => id === build.nature)
-          ? build.nature
-          : "serious",
-      );
+      setNature(build.nature);
       setAbilityPoints(build.abilityPoints ?? initialStats(0));
       setMoveIds([...build.moveIds, "", "", "", ""].slice(0, 4));
       setItemId(build.itemId ?? "");
@@ -330,14 +320,11 @@ export function TrainingSimulator({
     };
   }, [activeBuildId]);
 
-  // 性格IDが古い保存データなどで見つからない場合は、まじめ/先頭性格へフォールバックする。
-  const selectedNature =
-    natures.find(({ id }) => id === nature) ??
-    natures.find(({ id }) => id === "serious") ??
-    natures[0] ??
-    DEFAULT_NATURE;
-  const hasNatureModifier =
-    selectedNature.increasedStatId !== selectedNature.decreasedStatId;
+  const selectedNature = natures.find(({ id }) => id === nature) ?? null;
+  const hasNatureModifier = Boolean(
+    selectedNature &&
+      selectedNature.increasedStatId !== selectedNature.decreasedStatId,
+  );
   const orderedStats = useMemo(
     () =>
       STAT_IDS.map((statId) =>
@@ -352,10 +339,10 @@ export function TrainingSimulator({
     orderedStats.map(({ id, baseStat }) => {
       const point = abilityPoints[id] ?? 0;
       const natureModifier =
-        hasNatureModifier && selectedNature.increasedStatId === id
+        hasNatureModifier && selectedNature?.increasedStatId === id
           ? true
           : false;
-      if (hasNatureModifier && selectedNature.decreasedStatId === id) {
+      if (hasNatureModifier && selectedNature?.decreasedStatId === id) {
         const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
         return [id, Math.floor((base + 5 + point) * 0.9)];
       }
@@ -617,7 +604,7 @@ export function TrainingSimulator({
             type="button"
             onClick={() => setNatureMatrixOpen(true)}
           >
-            <span>{selectedNature.name}</span>
+            <span>{selectedNature?.name ?? "性格を選択"}</span>
             <small>マトリックス表から選ぶ</small>
           </button>
         </div>
@@ -652,7 +639,7 @@ export function TrainingSimulator({
       <div className={styles.statTable}>
         <div className={styles.statLabels}><b>能力</b><b>種族値</b><b>順位</b><b>能力P</b><b>実数値</b><b>ランキング</b></div>
         {orderedStats.map((stat) => <div className={styles.statRow} key={stat.id}>
-          <strong>{STAT_NAMES[stat.id] ?? stat.name}{hasNatureModifier && selectedNature.increasedStatId === stat.id ? <NatureCaret direction="up" /> : hasNatureModifier && selectedNature.decreasedStatId === stat.id ? <NatureCaret direction="down" /> : null}</strong><span>{stat.baseStat}</span><span className={styles.rankBadge}>{baseStatRanks[stat.id] ? `${baseStatRanks[stat.id]}位` : "-"}</span>
+          <strong>{STAT_NAMES[stat.id] ?? stat.name}{hasNatureModifier && selectedNature?.increasedStatId === stat.id ? <NatureCaret direction="up" /> : hasNatureModifier && selectedNature?.decreasedStatId === stat.id ? <NatureCaret direction="down" /> : null}</strong><span>{stat.baseStat}</span><span className={styles.rankBadge}>{baseStatRanks[stat.id] ? `${baseStatRanks[stat.id]}位` : "-"}</span>
           <div className={styles.pointControl}><input aria-label={`${stat.name}の能力ポイント`} type="number" min="0" max="32" value={abilityPoints[stat.id] ?? 0} onChange={(e) => changeAbilityPoint(stat.id, Number(e.target.value))} /><input aria-label={`${stat.name}の能力ポイントスライダー`} type="range" min="0" max="32" value={abilityPoints[stat.id] ?? 0} onChange={(e) => changeAbilityPoint(stat.id, Number(e.target.value))} /></div>
           <b>{actualStats[stat.id]}</b>
           <button className={styles.statRankingButton} type="button" onClick={() => setRankingStatId(stat.id)}>
