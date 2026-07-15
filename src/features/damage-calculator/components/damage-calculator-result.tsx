@@ -46,7 +46,7 @@ function DamageOutcome({
         />
       </span>
       <small className={styles.damageRange}>
-        {outcome.minimum}-{outcome.maximum} / HP {outcome.defenderHp}
+        {outcome.minimumPercent.toFixed(1)}-{outcome.maximumPercent.toFixed(1)}%
       </small>
     </div>
   );

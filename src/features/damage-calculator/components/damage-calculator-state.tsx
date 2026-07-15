@@ -13,6 +13,7 @@ import { ADJUSTABLE_STAT_IDS, STAT_IDS } from "./damage-calculator-display";
 import type {
   AdjustableStatId,
   DamageSide,
+  NatureCorrection,
   SpeedComparisonRow,
   StatAdjustment,
 } from "./damage-calculator-types";
@@ -28,7 +29,19 @@ export type StatAdjustmentState = Record<
  * @returns 能力ポイント、能力ランク、性格補正をすべて未補正にした入力値。
  */
 function createDefaultAdjustment(): StatAdjustment {
-  return { point: 0, rank: 0, nature: false };
+  return { point: 0, rank: 0, nature: "neutral" };
+}
+
+/**
+ * ダメージ計算ページで、三択の性格補正を実数値計算用の倍率へ変換する。
+ *
+ * @param nature - 上昇補正、下降補正、補正なしのいずれか。
+ * @returns 実数値へ掛ける性格倍率。
+ */
+function getNatureMultiplier(nature: NatureCorrection) {
+  if (nature === "up") return 1.1;
+  if (nature === "down") return 0.9;
+  return 1;
 }
 
 /**
@@ -61,19 +74,19 @@ export function createDefaultAdjustmentState(): StatAdjustmentState {
  * @param pokemon - 実数値を計算する対象ポケモン。
  * @param statId - HP、攻撃、防御など計算対象の能力ID。
  * @param point - 能力ポイント補正。
- * @param nature - 性格補正を上昇補正として適用するか。
+ * @param nature - 性格補正の向き。HPでは無視する。
  * @returns 指定能力の実数値。
  */
 function calculateActualStat(
   pokemon: DamageCalculatorPokemon,
   statId: (typeof STAT_IDS)[number],
   point = 0,
-  nature = false,
+  nature: NatureCorrection = "neutral",
 ) {
   const baseStat = pokemon.stats[statId] ?? 1;
   const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
   if (statId === "hp") return baseStat === 1 ? 1 : base + 50 + 10 + point;
-  return Math.floor((base + 5 + point) * (nature ? 1.1 : 1));
+  return Math.floor((base + 5 + point) * getNatureMultiplier(nature));
 }
 
 /**
@@ -81,14 +94,14 @@ function calculateActualStat(
  *
  * @param pokemon - 素早さを計算する対象ポケモン。未選択ならnull。
  * @param point - 素早さに振る能力ポイント。
- * @param nature - 素早さ上昇性格として扱うか。
+ * @param nature - 素早さの性格補正。
  * @param scarf - こだわりスカーフ補正を適用するか。
  * @returns 表示用の素早さ実数値。ポケモン未選択時はnull。
  */
 function calculateSpeedValue(
   pokemon: DamageCalculatorPokemon | null,
   point: number,
-  nature: boolean,
+  nature: NatureCorrection,
   scarf = false,
 ) {
   if (!pokemon) return null;
@@ -111,26 +124,26 @@ export function createSpeedComparisonRows(
     {
       id: "scarf-fastest",
       label: "スカーフ最速",
-      attacker: calculateSpeedValue(attacker, 32, true, true),
-      defender: calculateSpeedValue(defender, 32, true, true),
+      attacker: calculateSpeedValue(attacker, 32, "up", true),
+      defender: calculateSpeedValue(defender, 32, "up", true),
     },
     {
       id: "fastest",
       label: "最速",
-      attacker: calculateSpeedValue(attacker, 32, true),
-      defender: calculateSpeedValue(defender, 32, true),
+      attacker: calculateSpeedValue(attacker, 32, "up"),
+      defender: calculateSpeedValue(defender, 32, "up"),
     },
     {
       id: "semi-fast",
       label: "準速",
-      attacker: calculateSpeedValue(attacker, 32, false),
-      defender: calculateSpeedValue(defender, 32, false),
+      attacker: calculateSpeedValue(attacker, 32, "neutral"),
+      defender: calculateSpeedValue(defender, 32, "neutral"),
     },
     {
       id: "uninvested",
       label: "無振り",
-      attacker: calculateSpeedValue(attacker, 0, false),
-      defender: calculateSpeedValue(defender, 0, false),
+      attacker: calculateSpeedValue(attacker, 0, "neutral"),
+      defender: calculateSpeedValue(defender, 0, "neutral"),
     },
   ];
 }
@@ -227,18 +240,23 @@ export function getRelevantStatIds(move: DamageCalculatorMove | undefined) {
  * @param build - 反映元の育成案。
  * @param statId - 判定対象の能力ID。
  * @param natures - catalog.dbから読んだ性格一覧。
- * @returns 指定能力に上昇補正がかかるならtrue。
+ * @returns 指定能力にかかる性格補正の向き。
  */
-function hasPositiveNatureForStat(
+function getNatureCorrectionForStat(
   build: TrainingBuild,
   statId: AdjustableStatId,
   natures: Nature[],
-) {
+): NatureCorrection {
   const selectedNature = natures.find(({ id }) => id === build.nature);
-  return (
-    selectedNature?.increasedStatId === statId &&
-    selectedNature.increasedStatId !== selectedNature.decreasedStatId
-  );
+  if (
+    !selectedNature ||
+    selectedNature.increasedStatId === selectedNature.decreasedStatId
+  ) {
+    return "neutral";
+  }
+  if (selectedNature.increasedStatId === statId) return "up";
+  if (selectedNature.decreasedStatId === statId) return "down";
+  return "neutral";
 }
 
 /**
@@ -258,7 +276,7 @@ export function createStatAdjustmentsFromBuild(
       {
         point: build.abilityPoints[statId] ?? 0,
         rank: 0,
-        nature: hasPositiveNatureForStat(build, statId, natures),
+        nature: getNatureCorrectionForStat(build, statId, natures),
       },
     ]),
   ) as Record<AdjustableStatId, StatAdjustment>;

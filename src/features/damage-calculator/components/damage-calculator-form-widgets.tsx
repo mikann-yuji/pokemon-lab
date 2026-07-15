@@ -13,7 +13,7 @@ import type {
 } from "../domain/damage-calculator-types";
 import { TYPE_LABELS } from "./damage-calculator-display";
 import { TypeBadge } from "./damage-calculator-pokemon-widgets";
-import type { StatAdjustment } from "./damage-calculator-types";
+import type { NatureCorrection, StatAdjustment } from "./damage-calculator-types";
 import styles from "../styles/damage-calculator.module.css";
 
 // ダメージ計算画面の「入力フォーム系」だけを集めたファイル。
@@ -373,6 +373,12 @@ export function DamageStatControls({
 }) {
   // 能力ポイント、能力ランク、性格補正を1セットで編集する共通UI。
   // 攻撃側/防御側/HPで同じ部品を使い、必要ない入力だけ showRank/showNature で隠す。
+  const natureOptions: { value: NatureCorrection; label: string }[] = [
+    { value: "up", label: "上昇" },
+    { value: "neutral", label: "なし" },
+    { value: "down", label: "下降" },
+  ];
+
   return (
     <div className={styles.statControls}>
       <div className={styles.statControlsHeader}>
@@ -427,14 +433,23 @@ export function DamageStatControls({
         ) : null}
       </div>
       {showNature ? (
-        <label className={styles.conditionToggle}>
-          <input
-            type="checkbox"
-            checked={value.nature}
-            onChange={(event) => onChange({ nature: event.target.checked })}
-          />
-          性格補正あり
-        </label>
+        <fieldset className={styles.natureRadioGroup}>
+          <legend>性格補正</legend>
+          <div>
+            {natureOptions.map((option) => (
+              <label className={styles.natureRadio} key={option.value}>
+                <input
+                  type="radio"
+                  name={`${title}-${statLabel}-nature`}
+                  value={option.value}
+                  checked={value.nature === option.value}
+                  onChange={() => onChange({ nature: option.value })}
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
       ) : null}
     </div>
   );

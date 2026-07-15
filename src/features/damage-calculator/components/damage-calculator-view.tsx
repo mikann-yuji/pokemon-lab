@@ -120,6 +120,38 @@ type DamageCalculatorViewProps = {
   onSpeedModalOpenChange: (open: boolean) => void;
 };
 
+/**
+ * ダメージ計算ページで、攻撃側に表示する能力補正欄を決める。
+ *
+ * @param selectedMove - 現在選択されている技。未選択ならundefined。
+ * @param relevantStatId - 技選択済みのときに計算へ使う攻撃能力。
+ * @returns 表示する攻撃能力ID。技未選択時はA/Cを先に編集できるようにする。
+ */
+function getAttackerAdjustmentStatIds(
+  selectedMove: DamageCalculatorMove | undefined,
+  relevantStatId: AdjustableStatId | null,
+): AdjustableStatId[] {
+  return selectedMove && relevantStatId
+    ? [relevantStatId]
+    : ["attack", "special-attack"];
+}
+
+/**
+ * ダメージ計算ページで、防御側に表示する能力補正欄を決める。
+ *
+ * @param selectedMove - 現在選択されている技。未選択ならundefined。
+ * @param relevantStatId - 技選択済みのときに計算へ使う防御能力。
+ * @returns 表示する防御能力ID。HPは常に出し、技未選択時はB/Dも先に編集できるようにする。
+ */
+function getDefenderAdjustmentStatIds(
+  selectedMove: DamageCalculatorMove | undefined,
+  relevantStatId: AdjustableStatId | null,
+): AdjustableStatId[] {
+  return selectedMove && relevantStatId
+    ? ["hp", relevantStatId]
+    : ["hp", "defense", "special-defense"];
+}
+
 export function DamageCalculatorView({
   pokemonCatalog,
   heldItems,
@@ -170,6 +202,15 @@ export function DamageCalculatorView({
   onTerrainChange,
   onSpeedModalOpenChange,
 }: DamageCalculatorViewProps) {
+  const attackerAdjustmentStatIds = getAttackerAdjustmentStatIds(
+    selectedMove,
+    relevantStatIds.attacker,
+  );
+  const defenderAdjustmentStatIds = getDefenderAdjustmentStatIds(
+    selectedMove,
+    relevantStatIds.defender,
+  );
+
   return (
     <form className={styles.calculator} onSubmit={(event) => event.preventDefault()}>
       {/* 攻撃側。技選択と攻撃側補正はchildrenとしてこのパネルに差し込む。 */}
@@ -213,16 +254,15 @@ export function DamageCalculatorView({
           disabled={!attacker}
           onChange={onMoveChange}
         />
-        {selectedMove && relevantStatIds.attacker ? (
+        {attackerAdjustmentStatIds.map((statId) => (
           <DamageStatControls
+            key={statId}
             title="攻撃側の補正"
-            statLabel={STAT_LABELS[relevantStatIds.attacker]}
-            value={statAdjustments.attacker[relevantStatIds.attacker]}
-            onChange={(values) =>
-              onStatAdjustmentChange("attacker", relevantStatIds.attacker!, values)
-            }
+            statLabel={STAT_LABELS[statId]}
+            value={statAdjustments.attacker[statId]}
+            onChange={(values) => onStatAdjustmentChange("attacker", statId, values)}
           />
-        ) : null}
+        ))}
       </BattleSidePanel>
 
       {/* 攻守交代は左右の入力を入れ替える操作なので、2つのパネルの間に置く。 */}
@@ -257,26 +297,17 @@ export function DamageCalculatorView({
         }
         onHeldItemChange={(itemId) => onHeldItemChange("defender", itemId)}
       >
-        {selectedMove ? (
+        {defenderAdjustmentStatIds.map((statId) => (
           <DamageStatControls
-            title="防御側のHP"
-            statLabel={STAT_LABELS.hp}
-            value={statAdjustments.defender.hp}
-            showRank={false}
-            showNature={false}
-            onChange={(values) => onStatAdjustmentChange("defender", "hp", values)}
+            key={statId}
+            title={statId === "hp" ? "防御側のHP" : "防御側の補正"}
+            statLabel={STAT_LABELS[statId]}
+            value={statAdjustments.defender[statId]}
+            showRank={statId !== "hp"}
+            showNature={statId !== "hp"}
+            onChange={(values) => onStatAdjustmentChange("defender", statId, values)}
           />
-        ) : null}
-        {selectedMove && relevantStatIds.defender ? (
-          <DamageStatControls
-            title="防御側の補正"
-            statLabel={STAT_LABELS[relevantStatIds.defender]}
-            value={statAdjustments.defender[relevantStatIds.defender]}
-            onChange={(values) =>
-              onStatAdjustmentChange("defender", relevantStatIds.defender!, values)
-            }
-          />
-        ) : null}
+        ))}
       </BattleSidePanel>
 
       {/* 天候・フィールドは攻防どちらにも属さない共通条件。 */}

@@ -9,10 +9,12 @@ export type AdjustableStatId =
   | "special-attack"
   | "special-defense";
 
+export type NatureCorrection = "up" | "neutral" | "down";
+
 export type StatAdjustment = {
   point: number;
   rank: number;
-  nature: boolean;
+  nature: NatureCorrection;
 };
 
 export type SpeedComparisonRow = {
