@@ -4,7 +4,8 @@ import type { CalculationResult } from "./damage-calculator-types";
 import styles from "../styles/damage-calculator.module.css";
 
 type HpBarStyle = CSSProperties & {
-  "--remaining-hp": string;
+  "--minimum-damage": string;
+  "--maximum-damage": string;
 };
 
 function clampPercent(value: number) {
@@ -22,10 +23,14 @@ function DamageOutcome({
   outcome: DamageCalculation;
   critical?: boolean;
 }) {
-  // 最大ダメージを受けた後の残HPをバーで表す。
-  // keyにダメージ範囲を含めることで、再計算ごとにCSSアニメーションを最初から走らせる。
-  const remainingHp = clampPercent(100 - outcome.maximumPercent);
-  const barStyle: HpBarStyle = { "--remaining-hp": `${remainingHp}%` };
+  // ダメージ幅をHPバー上に重ねる。
+  // 薄い最大乱数バーの上に濃い最低乱数バーを描くと、乱数の広がりを小さい面積で読める。
+  const minimumDamage = clampPercent(outcome.minimumPercent);
+  const maximumDamage = clampPercent(outcome.maximumPercent);
+  const barStyle: HpBarStyle = {
+    "--minimum-damage": `${minimumDamage}%`,
+    "--maximum-damage": `${maximumDamage}%`,
+  };
 
   return (
     <div className={`${styles.outcome} ${critical ? styles.criticalOutcome : ""}`}>
@@ -36,18 +41,12 @@ function DamageOutcome({
       <em className={styles.koLabel}>{outcome.koLabel}</em>
       <span
         className={styles.damageBar}
-        aria-label={`残りHP ${remainingHp.toFixed(1)}%`}
+        aria-label={`ダメージ ${minimumDamage.toFixed(1)}%から${maximumDamage.toFixed(1)}%`}
         key={`${title}-${outcome.minimum}-${outcome.maximum}-${outcome.maximumPercent}`}
       >
-        <span className={styles.remainingHpBar} style={barStyle} />
-        <span
-          className={styles.minimumDamageMarker}
-          style={{ left: `${clampPercent(100 - outcome.minimumPercent)}%` }}
-        />
+        <span className={styles.maximumDamageBar} style={barStyle} />
+        <span className={styles.minimumDamageBar} style={barStyle} />
       </span>
-      <small className={styles.damageRange}>
-        {outcome.minimumPercent.toFixed(1)}-{outcome.maximumPercent.toFixed(1)}%
-      </small>
     </div>
   );
 }

@@ -757,8 +757,7 @@ a.pokemonSummary:focus-visible {
   align-items: center;
 }
 
-.pointControl button,
-.rankStepper button {
+.pointControl button {
   min-width: 2rem;
   min-height: 32px;
   border: 1px solid #b9cae0;
@@ -767,6 +766,20 @@ a.pokemonSummary:focus-visible {
   color: #172b4d;
   cursor: pointer;
   font: inherit;
+  font-weight: 950;
+}
+
+.rankStepper button {
+  min-width: 1.7rem;
+  min-height: 26px;
+  padding: 0.12rem 0.32rem;
+  border: 1px solid #b9cae0;
+  border-radius: 8px;
+  background: #eef6ff;
+  color: #172b4d;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
   font-weight: 950;
 }
 
@@ -1075,13 +1088,6 @@ a.pokemonSummary:focus-visible {
   box-shadow: 0 0 0 1px rgb(23 43 77 / 18%);
 }
 
-.damageRange {
-  grid-column: 2 / -1;
-  color: rgb(255 255 255 / 68%);
-  font-size: 0.62rem;
-  font-weight: 850;
-}
-
 @keyframes hpDrain {
   from {
     width: 100%;
@@ -1093,11 +1099,35 @@ a.pokemonSummary:focus-visible {
 }
 
 .maximumDamageBar {
+  width: var(--maximum-damage);
   background: rgb(116 214 108 / 42%);
+  animation: damageFillMax 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .minimumDamageBar {
+  width: var(--minimum-damage);
   background: #64d258;
+  animation: damageFillMin 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes damageFillMax {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: var(--maximum-damage);
+  }
+}
+
+@keyframes damageFillMin {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: var(--minimum-damage);
+  }
 }
 
 .outcomeTitle {
