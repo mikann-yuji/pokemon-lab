@@ -42,7 +42,10 @@ import { useDamageCalculatorUserData } from "./use-damage-calculator-user-data";
 import { useDamageHistoryPersistence } from "./use-damage-history-persistence";
 
 /**
- * Coordinates battle-side selections, user data, and damage calculation.
+ * ダメージ計算ページで、画面状態・保存済みデータ・計算実行をつなぐcontroller。
+ *
+ * @param props - catalog.dbから読み込んだポケモン、持ち物、天候、フィールド、タイプ相性。
+ * @returns 通常ダメージ計算ページの入力UIと計算結果UI。
  */
 export function DamageCalculator({
   pokemonCatalog,
@@ -180,6 +183,13 @@ export function DamageCalculator({
       defender: toMembers(selectedTeams.defender),
     };
   }, [buildById, pokemonCatalog, selectedTeams]);
+  /**
+   * ダメージ計算ページで、選択中ポケモンから育成詳細ページへのリンクを作る。
+   *
+   * @param pokemon - リンク対象のポケモン。未選択ならnull。
+   * @param buildId - 選択中の育成案ID。未選択ならnull。
+   * @returns 育成詳細ページURL。ポケモン未選択ならundefined。
+   */
   const getTrainingDetailHref = (
     pokemon: DamageCalculatorPokemon | null,
     buildId: number | null,
@@ -194,7 +204,12 @@ export function DamageCalculator({
       : `/training/${pokemon.id}`;
   };
 
-  // Changing the attacker invalidates the previously selected move and result.
+  /**
+   * ダメージ計算ページで、攻撃側ポケモンの直接選択を反映する。
+   *
+   * @param pokemon - 新しく攻撃側に選ぶポケモン。選択解除ならnull。
+   * @returns 戻り値なし。
+   */
   function selectAttacker(pokemon: DamageCalculatorPokemon | null) {
     selectPokemon("attacker", pokemon);
     resetSideForDirectPokemon("attacker");
@@ -203,12 +218,24 @@ export function DamageCalculator({
     setPreservedMove(null);
   }
 
-  // Changing the defender also invalidates the result for the old matchup.
+  /**
+   * ダメージ計算ページで、防御側ポケモンの直接選択を反映する。
+   *
+   * @param pokemon - 新しく防御側に選ぶポケモン。選択解除ならnull。
+   * @returns 戻り値なし。
+   */
   function selectDefender(pokemon: DamageCalculatorPokemon | null) {
     selectPokemon("defender", pokemon);
     resetSideForDirectPokemon("defender");
   }
 
+  /**
+   * ダメージ計算ページで、攻撃側または防御側の持ち物変更を反映する。
+   *
+   * @param side - 持ち物を変更する側。
+   * @param itemId - 選択された持ち物ID。持ち物なしなら空文字。
+   * @returns 戻り値なし。
+   */
   function changeHeldItem(side: DamageSide, itemId: string) {
     const item = heldItems.find(({ id }) => id === itemId) ?? null;
     const pokemon = side === "attacker" ? attacker : defender;
@@ -218,6 +245,13 @@ export function DamageCalculator({
     }
   }
 
+  /**
+   * ダメージ計算ページで、攻撃側または防御側の特性変更を反映する。
+   *
+   * @param side - 特性を変更する側。
+   * @param abilityId - 選択された特性ID。特性なしなら空文字。
+   * @returns 戻り値なし。
+   */
   function changeAbility(side: DamageSide, abilityId: string) {
     const selection = side === "attacker" ? attackerSelection : defenderSelection;
     const ability =
@@ -226,6 +260,14 @@ export function DamageCalculator({
     setAbilityConditionEnabled(side, false);
   }
 
+  /**
+   * ダメージ計算ページで、能力ポイント・ランク・性格補正の入力変更を保存する。
+   *
+   * @param side - 補正を変更する側。
+   * @param statId - 補正対象の能力ID。
+   * @param values - 変更された補正値の一部。
+   * @returns 戻り値なし。
+   */
   function changeStatAdjustment(
     side: DamageSide,
     statId: AdjustableStatId,
@@ -234,11 +276,25 @@ export function DamageCalculator({
     setStatAdjustment(side, statId, values);
   }
 
+  /**
+   * ダメージ計算ページで、モーダルから選ばれたバトルチームを現在の側に紐づける。
+   *
+   * @param side - チームを選ぶ側。
+   * @param team - 選択されたバトルチーム。
+   * @returns 戻り値なし。
+   */
   function selectBattleTeam(side: DamageSide, team: BattleTeam) {
     setSelectedTeamId(side, team.id ?? null);
     setTeamModalSide(null);
   }
 
+  /**
+   * ダメージ計算ページで、バトルチーム内の育成案を攻撃側/防御側へ反映する。
+   *
+   * @param side - 育成案を反映する側。
+   * @param build - 選択された保存済み育成案。
+   * @returns 戻り値なし。
+   */
   function selectTeamMember(side: DamageSide, build: TrainingBuild) {
     const pokemon = pokemonCatalog.find(({ id }) => id === build.pokemonId);
     if (!pokemon) return;
@@ -262,6 +318,11 @@ export function DamageCalculator({
     }
   }
 
+  /**
+   * ダメージ計算ページで、攻撃側と防御側の入力状態を入れ替える。
+   *
+   * @returns 戻り値なし。
+   */
   function swapBattleSides() {
     swapStoreSides();
     const nextMove =
@@ -277,8 +338,11 @@ export function DamageCalculator({
   }
 
   /**
-   * Restores a pokemon from local history.
-   * Missing IDs are ignored because the static catalog may have changed.
+   * ダメージ計算ページで、履歴からポケモンと使用技を復元する。
+   *
+   * @param side - 復元先の履歴種別。
+   * @param history - 選択された履歴レコード。
+   * @returns 戻り値なし。catalog.dbに存在しないポケモンIDは無視する。
    */
   function restoreHistory(
     side: DamageHistorySide,

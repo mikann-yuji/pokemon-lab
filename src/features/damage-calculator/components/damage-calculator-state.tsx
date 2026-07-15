@@ -17,21 +17,25 @@ import type {
   StatAdjustment,
 } from "./damage-calculator-types";
 
-// このファイルは「画面の入力値を計算エンジンへ渡せる形に整える」層。
-// Reactの表示部品からは切り離し、能力補正・育成案反映・履歴選択の状態だけを扱う。
-
 export type StatAdjustmentState = Record<
   DamageSide,
   Record<AdjustableStatId, StatAdjustment>
 >;
 
-// 補正入力の最小単位。能力ポイント、ランク、性格補正の3つを常に同じ形で持つ。
+/**
+ * ダメージ計算ページで、能力補正入力の初期値を作る。
+ *
+ * @returns 能力ポイント、能力ランク、性格補正をすべて未補正にした入力値。
+ */
 function createDefaultAdjustment(): StatAdjustment {
   return { point: 0, rank: 0, nature: false };
 }
 
-// 攻撃側と防御側で同じ補正表を持たせる。
-// UI側は side/statId をキーにして、この表の一部だけを更新する。
+/**
+ * ダメージ計算ページで、攻撃側と防御側の能力補正入力テーブルを初期化する。
+ *
+ * @returns 攻撃側/防御側それぞれに未補正の能力補正を持つ状態。
+ */
 export function createDefaultAdjustmentState(): StatAdjustmentState {
   return {
     attacker: {
@@ -51,20 +55,36 @@ export function createDefaultAdjustmentState(): StatAdjustmentState {
   };
 }
 
+/**
+ * ダメージ計算ページで、Lv.50・個体値31前提の実数値を計算する。
+ *
+ * @param pokemon - 実数値を計算する対象ポケモン。
+ * @param statId - HP、攻撃、防御など計算対象の能力ID。
+ * @param point - 能力ポイント補正。
+ * @param nature - 性格補正を上昇補正として適用するか。
+ * @returns 指定能力の実数値。
+ */
 function calculateActualStat(
   pokemon: DamageCalculatorPokemon,
   statId: (typeof STAT_IDS)[number],
   point = 0,
   nature = false,
 ) {
-  // Champions想定のLv.50、個体値31固定の実数値。
-  // HPだけ式が違うので先に分岐し、その他能力は最後に性格補正を掛ける。
   const baseStat = pokemon.stats[statId] ?? 1;
   const base = Math.floor(((2 * baseStat + 31) * 50) / 100);
   if (statId === "hp") return baseStat === 1 ? 1 : base + 50 + 10 + point;
   return Math.floor((base + 5 + point) * (nature ? 1.1 : 1));
 }
 
+/**
+ * ダメージ計算ページの素早さ比較モーダルで、代表条件の素早さを計算する。
+ *
+ * @param pokemon - 素早さを計算する対象ポケモン。未選択ならnull。
+ * @param point - 素早さに振る能力ポイント。
+ * @param nature - 素早さ上昇性格として扱うか。
+ * @param scarf - こだわりスカーフ補正を適用するか。
+ * @returns 表示用の素早さ実数値。ポケモン未選択時はnull。
+ */
 function calculateSpeedValue(
   pokemon: DamageCalculatorPokemon | null,
   point: number,
@@ -76,12 +96,17 @@ function calculateSpeedValue(
   return scarf ? Math.floor(speed * 1.5) : speed;
 }
 
+/**
+ * ダメージ計算ページの素早さ比較モーダルに表示する代表行を作る。
+ *
+ * @param attacker - 攻撃側に選ばれているポケモン。
+ * @param defender - 防御側に選ばれているポケモン。
+ * @returns スカーフ最速、最速、準速、無振りの比較行。
+ */
 export function createSpeedComparisonRows(
   attacker: DamageCalculatorPokemon | null,
   defender: DamageCalculatorPokemon | null,
 ): SpeedComparisonRow[] {
-  // すばやさ比較モーダル用の代表値。
-  // 実戦で見たい「スカーフ最速・最速・準速・無振」を固定で並べる。
   return [
     {
       id: "scarf-fastest",
@@ -103,28 +128,39 @@ export function createSpeedComparisonRows(
     },
     {
       id: "uninvested",
-      label: "無振",
+      label: "無振り",
       attacker: calculateSpeedValue(attacker, 0, false),
       defender: calculateSpeedValue(defender, 0, false),
     },
   ];
 }
 
+/**
+ * ダメージ計算ページで、能力補正を重ねる前の無補正実数値表を作る。
+ *
+ * @param pokemon - 実数値表を作る対象ポケモン。
+ * @returns 全能力IDをキーにした無補正の実数値表。
+ */
 function createNeutralActualStats(pokemon: DamageCalculatorPokemon) {
-  // 指定能力だけを上書きする前に、全能力の無補正実数値を土台として用意する。
   return Object.fromEntries(
     STAT_IDS.map((statId) => [statId, calculateActualStat(pokemon, statId)]),
   );
 }
 
+/**
+ * ダメージ計算ページで、能力ポイント・ランク・性格補正を選択ポケモンへ反映する。
+ *
+ * @param pokemon - 補正を反映するポケモン。未選択ならnull。
+ * @param statId - 補正対象の能力ID。対象なしならnull。
+ * @param adjustment - 画面入力された補正値。対象なしならnull。
+ * @returns 補正済みポケモン。入力が不足している場合は元の値。
+ */
 export function applyStatAdjustment(
   pokemon: DamageCalculatorPokemon | null,
   statId: AdjustableStatId | null,
   adjustment: StatAdjustment | null,
 ): DamageCalculatorPokemon | null {
   if (!pokemon || !statId || !adjustment) return pokemon;
-  // ダメージ計算エンジンが読む actualStats と boosts の両方へ画面入力を反映する。
-  // HPはランク補正を持たないので boosts には書かない。
   return {
     ...pokemon,
     actualStats: {
@@ -144,6 +180,13 @@ export function applyStatAdjustment(
   };
 }
 
+/**
+ * ダメージ計算ページで、持ち物選択をポケモン状態へ反映する。
+ *
+ * @param pokemon - 持ち物を差し替えるポケモン。未選択ならnull。
+ * @param item - 選択された持ち物。持ち物なしならnull。
+ * @returns 持ち物を反映したポケモン。未選択時はnull。
+ */
 export function applyHeldItem(
   pokemon: DamageCalculatorPokemon | null,
   item: DamageCalculatorHeldItem | null,
@@ -151,6 +194,13 @@ export function applyHeldItem(
   return pokemon ? { ...pokemon, heldItem: item } : pokemon;
 }
 
+/**
+ * ダメージ計算ページで、特性選択をポケモン状態へ反映する。
+ *
+ * @param pokemon - 特性を差し替えるポケモン。未選択ならnull。
+ * @param ability - 選択された特性。特性なしならnull。
+ * @returns 特性を反映したポケモン。未選択時はnull。
+ */
 export function applyAbility(
   pokemon: DamageCalculatorPokemon | null,
   ability: DamageCalculatorAbility | null,
@@ -158,15 +208,27 @@ export function applyAbility(
   return pokemon ? { ...pokemon, selectedAbility: ability } : pokemon;
 }
 
+/**
+ * ダメージ計算ページで、選択技から攻撃側/防御側に必要な補正能力を決める。
+ *
+ * @param move - 選択されている技。未選択ならundefined。
+ * @returns 物理ならA/B、特殊ならC/D、未選択なら両側null。
+ */
 export function getRelevantStatIds(move: DamageCalculatorMove | undefined) {
-  // 技の分類から、攻撃側・防御側で編集すべき能力を決める。
-  // 物理ならA/B、特殊ならC/D。未選択時はUI側で補正欄を隠すため null にする。
   if (!move) return { attacker: null, defender: null };
   return move.damageClass === "physical"
     ? ({ attacker: "attack", defender: "defense" } as const)
     : ({ attacker: "special-attack", defender: "special-defense" } as const);
 }
 
+/**
+ * ダメージ計算ページで、保存済み育成案の性格が指定能力を上げるか判定する。
+ *
+ * @param build - 反映元の育成案。
+ * @param statId - 判定対象の能力ID。
+ * @param natures - catalog.dbから読んだ性格一覧。
+ * @returns 指定能力に上昇補正がかかるならtrue。
+ */
 function hasPositiveNatureForStat(
   build: TrainingBuild,
   statId: AdjustableStatId,
@@ -179,12 +241,17 @@ function hasPositiveNatureForStat(
   );
 }
 
+/**
+ * ダメージ計算ページで、育成案から能力補正入力欄へ復元する値を作る。
+ *
+ * @param build - 選択された保存済み育成案。
+ * @param natures - catalog.dbから読んだ性格一覧。
+ * @returns 能力IDごとの能力ポイント、ランク、性格補正。
+ */
 export function createStatAdjustmentsFromBuild(
   build: TrainingBuild,
   natures: Nature[],
 ): Record<AdjustableStatId, StatAdjustment> {
-  // 保存済み育成案を選んだとき、能力ポイントと性格補正を画面の補正入力へ復元する。
-  // ランクは戦闘中の一時状態なので、育成案からは常に0で始める。
   return Object.fromEntries(
     ADJUSTABLE_STAT_IDS.map((statId) => [
       statId,
@@ -197,13 +264,19 @@ export function createStatAdjustmentsFromBuild(
   ) as Record<AdjustableStatId, StatAdjustment>;
 }
 
+/**
+ * ダメージ計算ページで、育成案の能力ポイントと性格から実数値表を作る。
+ *
+ * @param pokemon - catalog.db由来の基礎ポケモン。
+ * @param build - 反映元の育成案。
+ * @param natures - catalog.dbから読んだ性格一覧。
+ * @returns ダメージ計算エンジンへ渡す実数値表。
+ */
 function toActualStats(
   pokemon: DamageCalculatorPokemon,
   build: TrainingBuild,
   natures: Nature[],
 ) {
-  // 育成案の能力ポイント・性格を、計算エンジンで使う実数値表へ変換する。
-  // ここで作った値が、ダメージ計算のポケモン個体値として扱われる。
   const selectedNature = natures.find(({ id }) => id === build.nature) ?? null;
   const hasNatureModifier = Boolean(
     selectedNature &&
@@ -227,14 +300,21 @@ function toActualStats(
   );
 }
 
+/**
+ * ダメージ計算ページで、バトルチーム内の育成案を計算用ポケモンへ反映する。
+ *
+ * @param pokemon - catalog.db由来の基礎ポケモン。
+ * @param build - 選択された保存済み育成案。
+ * @param natures - catalog.dbから読んだ性格一覧。
+ * @param heldItems - catalog.dbから読んだ持ち物一覧。
+ * @returns 名前、実数値、持ち物、特性、技を育成案で上書きしたポケモン。
+ */
 export function applyTrainingBuildToPokemon(
   pokemon: DamageCalculatorPokemon,
   build: TrainingBuild,
   natures: Nature[],
   heldItems: DamageCalculatorHeldItem[],
 ): DamageCalculatorPokemon {
-  // バトルチームから育成案を選んだとき、カタログ上のポケモンにユーザー保存値を重ねる。
-  // 名前、実数値、持ち物、特性、技をまとめて差し替える入口。
   const learnedMoveIds = new Set(build.moveIds.filter(Boolean));
   const learnedDamageMoves =
     learnedMoveIds.size === 0
@@ -252,12 +332,21 @@ export function applyTrainingBuildToPokemon(
   };
 }
 
+/**
+ * ダメージ計算ページのポケモン検索欄で、入力文字列と選択結果をまとめて扱う。
+ *
+ * @returns 選択済みポケモン、検索文字列、検索文字列setter、選択setter。
+ */
 export function usePokemonSelection() {
-  // コンボボックスの入力文字列と選択済みポケモンをひとまとめにした小さな状態管理。
-  // 選択時に検索欄も日本語名へ揃えることで、画面表示と内部状態のズレを防ぐ。
   const [pokemon, setPokemon] = useState<DamageCalculatorPokemon | null>(null);
   const [query, setQuery] = useState("");
 
+  /**
+   * ダメージ計算ページのポケモン検索欄で、選択結果と検索文字列を同期する。
+   *
+   * @param nextPokemon - 新しく選択するポケモン。選択解除ならnull。
+   * @returns 戻り値なし。
+   */
   function select(nextPokemon: DamageCalculatorPokemon | null) {
     setPokemon(nextPokemon);
     setQuery(nextPokemon?.nameJa ?? "");

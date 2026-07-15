@@ -9,9 +9,9 @@ import styles from "../styles/damage-calculator.module.css";
 type CalculatorMode = "normal" | "reverse";
 
 /**
- * Client-side loader for the static damage-calculator catalog.
- * The actual catalog data lives in a Zustand store so route re-entry and
- * normal/reverse tab switches can reuse the first catalog.db read.
+ * ダメージ計算ページで、catalog.db由来の静的データを読み込んで計算画面へ渡す。
+ *
+ * @returns 読み込み中/エラー表示、または通常計算・逆引き計算の切り替えUI。
  */
 export function DamageCalculatorCatalogLoader() {
   const [mode, setMode] = useState<CalculatorMode>("normal");

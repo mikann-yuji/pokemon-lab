@@ -17,6 +17,11 @@ import {
   type DamageHistoryRecord,
 } from "../infrastructure/damage-history-repository";
 
+/**
+ * 逆引きダメージ計算ページで、user.db由来の保存データをまとめて読み込む。
+ *
+ * @returns 履歴、バトルチーム、育成案、性格、履歴setter、読み込みエラー。
+ */
 export function useReverseDamageUserData() {
   const [attackerHistory, setAttackerHistory] = useState<DamageHistoryRecord[]>([]);
   const [defenderHistory, setDefenderHistory] = useState<DamageHistoryRecord[]>([]);
@@ -25,6 +30,12 @@ export function useReverseDamageUserData() {
   const [natures, setNatures] = useState<Nature[]>([]);
   const [teamLoadError, setTeamLoadError] = useState("");
 
+  /**
+   * 逆引きダメージ計算ページで、履歴・チーム・育成案・性格を並列に再取得する。
+   *
+   * @param active - falseなら取得完了後もReact stateを更新しない。
+   * @returns 読み込み完了を表すPromise。
+   */
   const loadUserData = useCallback(async (active = true) => {
     const [savedAttackers, savedDefenders, teams, builds, loadedNatures] =
       await Promise.all([

@@ -38,33 +38,145 @@ type DamageCalculatorStore = {
   abilityConditionEnabled: AbilityConditionState;
   statAdjustments: StatAdjustmentState;
 
-  // Small setters and actions that update related fields together.
+  /**
+   * ダメージ計算ページで、ポケモン検索欄の入力文字列を更新する。
+   *
+   * @param side - 検索欄を更新する側。
+   * @param query - 入力中の検索文字列。
+   * @returns 戻り値なし。
+   */
   setQuery: (side: DamageSide, query: string) => void;
+  /**
+   * ダメージ計算ページで、選択ポケモンと検索欄表示を同期して更新する。
+   *
+   * @param side - ポケモンを選択する側。
+   * @param pokemon - 選択するポケモン。選択解除ならnull。
+   * @returns 戻り値なし。
+   */
   selectPokemon: (side: DamageSide, pokemon: DamageCalculatorPokemon | null) => void;
+  /**
+   * ダメージ計算ページで、攻撃側の使用技IDを更新する。
+   *
+   * @param moveId - 選択された技ID。
+   * @returns 戻り値なし。
+   */
   setMoveId: (moveId: string) => void;
+  /**
+   * ダメージ計算ページで、攻守交代後にも一時保持する技を保存する。
+   *
+   * @param move - 一時保持する技。不要ならnull。
+   * @returns 戻り値なし。
+   */
   setPreservedMove: (move: DamageCalculatorMove | null) => void;
+  /**
+   * ダメージ計算ページで、天候選択を更新する。
+   *
+   * @param weatherId - 選択された天候ID。
+   * @returns 戻り値なし。
+   */
   setWeatherId: (weatherId: string) => void;
+  /**
+   * ダメージ計算ページで、フィールド選択を更新する。
+   *
+   * @param terrainId - 選択されたフィールドID。
+   * @returns 戻り値なし。
+   */
   setTerrainId: (terrainId: string) => void;
+  /**
+   * ダメージ計算ページで、攻撃側/防御側に紐づくバトルチームIDを更新する。
+   *
+   * @param side - チームを選ぶ側。
+   * @param teamId - 選択されたチームID。解除ならnull。
+   * @returns 戻り値なし。
+   */
   setSelectedTeamId: (side: DamageSide, teamId: number | null) => void;
+  /**
+   * ダメージ計算ページで、攻撃側/防御側に紐づく育成案IDを更新する。
+   *
+   * @param side - 育成案を選ぶ側。
+   * @param buildId - 選択された育成案ID。解除ならnull。
+   * @returns 戻り値なし。
+   */
   setSelectedBuildId: (side: DamageSide, buildId: number | null) => void;
+  /**
+   * ダメージ計算ページで、開いているバトルチーム選択モーダルの側を更新する。
+   *
+   * @param side - モーダル対象の側。閉じる場合はnull。
+   * @returns 戻り値なし。
+   */
   setTeamModalSide: (side: DamageSide | null) => void;
+  /**
+   * ダメージ計算ページで、素早さ比較モーダルの開閉状態を更新する。
+   *
+   * @param open - 開くならtrue、閉じるならfalse。
+   * @returns 戻り値なし。
+   */
   setSpeedModalOpen: (open: boolean) => void;
+  /**
+   * ダメージ計算ページで、メトロノームの連続使用回数を更新する。
+   *
+   * @param count - 連続使用回数。
+   * @returns 戻り値なし。
+   */
   setMetronomeConsecutiveUseCount: (count: number) => void;
+  /**
+   * ダメージ計算ページで、手動発動する特性条件のON/OFFを更新する。
+   *
+   * @param side - 条件を切り替える側。
+   * @param enabled - 有効ならtrue。
+   * @returns 戻り値なし。
+   */
   setAbilityConditionEnabled: (side: DamageSide, enabled: boolean) => void;
+  /**
+   * ダメージ計算ページで、単一能力の補正入力を部分更新する。
+   *
+   * @param side - 補正を更新する側。
+   * @param statId - 補正対象の能力ID。
+   * @param values - 更新する補正値。
+   * @returns 戻り値なし。
+   */
   setStatAdjustment: (
     side: DamageSide,
     statId: AdjustableStatId,
     values: Partial<StatAdjustment>,
   ) => void;
+  /**
+   * ダメージ計算ページで、片側の能力補正一式を育成案などから差し替える。
+   *
+   * @param side - 補正一式を更新する側。
+   * @param adjustments - 能力IDごとの補正値。
+   * @returns 戻り値なし。
+   */
   setSideStatAdjustments: (
     side: DamageSide,
     adjustments: StatAdjustmentState[DamageSide],
   ) => void;
+  /**
+   * ダメージ計算ページで、攻撃側と防御側の入力状態をまとめて入れ替える。
+   *
+   * @returns 戻り値なし。
+   */
   swapSides: () => void;
+  /**
+   * ダメージ計算ページで、直接ポケモン選択した側の育成案由来状態を初期化する。
+   *
+   * @param side - 初期化する側。
+   * @returns 戻り値なし。
+   */
   resetSideForDirectPokemon: (side: DamageSide) => void;
+  /**
+   * ダメージ計算ページで、通常計算store全体を初期状態へ戻す。
+   *
+   * @returns 戻り値なし。
+   */
   reset: () => void;
 };
 
+/**
+ * ダメージ計算ページで、通常計算storeの初期状態を作る。
+ *
+ * @returns Zustand storeへ投入する初期状態。
+ */
 function initialState() {
   return {
     pokemon: { attacker: null, defender: null },

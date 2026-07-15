@@ -10,8 +10,12 @@ import {
   type DamageHistoryRecord,
 } from "../infrastructure/damage-history-repository";
 
-// 攻撃側/防御側の最近使ったポケモン履歴を保存するhook。
-// 計算画面本体から副作用を切り離し、選択状態が揃った時だけ保存する。
+/**
+ * ダメージ計算ページで、攻撃側/防御側の最近使ったポケモン履歴を保存する。
+ *
+ * @param params - 選択中の攻撃側、防御側、技、履歴更新setter。
+ * @returns 戻り値なし。選択状態が揃った時だけuser.dbへ保存する。
+ */
 export function useDamageHistoryPersistence({
   attacker,
   defender,

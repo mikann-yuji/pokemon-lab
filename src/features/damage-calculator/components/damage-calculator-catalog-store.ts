@@ -30,6 +30,12 @@ type DamageCalculatorCatalogState = {
 
 let catalogLoadPromise: Promise<void> | null = null;
 
+/**
+ * ダメージ計算ページで、catalog.db読み込み失敗時に表示できるエラー文へ変換する。
+ *
+ * @param error - catch句で受け取った任意の例外値。
+ * @returns Errorならmessage、それ以外なら固定文言。
+ */
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "unknown error";
 }

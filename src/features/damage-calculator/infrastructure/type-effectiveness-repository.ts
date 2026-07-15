@@ -17,6 +17,11 @@ type TypeEffectivenessRow = SqliteRow & {
 
 let loadingTypeEffectiveness: Promise<TypeEffectivenessSource> | null = null;
 
+/**
+ * ダメージ計算ページで使うタイプ相性表をcatalog.dbから読み込み、共有キャッシュへ保存する。
+ *
+ * @returns 攻撃タイプから防御タイプへの倍率を引けるタイプ相性表。
+ */
 export function loadTypeEffectivenessFromCatalog() {
   loadingTypeEffectiveness ??= sqliteWorkerClient
     .catalogQuery<TypeEffectivenessRow>(`

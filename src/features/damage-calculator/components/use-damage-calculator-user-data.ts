@@ -17,8 +17,11 @@ import {
   type Nature,
 } from "@/features/training/infrastructure/training-catalog-repository";
 
-// 通常ダメージ計算画面が使うユーザー保存データをまとめて読むhook。
-// 履歴、バトルチーム、育成案、性格を同じタイミングで読み、同期後も再取得する。
+/**
+ * 通常ダメージ計算ページで、user.db由来の保存データをまとめて読み込む。
+ *
+ * @returns 履歴、バトルチーム、育成案、性格、履歴setter、読み込みエラー。
+ */
 export function useDamageCalculatorUserData() {
   const [attackerHistory, setAttackerHistory] = useState<
     DamageHistoryRecord[]
@@ -31,6 +34,12 @@ export function useDamageCalculatorUserData() {
   const [natures, setNatures] = useState<Nature[]>([]);
   const [teamLoadError, setTeamLoadError] = useState("");
 
+  /**
+   * 通常ダメージ計算ページで、履歴・チーム・育成案・性格を並列に再取得する。
+   *
+   * @param active - falseなら取得完了後もReact stateを更新しない。
+   * @returns 読み込み完了を表すPromise。
+   */
   const loadUserData = useCallback(async (active = true) => {
     // 画面に必要なuser.db由来データを並列で読む。
     // active=falseになった後は、遅れて解決したPromiseで画面を更新しない。

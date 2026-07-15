@@ -110,6 +110,8 @@ type TerrainRow = SqliteRow & {
 /**
  * ダメージ計算に必要なChampions対象ポケモンだけをcatalog.dbから読み込む。
  * 画面側で検索・選択を即時に行えるよう、種族値・タイプ・物理/特殊技をまとめた配列へ変換する。
+ *
+ * @returns ダメージ計算ページで選択できるポケモン一覧。
  */
 export async function getChampionsDamageCalculatorPokemon(): Promise<
   DamageCalculatorPokemon[]
@@ -298,6 +300,11 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
   }));
 }
 
+/**
+ * ダメージ計算ページで使うChampions使用可能持ち物をcatalog.dbから読み込む。
+ *
+ * @returns 持ち物名とダメージ補正定義を含む持ち物一覧。
+ */
 export async function getChampionsDamageCalculatorHeldItems(): Promise<
   DamageCalculatorHeldItem[]
 > {
@@ -335,6 +342,11 @@ export async function getChampionsDamageCalculatorHeldItems(): Promise<
   }));
 }
 
+/**
+ * ダメージ計算ページで選ぶ天候とフィールドをcatalog.dbから読み込む。
+ *
+ * @returns 天候一覧とフィールド一覧。
+ */
 export async function getChampionsDamageFieldConditions(): Promise<{
   weathers: DamageCalculatorWeather[];
   terrains: DamageCalculatorTerrain[];
