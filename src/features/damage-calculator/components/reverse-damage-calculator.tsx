@@ -16,6 +16,7 @@ import {
   type BattleTeam,
   type TrainingBuild,
 } from "@/features/training/infrastructure/training-build-repository";
+import type { TypeEffectivenessSource } from "@/domain/type-matchup";
 import {
   STAT_LABELS,
   applyTrainingBuildToPokemon,
@@ -49,11 +50,13 @@ export function ReverseDamageCalculator({
   heldItems,
   weathers,
   terrains,
+  typeEffectivenessSource,
 }: {
   pokemonCatalog: DamageCalculatorPokemon[];
   heldItems: DamageCalculatorHeldItem[];
   weathers: DamageCalculatorWeather[];
   terrains: DamageCalculatorTerrain[];
+  typeEffectivenessSource: TypeEffectivenessSource;
 }) {
   // 攻撃側/防御側のポケモン選択状態。検索欄の文字列もこのhookに含める。
   const attackerSelection = usePokemonSelection();
@@ -76,7 +79,6 @@ export function ReverseDamageCalculator({
     setDefenderHistory,
     teamLoadError,
     trainingBuilds,
-    typeEffectivenessSource,
   } = useReverseDamageUserData();
   const [selectedTeamIds, setSelectedTeamIds] = useState<TeamSelectionState>({
     attacker: null,

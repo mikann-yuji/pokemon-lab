@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
-import type { TypeEffectivenessSource } from "@/domain/type-matchup";
 import {
   getNatures,
   type Nature,
@@ -17,11 +16,8 @@ import {
   getDamageHistory,
   type DamageHistoryRecord,
 } from "../infrastructure/damage-history-repository";
-import { loadTypeEffectivenessFromCatalog } from "../infrastructure/type-effectiveness-repository";
 
 export function useReverseDamageUserData() {
-  const [typeEffectivenessSource, setTypeEffectivenessSource] =
-    useState<TypeEffectivenessSource | null>(null);
   const [attackerHistory, setAttackerHistory] = useState<DamageHistoryRecord[]>([]);
   const [defenderHistory, setDefenderHistory] = useState<DamageHistoryRecord[]>([]);
   const [battleTeams, setBattleTeams] = useState<BattleTeam[]>([]);
@@ -44,20 +40,6 @@ export function useReverseDamageUserData() {
     setBattleTeams(teams);
     setTrainingBuilds(builds);
     setNatures(loadedNatures);
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    void loadTypeEffectivenessFromCatalog()
-      .then((source) => {
-        if (active) setTypeEffectivenessSource(source);
-      })
-      .catch((caught: unknown) => {
-        console.error("Failed to load type effectiveness from catalog.", caught);
-      });
-    return () => {
-      active = false;
-    };
   }, []);
 
   useEffect(() => {
@@ -99,6 +81,5 @@ export function useReverseDamageUserData() {
     setTeamLoadError,
     teamLoadError,
     trainingBuilds,
-    typeEffectivenessSource,
   };
 }

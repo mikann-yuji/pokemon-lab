@@ -5,7 +5,6 @@ import type {
   DamageCalculatorMove,
   DamageCalculatorPokemon,
 } from "../domain/damage-calculator-types";
-import type { TypeEffectivenessSource } from "@/domain/type-matchup";
 import {
   createDefaultAdjustmentState,
   type StatAdjustmentState,
@@ -23,15 +22,14 @@ type PokemonSelectionState = Record<DamageSide, DamageCalculatorPokemon | null>;
 type PokemonQueryState = Record<DamageSide, string>;
 
 type DamageCalculatorStore = {
-  // 画面で直接編集する入力状態。
-  // 計算結果はここへ保存せず、selectorで取り出した入力から都度組み立てる。
+  // Editable form state for the normal damage calculator.
+  // Derived calculation results are intentionally kept outside this store.
   pokemon: PokemonSelectionState;
   query: PokemonQueryState;
   moveId: string;
   preservedMove: DamageCalculatorMove | null;
   weatherId: string;
   terrainId: string;
-  typeEffectivenessSource: TypeEffectivenessSource | null;
   selectedTeamIds: TeamSelectionState;
   selectedBuildIds: BuildSelectionState;
   teamModalSide: DamageSide | null;
@@ -40,14 +38,13 @@ type DamageCalculatorStore = {
   abilityConditionEnabled: AbilityConditionState;
   statAdjustments: StatAdjustmentState;
 
-  // 単純なsetter。複数項目をまとめて更新する業務判断は下のactionへ寄せる。
+  // Small setters and actions that update related fields together.
   setQuery: (side: DamageSide, query: string) => void;
   selectPokemon: (side: DamageSide, pokemon: DamageCalculatorPokemon | null) => void;
   setMoveId: (moveId: string) => void;
   setPreservedMove: (move: DamageCalculatorMove | null) => void;
   setWeatherId: (weatherId: string) => void;
   setTerrainId: (terrainId: string) => void;
-  setTypeEffectivenessSource: (source: TypeEffectivenessSource | null) => void;
   setSelectedTeamId: (side: DamageSide, teamId: number | null) => void;
   setSelectedBuildId: (side: DamageSide, buildId: number | null) => void;
   setTeamModalSide: (side: DamageSide | null) => void;
@@ -76,7 +73,6 @@ function initialState() {
     preservedMove: null,
     weatherId: "",
     terrainId: "",
-    typeEffectivenessSource: null,
     selectedTeamIds: { attacker: null, defender: null },
     selectedBuildIds: { attacker: null, defender: null },
     teamModalSide: null,
@@ -103,8 +99,6 @@ export const useDamageCalculatorStore = create<DamageCalculatorStore>((set) => (
   setPreservedMove: (preservedMove) => set({ preservedMove }),
   setWeatherId: (weatherId) => set({ weatherId }),
   setTerrainId: (terrainId) => set({ terrainId }),
-  setTypeEffectivenessSource: (typeEffectivenessSource) =>
-    set({ typeEffectivenessSource }),
   setTeamModalSide: (teamModalSide) => set({ teamModalSide }),
   setSpeedModalOpen: (speedModalOpen) => set({ speedModalOpen }),
   setMetronomeConsecutiveUseCount: (metronomeConsecutiveUseCount) =>

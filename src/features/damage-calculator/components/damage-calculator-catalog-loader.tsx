@@ -3,77 +3,52 @@
 import { useEffect, useState } from "react";
 import { DamageCalculator } from "./damage-calculator";
 import { ReverseDamageCalculator } from "./reverse-damage-calculator";
-import type {
-  DamageCalculatorHeldItem,
-  DamageCalculatorPokemon,
-  DamageCalculatorTerrain,
-  DamageCalculatorWeather,
-} from "../domain/damage-calculator-types";
-import {
-  getChampionsDamageFieldConditions,
-  getChampionsDamageCalculatorHeldItems,
-  getChampionsDamageCalculatorPokemon,
-} from "../infrastructure/damage-calculator-catalog-repository";
+import { useDamageCalculatorCatalogStore } from "./damage-calculator-catalog-store";
 import styles from "../styles/damage-calculator.module.css";
 
 type CalculatorMode = "normal" | "reverse";
 
 /**
- * ダメージ計算画面のClient Loader。
- * catalog.dbから計算対象ポケモンを読み、読み込み状態とエラーを画面へ反映する。
+ * Client-side loader for the static damage-calculator catalog.
+ * The actual catalog data lives in a Zustand store so route re-entry and
+ * normal/reverse tab switches can reuse the first catalog.db read.
  */
 export function DamageCalculatorCatalogLoader() {
-  const [pokemonCatalog, setPokemonCatalog] = useState<
-    DamageCalculatorPokemon[]
-  >([]);
-  const [heldItems, setHeldItems] = useState<DamageCalculatorHeldItem[]>([]);
-  const [weathers, setWeathers] = useState<DamageCalculatorWeather[]>([]);
-  const [terrains, setTerrains] = useState<DamageCalculatorTerrain[]>([]);
-  const [loaded, setLoaded] = useState(false);
-  const [loadError, setLoadError] = useState("");
   const [mode, setMode] = useState<CalculatorMode>("normal");
+  const pokemonCatalog = useDamageCalculatorCatalogStore(
+    (state) => state.pokemonCatalog,
+  );
+  const heldItems = useDamageCalculatorCatalogStore((state) => state.heldItems);
+  const weathers = useDamageCalculatorCatalogStore((state) => state.weathers);
+  const terrains = useDamageCalculatorCatalogStore((state) => state.terrains);
+  const typeEffectivenessSource = useDamageCalculatorCatalogStore(
+    (state) => state.typeEffectivenessSource,
+  );
+  const status = useDamageCalculatorCatalogStore((state) => state.status);
+  const error = useDamageCalculatorCatalogStore((state) => state.error);
+  const ensureLoaded = useDamageCalculatorCatalogStore(
+    (state) => state.ensureLoaded,
+  );
 
-  // ダメージ計算に必要な全カタログを1回だけ読み、以降の検索と計算はローカル配列で行う。
   useEffect(() => {
-    let active = true;
-    void Promise.all([
-      getChampionsDamageCalculatorPokemon(),
-      getChampionsDamageCalculatorHeldItems(),
-      getChampionsDamageFieldConditions(),
-    ])
-      .then(([catalog, items, fieldConditions]) => {
-        if (!active) return;
-        setPokemonCatalog(catalog);
-        setHeldItems(items);
-        setWeathers(fieldConditions.weathers);
-        setTerrains(fieldConditions.terrains);
-        setLoaded(true);
-      })
-      .catch((error: unknown) => {
-        console.error("catalog.dbからダメージ計算用データを読み込めませんでした。", error);
-        if (active) {
-          setLoadError("ダメージ計算用データを読み込めませんでした。");
-          setLoaded(true);
-        }
-      });
+    void ensureLoaded().catch((caught: unknown) => {
+      console.error("catalog.dbからダメージ計算用データを読み込めませんでした。", caught);
+    });
+  }, [ensureLoaded]);
 
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  if (loadError) {
+  if (status === "error") {
     return (
       <p className={styles.statusMessage} role="alert">
-        {loadError}
+        ダメージ計算用データを読み込めませんでした。
+        {error ? ` (${error})` : ""}
       </p>
     );
   }
 
-  if (!loaded) {
+  if (status !== "loaded" || !typeEffectivenessSource) {
     return (
       <p className={styles.statusMessage}>
-        ダメージ計算用データを読み込んでいます…
+        ダメージ計算用データを読み込んでいます...
       </p>
     );
   }
@@ -102,6 +77,7 @@ export function DamageCalculatorCatalogLoader() {
           heldItems={heldItems}
           weathers={weathers}
           terrains={terrains}
+          typeEffectivenessSource={typeEffectivenessSource}
         />
       ) : (
         <ReverseDamageCalculator
@@ -109,6 +85,7 @@ export function DamageCalculatorCatalogLoader() {
           heldItems={heldItems}
           weathers={weathers}
           terrains={terrains}
+          typeEffectivenessSource={typeEffectivenessSource}
         />
       )}
     </>

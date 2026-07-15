@@ -2,7 +2,7 @@
 
 /** Page-level state controller for the damage calculator. */
 
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { championsDamageCalculator } from "../config/champions-damage-ruleset";
 import type {
   DamageCalculatorHeldItem,
@@ -14,13 +14,13 @@ import {
   type DamageHistoryRecord,
   type DamageHistorySide,
 } from "../infrastructure/damage-history-repository";
-import { loadTypeEffectivenessFromCatalog } from "../infrastructure/type-effectiveness-repository";
 import {
   type BattleTeam,
   type TrainingBuild,
 } from "@/features/training/infrastructure/training-build-repository";
 import {
   getTypeEffectiveness,
+  type TypeEffectivenessSource,
 } from "@/domain/type-matchup";
 import { DamageCalculatorView } from "./damage-calculator-view";
 import type {
@@ -49,12 +49,14 @@ export function DamageCalculator({
   heldItems,
   weathers,
   terrains,
+  typeEffectivenessSource,
 }: {
   /** Full damage-calculator catalog loaded from catalog.db by the page. */
   pokemonCatalog: DamageCalculatorPokemon[];
   heldItems: DamageCalculatorHeldItem[];
   weathers: DamageCalculatorWeather[];
   terrains: DamageCalculatorTerrain[];
+  typeEffectivenessSource: TypeEffectivenessSource;
 }) {
   const attacker = useDamageCalculatorStore((state) => state.pokemon.attacker);
   const defender = useDamageCalculatorStore((state) => state.pokemon.defender);
@@ -110,12 +112,6 @@ export function DamageCalculator({
   const swapStoreSides = useDamageCalculatorStore((state) => state.swapSides);
   const resetSideForDirectPokemon = useDamageCalculatorStore(
     (state) => state.resetSideForDirectPokemon,
-  );
-  const typeEffectivenessSource = useDamageCalculatorStore(
-    (state) => state.typeEffectivenessSource,
-  );
-  const setTypeEffectivenessSource = useDamageCalculatorStore(
-    (state) => state.setTypeEffectivenessSource,
   );
   const {
     attackerHistory,
@@ -197,22 +193,6 @@ export function DamageCalculator({
       ? `/training/${pokemon.id}?build=${linkedBuildId}`
       : `/training/${pokemon.id}`;
   };
-
-  // user.db is browser-local, so user-specific records are loaded after mount.
-  useEffect(() => {
-    let active = true;
-    void loadTypeEffectivenessFromCatalog()
-      .then((source) => {
-        if (active) setTypeEffectivenessSource(source);
-      })
-      .catch((caught: unknown) => {
-        console.error("Failed to load type effectiveness from catalog.", caught);
-      });
-    return () => {
-      active = false;
-    };
-  }, [setTypeEffectivenessSource]);
-
 
   // Changing the attacker invalidates the previously selected move and result.
   function selectAttacker(pokemon: DamageCalculatorPokemon | null) {
