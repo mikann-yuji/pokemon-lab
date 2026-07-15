@@ -133,7 +133,6 @@ export function PokemonCombobox({
                 >
                   <span>
                     {pokemon.nameJa}
-                    <small>{pokemon.name}</small>
                   </span>
                 </li>
               );

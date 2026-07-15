@@ -205,40 +205,42 @@ export function PokemonSummary({
     return <div className={styles.placeholder}>ポケモンを選択</div>;
   }
 
-  return (
-    <div className={styles.pokemonSummary}>
+  const content = (
+    <>
       <div className={styles.pokemonArtwork}>
         {pokemon.imageUrl ? (
-          <PokemonImage pokemon={pokemon} alt={pokemon.nameJa} size={112} />
+          <PokemonImage pokemon={pokemon} alt={pokemon.nameJa} size={72} />
         ) : (
           <SmallPokemonName name={pokemon.nameJa} />
         )}
       </div>
       <div className={styles.pokemonSummaryBody}>
-        <div>
-          <strong>{pokemon.nameJa}</strong>
-          <small>{pokemon.name}</small>
+        <strong>{pokemon.nameJa}</strong>
+        <div className={styles.pokemonMeta}>
+          <div className={styles.typeBadges} aria-label={`${pokemon.nameJa}のタイプ`}>
+            {pokemon.types.map((typeName) => (
+              <TypeBadge typeName={typeName} key={typeName} />
+            ))}
+          </div>
+          <dl className={styles.baseStats}>
+            {STAT_IDS.map((statId) => (
+              <div key={statId}>
+                <dt>{BASE_STAT_LABELS[statId]}</dt>
+                <dd>{pokemon.stats[statId] ?? "-"}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
-        {href ? (
-          <Link className={styles.trainingLink} href={href}>
-            育成詳細
-          </Link>
-        ) : null}
-        <div className={styles.typeBadges} aria-label={`${pokemon.nameJa}のタイプ`}>
-          {pokemon.types.map((typeName) => (
-            <TypeBadge typeName={typeName} key={typeName} />
-          ))}
-        </div>
-        <dl className={styles.baseStats}>
-          {STAT_IDS.map((statId) => (
-            <div key={statId}>
-              <dt>{BASE_STAT_LABELS[statId]}</dt>
-              <dd>{pokemon.stats[statId] ?? "-"}</dd>
-            </div>
-          ))}
-        </dl>
       </div>
-    </div>
+    </>
+  );
+
+  return href ? (
+    <Link className={styles.pokemonSummary} href={href}>
+      {content}
+    </Link>
+  ) : (
+    <div className={styles.pokemonSummary}>{content}</div>
   );
 }
 

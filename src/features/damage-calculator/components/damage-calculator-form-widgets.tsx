@@ -181,10 +181,6 @@ export function MoveSelect({
   );
 }
 
-function formatAbilityModifier(ability: DamageCalculatorAbility) {
-  return ability.damageModifiers.length > 0 ? " / ダメージ補正あり" : "";
-}
-
 function hasManualAbilityCondition(ability: DamageCalculatorAbility | null) {
   return Boolean(
     ability?.damageModifiers.some((modifier) =>
@@ -200,11 +196,15 @@ function hasManualAbilityCondition(ability: DamageCalculatorAbility | null) {
   );
 }
 
+function formatAbilityModifier(ability: DamageCalculatorAbility) {
+  return ability.damageModifiers.length > 0 ? " / ダメージ補正あり" : "";
+}
+
 function AbilityOptionContent({ ability }: { ability: DamageCalculatorAbility }) {
   return (
-    <span>
-      {ability.name}
-      <small>{formatAbilityModifier(ability)}</small>
+    <span className={styles.abilityOptionContent}>
+      <strong>{ability.name}</strong>
+      <small>{formatAbilityModifier(ability) || ability.effect || "説明なし"}</small>
     </span>
   );
 }
@@ -220,23 +220,59 @@ export function AbilityField({
   onAbilityChange: (abilityId: string) => void;
   onConditionChange: (enabled: boolean) => void;
 }) {
+  const [open, setOpen] = useState(false);
   const selectedAbility = pokemon?.selectedAbility ?? null;
+
+  function selectAbility(abilityId: string) {
+    onAbilityChange(abilityId);
+    setOpen(false);
+  }
+
   return (
-    <label>
-      特性
-      <select
-        value={selectedAbility?.id ?? ""}
-        disabled={!pokemon}
-        onChange={(event) => onAbilityChange(event.target.value)}
+    <div className={styles.abilityField}>
+      <span>特性</span>
+      <div
+        className={styles.moveSelect}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+        }}
       >
-        <option value="">特性なし</option>
-        {pokemon?.abilities.map((ability) => (
-          <option value={ability.id} key={ability.id}>
-            {ability.name}
-          </option>
-        ))}
-      </select>
-      {selectedAbility ? <AbilityOptionContent ability={selectedAbility} /> : null}
+        <button
+          type="button"
+          className={styles.moveSelectButton}
+          disabled={!pokemon}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          onClick={() => setOpen((current) => !current)}
+        >
+          {selectedAbility?.name ?? "特性なし"}
+        </button>
+        {open && pokemon ? (
+          <div className={styles.moveOptions} role="listbox" aria-label="特性">
+            <button
+              type="button"
+              role="option"
+              aria-selected={!selectedAbility}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => selectAbility("")}
+            >
+              <span className={styles.movePlaceholder}>特性なし</span>
+            </button>
+            {pokemon.abilities.map((ability) => (
+              <button
+                type="button"
+                role="option"
+                aria-selected={ability.id === selectedAbility?.id}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => selectAbility(ability.id)}
+                key={ability.id}
+              >
+                <AbilityOptionContent ability={ability} />
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
       {hasManualAbilityCondition(selectedAbility) ? (
         <label className={styles.conditionToggle}>
           <input
@@ -247,7 +283,7 @@ export function AbilityField({
           条件を有効
         </label>
       ) : null}
-    </label>
+    </div>
   );
 }
 
@@ -322,33 +358,58 @@ export function DamageStatControls({
   onChange: (values: Partial<StatAdjustment>) => void;
 }) {
   return (
-    <div className={styles.statControlGroup}>
-      <div className={styles.statControlHeader}>
+    <div className={styles.statControls}>
+      <div className={styles.statControlsHeader}>
         <strong>{title}</strong>
         <span>{statLabel}</span>
       </div>
-      <label>
-        能力ポイント
-        <input
-          type="number"
-          min="0"
-          max="32"
-          value={value.point}
-          onChange={(event) => onChange({ point: Number(event.target.value) })}
-        />
-      </label>
-      {showRank ? (
-        <label>
-          能力ランク
+      <div className={styles.statControlGrid}>
+        <label className={styles.pointField}>
+          能力ポイント
+          <div className={styles.pointControl}>
+            <input
+              type="number"
+              min="0"
+              max="32"
+              value={value.point}
+              onChange={(event) => onChange({ point: Number(event.target.value) })}
+            />
+            <button type="button" onClick={() => onChange({ point: 32 })}>
+              32
+            </button>
+          </div>
           <input
-            type="number"
-            min="-6"
-            max="6"
-            value={value.rank}
-            onChange={(event) => onChange({ rank: Number(event.target.value) })}
+            type="range"
+            min="0"
+            max="32"
+            step="1"
+            value={value.point}
+            onChange={(event) => onChange({ point: Number(event.target.value) })}
           />
         </label>
-      ) : null}
+        {showRank ? (
+          <label className={styles.rankField}>
+            能力ランク
+            <div className={styles.rankStepper}>
+              <button
+                type="button"
+                onClick={() => onChange({ rank: Math.max(-6, value.rank - 1) })}
+              >
+                -
+              </button>
+              <span className={styles.rankValue}>
+                {value.rank > 0 ? `+${value.rank}` : value.rank}
+              </span>
+              <button
+                type="button"
+                onClick={() => onChange({ rank: Math.min(6, value.rank + 1) })}
+              >
+                +
+              </button>
+            </div>
+          </label>
+        ) : null}
+      </div>
       {showNature ? (
         <label className={styles.conditionToggle}>
           <input
