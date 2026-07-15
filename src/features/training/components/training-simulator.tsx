@@ -338,9 +338,18 @@ export function TrainingSimulator({
     DEFAULT_NATURE;
   const hasNatureModifier =
     selectedNature.increasedStatId !== selectedNature.decreasedStatId;
+  const orderedStats = useMemo(
+    () =>
+      STAT_IDS.map((statId) =>
+        pokemon.stats.find((stat) => stat.id === statId),
+      ).filter((stat): stat is (typeof pokemon.stats)[number] =>
+        Boolean(stat),
+      ),
+    [pokemon],
+  );
   // ChampionsではLv.50・個体値31固定。能力ポイントは性格補正の内側へ直接加算する。
   const actualStats = useMemo(() => Object.fromEntries(
-    pokemon.stats.map(({ id, baseStat }) => {
+    orderedStats.map(({ id, baseStat }) => {
       const point = abilityPoints[id] ?? 0;
       const natureModifier =
         hasNatureModifier && selectedNature.increasedStatId === id
@@ -352,7 +361,7 @@ export function TrainingSimulator({
       }
       return [id, calculateActualStat(baseStat, id, point, natureModifier)];
     }),
-  ), [abilityPoints, hasNatureModifier, pokemon.stats, selectedNature]);
+  ), [abilityPoints, hasNatureModifier, orderedStats, selectedNature]);
   const baseStatRanks = useMemo(
     () =>
       Object.fromEntries(
@@ -642,7 +651,7 @@ export function TrainingSimulator({
       <div className={styles.statHeader}><h2>能力値</h2><span>能力ポイント {pointTotal} / 66</span></div>
       <div className={styles.statTable}>
         <div className={styles.statLabels}><b>能力</b><b>種族値</b><b>順位</b><b>能力P</b><b>実数値</b><b>ランキング</b></div>
-        {pokemon.stats.map((stat) => <div className={styles.statRow} key={stat.id}>
+        {orderedStats.map((stat) => <div className={styles.statRow} key={stat.id}>
           <strong>{STAT_NAMES[stat.id] ?? stat.name}{hasNatureModifier && selectedNature.increasedStatId === stat.id ? <NatureCaret direction="up" /> : hasNatureModifier && selectedNature.decreasedStatId === stat.id ? <NatureCaret direction="down" /> : null}</strong><span>{stat.baseStat}</span><span className={styles.rankBadge}>{baseStatRanks[stat.id] ? `${baseStatRanks[stat.id]}位` : "-"}</span>
           <div className={styles.pointControl}><input aria-label={`${stat.name}の能力ポイント`} type="number" min="0" max="32" value={abilityPoints[stat.id] ?? 0} onChange={(e) => changeAbilityPoint(stat.id, Number(e.target.value))} /><input aria-label={`${stat.name}の能力ポイントスライダー`} type="range" min="0" max="32" value={abilityPoints[stat.id] ?? 0} onChange={(e) => changeAbilityPoint(stat.id, Number(e.target.value))} /></div>
           <b>{actualStats[stat.id]}</b>
