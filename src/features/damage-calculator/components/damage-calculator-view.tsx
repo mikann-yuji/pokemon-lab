@@ -42,13 +42,18 @@ import type {
   SpeedComparisonRow,
   StatAdjustment,
 } from "./damage-calculator-types";
-import type { StatAdjustmentState, usePokemonSelection } from "./damage-calculator-state";
+import type { StatAdjustmentState } from "./damage-calculator-state";
 import styles from "../styles/damage-calculator.module.css";
 
 // 通常ダメージ計算ページの見た目を組み立てるファイル。
 // 状態更新や計算は親へ任せ、ここでは「どの入力をどこに置くか」だけを扱う。
 
-type PokemonSelection = ReturnType<typeof usePokemonSelection>;
+type PokemonSelection = {
+  pokemon: DamageCalculatorPokemon | null;
+  query: string;
+  setQuery: (query: string) => void;
+  select: (nextPokemon: DamageCalculatorPokemon | null) => void;
+};
 type TeamMembersBySide = Record<
   DamageSide,
   { build: TrainingBuild; pokemon: DamageCalculatorPokemon }[]

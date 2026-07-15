@@ -2,11 +2,10 @@
 
 /** Page-level state controller for the damage calculator. */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { championsDamageCalculator } from "../config/champions-damage-ruleset";
 import type {
   DamageCalculatorHeldItem,
-  DamageCalculatorMove,
   DamageCalculatorPokemon,
   DamageCalculatorTerrain,
   DamageCalculatorWeather,
@@ -22,7 +21,6 @@ import {
 } from "@/features/training/infrastructure/training-build-repository";
 import {
   getTypeEffectiveness,
-  type TypeEffectivenessSource,
 } from "@/domain/type-matchup";
 import { DamageCalculatorView } from "./damage-calculator-view";
 import type {
@@ -35,18 +33,13 @@ import {
   applyHeldItem,
   applyStatAdjustment,
   applyTrainingBuildToPokemon,
-  createDefaultAdjustmentState,
   createSpeedComparisonRows,
   createStatAdjustmentsFromBuild,
   getRelevantStatIds,
-  usePokemonSelection,
-  type StatAdjustmentState,
 } from "./damage-calculator-state";
+import { useDamageCalculatorStore } from "./damage-calculator-store";
 import { useDamageCalculatorUserData } from "./use-damage-calculator-user-data";
 import { useDamageHistoryPersistence } from "./use-damage-history-persistence";
-
-type TeamSelectionState = Record<DamageSide, number | null>;
-type BuildSelectionState = Record<DamageSide, number | null>;
 
 /**
  * Coordinates battle-side selections, user data, and damage calculation.
@@ -63,17 +56,67 @@ export function DamageCalculator({
   weathers: DamageCalculatorWeather[];
   terrains: DamageCalculatorTerrain[];
 }) {
-  const attackerSelection = usePokemonSelection();
-  const defenderSelection = usePokemonSelection();
-  const attacker = attackerSelection.pokemon;
-  const defender = defenderSelection.pokemon;
-  const [moveId, setMoveId] = useState("");
-  const [preservedMove, setPreservedMove] =
-    useState<DamageCalculatorMove | null>(null);
-  const [weatherId, setWeatherId] = useState("");
-  const [terrainId, setTerrainId] = useState("");
-  const [typeEffectivenessSource, setTypeEffectivenessSource] =
-    useState<TypeEffectivenessSource | null>(null);
+  const attacker = useDamageCalculatorStore((state) => state.pokemon.attacker);
+  const defender = useDamageCalculatorStore((state) => state.pokemon.defender);
+  const attackerQuery = useDamageCalculatorStore((state) => state.query.attacker);
+  const defenderQuery = useDamageCalculatorStore((state) => state.query.defender);
+  const moveId = useDamageCalculatorStore((state) => state.moveId);
+  const preservedMove = useDamageCalculatorStore((state) => state.preservedMove);
+  const weatherId = useDamageCalculatorStore((state) => state.weatherId);
+  const terrainId = useDamageCalculatorStore((state) => state.terrainId);
+  const selectedTeamIds = useDamageCalculatorStore((state) => state.selectedTeamIds);
+  const selectedBuildIds = useDamageCalculatorStore((state) => state.selectedBuildIds);
+  const teamModalSide = useDamageCalculatorStore((state) => state.teamModalSide);
+  const speedModalOpen = useDamageCalculatorStore((state) => state.speedModalOpen);
+  const metronomeConsecutiveUseCount = useDamageCalculatorStore(
+    (state) => state.metronomeConsecutiveUseCount,
+  );
+  const abilityConditionEnabled = useDamageCalculatorStore(
+    (state) => state.abilityConditionEnabled,
+  );
+  const statAdjustments = useDamageCalculatorStore((state) => state.statAdjustments);
+  const setQuery = useDamageCalculatorStore((state) => state.setQuery);
+  const selectPokemon = useDamageCalculatorStore((state) => state.selectPokemon);
+  const setMoveId = useDamageCalculatorStore((state) => state.setMoveId);
+  const setPreservedMove = useDamageCalculatorStore(
+    (state) => state.setPreservedMove,
+  );
+  const setWeatherId = useDamageCalculatorStore((state) => state.setWeatherId);
+  const setTerrainId = useDamageCalculatorStore((state) => state.setTerrainId);
+  const setSelectedTeamId = useDamageCalculatorStore(
+    (state) => state.setSelectedTeamId,
+  );
+  const setSelectedBuildId = useDamageCalculatorStore(
+    (state) => state.setSelectedBuildId,
+  );
+  const setTeamModalSide = useDamageCalculatorStore(
+    (state) => state.setTeamModalSide,
+  );
+  const setSpeedModalOpen = useDamageCalculatorStore(
+    (state) => state.setSpeedModalOpen,
+  );
+  const setMetronomeConsecutiveUseCount = useDamageCalculatorStore(
+    (state) => state.setMetronomeConsecutiveUseCount,
+  );
+  const setAbilityConditionEnabled = useDamageCalculatorStore(
+    (state) => state.setAbilityConditionEnabled,
+  );
+  const setStatAdjustment = useDamageCalculatorStore(
+    (state) => state.setStatAdjustment,
+  );
+  const setSideStatAdjustments = useDamageCalculatorStore(
+    (state) => state.setSideStatAdjustments,
+  );
+  const swapStoreSides = useDamageCalculatorStore((state) => state.swapSides);
+  const resetSideForDirectPokemon = useDamageCalculatorStore(
+    (state) => state.resetSideForDirectPokemon,
+  );
+  const typeEffectivenessSource = useDamageCalculatorStore(
+    (state) => state.typeEffectivenessSource,
+  );
+  const setTypeEffectivenessSource = useDamageCalculatorStore(
+    (state) => state.setTypeEffectivenessSource,
+  );
   const {
     attackerHistory,
     setAttackerHistory,
@@ -84,24 +127,26 @@ export function DamageCalculator({
     natures,
     teamLoadError,
   } = useDamageCalculatorUserData();
-  const [selectedTeamIds, setSelectedTeamIds] = useState<TeamSelectionState>({
-    attacker: null,
-    defender: null,
-  });
-  const [selectedBuildIds, setSelectedBuildIds] = useState<BuildSelectionState>({
-    attacker: null,
-    defender: null,
-  });
-  const [teamModalSide, setTeamModalSide] = useState<DamageSide | null>(null);
-  const [speedModalOpen, setSpeedModalOpen] = useState(false);
-  const [metronomeConsecutiveUseCount, setMetronomeConsecutiveUseCount] =
-    useState(1);
-  const [abilityConditionEnabled, setAbilityConditionEnabled] = useState({
-    attacker: false,
-    defender: false,
-  });
-  const [statAdjustments, setStatAdjustments] =
-    useState<StatAdjustmentState>(() => createDefaultAdjustmentState());
+  const attackerSelection = useMemo(
+    () => ({
+      pokemon: attacker,
+      query: attackerQuery,
+      setQuery: (query: string) => setQuery("attacker", query),
+      select: (pokemon: DamageCalculatorPokemon | null) =>
+        selectPokemon("attacker", pokemon),
+    }),
+    [attacker, attackerQuery, selectPokemon, setQuery],
+  );
+  const defenderSelection = useMemo(
+    () => ({
+      pokemon: defender,
+      query: defenderQuery,
+      setQuery: (query: string) => setQuery("defender", query),
+      select: (pokemon: DamageCalculatorPokemon | null) =>
+        selectPokemon("defender", pokemon),
+    }),
+    [defender, defenderQuery, selectPokemon, setQuery],
+  );
   const buildById = useMemo(
     () =>
       new Map(
@@ -166,18 +211,13 @@ export function DamageCalculator({
     return () => {
       active = false;
     };
-  }, []);
+  }, [setTypeEffectivenessSource]);
 
 
   // Changing the attacker invalidates the previously selected move and result.
   function selectAttacker(pokemon: DamageCalculatorPokemon | null) {
-    attackerSelection.select(pokemon);
-    setSelectedBuildIds((current) => ({ ...current, attacker: null }));
-    setStatAdjustments((current) => ({
-      ...current,
-      attacker: createDefaultAdjustmentState().attacker,
-    }));
-    setAbilityConditionEnabled((current) => ({ ...current, attacker: false }));
+    selectPokemon("attacker", pokemon);
+    resetSideForDirectPokemon("attacker");
     setMetronomeConsecutiveUseCount(1);
     setMoveId("");
     setPreservedMove(null);
@@ -185,19 +225,14 @@ export function DamageCalculator({
 
   // Changing the defender also invalidates the result for the old matchup.
   function selectDefender(pokemon: DamageCalculatorPokemon | null) {
-    defenderSelection.select(pokemon);
-    setSelectedBuildIds((current) => ({ ...current, defender: null }));
-    setStatAdjustments((current) => ({
-      ...current,
-      defender: createDefaultAdjustmentState().defender,
-    }));
-    setAbilityConditionEnabled((current) => ({ ...current, defender: false }));
+    selectPokemon("defender", pokemon);
+    resetSideForDirectPokemon("defender");
   }
 
   function changeHeldItem(side: DamageSide, itemId: string) {
     const item = heldItems.find(({ id }) => id === itemId) ?? null;
-    const selection = side === "attacker" ? attackerSelection : defenderSelection;
-    selection.select(applyHeldItem(selection.pokemon, item));
+    const pokemon = side === "attacker" ? attacker : defender;
+    selectPokemon(side, applyHeldItem(pokemon, item));
     if (side === "attacker" && item?.id !== "metronome") {
       setMetronomeConsecutiveUseCount(1);
     }
@@ -207,8 +242,8 @@ export function DamageCalculator({
     const selection = side === "attacker" ? attackerSelection : defenderSelection;
     const ability =
       selection.pokemon?.abilities.find(({ id }) => id === abilityId) ?? null;
-    selection.select(applyAbility(selection.pokemon, ability));
-    setAbilityConditionEnabled((current) => ({ ...current, [side]: false }));
+    selectPokemon(side, applyAbility(selection.pokemon, ability));
+    setAbilityConditionEnabled(side, false);
   }
 
   function changeStatAdjustment(
@@ -216,23 +251,11 @@ export function DamageCalculator({
     statId: AdjustableStatId,
     values: Partial<StatAdjustment>,
   ) {
-    setStatAdjustments((current) => ({
-      ...current,
-      [side]: {
-        ...current[side],
-        [statId]: {
-          ...current[side][statId],
-          ...values,
-        },
-      },
-    }));
+    setStatAdjustment(side, statId, values);
   }
 
   function selectBattleTeam(side: DamageSide, team: BattleTeam) {
-    setSelectedTeamIds((current) => ({
-      ...current,
-      [side]: team.id ?? null,
-    }));
+    setSelectedTeamId(side, team.id ?? null);
     setTeamModalSide(null);
   }
 
@@ -246,17 +269,10 @@ export function DamageCalculator({
       natures,
       heldItems,
     );
-    const selection = side === "attacker" ? attackerSelection : defenderSelection;
-    selection.select(trainedPokemon);
-    setSelectedBuildIds((current) => ({
-      ...current,
-      [side]: build.id ?? null,
-    }));
-    setStatAdjustments((current) => ({
-      ...current,
-      [side]: createStatAdjustmentsFromBuild(build, natures),
-    }));
-    setAbilityConditionEnabled((current) => ({ ...current, [side]: false }));
+    selectPokemon(side, trainedPokemon);
+    setSelectedBuildId(side, build.id ?? null);
+    setSideStatAdjustments(side, createStatAdjustmentsFromBuild(build, natures));
+    setAbilityConditionEnabled(side, false);
     if (side === "attacker") {
       setMoveId(trainedPokemon.moves[0]?.id ?? "");
       setPreservedMove(null);
@@ -267,24 +283,7 @@ export function DamageCalculator({
   }
 
   function swapBattleSides() {
-    attackerSelection.select(defender);
-    defenderSelection.select(attacker);
-    setStatAdjustments((current) => ({
-      attacker: current.defender,
-      defender: current.attacker,
-    }));
-    setAbilityConditionEnabled((current) => ({
-      attacker: current.defender,
-      defender: current.attacker,
-    }));
-    setSelectedTeamIds((current) => ({
-      attacker: current.defender,
-      defender: current.attacker,
-    }));
-    setSelectedBuildIds((current) => ({
-      attacker: current.defender,
-      defender: current.attacker,
-    }));
+    swapStoreSides();
     const nextMove =
       defender?.moves.find(({ id }) => id === moveId) ??
       defender?.moves[0] ??
@@ -310,8 +309,8 @@ export function DamageCalculator({
     if (!pokemon) return;
 
     if (side === "attacker") {
-      attackerSelection.select(pokemon);
-      setSelectedBuildIds((current) => ({ ...current, attacker: null }));
+      selectPokemon("attacker", pokemon);
+      setSelectedBuildId("attacker", null);
       setPreservedMove(null);
       setMoveId(
         pokemon.moves.some(({ id }) => id === history.moveId)
@@ -319,8 +318,8 @@ export function DamageCalculator({
           : "",
       );
     } else {
-      defenderSelection.select(pokemon);
-      setSelectedBuildIds((current) => ({ ...current, defender: null }));
+      selectPokemon("defender", pokemon);
+      setSelectedBuildId("defender", null);
     }
   }
 
@@ -481,9 +480,7 @@ export function DamageCalculator({
       onSelectDefender={selectDefender}
       onRestoreHistory={restoreHistory}
       onAbilityChange={changeAbility}
-      onAbilityConditionChange={(side, enabled) =>
-        setAbilityConditionEnabled((current) => ({ ...current, [side]: enabled }))
-      }
+      onAbilityConditionChange={setAbilityConditionEnabled}
       onHeldItemChange={changeHeldItem}
       onMetronomeCountChange={setMetronomeConsecutiveUseCount}
       onMoveChange={(nextMoveId) => {
