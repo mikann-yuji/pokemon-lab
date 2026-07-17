@@ -1,0 +1,42 @@
+.eyebrow { margin:0 0 .35rem!important; font-size:.72rem!important; letter-spacing:.14em; }
+.backLink { display:inline-block; margin-top:.8rem; color:white; font-size:.82rem; font-weight:800; }
+.card,.status,.modeTabs { width:min(100%,48rem); }
+.card,.status { padding:clamp(1rem,4vw,2rem); border:4px solid #172b4d; border-radius:24px; background:#fffdf5; color:#172b4d; box-shadow:0 12px 0 rgb(23 43 77/22%); }
+.status,.intro,.result,.prompt { text-align:center; }
+.modeTabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.55rem; margin-bottom:.8rem; }
+.modeTabs button { display:grid; gap:.1rem; min-height:56px; padding:.55rem; border:2px solid #b9c7da; border-radius:12px; background:white; color:#52657e; cursor:pointer; font:inherit; font-weight:950; }
+.modeTabs small { font-size:.66rem; }
+.modeTabs .activeTab { border-color:#172b4d; background:#fff4b8; color:#172b4d; box-shadow:0 3px 0 #172b4d; }
+.intro { margin-bottom:1.2rem; }
+.intro span,.result>span { display:inline-block; padding:.2rem .6rem; border-radius:999px; background:#ffd43b; font-size:.68rem; font-weight:950; letter-spacing:.12em; }
+.intro h2,.result h2 { margin:.65rem 0 .45rem; }
+.intro p,.result p { color:#52657e; line-height:1.65; }
+.setupGrid { display:grid; grid-template-columns:.7fr 1.3fr; gap:.75rem; margin-bottom:1rem; }
+.setupGrid label { display:grid; gap:.35rem; font-size:.78rem; font-weight:900; }
+.setupGrid select { min-height:46px; padding:.55rem .7rem; border:2px solid #b9c7da; border-radius:10px; background:white; color:#172b4d; font:inherit; }
+.primaryButton,.feedback button,.result button { width:100%; min-height:48px; padding:.7rem 1rem; border:3px solid #172b4d; border-radius:999px; background:linear-gradient(135deg,#ef4552,#b51f2d); color:white; cursor:pointer; font:inherit; font-weight:950; }
+.primaryButton:disabled { cursor:not-allowed; opacity:.45; }
+.empty { display:grid; gap:.4rem; padding:1rem; border:2px dashed #b9c7da; border-radius:12px; text-align:center; }
+.progressHeader { display:flex; justify-content:space-between; margin-bottom:.45rem; font-size:.78rem; font-weight:900; }
+.progressTrack { height:10px; overflow:hidden; border:2px solid #172b4d; border-radius:999px; background:#dce5f2; }
+.progressTrack div { height:100%; background:linear-gradient(90deg,#ffd43b,#ff9f1c); }
+.battle { display:grid; grid-template-columns:1fr auto 1fr; gap:.5rem; align-items:center; margin:1rem 0; }
+.versus { font-weight:950; }
+.pokemonCard { display:grid; justify-items:center; margin:0; min-width:0; }
+.pokemonCard>span { padding:.15rem .5rem; border-radius:999px; background:#172b4d; color:white; font-size:.66rem; font-weight:900; }
+.pokemonCard img { width:8rem; height:8rem; object-fit:contain; }
+.pokemonCard figcaption { max-width:100%; overflow:hidden; font-size:.85rem; font-weight:950; text-overflow:ellipsis; white-space:nowrap; }
+.prompt { margin:.5rem 0 1rem; }
+.prompt p { margin:0; font-size:1.05rem; font-weight:900; }
+.prompt strong { padding:.15rem .5rem; border-radius:999px; background:#ffd43b; }
+.answerGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.55rem; margin-bottom:1rem; }
+.answerButton { min-height:3.5rem; padding:.5rem; border:2px solid #b9c7da; border-radius:12px; background:white; color:#172b4d; cursor:pointer; font:inherit; font-weight:900; }
+.correctAnswer { border-color:#2e7d32; background:#e8f5e9; }
+.incorrectAnswer { border-color:#c62828; background:#ffebee; }
+.feedback { padding:1rem; border:2px solid; border-radius:14px; }
+.feedback h3,.feedback p { margin:0 0 .55rem; }
+.feedback ul { margin:0 0 1rem; padding-left:1.2rem; color:#52657e; font-size:.78rem; line-height:1.6; }
+.feedbackCorrect { border-color:#4caf50; background:#f0fff2; }
+.feedbackIncorrect { border-color:#e63946; background:#fff2f3; }
+.result { display:grid; justify-items:center; gap:.6rem; padding:clamp(1rem,5vw,2.5rem); }
+@media(max-width:34rem){.card,.status{padding:.9rem .75rem 1rem;border-width:3px;border-radius:18px}.setupGrid{grid-template-columns:1fr}.pokemonCard img{width:6.5rem;height:6.5rem}.answerGrid{gap:.4rem}.answerButton{font-size:.78rem}}

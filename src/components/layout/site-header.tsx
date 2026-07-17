@@ -13,6 +13,7 @@ import styles from "./site-header.module.css";
 const navigationItems = [
   { href: "/pokemon", label: "ポケモン検索" },
   { href: "/damage-calculator", label: "ダメージ計算" },
+  { href: "/damage-quiz", label: "ダメージ計算クイズ" },
   { href: "/training", label: "育成シミュレーター" },
   { href: "/battle-team", label: "バトルチーム編成" },
   { href: "/battle-simulator", label: "対戦シミュレータ" },
