@@ -31,19 +31,37 @@ export async function getBaseStatQuizPokemon(
 ): Promise<BaseStatPokemon[]> {
   const rows = await sqliteWorkerClient.catalogQuery<BaseStatRow>(
     `
+      WITH top_rankings AS (
+        SELECT form_id, usage_rank
+        FROM champions_form_usage_rankings
+        WHERE battle_format = ?
+          AND usage_rank <= 100
+      ),
+      quiz_forms AS (
+        SELECT form_id, usage_rank FROM top_rankings
+        UNION
+        SELECT mega_forms.id, top_rankings.usage_rank
+        FROM top_rankings
+        JOIN forms AS ranked_forms ON ranked_forms.id = top_rankings.form_id
+        JOIN forms AS mega_forms
+          ON mega_forms.species_id = ranked_forms.species_id
+          AND mega_forms.is_mega = 1
+        JOIN champions_forms
+          ON champions_forms.form_id = mega_forms.id
+          AND champions_forms.normally_available = 1
+          AND champions_forms.source_section = 'mega'
+      )
       SELECT
-        rankings.form_id AS formId,
+        quiz_forms.form_id AS formId,
         COALESCE(forms.name_ja, forms.form_name_ja, forms.name) AS nameJa,
         COALESCE(forms.artwork_default_url, forms.sprite_default_url) AS imageUrl,
-        rankings.usage_rank AS usageRank,
+        quiz_forms.usage_rank AS usageRank,
         form_stats.stat_id AS statId,
         form_stats.base_stat AS baseStat
-      FROM champions_form_usage_rankings AS rankings
-      JOIN forms ON forms.id = rankings.form_id
+      FROM quiz_forms
+      JOIN forms ON forms.id = quiz_forms.form_id
       JOIN form_stats ON form_stats.form_id = forms.id
-      WHERE rankings.battle_format = ?
-        AND rankings.usage_rank <= 100
-      ORDER BY rankings.usage_rank
+      ORDER BY quiz_forms.usage_rank, forms.is_mega, forms.id
     `,
     [battleFormat],
   );
