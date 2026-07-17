@@ -61,6 +61,7 @@ export default function PracticeQuizLoader() {
             pokemonId: build.pokemonId,
             pokemonName: pokemon.nameJa,
             imageUrl: pokemon.imageUrl,
+            types: pokemon.types,
             moves: (catalog.movesByFormId.get(build.pokemonId) ?? []).filter(
               (move) => selectedMoveIds.has(move.id),
             ),

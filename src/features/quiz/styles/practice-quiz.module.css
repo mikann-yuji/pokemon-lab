@@ -65,6 +65,40 @@
   margin-bottom: 1rem;
 }
 
+.sideTabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+}
+
+.sideTabs button {
+  display: grid;
+  gap: 0.12rem;
+  min-height: 56px;
+  padding: 0.55rem 0.75rem;
+  border: 2px solid #b9c7da;
+  border-radius: 12px;
+  background: white;
+  color: #52657e;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+}
+
+.sideTabs button small {
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.sideTabs .activeSideTab {
+  border-color: #2857a4;
+  background: #eef6ff;
+  color: #172b4d;
+  box-shadow: 0 3px 0 #2857a4;
+  transform: translateY(-1px);
+}
+
 .setupGrid label {
   display: grid;
   gap: 0.35rem;
@@ -230,6 +264,32 @@
   margin-top: -0.4rem;
   font-size: 1rem;
   font-weight: 950;
+}
+
+.selectedMove {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.55rem;
+  align-items: center;
+  margin: -0.2rem 0 1rem;
+  padding: 0.65rem 0.8rem;
+  border: 2px solid #2857a4;
+  border-radius: 12px;
+  background: #eef6ff;
+}
+
+.selectedMove span,
+.selectedMove small {
+  color: #52657e;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.selectedMove strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .memberGrid {

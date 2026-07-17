@@ -17,10 +17,19 @@ type TargetRow = SqliteRow & {
   usageRank: number;
 };
 
-type MemberPokemonRow = SqliteRow & {
+type TargetMoveRow = SqliteRow & {
+  formId: number;
+  id: string;
+  name: string;
+  typeName: TypeName;
+  usageRate: number;
+};
+
+type MemberPokemonTypeRow = SqliteRow & {
   formId: number;
   nameJa: string;
   imageUrl: string | null;
+  typeName: TypeName;
 };
 
 type MemberMoveRow = SqliteRow & {
@@ -33,7 +42,7 @@ type MemberMoveRow = SqliteRow & {
 export type PracticeMemberCatalog = {
   pokemonByFormId: Map<
     number,
-    { nameJa: string; imageUrl: string | null }
+    { nameJa: string; imageUrl: string | null; types: TypeName[] }
   >;
   movesByFormId: Map<number, PracticeMove[]>;
 };
@@ -41,8 +50,9 @@ export type PracticeMemberCatalog = {
 export async function getPracticeTargets(
   battleFormat: PracticeBattleFormat,
 ): Promise<PracticeTarget[]> {
-  const rows = await sqliteWorkerClient.catalogQuery<TargetRow>(
-    `
+  const [rows, moveRows] = await Promise.all([
+    sqliteWorkerClient.catalogQuery<TargetRow>(
+      `
       SELECT
         rankings.form_id AS formId,
         COALESCE(forms.name_ja, forms.form_name_ja, forms.name) AS nameJa,
@@ -56,8 +66,41 @@ export async function getPracticeTargets(
         AND rankings.usage_rank <= 100
       ORDER BY rankings.usage_rank, form_types.slot
     `,
-    [battleFormat],
-  );
+      [battleFormat],
+    ),
+    sqliteWorkerClient.catalogQuery<TargetMoveRow>(
+      `
+        SELECT
+          usage.form_id AS formId,
+          moves.id,
+          COALESCE(moves.name_ja, moves.id) AS name,
+          moves.type_name AS typeName,
+          usage.usage_rate AS usageRate
+        FROM champions_form_move_usage AS usage
+        JOIN moves ON moves.id = usage.move_id
+        JOIN champions_form_usage_rankings AS rankings
+          ON rankings.form_id = usage.form_id
+          AND rankings.battle_format = ?
+          AND rankings.usage_rank <= 100
+        WHERE moves.damage_class_name IN ('physical', 'special')
+          AND moves.power > 0
+        ORDER BY usage.form_id, usage.usage_rate DESC, moves.id
+      `,
+      [battleFormat],
+    ),
+  ]);
+
+  const popularMovesByFormId = new Map<number, PracticeMove[]>();
+  for (const row of moveRows) {
+    const popularMoves = popularMovesByFormId.get(Number(row.formId)) ?? [];
+    if (popularMoves.length >= 4) continue;
+    popularMoves.push({
+      id: String(row.id),
+      name: String(row.name),
+      typeName: row.typeName,
+    });
+    popularMovesByFormId.set(Number(row.formId), popularMoves);
+  }
 
   const targets = new Map<number, PracticeTarget>();
   for (const row of rows) {
@@ -67,6 +110,7 @@ export async function getPracticeTargets(
       imageUrl: row.imageUrl === null ? null : String(row.imageUrl),
       types: [],
       usageRank: Number(row.usageRank),
+      popularMoves: popularMovesByFormId.get(Number(row.formId)) ?? [],
     };
     target.types.push(row.typeName);
     targets.set(row.formId, target);
@@ -83,14 +127,17 @@ export async function getPracticeMemberCatalog(
   }
   const placeholders = uniqueFormIds.map(() => "?").join(", ");
   const [pokemonRows, moveRows] = await Promise.all([
-    sqliteWorkerClient.catalogQuery<MemberPokemonRow>(
+    sqliteWorkerClient.catalogQuery<MemberPokemonTypeRow>(
       `
         SELECT
           forms.id AS formId,
           COALESCE(forms.name_ja, forms.form_name_ja, forms.name) AS nameJa,
-          COALESCE(forms.artwork_default_url, forms.sprite_default_url) AS imageUrl
+          COALESCE(forms.artwork_default_url, forms.sprite_default_url) AS imageUrl,
+          form_types.type_name AS typeName
         FROM forms
+        JOIN form_types ON form_types.form_id = forms.id
         WHERE forms.id IN (${placeholders})
+        ORDER BY forms.id, form_types.slot
       `,
       uniqueFormIds,
     ),
@@ -142,15 +189,19 @@ export async function getPracticeMemberCatalog(
     ),
   ]);
 
-  const pokemonByFormId = new Map(
-    pokemonRows.map((row) => [
-      Number(row.formId),
-      {
-        nameJa: String(row.nameJa),
-        imageUrl: row.imageUrl === null ? null : String(row.imageUrl),
-      },
-    ]),
-  );
+  const pokemonByFormId = new Map<
+    number,
+    { nameJa: string; imageUrl: string | null; types: TypeName[] }
+  >();
+  for (const row of pokemonRows) {
+    const pokemon = pokemonByFormId.get(Number(row.formId)) ?? {
+      nameJa: String(row.nameJa),
+      imageUrl: row.imageUrl === null ? null : String(row.imageUrl),
+      types: [],
+    };
+    pokemon.types.push(row.typeName);
+    pokemonByFormId.set(Number(row.formId), pokemon);
+  }
   const movesByFormId = new Map<number, PracticeMove[]>();
   for (const { formId, ...move } of moveRows) {
     const moves = movesByFormId.get(Number(formId)) ?? [];

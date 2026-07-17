@@ -9,11 +9,13 @@ import type {
   TrainingBuild,
 } from "@/features/training/infrastructure/training-build-repository";
 import {
-  createPracticeQuestion,
+  createAttackPracticeQuestion,
+  createDefensePracticeQuestion,
   isExactPracticeAnswer,
   PRACTICE_MULTIPLIER_LABELS,
   type PracticeBattleFormat,
   type PracticeQuestion,
+  type PracticeQuizSide,
   type PracticeTarget,
   type PracticeTeamMember,
 } from "../practice-quiz-logic";
@@ -39,6 +41,7 @@ export default function PracticeQuizGame({
   const [selectedTeamId, setSelectedTeamId] = useState<number | "">("");
   const [battleFormat, setBattleFormat] =
     useState<PracticeBattleFormat>("single");
+  const [quizSide, setQuizSide] = useState<PracticeQuizSide>("attack");
   const [question, setQuestion] = useState<PracticeQuestion | null>(null);
   const [questionNumber, setQuestionNumber] = useState(1);
   const [score, setScore] = useState(0);
@@ -70,12 +73,16 @@ export default function PracticeQuizGame({
   );
 
   function makeQuestion(previousKey = "") {
-    return createPracticeQuestion(
-      targetsByFormat[battleFormat],
-      members,
-      typeMatchups,
-      previousKey,
-    );
+    const createQuestion =
+      quizSide === "attack"
+        ? createAttackPracticeQuestion
+        : createDefensePracticeQuestion;
+    return createQuestion(
+        targetsByFormat[battleFormat],
+        members,
+        typeMatchups,
+        previousKey,
+      );
   }
 
   function startQuiz() {
@@ -144,8 +151,33 @@ export default function PracticeQuizGame({
               <span>PRACTICE MODE</span>
               <h2>チームを選んで実戦チェック</h2>
               <p>
-                採用順位100位以内の相手に対して、指定された倍率の技を持つ味方をすべて選びます。
+                {quizSide === "attack"
+                  ? "相手に指定倍率の技を使える味方をすべて選びます。"
+                  : "相手の採用上位技を、指定倍率で受ける味方をすべて選びます。"}
               </p>
+            </div>
+
+            <div className={styles.sideTabs} role="tablist" aria-label="クイズの攻守">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={quizSide === "attack"}
+                className={quizSide === "attack" ? styles.activeSideTab : ""}
+                onClick={() => setQuizSide("attack")}
+              >
+                攻撃側
+                <small>有効な技を探す</small>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={quizSide === "defense"}
+                className={quizSide === "defense" ? styles.activeSideTab : ""}
+                onClick={() => setQuizSide("defense")}
+              >
+                防御側
+                <small>受けられる味方を探す</small>
+              </button>
             </div>
 
             <div className={styles.setupGrid}>
@@ -236,11 +268,19 @@ export default function PracticeQuizGame({
       </div>
 
       <div className={styles.prompt}>
-        <p>
-          このポケモンに
-          <strong>{PRACTICE_MULTIPLIER_LABELS[question.multiplier]}</strong>
-          の技を持つ味方は？
-        </p>
+        {question.side === "attack" ? (
+          <p>
+            このポケモンに
+            <strong>{PRACTICE_MULTIPLIER_LABELS[question.multiplier]}</strong>
+            の技を持つ味方は？
+          </p>
+        ) : (
+          <p>
+            相手の技を
+            <strong>{PRACTICE_MULTIPLIER_LABELS[question.multiplier]}</strong>
+            で受ける味方は？
+          </p>
+        )}
         <small>当てはまるポケモンをすべて選択</small>
       </div>
 
@@ -257,6 +297,14 @@ export default function PracticeQuizGame({
         ) : null}
         <figcaption>{question.target.nameJa}</figcaption>
       </figure>
+
+      {question.side === "defense" ? (
+        <div className={styles.selectedMove}>
+          <span>相手が使う技</span>
+          <strong>{question.selectedMove.name}</strong>
+          <small>{question.selectedMove.typeName}タイプ</small>
+        </div>
+      ) : null}
 
       <div className={styles.memberGrid}>
         {members.map((member) => {
@@ -344,7 +392,7 @@ export default function PracticeQuizGame({
                   .map((member) => member.pokemonName)
                   .join("、")}
           </p>
-          {question.correctBuildIds.length > 0 ? (
+          {question.correctBuildIds.length > 0 && question.side === "attack" ? (
             <ul>
               {members
                 .filter((member) =>

@@ -1,6 +1,7 @@
 import type { TypeMatchup, TypeName } from "@/domain/type-matchup";
 
 export type PracticeBattleFormat = "single" | "double";
+export type PracticeQuizSide = "attack" | "defense";
 export type PracticeMultiplier = 4 | 2 | 1 | 0.5 | 0.25;
 
 export const PRACTICE_MULTIPLIERS: PracticeMultiplier[] = [
@@ -28,6 +29,7 @@ export type PracticeTarget = {
   imageUrl: string | null;
   types: TypeName[];
   usageRank: number;
+  popularMoves: PracticeMove[];
 };
 
 export type PracticeMove = {
@@ -42,16 +44,27 @@ export type PracticeTeamMember = {
   pokemonId: number;
   pokemonName: string;
   imageUrl: string | null;
+  types: TypeName[];
   moves: PracticeMove[];
 };
 
-export type PracticeQuestion = {
+type PracticeQuestionBase = {
   key: string;
   target: PracticeTarget;
   multiplier: PracticeMultiplier;
   correctBuildIds: number[];
   matchingMovesByBuildId: Record<number, PracticeMove[]>;
 };
+
+export type PracticeQuestion =
+  | (PracticeQuestionBase & {
+      side: "attack";
+      selectedMove: null;
+    })
+  | (PracticeQuestionBase & {
+      side: "defense";
+      selectedMove: PracticeMove;
+    });
 
 function getSingleTypeEffectiveness(
   attackingType: TypeName,
@@ -78,7 +91,7 @@ export function getPracticeMoveEffectiveness(
   );
 }
 
-export function createPracticeQuestion(
+export function createAttackPracticeQuestion(
   targets: PracticeTarget[],
   members: PracticeTeamMember[],
   typeMatchups: TypeMatchup[],
@@ -107,14 +120,57 @@ export function createPracticeQuestion(
       const correctBuildIds = Object.keys(matchingMovesByBuildId).map(Number);
       return [
         {
-          key: `${target.formId}:${multiplier}`,
+          key: `attack:${target.formId}:${multiplier}`,
+          side: "attack" as const,
           target,
           multiplier,
           correctBuildIds,
           matchingMovesByBuildId,
+          selectedMove: null,
         },
       ];
     }),
+  );
+
+  if (candidates.length === 0) return null;
+  const nextCandidates =
+    candidates.length > 1
+      ? candidates.filter((candidate) => candidate.key !== previousKey)
+      : candidates;
+  return nextCandidates[Math.floor(Math.random() * nextCandidates.length)];
+}
+
+export function createDefensePracticeQuestion(
+  targets: PracticeTarget[],
+  members: PracticeTeamMember[],
+  typeMatchups: TypeMatchup[],
+  previousKey = "",
+): PracticeQuestion | null {
+  const matchupsByType = new Map(
+    typeMatchups.map((matchup) => [matchup.name, matchup]),
+  );
+  const candidates = targets.flatMap((target) =>
+    target.popularMoves.flatMap((selectedMove) =>
+      PRACTICE_MULTIPLIERS.map((multiplier) => {
+        const correctMembers = members.filter(
+          (member) =>
+            getPracticeMoveEffectiveness(
+              selectedMove.typeName,
+              member.types,
+              matchupsByType,
+            ) === multiplier,
+        );
+        return {
+          key: `defense:${target.formId}:${selectedMove.id}:${multiplier}`,
+          side: "defense" as const,
+          target,
+          multiplier,
+          correctBuildIds: correctMembers.map((member) => member.buildId),
+          matchingMovesByBuildId: {},
+          selectedMove,
+        };
+      }),
+    ),
   );
 
   if (candidates.length === 0) return null;
