@@ -12,6 +12,39 @@
   font-weight: 800;
 }
 
+.modeTabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  width: min(100%, 48rem);
+  margin-bottom: 0.8rem;
+}
+
+.modeTabs button {
+  display: grid;
+  gap: 0.12rem;
+  min-height: 56px;
+  padding: 0.55rem;
+  border: 2px solid #b9c7da;
+  border-radius: 12px;
+  background: white;
+  color: #52657e;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+}
+
+.modeTabs button small {
+  font-size: 0.66rem;
+}
+
+.modeTabs .activeModeTab {
+  border-color: #172b4d;
+  background: #fff4b8;
+  color: #172b4d;
+  box-shadow: 0 3px 0 #172b4d;
+}
+
 .card,
 .status {
   width: min(100%, 48rem);
@@ -165,6 +198,37 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.55rem;
   margin-bottom: 1rem;
+}
+
+.comparisonGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.comparisonButton {
+  display: grid;
+  gap: 0.35rem;
+  place-items: center;
+  min-height: 6rem;
+  padding: 0.8rem;
+  border: 3px solid #b9c7da;
+  border-radius: 16px;
+  background: white;
+  color: #172b4d;
+  cursor: pointer;
+  font: inherit;
+}
+
+.comparisonButton strong {
+  font-size: 1rem;
+}
+
+.comparisonButton span {
+  color: #52657e;
+  font-size: 0.75rem;
+  font-weight: 800;
 }
 
 .moveButton {

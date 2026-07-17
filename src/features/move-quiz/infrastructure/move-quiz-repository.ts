@@ -52,7 +52,7 @@ export async function getMoveQuizPokemon(
       usageRank: Number(row.usageRank),
       moves: [],
     };
-    if (pokemon.moves.length < 10) {
+    if (pokemon.moves.length < 15) {
       pokemon.moves.push({
         id: String(row.moveId),
         name: String(row.moveName),
@@ -62,6 +62,6 @@ export async function getMoveQuizPokemon(
     pokemonByFormId.set(formId, pokemon);
   }
   return [...pokemonByFormId.values()].filter(
-    (pokemon) => pokemon.moves.length === 10,
+    (pokemon) => pokemon.moves.length >= 10,
   );
 }
