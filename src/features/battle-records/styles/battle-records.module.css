@@ -240,7 +240,8 @@
 
 .learningControls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(12rem, 1fr) auto;
   gap: 8px;
   margin-top: 10px;
 }

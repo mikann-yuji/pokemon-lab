@@ -705,50 +705,50 @@ export function BattleRecords() {
                         </li>
                       ))}
                     </ol>
-                    <div className={styles.learningControls}>
-                      <PokemonCombobox
-                        id={`battle-record-correction-${slot.slot}`}
-                        label={`枠${slot.slot}の正解ポケモン`}
-                        pokemonCatalog={iconCatalog}
-                        selectedPokemon={
-                          iconCatalog.find(
-                            (pokemon) =>
-                              String(pokemon.id) === correctionBySlot[slot.slot],
-                          ) ?? null
-                        }
-                        inputValue={correctionInputBySlot[slot.slot] ?? ""}
-                        onInputValueChange={(value) => {
-                          const exactMatch = iconCatalog.find(
-                            (pokemon) => pokemon.nameJa === value,
-                          );
-                          setCorrectionInputBySlot((current) => ({
-                            ...current,
-                            [slot.slot]: value,
-                          }));
-                          setCorrectionBySlot((current) => ({
-                            ...current,
-                            [slot.slot]: exactMatch ? String(exactMatch.id) : "",
-                          }));
-                        }}
-                        onSelect={(pokemon) => {
-                          setCorrectionBySlot((current) => ({
-                            ...current,
-                            [slot.slot]: pokemon ? String(pokemon.id) : "",
-                          }));
-                          setCorrectionInputBySlot((current) => ({
-                            ...current,
-                            [slot.slot]: pokemon?.nameJa ?? "",
-                          }));
-                        }}
-                      />
-                      <button
-                        type="button"
-                        disabled={!correctionBySlot[slot.slot]}
-                        onClick={() => void registerCorrection(slot)}
-                      >
-                        正解登録
-                      </button>
-                    </div>
+                  </div>
+                  <div className={styles.learningControls}>
+                    <PokemonCombobox
+                      id={`battle-record-correction-${slot.slot}`}
+                      label={`枠${slot.slot}の正解ポケモン`}
+                      pokemonCatalog={iconCatalog}
+                      selectedPokemon={
+                        iconCatalog.find(
+                          (pokemon) =>
+                            String(pokemon.id) === correctionBySlot[slot.slot],
+                        ) ?? null
+                      }
+                      inputValue={correctionInputBySlot[slot.slot] ?? ""}
+                      onInputValueChange={(value) => {
+                        const exactMatch = iconCatalog.find(
+                          (pokemon) => pokemon.nameJa === value,
+                        );
+                        setCorrectionInputBySlot((current) => ({
+                          ...current,
+                          [slot.slot]: value,
+                        }));
+                        setCorrectionBySlot((current) => ({
+                          ...current,
+                          [slot.slot]: exactMatch ? String(exactMatch.id) : "",
+                        }));
+                      }}
+                      onSelect={(pokemon) => {
+                        setCorrectionBySlot((current) => ({
+                          ...current,
+                          [slot.slot]: pokemon ? String(pokemon.id) : "",
+                        }));
+                        setCorrectionInputBySlot((current) => ({
+                          ...current,
+                          [slot.slot]: pokemon?.nameJa ?? "",
+                        }));
+                      }}
+                    />
+                    <button
+                      type="button"
+                      disabled={!correctionBySlot[slot.slot]}
+                      onClick={() => void registerCorrection(slot)}
+                    >
+                      正解登録
+                    </button>
                   </div>
                 </article>
               ))}
