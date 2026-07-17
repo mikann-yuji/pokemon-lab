@@ -241,7 +241,7 @@ function TopFourMoveQuizGame({ pokemonByFormat }: Props) {
           <p>
             正解は「
             {question.pokemon.moves
-              .slice(0, 4)
+              .filter((move) => question.correctMoveIds.includes(move.id))
               .map((move) => move.name)
               .join("・")}
             」です。

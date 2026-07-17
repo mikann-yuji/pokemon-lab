@@ -27,6 +27,15 @@ export type MoveComparisonQuestion = {
   key: string;
 };
 
+function shuffle<T>(values: T[], random: () => number): T[] {
+  const result = [...values];
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+  }
+  return result;
+}
+
 export function createMoveQuizQuestion(
   pokemon: MoveQuizPokemon[],
   previousKey?: string,
@@ -40,9 +49,10 @@ export function createMoveQuizQuestion(
       : eligible;
   const selected =
     candidates[Math.floor(random() * candidates.length)] ?? candidates[0];
+  const topTenMoves = selected.moves.slice(0, 10);
   return {
-    pokemon: { ...selected, moves: selected.moves.slice(0, 10) },
-    correctMoveIds: selected.moves.slice(0, 4).map((move) => move.id),
+    pokemon: { ...selected, moves: shuffle(topTenMoves, random) },
+    correctMoveIds: topTenMoves.slice(0, 4).map((move) => move.id),
     key: String(selected.formId),
   };
 }
@@ -84,8 +94,11 @@ export function createMoveComparisonQuestion(
   if (pairs.length === 0) return null;
   const [first, second] =
     pairs[Math.floor(random() * pairs.length)] ?? pairs[0];
-  const moves: [MoveQuizMove, MoveQuizMove] =
-    random() < 0.5 ? [first, second] : [second, first];
+  const shuffledMoves = shuffle([first, second], random);
+  const moves: [MoveQuizMove, MoveQuizMove] = [
+    shuffledMoves[0],
+    shuffledMoves[1],
+  ];
   return {
     pokemon: selectedPokemon,
     moves,
