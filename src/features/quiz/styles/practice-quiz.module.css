@@ -292,6 +292,52 @@
   background: #ffebee;
 }
 
+.noneButton {
+  display: grid;
+  justify-items: center;
+  width: 100%;
+  min-height: 54px;
+  margin: -0.2rem 0 1rem;
+  padding: 0.5rem 1rem;
+  border: 2px dashed #8796aa;
+  border-radius: 14px;
+  background: #f8fbff;
+  color: #172b4d;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+}
+
+.noneButton small {
+  color: #667085;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.noneButtonSelected {
+  border-style: solid;
+  border-color: #172b4d;
+  background: #fff4b8;
+  box-shadow: 0 4px 0 #172b4d;
+  transform: translateY(-2px);
+}
+
+.noneButtonCorrect {
+  border-style: solid;
+  border-color: #2e7d32;
+  background: #e8f5e9;
+}
+
+.noneButtonIncorrect {
+  border-style: solid;
+  border-color: #c62828;
+  background: #ffebee;
+}
+
+.noneButton:disabled {
+  cursor: not-allowed;
+}
+
 .feedback {
   padding: 1rem;
   border: 2px solid;

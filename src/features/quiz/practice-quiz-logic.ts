@@ -105,7 +105,6 @@ export function createPracticeQuestion(
       }
 
       const correctBuildIds = Object.keys(matchingMovesByBuildId).map(Number);
-      if (correctBuildIds.length === 0) return [];
       return [
         {
           key: `${target.formId}:${multiplier}`,

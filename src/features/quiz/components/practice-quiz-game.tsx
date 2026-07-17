@@ -45,6 +45,7 @@ export default function PracticeQuizGame({
   const [selectedBuildIds, setSelectedBuildIds] = useState<Set<number>>(
     new Set(),
   );
+  const [answerNone, setAnswerNone] = useState(false);
   const [answered, setAnswered] = useState(false);
   const [lastCorrect, setLastCorrect] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -82,12 +83,14 @@ export default function PracticeQuizGame({
     setQuestionNumber(1);
     setScore(0);
     setSelectedBuildIds(new Set());
+    setAnswerNone(false);
     setAnswered(false);
     setFinished(false);
   }
 
   function toggleMember(buildId: number) {
     if (answered) return;
+    setAnswerNone(false);
     setSelectedBuildIds((current) => {
       const next = new Set(current);
       if (next.has(buildId)) next.delete(buildId);
@@ -98,10 +101,13 @@ export default function PracticeQuizGame({
 
   function submitAnswer() {
     if (!question) return;
-    const correct = isExactPracticeAnswer(
-      selectedBuildIds,
-      question.correctBuildIds,
-    );
+    const correct =
+      answerNone
+        ? question.correctBuildIds.length === 0
+        : isExactPracticeAnswer(
+            selectedBuildIds,
+            question.correctBuildIds,
+          );
     setLastCorrect(correct);
     if (correct) setScore((current) => current + 1);
     setAnswered(true);
@@ -116,6 +122,7 @@ export default function PracticeQuizGame({
     setQuestion(makeQuestion(question.key));
     setQuestionNumber((current) => current + 1);
     setSelectedBuildIds(new Set());
+    setAnswerNone(false);
     setAnswered(false);
   }
 
@@ -288,11 +295,33 @@ export default function PracticeQuizGame({
         })}
       </div>
 
+      <button
+        type="button"
+        className={`${styles.noneButton} ${
+          answerNone ? styles.noneButtonSelected : ""
+        } ${
+          answered && question.correctBuildIds.length === 0
+            ? styles.noneButtonCorrect
+            : answered && answerNone
+              ? styles.noneButtonIncorrect
+              : ""
+        }`}
+        disabled={answered}
+        aria-pressed={answerNone}
+        onClick={() => {
+          setSelectedBuildIds(new Set());
+          setAnswerNone((current) => !current);
+        }}
+      >
+        答えなし
+        <small>当てはまるポケモンがいない</small>
+      </button>
+
       {!answered ? (
         <button
           className={styles.primaryButton}
           type="button"
-          disabled={selectedBuildIds.size === 0}
+          disabled={selectedBuildIds.size === 0 && !answerNone}
           onClick={submitAnswer}
         >
           これで答える
@@ -306,28 +335,32 @@ export default function PracticeQuizGame({
           <h3>{lastCorrect ? "正解！" : "ざんねん！"}</h3>
           <p>
             正解：
-            {members
-              .filter((member) =>
-                question.correctBuildIds.includes(member.buildId),
-              )
-              .map((member) => member.pokemonName)
-              .join("、")}
+            {question.correctBuildIds.length === 0
+              ? "答えなし"
+              : members
+                  .filter((member) =>
+                    question.correctBuildIds.includes(member.buildId),
+                  )
+                  .map((member) => member.pokemonName)
+                  .join("、")}
           </p>
-          <ul>
-            {members
-              .filter((member) =>
-                question.correctBuildIds.includes(member.buildId),
-              )
-              .map((member) => (
-                <li key={member.buildId}>
-                  <strong>{member.pokemonName}</strong>
-                  {"："}
-                  {question.matchingMovesByBuildId[member.buildId]
-                    .map((move) => move.name)
-                    .join("、")}
-                </li>
-              ))}
-          </ul>
+          {question.correctBuildIds.length > 0 ? (
+            <ul>
+              {members
+                .filter((member) =>
+                  question.correctBuildIds.includes(member.buildId),
+                )
+                .map((member) => (
+                  <li key={member.buildId}>
+                    <strong>{member.pokemonName}</strong>
+                    {"："}
+                    {question.matchingMovesByBuildId[member.buildId]
+                      .map((move) => move.name)
+                      .join("、")}
+                  </li>
+                ))}
+            </ul>
+          ) : null}
           <button type="button" onClick={nextQuestion}>
             {questionNumber >= QUESTION_COUNT
               ? "結果を見る"
