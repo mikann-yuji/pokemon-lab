@@ -21,14 +21,21 @@ const IMAGE_QUALITY = 0.82;
 const SIGNATURE_SIZE = 36;
 const HUE_BUCKETS = 18;
 const LEARNING_STORAGE_KEY = "pokemon-lab:battle-record-detection-learning:v1";
-const OPPONENT_SLOT_RECTS = [
-  { x: 0.707, y: 0.155, width: 0.071, height: 0.087 },
-  { x: 0.707, y: 0.271, width: 0.071, height: 0.087 },
-  { x: 0.707, y: 0.388, width: 0.071, height: 0.087 },
-  { x: 0.707, y: 0.503, width: 0.071, height: 0.087 },
-  { x: 0.707, y: 0.619, width: 0.071, height: 0.087 },
-  { x: 0.707, y: 0.735, width: 0.071, height: 0.087 },
+const FALLBACK_OPPONENT_SLOT_RECTS = [
+  { x: 0.758, y: 0.128, width: 0.082, height: 0.095 },
+  { x: 0.758, y: 0.245, width: 0.082, height: 0.095 },
+  { x: 0.758, y: 0.362, width: 0.082, height: 0.095 },
+  { x: 0.758, y: 0.478, width: 0.082, height: 0.095 },
+  { x: 0.758, y: 0.595, width: 0.082, height: 0.095 },
+  { x: 0.758, y: 0.712, width: 0.082, height: 0.095 },
 ] as const;
+
+type CropRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
 type DetectionCandidate = {
   pokemon: ChampionsIcon;
@@ -124,6 +131,70 @@ function shouldUsePixel(red: number, green: number, blue: number, alpha: number)
     !isTypeIconOrange &&
     !isTypeIconRed
   );
+}
+
+function isOpponentPanelPixel(red: number, green: number, blue: number, alpha: number) {
+  return alpha > 160 && red > 120 && green < 80 && blue > 60 && red > green * 1.8;
+}
+
+function detectOpponentSlotRects(sourceImage: HTMLImageElement): CropRect[] {
+  const sampleWidth = 320;
+  const sampleHeight = Math.max(1, Math.round((sourceImage.naturalHeight / sourceImage.naturalWidth) * sampleWidth));
+  const canvas = document.createElement("canvas");
+  canvas.width = sampleWidth;
+  canvas.height = sampleHeight;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) return [...FALLBACK_OPPONENT_SLOT_RECTS];
+  context.drawImage(sourceImage, 0, 0, sampleWidth, sampleHeight);
+
+  const { data } = context.getImageData(0, 0, sampleWidth, sampleHeight);
+  const minX = Math.floor(sampleWidth * 0.55);
+  const rowHits = Array.from({ length: sampleHeight }, () => 0);
+  for (let y = 0; y < sampleHeight; y += 1) {
+    for (let x = minX; x < sampleWidth; x += 1) {
+      const index = (y * sampleWidth + x) * 4;
+      if (isOpponentPanelPixel(data[index], data[index + 1], data[index + 2], data[index + 3])) {
+        rowHits[y] += 1;
+      }
+    }
+  }
+
+  const minRowHits = Math.max(10, Math.round(sampleWidth * 0.045));
+  const bands: Array<{ top: number; bottom: number }> = [];
+  let bandStart: number | null = null;
+  for (let y = 0; y < sampleHeight; y += 1) {
+    if (rowHits[y] >= minRowHits) {
+      bandStart ??= y;
+    } else if (bandStart !== null) {
+      if (y - bandStart >= sampleHeight * 0.035) bands.push({ top: bandStart, bottom: y - 1 });
+      bandStart = null;
+    }
+  }
+  if (bandStart !== null) bands.push({ top: bandStart, bottom: sampleHeight - 1 });
+
+  const rects = bands.slice(0, 6).map((band) => {
+    let left = sampleWidth;
+    let right = minX;
+    for (let y = band.top; y <= band.bottom; y += 1) {
+      for (let x = minX; x < sampleWidth; x += 1) {
+        const index = (y * sampleWidth + x) * 4;
+        if (isOpponentPanelPixel(data[index], data[index + 1], data[index + 2], data[index + 3])) {
+          left = Math.min(left, x);
+          right = Math.max(right, x);
+        }
+      }
+    }
+    const panelWidth = Math.max(1, right - left + 1);
+    const panelHeight = Math.max(1, band.bottom - band.top + 1);
+    return {
+      x: (left + panelWidth * 0.08) / sampleWidth,
+      y: (band.top + panelHeight * 0.04) / sampleHeight,
+      width: (panelWidth * 0.42) / sampleWidth,
+      height: (panelHeight * 0.92) / sampleHeight,
+    };
+  });
+
+  return rects.length === 6 ? rects : [...FALLBACK_OPPONENT_SLOT_RECTS];
 }
 
 function createSignature(source: CanvasImageSource) {
@@ -279,7 +350,7 @@ async function detectOpponentPokemon(imageDataUrl: string) {
   }
 
   const slots: DetectionSlot[] = [];
-  for (const [index, rect] of OPPONENT_SLOT_RECTS.entries()) {
+  for (const [index, rect] of detectOpponentSlotRects(sourceImage).entries()) {
     const cropCanvas = document.createElement("canvas");
     cropCanvas.width = 120;
     cropCanvas.height = 90;
@@ -582,7 +653,7 @@ export function BattleRecords() {
             <div>
               <h2>検出候補</h2>
               <p>
-                画像内の相手側6枠を固定位置で切り出し、ローカルで色特徴を照合しています。
+                画像内の相手側6枠を自動検出して切り出し、ローカルで色特徴を照合しています。
               </p>
             </div>
             <div className={styles.detectionGrid}>
