@@ -20,7 +20,7 @@ const championsIconManifestPath = path.join(
   "manifest.json",
 );
 
-const seedVersion = 9;
+const seedVersion = 10;
 
 // publicへ配布するcatalog.dbにも、通常DBと同じ親子関係順でCSVを投入する。
 const seedTableOrder = [
@@ -41,6 +41,7 @@ const seedTableOrder = [
   "form_moves",
   "champions_forms",
   "champions_form_move_usage",
+  "champions_form_usage_rankings",
   "champions_items",
   "champions_item_damage_modifiers",
   "champions_ability_damage_modifiers",
@@ -116,6 +117,10 @@ const numericColumns = new Map([
   ],
   ["champions_forms", new Set(["form_id", "normally_available"])],
   ["champions_form_move_usage", new Set(["form_id", "usage_rate"])],
+  [
+    "champions_form_usage_rankings",
+    new Set(["form_id", "usage_rank"]),
+  ],
   [
     "champions_item_damage_modifiers",
     new Set(["multiplier", "max_multiplier"]),
@@ -320,6 +325,11 @@ filterRows(
   (row) =>
     championFormIds.has(row[columnIndex("champions_form_move_usage", "form_id")]) &&
     selectedMoveIds.has(row[columnIndex("champions_form_move_usage", "move_id")]),
+);
+filterRows("champions_form_usage_rankings", (row) =>
+  championFormIds.has(
+    row[columnIndex("champions_form_usage_rankings", "form_id")],
+  ),
 );
 
 const selectedAbilityIds = new Set(

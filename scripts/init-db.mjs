@@ -101,6 +101,7 @@ const seedTableOrder = [
   "form_moves",
   "champions_forms",
   "champions_form_move_usage",
+  "champions_form_usage_rankings",
   "champions_items",
   "champions_item_damage_modifiers",
   "champions_ability_damage_modifiers",

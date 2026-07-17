@@ -1,0 +1,370 @@
+.eyebrow {
+  margin: 0 0 0.35rem !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.14em;
+}
+
+.backLink {
+  display: inline-block;
+  margin-top: 0.8rem;
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.card,
+.status {
+  position: relative;
+  width: min(100%, 48rem);
+  padding: clamp(1rem, 4vw, 2rem);
+  border: 4px solid #172b4d;
+  border-radius: 24px;
+  background: #fffdf5;
+  color: #172b4d;
+  box-shadow: 0 12px 0 rgb(23 43 77 / 22%);
+}
+
+.status {
+  text-align: center;
+  font-weight: 800;
+}
+
+.intro {
+  margin-bottom: 1.2rem;
+  text-align: center;
+}
+
+.intro span,
+.result > span {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: #ffd43b;
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+}
+
+.intro h2,
+.result h2 {
+  margin: 0.65rem 0 0.45rem;
+}
+
+.intro p,
+.result p {
+  margin: 0;
+  color: #52657e;
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+
+.setupGrid {
+  display: grid;
+  grid-template-columns: 0.65fr 1.35fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.setupGrid label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.setupGrid select {
+  width: 100%;
+  min-height: 46px;
+  padding: 0.55rem 0.7rem;
+  border: 2px solid #b9c7da;
+  border-radius: 10px;
+  background: white;
+  color: #172b4d;
+  font: inherit;
+}
+
+.setupGrid select:focus {
+  border-color: #2857a4;
+  outline: 3px solid rgb(40 87 164 / 18%);
+}
+
+.teamPreview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  gap: 0.55rem;
+  margin: 0 0 1rem;
+}
+
+.teamPreview > div {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+  padding: 0.55rem;
+  border: 2px solid #d7e1ef;
+  border-radius: 12px;
+  background: #f5f9ff;
+  text-align: center;
+}
+
+.teamPreview img {
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: contain;
+}
+
+.teamPreview strong,
+.teamPreview small {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teamPreview strong {
+  font-size: 0.78rem;
+}
+
+.teamPreview small {
+  color: #667085;
+  font-size: 0.65rem;
+}
+
+.empty {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1rem;
+  border: 2px dashed #b9c7da;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.primaryButton,
+.feedback button,
+.result button {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.7rem 1rem;
+  border: 3px solid #172b4d;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ef4552, #b51f2d);
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+}
+
+.primaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.progressTrack {
+  height: 10px;
+  overflow: hidden;
+  border: 2px solid #172b4d;
+  border-radius: 999px;
+  background: #dce5f2;
+}
+
+.progressTrack div {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd43b, #ff9f1c);
+  transition: width 0.25s;
+}
+
+.prompt {
+  margin: 1.2rem 0 0.5rem;
+  text-align: center;
+}
+
+.prompt p {
+  margin: 0;
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  font-weight: 850;
+}
+
+.prompt strong {
+  display: inline-block;
+  margin: 0 0.35rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: #ffd43b;
+}
+
+.prompt small {
+  color: #667085;
+  font-weight: 750;
+}
+
+.target {
+  display: grid;
+  justify-items: center;
+  margin: 0.6rem auto 1rem;
+}
+
+.target > span {
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: #172b4d;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.target img {
+  width: 11.25rem;
+  height: 11.25rem;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 8px rgb(23 43 77 / 22%));
+}
+
+.target figcaption {
+  margin-top: -0.4rem;
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.memberGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.memberButton {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+  min-height: 8.5rem;
+  padding: 0.55rem;
+  border: 2px solid #b9c7da;
+  border-radius: 14px;
+  background: white;
+  color: #172b4d;
+  cursor: pointer;
+}
+
+.memberButton img {
+  width: 5.25rem;
+  height: 5.25rem;
+  object-fit: contain;
+}
+
+.memberButton strong,
+.memberButton small {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.memberButton strong {
+  font-size: 0.8rem;
+}
+
+.memberButton small {
+  color: #667085;
+  font-size: 0.65rem;
+}
+
+.memberButton.selected {
+  border-color: #172b4d;
+  background: #fff4b8;
+  box-shadow: 0 4px 0 #172b4d;
+  transform: translateY(-2px);
+}
+
+.memberButton.correct {
+  border-color: #2e7d32;
+  background: #e8f5e9;
+}
+
+.memberButton.incorrect {
+  border-color: #c62828;
+  background: #ffebee;
+}
+
+.feedback {
+  padding: 1rem;
+  border: 2px solid;
+  border-radius: 14px;
+}
+
+.feedbackCorrect {
+  border-color: #4caf50;
+  background: #f0fff2;
+}
+
+.feedbackIncorrect {
+  border-color: #e63946;
+  background: #fff2f3;
+}
+
+.feedback h3,
+.feedback p {
+  margin: 0 0 0.55rem;
+}
+
+.feedback ul {
+  margin: 0 0 1rem;
+  padding-left: 1.2rem;
+  color: #52657e;
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.result {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  padding: clamp(1rem, 5vw, 2.5rem);
+  text-align: center;
+}
+
+.result button {
+  margin-top: 0.6rem;
+}
+
+@media (max-width: 34rem) {
+  .card,
+  .status {
+    padding: 0.9rem 0.75rem 1rem;
+    border-width: 3px;
+    border-radius: 18px;
+  }
+
+  .setupGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .teamPreview {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .memberGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .memberButton {
+    min-height: 7.5rem;
+  }
+
+  .memberButton img {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+
+  .target img {
+    width: 8.5rem;
+    height: 8.5rem;
+  }
+}

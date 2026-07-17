@@ -92,6 +92,30 @@
   font-weight: 700;
 }
 
+.practiceLink {
+  display: inline-flex;
+  min-height: 46px;
+  margin-top: 1rem;
+  padding: 0.65rem 1.2rem;
+  border: 3px solid white;
+  border-radius: 999px;
+  background: #ffd43b;
+  color: #172b4d;
+  font-weight: 900;
+  text-decoration: none;
+  text-shadow: none;
+  box-shadow: 0 5px 0 rgb(10 28 58 / 45%);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.practiceLink:hover,
+.practiceLink:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
+  box-shadow: 0 7px 0 rgb(10 28 58 / 45%);
+  transform: translateY(-2px);
+}
+
 .statusMessage {
   width: min(100%, 44rem);
   margin: 0 auto;
