@@ -18,6 +18,7 @@ const navigationItems = [
   { href: "/battle-simulator", label: "対戦シミュレータ" },
   { href: "/battle-records", label: "バトル記録" },
   { href: "/quiz", label: "タイプ相性クイズ" },
+  { href: "/move-quiz", label: "ポケモン技クイズ" },
 ] as const;
 
 /** モバイルでは開閉式、デスクトップでは常時表示の共通ヘッダー。 */

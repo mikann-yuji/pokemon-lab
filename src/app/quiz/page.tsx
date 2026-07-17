@@ -12,6 +12,9 @@ export default function QuizPage() {
         <Link className={styles.practiceLink} href="/quiz/practice">
           バトルチームで挑戦！ 実践編 →
         </Link>
+        <Link className={styles.practiceLink} href="/move-quiz">
+          採用率上位の技を当てよう！ ポケモン技クイズ →
+        </Link>
       </header>
       <QuizCatalogLoader />
     </main>
