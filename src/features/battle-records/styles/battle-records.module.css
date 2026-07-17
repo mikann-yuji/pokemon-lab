@@ -139,6 +139,33 @@
   font-weight: 700;
 }
 
+.toast {
+  position: fixed;
+  right: clamp(1rem, 4vw, 2rem);
+  bottom: clamp(1rem, 4vw, 2rem);
+  z-index: 80;
+  max-width: min(22rem, calc(100vw - 2rem));
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  background: #18743a;
+  color: #ffffff;
+  font-weight: 900;
+  box-shadow: 0 12px 35px rgb(10 20 35 / 28%);
+  animation: toastIn 0.18s ease-out;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .records {
   margin-top: 26px;
 }
@@ -218,14 +245,8 @@
   margin-top: 10px;
 }
 
-.learningControls select {
+.learningControls > div {
   min-width: 0;
-  border: 1px solid rgba(24, 34, 54, 0.16);
-  border-radius: 8px;
-  padding: 8px 10px;
-  background: #ffffff;
-  color: #182236;
-  font: inherit;
 }
 
 .learningControls button {

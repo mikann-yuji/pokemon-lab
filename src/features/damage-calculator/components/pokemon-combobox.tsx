@@ -14,27 +14,32 @@ import {
   normalizePokemonSearchText,
   pokemonNameIncludes,
 } from "@/domain/pokemon-name-search";
-import type { DamageCalculatorPokemon } from "../domain/damage-calculator-types";
 import styles from "../styles/damage-calculator.module.css";
 
-type PokemonComboboxProps = {
+type PokemonComboboxItem = {
+  id: number;
+  name: string;
+  nameJa: string;
+};
+
+type PokemonComboboxProps<TPokemon extends PokemonComboboxItem> = {
   /** inputと候補キーを区別するための一意なID。 */
   id: string;
   /** 入力欄の目的を伝えるラベル。 */
   label: string;
   /** SQLiteから事前に読み込んだチャンピオンズ対象一覧。 */
-  pokemonCatalog: DamageCalculatorPokemon[];
+  pokemonCatalog: TPokemon[];
   /** 親コンポーネントで現在選ばれているポケモン。 */
-  selectedPokemon: DamageCalculatorPokemon | null;
+  selectedPokemon: TPokemon | null;
   /** 検索欄へ現在表示する文字列。 */
   inputValue: string;
   /** 入力中の文字列が変わったときに親へ通知する。 */
   onInputValueChange: (value: string) => void;
   /** 新しい候補が確定したときに親へ通知する。 */
-  onSelect: (pokemon: DamageCalculatorPokemon | null) => void;
+  onSelect: (pokemon: TPokemon | null) => void;
 };
 
-export function PokemonCombobox({
+export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
   id,
   label,
   pokemonCatalog,
@@ -42,7 +47,7 @@ export function PokemonCombobox({
   inputValue,
   onInputValueChange,
   onSelect,
-}: PokemonComboboxProps) {
+}: PokemonComboboxProps<TPokemon>) {
   // 入力またはカタログが変わった場合だけ候補を再計算する。
   // 共通関数を使うことで「ふしぎだね」と「フシギダネ」を同一視する。
   const suggestions = useMemo(() => {

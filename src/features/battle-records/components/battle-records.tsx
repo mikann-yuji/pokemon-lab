@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
+import { PokemonCombobox } from "@/features/damage-calculator/components/pokemon-combobox";
 import {
   deleteBattleRecord,
   getBattleRecords,
@@ -401,7 +402,11 @@ export function BattleRecords() {
   const [correctionBySlot, setCorrectionBySlot] = useState<Record<number, string>>(
     {},
   );
+  const [correctionInputBySlot, setCorrectionInputBySlot] = useState<
+    Record<number, string>
+  >({});
   const [message, setMessage] = useState("");
+  const [toast, setToast] = useState("");
   const [error, setError] = useState("");
 
   const loadRecords = useCallback(async (active = true) => {
@@ -462,6 +467,12 @@ export function BattleRecords() {
     };
   }, [loadRecords]);
 
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(""), 3000);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
   const previewLabel = useMemo(
     () => (imageDataUrl ? "選択中の写真" : "写真未選択"),
     [imageDataUrl],
@@ -474,6 +485,7 @@ export function BattleRecords() {
       setImageDataUrl("");
       setDetections([]);
       setCorrectionBySlot({});
+      setCorrectionInputBySlot({});
       return;
     }
     if (!file.type.startsWith("image/")) {
@@ -484,6 +496,7 @@ export function BattleRecords() {
       setImageDataUrl(await resizeImage(file));
       setDetections([]);
       setCorrectionBySlot({});
+      setCorrectionInputBySlot({});
     } catch (resizeError: unknown) {
       console.error("Failed to resize battle image.", resizeError);
       setError("写真を読み込めませんでした。");
@@ -537,6 +550,15 @@ export function BattleRecords() {
           ),
         ),
       );
+      setCorrectionInputBySlot(
+        Object.fromEntries(
+          result.slots.flatMap((slot) =>
+            slot.candidates[0]
+              ? [[slot.slot, slot.candidates[0].pokemon.nameJa]]
+              : [],
+          ),
+        ),
+      );
       setMessage("相手側6枠の候補を検出しました。");
     } catch (detectError: unknown) {
       console.error("Failed to detect opponent Pokemon.", detectError);
@@ -565,11 +587,13 @@ export function BattleRecords() {
       setMessage(
         `${pokemon?.nameJa ?? "選択したポケモン"}を正解として共有学習しました。`,
       );
+      setToast("正解登録しました。");
     } catch (error: unknown) {
       console.warn("Failed to save remote detection sample.", error);
       setMessage(
         `${pokemon?.nameJa ?? "選択したポケモン"}を端末内に学習しました。`,
       );
+      setToast("正解登録しました。");
     }
   }
 
@@ -582,6 +606,11 @@ export function BattleRecords() {
 
   return (
     <main className={styles.page}>
+      {toast ? (
+        <div className={styles.toast} role="status" aria-live="polite">
+          {toast}
+        </div>
+      ) : null}
       <section className={styles.header} aria-labelledby="battle-record-title">
         <p>Battle Records</p>
         <h1 id="battle-record-title">バトル記録</h1>
@@ -677,24 +706,44 @@ export function BattleRecords() {
                       ))}
                     </ol>
                     <div className={styles.learningControls}>
-                      <select
-                        aria-label={`枠${slot.slot}の正解ポケモン`}
-                        value={correctionBySlot[slot.slot] ?? ""}
-                        onChange={(event) =>
+                      <PokemonCombobox
+                        id={`battle-record-correction-${slot.slot}`}
+                        label={`枠${slot.slot}の正解ポケモン`}
+                        pokemonCatalog={iconCatalog}
+                        selectedPokemon={
+                          iconCatalog.find(
+                            (pokemon) =>
+                              String(pokemon.id) === correctionBySlot[slot.slot],
+                          ) ?? null
+                        }
+                        inputValue={correctionInputBySlot[slot.slot] ?? ""}
+                        onInputValueChange={(value) => {
+                          const exactMatch = iconCatalog.find(
+                            (pokemon) => pokemon.nameJa === value,
+                          );
+                          setCorrectionInputBySlot((current) => ({
+                            ...current,
+                            [slot.slot]: value,
+                          }));
                           setCorrectionBySlot((current) => ({
                             ...current,
-                            [slot.slot]: event.target.value,
-                          }))
-                        }
-                      >
-                        {iconCatalog.map((pokemon) => (
-                          <option key={pokemon.id} value={pokemon.id}>
-                            {pokemon.nameJa}
-                          </option>
-                        ))}
-                      </select>
+                            [slot.slot]: exactMatch ? String(exactMatch.id) : "",
+                          }));
+                        }}
+                        onSelect={(pokemon) => {
+                          setCorrectionBySlot((current) => ({
+                            ...current,
+                            [slot.slot]: pokemon ? String(pokemon.id) : "",
+                          }));
+                          setCorrectionInputBySlot((current) => ({
+                            ...current,
+                            [slot.slot]: pokemon?.nameJa ?? "",
+                          }));
+                        }}
+                      />
                       <button
                         type="button"
+                        disabled={!correctionBySlot[slot.slot]}
                         onClick={() => void registerCorrection(slot)}
                       >
                         正解登録
