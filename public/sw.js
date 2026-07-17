@@ -1,10 +1,11 @@
-const CACHE_NAME = "pokemon-lab-v14";
+const CACHE_NAME = "pokemon-lab-v15";
 const IMAGE_CACHE_NAME = "pokemon-lab-images-v1";
 const IMAGE_CACHE_LIMIT = 300;
 
 const APP_ROUTES = [
   "/",
   "/quiz",
+  "/quiz/practice",
   "/pokemon",
   "/damage-calculator",
   "/training",
@@ -168,6 +169,21 @@ async function respondWithCachedFirst(request) {
   return response;
 }
 
+async function respondWithNetworkFirstAsset(request) {
+  try {
+    const response = await fetch(request, { cache: "no-store" });
+    if (response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    throw new Error("Offline asset is unavailable.");
+  }
+}
+
 async function respondWithNavigation(request) {
   try {
     const response = await fetch(request);
@@ -214,6 +230,14 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  if (
+    url.pathname === "/sqlite-runtime-worker.mjs" ||
+    url.pathname === "/sqlite-catalog.db.gz"
+  ) {
+    event.respondWith(respondWithNetworkFirstAsset(request));
+    return;
+  }
+
   if (request.mode === "navigate") {
     event.respondWith(respondWithNavigation(request));
     return;
@@ -225,9 +249,7 @@ self.addEventListener("fetch", (event) => {
     url.pathname.startsWith("/screenshots/") ||
     url.pathname.startsWith("/champions-icons/") ||
     url.pathname.startsWith("/sqlite-wasm/") ||
-    url.pathname === "/manifest.webmanifest" ||
-    url.pathname === "/sqlite-runtime-worker.mjs" ||
-    url.pathname === "/sqlite-catalog.db.gz";
+    url.pathname === "/manifest.webmanifest";
 
   if (isOfflineAsset) {
     event.respondWith(respondWithCachedFirst(request));

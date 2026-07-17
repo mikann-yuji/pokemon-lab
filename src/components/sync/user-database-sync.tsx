@@ -96,6 +96,7 @@ export function UserDatabaseSync() {
   const [message, setMessage] = useState("未ログイン");
   const [detailMessage, setDetailMessage] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
+  const [visible, setVisible] = useState(true);
   const syncingRef = useRef(false);
   const lastAutoSyncAttemptRef = useRef(0);
 
@@ -106,9 +107,11 @@ export function UserDatabaseSync() {
         const lastSync = getLastSync(nextUser.uid);
         setLastSyncAt(lastSync);
         setMessage(lastSync ? "同期済み" : "ログイン済み");
+        setVisible(true);
       } else {
         setLastSyncAt(0);
         setMessage("未ログイン");
+        setVisible(true);
       }
     });
 
@@ -128,6 +131,7 @@ export function UserDatabaseSync() {
     lastAutoSyncAttemptRef.current = Date.now();
     syncingRef.current = true;
     setSyncing(true);
+    setVisible(true);
     setMessage("同期中");
     setDetailMessage("");
     setDetailOpen(false);
@@ -218,6 +222,7 @@ export function UserDatabaseSync() {
   }, []);
 
   async function handleSignIn() {
+    setVisible(true);
     if (!navigator.onLine) {
       setMessage("オフラインです");
       return;
@@ -243,11 +248,27 @@ export function UserDatabaseSync() {
   }
 
   async function handleSignOut() {
+    setVisible(true);
     await signOutFirebaseUser();
   }
 
+  if (!visible && user) return null;
+
   return (
     <div className={styles.syncBox}>
+      {user ? (
+        <button
+          type="button"
+          className={styles.closeButton}
+          aria-label="同期ステータスを閉じる"
+          onClick={() => {
+            setDetailOpen(false);
+            setVisible(false);
+          }}
+        >
+          ×
+        </button>
+      ) : null}
       <div className={styles.summaryRow}>
         <span className={online ? styles.online : styles.offline} />
         <button

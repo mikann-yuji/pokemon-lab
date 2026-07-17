@@ -15,7 +15,7 @@ import type {
 
 const DEFAULT_TIMEOUT_MS = 20_000;
 const STORAGE_API_TIMEOUT_MS = 3_000;
-const SQLITE_WORKER_VERSION = "8";
+const SQLITE_WORKER_VERSION = "9";
 const SQLITE_CLOSE_REQUEST_KEY = "pokemon-lab:sqlite-close-request";
 
 /**
