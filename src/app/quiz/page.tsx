@@ -12,15 +12,6 @@ export default function QuizPage() {
         <Link className={styles.practiceLink} href="/quiz/practice">
           バトルチームで挑戦！ 実践編 →
         </Link>
-        <Link className={styles.practiceLink} href="/move-quiz">
-          採用率上位の技を当てよう！ ポケモン技クイズ →
-        </Link>
-        <Link className={styles.practiceLink} href="/base-stat-quiz">
-          H-A-B-C-D-Sを当てよう！ 種族値クイズ →
-        </Link>
-        <Link className={styles.practiceLink} href="/damage-quiz">
-          撃破ラインと最大打点を当てよう！ ダメージ計算クイズ →
-        </Link>
       </header>
       <QuizCatalogLoader />
     </main>

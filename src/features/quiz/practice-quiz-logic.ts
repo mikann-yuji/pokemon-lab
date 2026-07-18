@@ -91,6 +91,16 @@ export function getPracticeMoveEffectiveness(
   );
 }
 
+export function toPracticeMultiplier(
+  effectiveness: number,
+): PracticeMultiplier {
+  if (effectiveness >= 4) return 4;
+  if (effectiveness >= 2) return 2;
+  if (effectiveness >= 1) return 1;
+  if (effectiveness >= 0.5) return 0.5;
+  return 0.25;
+}
+
 export function createAttackPracticeQuestion(
   targets: PracticeTarget[],
   members: PracticeTeamMember[],
@@ -154,10 +164,12 @@ export function createDefensePracticeQuestion(
       PRACTICE_MULTIPLIERS.map((multiplier) => {
         const correctMembers = members.filter(
           (member) =>
-            getPracticeMoveEffectiveness(
-              selectedMove.typeName,
-              member.types,
-              matchupsByType,
+            toPracticeMultiplier(
+              getPracticeMoveEffectiveness(
+                selectedMove.typeName,
+                member.types,
+                matchupsByType,
+              ),
             ) === multiplier,
         );
         return {

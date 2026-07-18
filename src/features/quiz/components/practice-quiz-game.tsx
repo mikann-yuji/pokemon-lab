@@ -11,8 +11,10 @@ import type {
 import {
   createAttackPracticeQuestion,
   createDefensePracticeQuestion,
+  getPracticeMoveEffectiveness,
   isExactPracticeAnswer,
   PRACTICE_MULTIPLIER_LABELS,
+  toPracticeMultiplier,
   type PracticeBattleFormat,
   type PracticeQuestion,
   type PracticeQuizSide,
@@ -70,6 +72,10 @@ export default function PracticeQuizGame({
         ),
       ),
     [builds],
+  );
+  const matchupsByType = useMemo(
+    () => new Map(typeMatchups.map((matchup) => [matchup.name, matchup])),
+    [typeMatchups],
   );
 
   function makeQuestion(previousKey = "") {
@@ -338,6 +344,19 @@ export default function PracticeQuizGame({
               ) : null}
               <strong>{member.pokemonName}</strong>
               <small>{buildsById.get(member.buildId)?.name ?? member.buildName}</small>
+              {answered && question.side === "defense" ? (
+                <span className={styles.effectivenessResult}>
+                  {PRACTICE_MULTIPLIER_LABELS[
+                    toPracticeMultiplier(
+                      getPracticeMoveEffectiveness(
+                        question.selectedMove.typeName,
+                        member.types,
+                        matchupsByType,
+                      ),
+                    )
+                  ]}
+                </span>
+              ) : null}
             </button>
           );
         })}
