@@ -32,6 +32,7 @@
 .layout {
   width: min(1120px, 100%);
   margin: 0 auto;
+  padding-bottom: 76px;
 }
 
 .settingsGrid {
@@ -42,7 +43,7 @@
 .sidePanel,
 .fieldPanel,
 .summary,
-.mapPanel,
+.mapDock,
 .adjustments,
 .status {
   border: 1px solid rgb(26 61 100 / 14%);
@@ -143,14 +144,12 @@
 }
 
 .summary,
-.mapPanel,
 .adjustments {
   margin-top: 16px;
   padding: 18px;
 }
 
 .summary h2,
-.mapPanel h2,
 .adjustments h2 {
   margin: 0 0 12px;
   font-size: 1.15rem;
@@ -209,61 +208,54 @@
   border-radius: 3px;
 }
 
-.mapPanel svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  min-width: 720px;
+.mapDock {
+  position: fixed;
+  z-index: 40;
+  right: max(10px, env(safe-area-inset-right));
+  bottom: max(10px, env(safe-area-inset-bottom));
+  width: min(520px, calc(100vw - 20px));
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+}
+
+.mapDock > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-weight: 900;
+  list-style: none;
+}
+
+.mapDock > summary::-webkit-details-marker {
+  display: none;
+}
+
+.mapDock > summary::before {
+  content: "▴";
+  color: #28649c;
+}
+
+.mapDock:not([open]) > summary::before {
+  content: "▾";
+}
+
+.mapDock > summary small {
+  margin-left: auto;
+  color: #65758a;
+  font-weight: 700;
 }
 
 .mapPanel {
-  overflow-x: auto;
-  touch-action: pan-x pan-y pinch-zoom;
+  border-top: 1px solid rgb(26 61 100 / 14%);
+  padding: 10px 12px 8px;
 }
 
-.plotBackground {
-  fill: #f5f8fb;
-  stroke: #b8c8d8;
-}
-
-.axis {
-  stroke: #526278;
-  stroke-width: 2;
-}
-
-.axisLabel,
-.currentLabel {
-  fill: #253950;
-  font-size: 15px;
-  font-weight: 800;
-  paint-order: stroke;
-  stroke: white;
-  stroke-width: 4px;
-}
-
-.attackLine,
-.hpLine,
-.defenseLine {
-  fill: none;
-  stroke-width: 3;
-  stroke-linecap: round;
-  opacity: 0.8;
-}
-
-.attackLine { stroke: #d83f4f; }
-.hpLine { stroke: #2678c5; }
-.defenseLine { stroke: #2f9664; }
-
-.candidatePoint {
-  fill: #fff;
-  stroke: #334b62;
-  stroke-width: 1.5;
-}
-
-.currentPoint {
-  fill: #111d2b;
-  stroke: #fff;
-  stroke-width: 4;
+.chart {
+  width: 100%;
+  height: 250px !important;
 }
 
 .lineHelp {
@@ -321,8 +313,14 @@
     grid-template-columns: 1fr;
   }
 
-  .mapPanel {
-    padding: 14px 8px;
+  .mapDock {
+    right: 6px;
+    bottom: max(6px, env(safe-area-inset-bottom));
+    width: calc(100vw - 12px);
+  }
+
+  .chart {
+    height: 220px !important;
   }
 }
 
@@ -343,7 +341,7 @@
   .sidePanel,
   .fieldPanel,
   .summary,
-  .mapPanel,
+  .mapDock,
   .adjustments,
   .status {
     border-color: #30475f;

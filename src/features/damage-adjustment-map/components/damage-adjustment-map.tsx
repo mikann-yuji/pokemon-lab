@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import ReactECharts from "echarts-for-react";
 import type { TypeEffectivenessSource, TypeName } from "@/domain/type-matchup";
 import type {
   DamageCalculation,
@@ -19,6 +20,8 @@ import type {
   DamageCalculatorWeather,
 } from "@/features/damage-calculator/domain/damage-calculator-types";
 import type { NatureCorrection } from "@/features/damage-calculator/components/damage-calculator-types";
+import { MoveSelect } from "@/features/damage-calculator/components/damage-calculator-form-widgets";
+import { PokemonCombobox } from "@/features/damage-calculator/components/pokemon-combobox";
 import {
   classifyDamageZone,
   DAMAGE_ZONE_LABELS,
@@ -84,7 +87,6 @@ type MapData = {
   cells: GridCell[];
   current: CalculatedPoint;
   attackCandidates: CandidatePoint[];
-  hpCandidates: CandidatePoint[];
   defenseCandidates: CandidatePoint[];
   minX: number;
   maxX: number;
@@ -120,6 +122,8 @@ export default function DamageAdjustmentMap(props: Props) {
   const [terrainId, setTerrainId] = useState("");
   const [wall, setWall] = useState(false);
   const [stab, setStab] = useState(true);
+  const [attackerSearch, setAttackerSearch] = useState(attackerBase?.nameJa ?? "");
+  const [defenderSearch, setDefenderSearch] = useState(defenderBase?.nameJa ?? "");
 
   const attackStatId =
     selectedMove?.damageClass === "special" ? "special-attack" : "attack";
@@ -221,21 +225,16 @@ export default function DamageAdjustmentMap(props: Props) {
       const value = calculate(point, defenderSettings.point);
       return value ? [{ ...value, point }] : [];
     });
-    const hpCandidates = POINTS.flatMap((point) => {
-      const value = calculate(attackerSettings.point, defenderSettings.point, point);
-      return value ? [{ ...value, point }] : [];
-    });
     const defenseCandidates = POINTS.flatMap((point) => {
       const value = calculate(attackerSettings.point, point);
       return value ? [{ ...value, point }] : [];
     });
-    const all = [...cells, ...attackCandidates, ...hpCandidates, ...defenseCandidates];
+    const all = [...cells, ...attackCandidates, ...defenseCandidates];
     if (!current || all.length === 0) return null;
     return {
       cells,
       current,
       attackCandidates,
-      hpCandidates,
       defenseCandidates,
       minX: Math.min(...all.map((item) => item.x)) * 0.97,
       maxX: Math.max(...all.map((item) => item.x)) * 1.03,
@@ -279,7 +278,14 @@ export default function DamageAdjustmentMap(props: Props) {
   function selectAttacker(id: number) {
     const pokemon = props.pokemonCatalog.find((entry) => entry.id === id);
     setAttackerId(id);
+    setAttackerSearch(pokemon?.nameJa ?? "");
     setMoveId(pokemon?.moves[0]?.id ?? "");
+  }
+
+  function selectDefender(id: number) {
+    const pokemon = props.pokemonCatalog.find((entry) => entry.id === id);
+    setDefenderId(id);
+    setDefenderSearch(pokemon?.nameJa ?? "");
   }
 
   return (
@@ -294,18 +300,19 @@ export default function DamageAdjustmentMap(props: Props) {
           statLabel={selectedMove?.damageClass === "special" ? "特攻" : "攻撃"}
           heldItems={props.heldItems}
           onPokemonChange={selectAttacker}
+          searchValue={attackerSearch}
+          onSearchValueChange={setAttackerSearch}
           onSettingsChange={setAttackerSettings}
         >
-          <label>
-            技
-            <select value={selectedMove?.id ?? ""} onChange={(e) => setMoveId(e.target.value)}>
-              {attackerBase?.moves.map((move) => (
-                <option value={move.id} key={move.id}>
-                  {move.name}（{move.damageClass === "physical" ? "物理" : "特殊"}・威力{move.power || "変動"}）
-                </option>
-              ))}
-            </select>
-          </label>
+          <MoveSelect
+            label="技"
+            moves={attackerBase?.moves ?? []}
+            defenderTypes={defenderBase?.types ?? []}
+            typeEffectivenessSource={props.typeEffectivenessSource}
+            selectedMoveId={selectedMove?.id ?? ""}
+            disabled={!attackerBase}
+            onChange={setMoveId}
+          />
           <label className={styles.check}>
             <input type="checkbox" checked={stab} onChange={(e) => setStab(e.target.checked)} />
             タイプ一致補正を適用
@@ -318,7 +325,9 @@ export default function DamageAdjustmentMap(props: Props) {
           settings={defenderSettings}
           statLabel={selectedMove?.damageClass === "special" ? "特防" : "防御"}
           heldItems={props.heldItems}
-          onPokemonChange={setDefenderId}
+          onPokemonChange={selectDefender}
+          searchValue={defenderSearch}
+          onSearchValueChange={setDefenderSearch}
           onSettingsChange={setDefenderSettings}
         >
           <PointControl label="HP能力ポイント" value={hpPoint} onChange={setHpPoint} />
@@ -346,7 +355,7 @@ export default function DamageAdjustmentMap(props: Props) {
             move={selectedMove.name}
             data={mapData.current}
           />
-          <DamageMapSvg
+          <DamageMapChart
             data={mapData}
             attackStatLabel={attackStatId === "attack" ? "攻撃" : "特攻"}
             defenseStatLabel={defenseStatId === "defense" ? "防御" : "特防"}
@@ -382,11 +391,13 @@ export default function DamageAdjustmentMap(props: Props) {
 
 function SidePanel({
   title, open = false, pokemon, pokemonCatalog, settings, statLabel,
-  heldItems, onPokemonChange, onSettingsChange, children,
+  heldItems, onPokemonChange, searchValue, onSearchValueChange,
+  onSettingsChange, children,
 }: {
   title: string; open?: boolean; pokemon: DamageCalculatorPokemon | null;
   pokemonCatalog: DamageCalculatorPokemon[]; settings: SideSettings; statLabel: string;
   heldItems: DamageCalculatorHeldItem[]; onPokemonChange: (id: number) => void;
+  searchValue: string; onSearchValueChange: (value: string) => void;
   onSettingsChange: (value: SideSettings) => void; children?: React.ReactNode;
 }) {
   const patch = (value: Partial<SideSettings>) => onSettingsChange({ ...settings, ...value });
@@ -394,9 +405,17 @@ function SidePanel({
     <details className={styles.sidePanel} open={open}>
       <summary>{title}<span>{pokemon?.nameJa ?? "未選択"}</span></summary>
       <div className={styles.sideFields}>
-        <label>ポケモン<select value={pokemon?.id ?? ""} onChange={(e) => onPokemonChange(Number(e.target.value))}>
-          {pokemonCatalog.map((entry) => <option key={entry.id} value={entry.id}>{entry.nameJa}</option>)}
-        </select></label>
+        <PokemonCombobox
+          id={`${title}-pokemon`}
+          label="ポケモン"
+          pokemonCatalog={pokemonCatalog}
+          selectedPokemon={pokemon}
+          inputValue={searchValue}
+          onInputValueChange={onSearchValueChange}
+          onSelect={(nextPokemon) => {
+            if (nextPokemon) onPokemonChange(nextPokemon.id);
+          }}
+        />
         {children}
         <PointControl label={`${statLabel}能力ポイント`} value={settings.point} onChange={(point) => patch({ point })} />
         <label>性格補正<select value={settings.nature} onChange={(e) => patch({ nature: e.target.value as NatureCorrection })}>
@@ -436,7 +455,7 @@ function ResultSummary({ attacker, defender, move, data }: {
   </dl></section>;
 }
 
-function DamageMapSvg({
+function DamageMapChart({
   data,
   attackStatLabel,
   defenseStatLabel,
@@ -445,25 +464,96 @@ function DamageMapSvg({
   attackStatLabel: string;
   defenseStatLabel: string;
 }) {
-  const left = 76, top = 24, width = 684, height = 390;
-  const sx = (x: number) => left + ((x - data.minX) / (data.maxX - data.minX || 1)) * width;
-  const sy = (y: number) => top + height - ((y - data.minY) / (data.maxY - data.minY || 1)) * height;
-  return <section className={styles.mapPanel}><h2>ダメージ調整マップ</h2>
-    <div className={styles.legend}>{Object.entries(DAMAGE_ZONE_LABELS).map(([zone,label]) => <span key={zone}><i style={{ background: ZONE_COLORS[zone as DamageZone] }} />{label}</span>)}</div>
-    <svg viewBox="0 0 800 460" role="img" aria-label="耐久指数と火力指数によるダメージ領域">
-      <rect x={left} y={top} width={width} height={height} className={styles.plotBackground}/>
-      {data.cells.map((cell) => <circle key={`${cell.attackPoint}-${cell.defensePoint}`} cx={sx(cell.x)} cy={sy(cell.y)} r="31" fill={ZONE_COLORS[cell.zone]} opacity=".78"/>)}
-      <polyline points={data.attackCandidates.map((point) => `${sx(point.x)},${sy(point.y)}`).join(" ")} className={styles.attackLine}/>
-      <polyline points={data.hpCandidates.map((point) => `${sx(point.x)},${sy(point.y)}`).join(" ")} className={styles.hpLine}/>
-      <polyline points={data.defenseCandidates.map((point) => `${sx(point.x)},${sy(point.y)}`).join(" ")} className={styles.defenseLine}/>
-      {[...data.attackCandidates,...data.hpCandidates,...data.defenseCandidates].map((point, index)=><circle key={index} cx={sx(point.x)} cy={sy(point.y)} r="3.5" className={styles.candidatePoint}/>)}
-      <circle cx={sx(data.current.x)} cy={sy(data.current.y)} r="10" className={styles.currentPoint}/>
-      <text x={sx(data.current.x)+13} y={sy(data.current.y)-12} className={styles.currentLabel}>{DAMAGE_ZONE_LABELS[data.current.zone]}</text>
-      <line x1={left} y1={top+height} x2={left+width} y2={top+height} className={styles.axis}/>
-      <line x1={left} y1={top} x2={left} y2={top+height} className={styles.axis}/>
-      <text x={left+width/2} y="448" textAnchor="middle" className={styles.axisLabel}>耐久指数（HP × {defenseStatLabel}実数値）</text>
-      <text x="18" y={top+height/2} textAnchor="middle" transform={`rotate(-90 18 ${top+height/2})`} className={styles.axisLabel}>火力指数（{attackStatLabel}実数値 × 技威力）</text>
-    </svg>
-    <p className={styles.lineHelp}><span>赤線：A/Cポイント</span><span>青線：Hポイント</span><span>緑線：B/Dポイント</span></p>
-  </section>;
+  const option = {
+    animation: false,
+    grid: { left: 64, right: 18, top: 18, bottom: 54 },
+    tooltip: {
+      trigger: "item",
+      formatter: (params: { data?: { value: number[]; label?: string } }) => {
+        const value = params.data?.value ?? [];
+        return `${params.data?.label ?? ""}<br />耐久指数 ${Math.round(value[0] ?? 0).toLocaleString()}<br />火力指数 ${Math.round(value[1] ?? 0).toLocaleString()}`;
+      },
+    },
+    xAxis: {
+      type: "value",
+      min: data.minX,
+      max: data.maxX,
+      name: `耐久指数（HP × ${defenseStatLabel}）`,
+      nameLocation: "middle",
+      nameGap: 34,
+      splitLine: { lineStyle: { color: "#9eafbf33" } },
+    },
+    yAxis: {
+      type: "value",
+      min: data.minY,
+      max: data.maxY,
+      name: `火力指数（${attackStatLabel} × 威力）`,
+      nameLocation: "middle",
+      nameGap: 48,
+      splitLine: { lineStyle: { color: "#9eafbf33" } },
+    },
+    series: [
+      ...Object.keys(DAMAGE_ZONE_LABELS).map((zone) => ({
+        name: DAMAGE_ZONE_LABELS[zone as DamageZone],
+        type: "scatter",
+        symbolSize: 31,
+        itemStyle: { color: ZONE_COLORS[zone as DamageZone], opacity: 0.72 },
+        data: data.cells
+          .filter((cell) => cell.zone === zone)
+          .map((cell) => ({ value: [cell.x, cell.y], label: DAMAGE_ZONE_LABELS[cell.zone] })),
+      })),
+      {
+        name: `${attackStatLabel}ポイント`,
+        type: "line",
+        showSymbol: true,
+        symbolSize: 5,
+        lineStyle: { color: "#d83f4f", width: 2 },
+        itemStyle: { color: "#d83f4f" },
+        data: data.attackCandidates.map((point) => [point.x, point.y]),
+      },
+      {
+        name: `${defenseStatLabel}ポイント`,
+        type: "line",
+        showSymbol: true,
+        symbolSize: 5,
+        lineStyle: { color: "#2f9664", width: 2 },
+        itemStyle: { color: "#2f9664" },
+        data: data.defenseCandidates.map((point) => [point.x, point.y]),
+      },
+      {
+        name: "現在位置",
+        type: "scatter",
+        symbolSize: 15,
+        itemStyle: { color: "#111d2b", borderColor: "#fff", borderWidth: 3 },
+        data: [{
+          value: [data.current.x, data.current.y],
+          label: `現在位置：${DAMAGE_ZONE_LABELS[data.current.zone]}`,
+        }],
+      },
+    ],
+  };
+
+  return (
+    <details className={styles.mapDock} open>
+      <summary>
+        <span>ダメージ調整マップ</span>
+        <small>タップで開閉</small>
+      </summary>
+      <div className={styles.mapPanel}>
+        <div className={styles.legend}>
+          {Object.entries(DAMAGE_ZONE_LABELS).map(([zone, label]) => (
+            <span key={zone}>
+              <i style={{ background: ZONE_COLORS[zone as DamageZone] }} />
+              {label}
+            </span>
+          ))}
+        </div>
+        <ReactECharts option={option} className={styles.chart} />
+        <p className={styles.lineHelp}>
+          <span>赤線：{attackStatLabel}ポイント</span>
+          <span>緑線：{defenseStatLabel}ポイント</span>
+        </p>
+      </div>
+    </details>
+  );
 }
