@@ -87,6 +87,7 @@ type MapData = {
   cells: GridCell[];
   current: CalculatedPoint;
   attackCandidates: CandidatePoint[];
+  hpCandidates: CandidatePoint[];
   defenseCandidates: CandidatePoint[];
   minX: number;
   maxX: number;
@@ -225,16 +226,21 @@ export default function DamageAdjustmentMap(props: Props) {
       const value = calculate(point, defenderSettings.point);
       return value ? [{ ...value, point }] : [];
     });
+    const hpCandidates = POINTS.flatMap((point) => {
+      const value = calculate(attackerSettings.point, defenderSettings.point, point);
+      return value ? [{ ...value, point }] : [];
+    });
     const defenseCandidates = POINTS.flatMap((point) => {
       const value = calculate(attackerSettings.point, point);
       return value ? [{ ...value, point }] : [];
     });
-    const all = [...cells, ...attackCandidates, ...defenseCandidates];
+    const all = [...cells, ...attackCandidates, ...hpCandidates, ...defenseCandidates];
     if (!current || all.length === 0) return null;
     return {
       cells,
       current,
       attackCandidates,
+      hpCandidates,
       defenseCandidates,
       minX: Math.min(...all.map((item) => item.x)) * 0.97,
       maxX: Math.max(...all.map((item) => item.x)) * 1.03,
@@ -512,6 +518,15 @@ function DamageMapChart({
         data: data.attackCandidates.map((point) => [point.x, point.y]),
       },
       {
+        name: "HPポイント",
+        type: "line",
+        showSymbol: true,
+        symbolSize: 5,
+        lineStyle: { color: "#2678c5", width: 2 },
+        itemStyle: { color: "#2678c5" },
+        data: data.hpCandidates.map((point) => [point.x, point.y]),
+      },
+      {
         name: `${defenseStatLabel}ポイント`,
         type: "line",
         showSymbol: true,
@@ -551,6 +566,7 @@ function DamageMapChart({
         <ReactECharts option={option} className={styles.chart} />
         <p className={styles.lineHelp}>
           <span>赤線：{attackStatLabel}ポイント</span>
+          <span>青線：HPポイント</span>
           <span>緑線：{defenseStatLabel}ポイント</span>
         </p>
       </div>
