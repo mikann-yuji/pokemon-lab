@@ -187,6 +187,35 @@ export function MoveSelect({
   );
 }
 
+export function VariableMovePowerField({
+  moveName,
+  options,
+  value,
+  onChange,
+}: {
+  moveName: string;
+  options: readonly number[];
+  value: number;
+  onChange: (power: number) => void;
+}) {
+  return (
+    <label className={styles.variableMovePowerField}>
+      条件適用後の威力
+      <select
+        aria-label={`${moveName}の条件適用後の威力`}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+      >
+        {options.map((power) => (
+          <option value={power} key={power}>
+            {power}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function hasManualAbilityCondition(ability: DamageCalculatorAbility | null) {
   // 条件付きで発動する特性だけ、手動ON/OFFのチェックボックスを出す。
   // 常時発動する補正は選択した時点で計算へ渡すので、追加UIは不要。

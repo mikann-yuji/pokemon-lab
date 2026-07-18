@@ -2,7 +2,7 @@
 
 /** Page-level state controller for the damage calculator. */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { championsDamageCalculator } from "../config/champions-damage-ruleset";
 import type {
   DamageCalculatorHeldItem,
@@ -40,6 +40,7 @@ import {
 import { useDamageCalculatorStore } from "./damage-calculator-store";
 import { useDamageCalculatorUserData } from "./use-damage-calculator-user-data";
 import { useDamageHistoryPersistence } from "./use-damage-history-persistence";
+import { getVariableMovePowers } from "../domain/variable-move-power";
 
 /**
  * ダメージ計算ページで、画面状態・保存済みデータ・計算実行をつなぐcontroller。
@@ -61,6 +62,10 @@ export function DamageCalculator({
   terrains: DamageCalculatorTerrain[];
   typeEffectivenessSource: TypeEffectivenessSource;
 }) {
+  const [variableMovePowerSelection, setVariableMovePowerSelection] = useState<{
+    moveId: string;
+    power: number;
+  } | null>(null);
   const attacker = useDamageCalculatorStore((state) => state.pokemon.attacker);
   const defender = useDamageCalculatorStore((state) => state.pokemon.defender);
   const attackerQuery = useDamageCalculatorStore((state) => state.query.attacker);
@@ -367,9 +372,23 @@ export function DamageCalculator({
     }
   }
 
-  const selectedMove =
+  const selectedMoveBase =
     attacker?.moves.find(({ id }) => id === moveId) ??
     (preservedMove?.id === moveId ? preservedMove : undefined);
+  const variableMovePowerOptions = getVariableMovePowers(selectedMoveBase);
+  const selectedMovePower =
+    selectedMoveBase && variableMovePowerOptions
+      ? variableMovePowerSelection?.moveId === selectedMoveBase.id &&
+        variableMovePowerOptions.includes(variableMovePowerSelection.power)
+        ? variableMovePowerSelection.power
+        : variableMovePowerOptions.includes(selectedMoveBase.power)
+          ? selectedMoveBase.power
+          : variableMovePowerOptions[0]
+      : selectedMoveBase?.power;
+  const selectedMove =
+    selectedMoveBase && selectedMovePower !== undefined
+      ? { ...selectedMoveBase, power: selectedMovePower }
+      : selectedMoveBase;
   const selectedWeather =
     weathers.find(({ id }) => id === weatherId) ?? null;
   const selectedTerrain =
@@ -416,7 +435,7 @@ export function DamageCalculator({
   );
 
   const { result, error } = useMemo(() => {
-    if (!attacker || !defender || !selectedMove) {
+    if (!attacker || !defender || !selectedMoveBase) {
       return { result: null, error: null };
     }
     if (!adjustedAttacker || !adjustedDefender) {
@@ -424,12 +443,16 @@ export function DamageCalculator({
     }
 
     try {
+      const calculationMove = {
+        ...selectedMoveBase,
+        power: selectedMovePower ?? selectedMoveBase.power,
+      };
       return {
         result: {
           normal: championsDamageCalculator.calculate({
             attacker: adjustedAttacker,
             defender: adjustedDefender,
-            move: selectedMove,
+            move: calculationMove,
             metronomeConsecutiveUseCount,
             abilityConditionEnabled,
             field: fieldOptions,
@@ -438,7 +461,7 @@ export function DamageCalculator({
           critical: championsDamageCalculator.calculate({
             attacker: adjustedAttacker,
             defender: adjustedDefender,
-            move: selectedMove,
+            move: calculationMove,
             metronomeConsecutiveUseCount,
             abilityConditionEnabled,
             isCritical: true,
@@ -447,9 +470,9 @@ export function DamageCalculator({
           }),
           attackerName: attacker.nameJa,
           defenderName: defender.nameJa,
-          moveName: selectedMove.name,
+          moveName: calculationMove.name,
           moveEffectiveness: getTypeEffectiveness(
-            selectedMove.typeName,
+            calculationMove.typeName,
             defender.types,
             typeEffectivenessSource,
           ),
@@ -470,13 +493,14 @@ export function DamageCalculator({
     defender,
     fieldOptions,
     metronomeConsecutiveUseCount,
-    selectedMove,
+    selectedMoveBase,
+    selectedMovePower,
     typeEffectivenessSource,
   ]);
   useDamageHistoryPersistence({
     attacker,
     defender,
-    selectedMove,
+    selectedMove: selectedMoveBase,
     setAttackerHistory,
     setDefenderHistory,
   });
@@ -493,6 +517,7 @@ export function DamageCalculator({
       defender={defender}
       selectedMove={selectedMove}
       moveId={moveId}
+      variableMovePowerOptions={variableMovePowerOptions}
       typeEffectivenessSource={typeEffectivenessSource}
       selectedTeams={selectedTeams}
       selectedTeamMembers={selectedTeamMembers}
@@ -530,6 +555,11 @@ export function DamageCalculator({
       onMoveChange={(nextMoveId) => {
         setPreservedMove(null);
         setMoveId(nextMoveId);
+      }}
+      onVariableMovePowerChange={(power) => {
+        if (selectedMoveBase) {
+          setVariableMovePowerSelection({ moveId: selectedMoveBase.id, power });
+        }
       }}
       onStatAdjustmentChange={changeStatAdjustment}
       onSwapSides={swapBattleSides}

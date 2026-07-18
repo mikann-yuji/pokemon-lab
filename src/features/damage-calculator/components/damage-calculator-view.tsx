@@ -25,6 +25,7 @@ import {
   HeldItemField,
   MetronomeUseControl,
   MoveSelect,
+  VariableMovePowerField,
 } from "./damage-calculator-form-widgets";
 import {
   BattleTeamModal,
@@ -70,6 +71,7 @@ type DamageCalculatorViewProps = {
   defender: DamageCalculatorPokemon | null;
   selectedMove: DamageCalculatorMove | undefined;
   moveId: string;
+  variableMovePowerOptions: readonly number[] | null;
   typeEffectivenessSource: TypeEffectivenessSource | null;
   selectedTeams: Record<DamageSide, BattleTeam | null>;
   selectedTeamMembers: TeamMembersBySide;
@@ -109,6 +111,7 @@ type DamageCalculatorViewProps = {
   onHeldItemChange: (side: DamageSide, itemId: string) => void;
   onMetronomeCountChange: (value: number) => void;
   onMoveChange: (moveId: string) => void;
+  onVariableMovePowerChange: (power: number) => void;
   onStatAdjustmentChange: (
     side: DamageSide,
     statId: AdjustableStatId,
@@ -163,6 +166,7 @@ export function DamageCalculatorView({
   defender,
   selectedMove,
   moveId,
+  variableMovePowerOptions,
   typeEffectivenessSource,
   selectedTeams,
   selectedTeamMembers,
@@ -196,6 +200,7 @@ export function DamageCalculatorView({
   onHeldItemChange,
   onMetronomeCountChange,
   onMoveChange,
+  onVariableMovePowerChange,
   onStatAdjustmentChange,
   onSwapSides,
   onWeatherChange,
@@ -254,6 +259,14 @@ export function DamageCalculatorView({
           disabled={!attacker}
           onChange={onMoveChange}
         />
+        {selectedMove && variableMovePowerOptions ? (
+          <VariableMovePowerField
+            moveName={selectedMove.name}
+            options={variableMovePowerOptions}
+            value={selectedMove.power}
+            onChange={onVariableMovePowerChange}
+          />
+        ) : null}
         {attackerAdjustmentStatIds.map((statId) => (
           <DamageStatControls
             key={statId}

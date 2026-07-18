@@ -258,6 +258,25 @@
   font: inherit;
 }
 
+.variableMovePowerField {
+  display: grid;
+  gap: 0.28rem;
+  color: #344760;
+  font-size: 0.74rem;
+  font-weight: 850;
+}
+
+.variableMovePowerField select {
+  width: 100%;
+  min-height: 38px;
+  padding: 0.45rem 0.58rem;
+  border: 2px solid #b9cae0;
+  border-radius: 10px;
+  background: white;
+  color: #172b4d;
+  font: inherit;
+}
+
 .combobox input:focus,
 .moveField select:focus,
 .moveField input:focus {
