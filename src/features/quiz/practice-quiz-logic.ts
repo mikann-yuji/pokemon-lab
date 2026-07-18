@@ -2,7 +2,7 @@ import type { TypeMatchup, TypeName } from "@/domain/type-matchup";
 
 export type PracticeBattleFormat = "single" | "double";
 export type PracticeQuizSide = "attack" | "defense";
-export type PracticeMultiplier = 4 | 2 | 1 | 0.5 | 0.25;
+export type PracticeMultiplier = 4 | 2 | 1 | 0.5 | 0.25 | 0;
 
 export const PRACTICE_MULTIPLIERS: PracticeMultiplier[] = [
   2,
@@ -10,6 +10,7 @@ export const PRACTICE_MULTIPLIERS: PracticeMultiplier[] = [
   1,
   0.5,
   0.25,
+  0,
 ];
 
 export const PRACTICE_MULTIPLIER_LABELS: Record<
@@ -21,6 +22,7 @@ export const PRACTICE_MULTIPLIER_LABELS: Record<
   1: "等倍",
   0.5: "いまひとつ",
   0.25: "かなりいまひとつ",
+  0: "効果なし",
 };
 
 export type PracticeTarget = {
@@ -94,6 +96,7 @@ export function getPracticeMoveEffectiveness(
 export function toPracticeMultiplier(
   effectiveness: number,
 ): PracticeMultiplier {
+  if (effectiveness === 0) return 0;
   if (effectiveness >= 4) return 4;
   if (effectiveness >= 2) return 2;
   if (effectiveness >= 1) return 1;

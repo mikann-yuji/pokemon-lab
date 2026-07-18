@@ -302,6 +302,18 @@ export default function PracticeQuizGame({
           />
         ) : null}
         <figcaption>{question.target.nameJa}</figcaption>
+        {answered ? (
+          <div
+            className={styles.targetTypes}
+            aria-label={`${question.target.nameJa}のタイプ`}
+          >
+            {question.target.types.map((typeName) => (
+              <span key={typeName}>
+                {matchupsByType.get(typeName)?.nameJa ?? typeName}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </figure>
 
       {question.side === "defense" ? (

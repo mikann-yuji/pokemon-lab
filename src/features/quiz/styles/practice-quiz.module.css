@@ -266,6 +266,23 @@
   font-weight: 950;
 }
 
+.targetTypes {
+  display: flex;
+  gap: 0.35rem;
+  justify-content: center;
+  margin-top: 0.4rem;
+}
+
+.targetTypes span {
+  padding: 0.18rem 0.55rem;
+  border: 2px solid #b9c7da;
+  border-radius: 999px;
+  background: #eef6ff;
+  color: #172b4d;
+  font-size: 0.68rem;
+  font-weight: 950;
+}
+
 .selectedMove {
   display: grid;
   grid-template-columns: auto 1fr auto;
