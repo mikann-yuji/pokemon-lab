@@ -46,8 +46,25 @@ export default function TypeMatchupMatrix({
 }) {
   const [highlightedAttacker, setHighlightedAttacker] =
     useState<TypeName | null>(null);
-  const [highlightedDefender, setHighlightedDefender] =
-    useState<TypeName | null>(null);
+  const [highlightedDefenders, setHighlightedDefenders] = useState<TypeName[]>(
+    [],
+  );
+
+  function toggleAttacker(typeName: TypeName) {
+    setHighlightedAttacker((current) =>
+      current === typeName ? null : typeName,
+    );
+  }
+
+  function toggleDefender(typeName: TypeName) {
+    setHighlightedDefenders((current) => {
+      if (current.includes(typeName)) {
+        return current.filter((selectedType) => selectedType !== typeName);
+      }
+
+      return [...current.slice(-1), typeName];
+    });
+  }
 
   return (
     <section className={styles.matrixSection}>
@@ -65,7 +82,7 @@ export default function TypeMatchupMatrix({
               {typeMatchups.map((defender) => (
                 <th
                   className={
-                    highlightedDefender === defender.name
+                    highlightedDefenders.includes(defender.name)
                       ? styles.highlightedHeader
                       : undefined
                   }
@@ -75,8 +92,8 @@ export default function TypeMatchupMatrix({
                   <button
                     type="button"
                     className={styles.headerSelectButton}
-                    aria-pressed={highlightedDefender === defender.name}
-                    onClick={() => setHighlightedDefender(defender.name)}
+                    aria-pressed={highlightedDefenders.includes(defender.name)}
+                    onClick={() => toggleDefender(defender.name)}
                   >
                     <DefenderTypeLabel label={defender.nameJa} />
                   </button>
@@ -99,7 +116,7 @@ export default function TypeMatchupMatrix({
                     type="button"
                     className={styles.headerSelectButton}
                     aria-pressed={highlightedAttacker === attacker.name}
-                    onClick={() => setHighlightedAttacker(attacker.name)}
+                    onClick={() => toggleAttacker(attacker.name)}
                   >
                     {attacker.nameJa}
                   </button>
@@ -108,7 +125,7 @@ export default function TypeMatchupMatrix({
                   const effectiveness = getEffectiveness(attacker, defender);
                   const highlighted =
                     highlightedAttacker === attacker.name ||
-                    highlightedDefender === defender.name;
+                    highlightedDefenders.includes(defender.name);
 
                   return (
                     <td
