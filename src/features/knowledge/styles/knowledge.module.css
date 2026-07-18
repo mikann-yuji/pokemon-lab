@@ -1,0 +1,23 @@
+.container { min-height:100vh; padding:clamp(1rem,4vw,2.5rem); background:linear-gradient(145deg,#eef6ff,#dcecff); color:#172b4d; }
+.hero { width:min(100%,64rem); margin:0 auto 1.5rem; padding:clamp(1.2rem,4vw,2rem); border-radius:24px; background:linear-gradient(135deg,#2857a4,#172b4d); color:white; box-shadow:0 10px 0 rgb(23 43 77/18%); }
+.hero p { margin:.45rem 0 0; line-height:1.65; }
+.hero h1 { margin:0; font-size:clamp(2rem,6vw,3.4rem); }
+.board,.status { width:min(100%,64rem); margin:0 auto; }
+.status { padding:2rem; border-radius:18px; background:white; text-align:center; font-weight:900; }
+.condition { padding:.8rem 1rem; border:2px solid #b9c7da; border-radius:14px; background:white; color:#52657e; font-size:.8rem; font-weight:800; text-align:center; }
+.guideCard { margin:1rem 0; padding:clamp(.9rem,3vw,1.4rem); border:3px solid #172b4d; border-radius:20px; background:#fffdf5; box-shadow:0 7px 0 rgb(23 43 77/16%); }
+.guideCard header { display:flex; gap:1rem; align-items:flex-start; justify-content:space-between; margin-bottom:1rem; }
+.guideCard h2 { margin:0; font-size:1.25rem; }
+.markSummary { display:flex; flex-wrap:wrap; gap:.35rem .75rem; justify-content:flex-end; color:#52657e; font-size:.76rem; }
+.markSummary strong { color:#172b4d; }
+.statLane { display:grid; grid-template-columns:4.5rem minmax(0,1fr); gap:.6rem; align-items:center; margin-top:.75rem; }
+.laneLabel { font-size:.82rem; text-align:right; }
+.scale { position:relative; height:102px; border:2px solid #b9c7da; border-radius:12px; background:linear-gradient(90deg,#edf3fb,#fff4b8 65%,#ffd6d9); }
+.scale::after { position:absolute; right:0; bottom:8px; left:0; height:3px; background:#172b4d; content:""; opacity:.5; }
+.marker { position:absolute; z-index:1; top:0; bottom:0; width:1px; border-left:2px dashed rgb(23 43 77/35%); transform:translateX(-1px); }
+.marker>span { position:absolute; bottom:10px; left:50%; padding:.1rem .3rem; border-radius:5px; background:#172b4d; color:white; font-size:.58rem; font-weight:900; transform:translateX(-50%); }
+.pokemonIcon { position:absolute; z-index:2; display:grid; place-items:center; width:34px; height:34px; border:2px solid white; border-radius:50%; background:#eef6ff; box-shadow:0 2px 5px rgb(23 43 77/35%); transform:translateX(-50%); transition:transform .15s; }
+.pokemonIcon:hover,.pokemonIcon:focus-visible { z-index:5; outline:3px solid #ffd43b; transform:translateX(-50%) scale(1.25); }
+.pokemonIcon img { width:30px; height:30px; object-fit:contain; }
+.pokemonIcon small { position:absolute; top:27px; padding:0 .18rem; border-radius:4px; background:#172b4d; color:white; font-size:.5rem; font-weight:900; line-height:1.2; }
+@media(max-width:38rem){.guideCard header{display:grid}.markSummary{justify-content:flex-start}.statLane{grid-template-columns:1fr}.laneLabel{text-align:left}.scale{height:108px}.pokemonIcon{width:30px;height:30px}.pokemonIcon img{width:27px;height:27px}}

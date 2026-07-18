@@ -21,6 +21,7 @@ const navigationItems = [
   { href: "/quiz", label: "タイプ相性クイズ" },
   { href: "/move-quiz", label: "ポケモン技クイズ" },
   { href: "/base-stat-quiz", label: "種族値クイズ" },
+  { href: "/knowledge", label: "ナレッジ" },
 ] as const;
 
 /** モバイルでは開閉式、デスクトップでは常時表示の共通ヘッダー。 */
