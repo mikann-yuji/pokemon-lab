@@ -37,6 +37,7 @@ type MoveOptions = ConstructorParameters<typeof Move>[2];
 type FieldOptions = ConstructorParameters<typeof Field>[0];
 
 export type DamageCalculation = {
+  damageRolls: number[];
   minimum: number;
   maximum: number;
   defenderHp: number;
@@ -50,7 +51,33 @@ export type DamageCalculation = {
   koHits: number;
   /** その回数で倒せる確率。計算不能な場合はundefined。 */
   koProbability?: number;
+  oneHitProbability: number;
+  twoHitProbability: number;
 };
+
+function flattenDamageRolls(damage: Result["damage"]): number[] {
+  return Array.isArray(damage)
+    ? damage.flatMap((value) =>
+        Array.isArray(value)
+          ? flattenDamageRolls(value as Result["damage"])
+          : [Number(value)],
+      )
+    : [Number(damage)];
+}
+
+function hitProbability(rolls: number[], hp: number, hits: 1 | 2) {
+  if (rolls.length === 0) return 0;
+  if (hits === 1) {
+    return rolls.filter((damage) => damage >= hp).length / rolls.length;
+  }
+  let successful = 0;
+  for (const first of rolls) {
+    for (const second of rolls) {
+      if (first + second >= hp) successful += 1;
+    }
+  }
+  return successful / (rolls.length * rolls.length);
+}
 
 export type DamageCalculationInput = {
   attacker: DamageCalculatorPokemon;
@@ -628,8 +655,13 @@ export class SmogonDamageCalculator {
     }
     const [minimum, maximum] = sourceResult.range();
     const defenderHp = sourceResult.defender.maxHP();
-    const koChance = sourceResult.kochance();
+    const damageRolls = flattenDamageRolls(sourceResult.damage);
+    const koChance =
+      maximum === 0
+        ? { text: "ダメージなし", n: 0, chance: 0 }
+        : sourceResult.kochance();
     const result: DamageCalculation = {
+      damageRolls,
       minimum,
       maximum,
       defenderHp,
@@ -639,6 +671,8 @@ export class SmogonDamageCalculator {
       koLabel: formatKoLabel(koChance),
       koHits: koChance.n,
       koProbability: koChance.chance,
+      oneHitProbability: hitProbability(damageRolls, defenderHp, 1),
+      twoHitProbability: hitProbability(damageRolls, defenderHp, 2),
     };
 
     return this.ruleset.transformResult?.(result, sourceResult, input) ?? result;

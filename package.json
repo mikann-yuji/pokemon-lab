@@ -11,6 +11,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:damage-map": "node --experimental-strip-types --test scripts/test-damage-adjustment-map.mjs",
     "seeds:fetch": "node scripts/fetch-pokeapi-seeds.mjs && node scripts/fetch-pokeapi-items.mjs && node scripts/fetch-champions-items.mjs && node scripts/fetch-champions-move-usage.mjs && node scripts/fetch-champions-usage-rankings.mjs",
     "seeds:validate": "node scripts/validate-pokeapi-seeds.mjs",
     "champions:fetch": "node scripts/fetch-champions-seed.mjs && node scripts/fetch-champions-items.mjs && node scripts/fetch-champions-move-usage.mjs && node scripts/fetch-champions-usage-rankings.mjs",

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { DamageCalculatorCatalogLoader } from "@/features/damage-calculator/components/damage-calculator-catalog-loader";
 import styles from "@/features/damage-calculator/styles/damage-calculator.module.css";
 
@@ -13,6 +14,7 @@ export default function DamageCalculatorPage() {
     <main className={styles.page}>
       <header className={styles.hero}>
         <h3>ダメージ計算</h3>
+        <Link href="/damage-adjustment-map">ダメージ調整マップを開く →</Link>
       </header>
       <DamageCalculatorCatalogLoader />
     </main>

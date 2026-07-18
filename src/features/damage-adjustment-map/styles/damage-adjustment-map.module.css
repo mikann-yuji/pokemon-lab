@@ -1,0 +1,381 @@
+.page {
+  min-height: 100vh;
+  padding: 28px 16px 64px;
+  color: #182538;
+  background:
+    radial-gradient(circle at 10% 0%, rgb(94 168 255 / 20%), transparent 30rem),
+    linear-gradient(180deg, #edf6ff, #f8fbff 38%, #eef4fa);
+}
+
+.hero {
+  width: min(1120px, 100%);
+  margin: 0 auto 18px;
+}
+
+.hero h1 {
+  margin: 8px 0;
+  font-size: clamp(1.8rem, 7vw, 3rem);
+}
+
+.hero p {
+  max-width: 760px;
+  margin: 0;
+  color: #526278;
+  line-height: 1.7;
+}
+
+.backLink {
+  color: #28649c;
+  font-weight: 800;
+}
+
+.layout {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.settingsGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.sidePanel,
+.fieldPanel,
+.summary,
+.mapPanel,
+.adjustments,
+.status {
+  border: 1px solid rgb(26 61 100 / 14%);
+  border-radius: 20px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 12px 36px rgb(25 56 93 / 9%);
+}
+
+.sidePanel {
+  overflow: hidden;
+}
+
+.sidePanel summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 17px 18px;
+  cursor: pointer;
+  font-weight: 900;
+  list-style: none;
+}
+
+.sidePanel summary span {
+  color: #44729c;
+  font-size: 0.88rem;
+}
+
+.sideFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0 18px 18px;
+}
+
+.sideFields label,
+.fieldPanel label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: #526278;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.sideFields select,
+.fieldPanel select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #b9c9d9;
+  border-radius: 11px;
+  padding: 0 10px;
+  color: #182538;
+  background: #fff;
+  font: inherit;
+}
+
+.check {
+  display: flex !important;
+  align-items: center;
+  flex-direction: row !important;
+  gap: 8px !important;
+}
+
+.check input {
+  width: 20px;
+  height: 20px;
+}
+
+.range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.range input {
+  min-width: 0;
+  width: 100%;
+}
+
+.range output {
+  min-width: 2.2rem;
+  padding: 4px 6px;
+  border-radius: 8px;
+  color: #fff;
+  background: #28649c;
+  text-align: center;
+}
+
+.fieldPanel {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px 18px;
+}
+
+.fieldPanel label {
+  flex: 1;
+}
+
+.summary,
+.mapPanel,
+.adjustments {
+  margin-top: 16px;
+  padding: 18px;
+}
+
+.summary h2,
+.mapPanel h2,
+.adjustments h2 {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+}
+
+.matchup {
+  margin: 0 0 14px;
+  color: #28649c;
+  font-weight: 900;
+}
+
+.summary dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.summary dl div {
+  padding: 10px;
+  border-radius: 12px;
+  background: #eef5fb;
+}
+
+.summary dt {
+  color: #65758a;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.summary dd {
+  margin: 4px 0 0;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 12px;
+  margin-bottom: 10px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend i {
+  width: 11px;
+  height: 11px;
+  border: 1px solid rgb(0 0 0 / 18%);
+  border-radius: 3px;
+}
+
+.mapPanel svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 720px;
+}
+
+.mapPanel {
+  overflow-x: auto;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.plotBackground {
+  fill: #f5f8fb;
+  stroke: #b8c8d8;
+}
+
+.axis {
+  stroke: #526278;
+  stroke-width: 2;
+}
+
+.axisLabel,
+.currentLabel {
+  fill: #253950;
+  font-size: 15px;
+  font-weight: 800;
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 4px;
+}
+
+.attackLine,
+.hpLine,
+.defenseLine {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+
+.attackLine { stroke: #d83f4f; }
+.hpLine { stroke: #2678c5; }
+.defenseLine { stroke: #2f9664; }
+
+.candidatePoint {
+  fill: #fff;
+  stroke: #334b62;
+  stroke-width: 1.5;
+}
+
+.currentPoint {
+  fill: #111d2b;
+  stroke: #fff;
+  stroke-width: 4;
+}
+
+.lineHelp {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 8px 0 0;
+  color: #5a6d82;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.adjustments > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.adjustments p {
+  margin: 0;
+  padding: 13px;
+  border-radius: 12px;
+  background: #eef5fb;
+  line-height: 1.6;
+}
+
+.status {
+  padding: 24px;
+  text-align: center;
+  font-weight: 800;
+}
+
+@media (min-width: 780px) {
+  .settingsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .page {
+    padding: 18px 10px 48px;
+  }
+
+  .sideFields {
+    grid-template-columns: 1fr;
+  }
+
+  .summary dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fieldPanel,
+  .adjustments > div {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .mapPanel {
+    padding: 14px 8px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    color: #edf5ff;
+    background: radial-gradient(circle at 10% 0%, #183c61, transparent 34rem), #0d1622;
+  }
+
+  .hero p {
+    color: #b4c4d8;
+  }
+
+  .backLink {
+    color: #8bc5ff;
+  }
+
+  .sidePanel,
+  .fieldPanel,
+  .summary,
+  .mapPanel,
+  .adjustments,
+  .status {
+    border-color: #30475f;
+    background: rgb(20 33 48 / 95%);
+  }
+
+  .sideFields label,
+  .fieldPanel label,
+  .lineHelp {
+    color: #b4c4d8;
+  }
+
+  .sideFields select,
+  .fieldPanel select {
+    border-color: #476077;
+    color: #edf5ff;
+    background: #152538;
+  }
+
+  .summary dl div,
+  .adjustments p {
+    background: #1c3045;
+  }
+
+  .plotBackground {
+    fill: #132437;
+    stroke: #49647c;
+  }
+
+  .axisLabel,
+  .currentLabel {
+    fill: #eaf4ff;
+    stroke: #132437;
+  }
+}
