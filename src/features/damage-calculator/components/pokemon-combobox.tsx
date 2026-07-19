@@ -16,12 +16,18 @@ import {
 } from "@/domain/pokemon-name-search";
 import styles from "../styles/damage-calculator.module.css";
 
+// ダメージ計算と対戦記録の両方で扱える、候補の最小データ構造。
+// 画面固有の画像や能力値を要求しないことで、共通部品として利用できる。
 type PokemonComboboxItem = {
+  // 数値IDは候補リストの識別と、選択結果の保存に使用する。
   id: number;
+  // 英語名も検索対象に含め、日本語名が分からない場合に対応する。
   name: string;
+  // 日本語名は入力欄と候補リストへ表示する。
   nameJa: string;
 };
 
+// 親側で入力文字列と選択結果を管理する、制御コンポーネント用のprops。
 type PokemonComboboxProps<TPokemon extends PokemonComboboxItem> = {
   /** inputと候補キーを区別するための一意なID。 */
   id: string;
@@ -39,6 +45,10 @@ type PokemonComboboxProps<TPokemon extends PokemonComboboxItem> = {
   onSelect: (pokemon: TPokemon | null) => void;
 };
 
+/**
+ * ポケモン名を部分一致で検索し、候補から1匹を選択する入力欄。
+ * 入力値を親状態へ保存するため、再レンダーや日本語変換中も文字列を維持できる。
+ */
 export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
   id,
   label,
@@ -51,7 +61,9 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
   // 入力またはカタログが変わった場合だけ候補を再計算する。
   // 共通関数を使うことで「ふしぎだね」と「フシギダネ」を同一視する。
   const suggestions = useMemo(() => {
+    // ひらがな・カタカナ・大文字小文字などの表記差を検索前にそろえる。
     const normalizedQuery = normalizePokemonSearchText(inputValue);
+    // 空欄または選択確定済みの名称なら、不要な候補一覧を閉じる。
     if (
       !normalizedQuery ||
       normalizedQuery ===
@@ -60,6 +72,8 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
       return [];
     }
 
+    // 日本語名と英語名のどちらかに一致するポケモンを候補に残す。
+    // モバイル画面を候補で埋めないよう、表示件数は先頭8件に制限する。
     return pokemonCatalog
       .filter(
         ({ name, nameJa }) =>
@@ -68,6 +82,8 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
       )
       .slice(0, 8);
   }, [inputValue, pokemonCatalog, selectedPokemon?.nameJa]);
+
+  // Downshiftから、ARIA対応済みの状態と各要素へ渡すprops生成関数を受け取る。
   const {
     isOpen,
     highlightedIndex,
@@ -76,11 +92,13 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
     getLabelProps,
     getMenuProps,
   } = useCombobox({
+    // 絞り込み済みの配列だけを渡し、Downshiftには選択操作を担当させる。
     items: suggestions,
     selectedItem: selectedPokemon,
     // 選択解除によるDownshift内部の入力リセットより、親が保持する入力値を優先する。
     // 日本語IMEの変換途中もonInputValueChangeで受け取った文字列をそのまま戻す。
     inputValue,
+    // 選択確定時に入力欄へ表示する文字列は日本語名に統一する。
     itemToString: (pokemon) => pokemon?.nameJa ?? "",
     // 入力途中でフォーカスが外れても、選択済み名称へ勝手に巻き戻さない。
     stateReducer: (state, { type, changes }) =>
@@ -98,18 +116,24 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
     },
   });
 
+  // 候補が0件の場合は空のメニュー領域を表示しない。
   const showSuggestions = isOpen && suggestions.length > 0;
 
   return (
     <div className={styles.combobox}>
+      {/* Downshiftが生成するhtmlForなどを付け、ラベルと入力欄を関連付ける。 */}
       <label {...getLabelProps()}>{label}</label>
       <input
         {...getInputProps({
+          // 複数の入力欄を同じ画面に置いてもARIA属性が衝突しないIDを使う。
           id,
           type: "search",
           placeholder: "ポケモン名を入力",
+          // ブラウザ履歴の候補とポケモン候補が重ならないよう自動補完を止める。
           autoComplete: "off",
           onFocus: (event) => {
+            // 既存のポケモン名をすぐ置き換えられるよう、フォーカス時に全選択する。
+            // iOSでフォーカス処理が完了した後に選択するため、次のタスクへ遅延する。
             const input = event.currentTarget;
             window.setTimeout(() => input.select(), 0);
           },
@@ -117,6 +141,7 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
       />
       <ul
         {...getMenuProps({
+          // 見た目だけでなく、読み上げ時にも何の候補か分かる名前を付ける。
           className: styles.suggestions,
           "aria-label": `${label}の候補`,
         })}
@@ -124,6 +149,7 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
       >
         {showSuggestions
           ? suggestions.map((pokemon, index) => {
+              // キーボード移動、クリック、タップに必要なイベントを候補ごとに生成する。
               const itemProps = getItemProps({ item: pokemon, index });
 
               return (
@@ -132,6 +158,7 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
                   key={`${id}-${pokemon.id}-${index}`}
                   {...itemProps}
                   className={
+                    // 現在キーボードで指している候補だけを視覚的に強調する。
                     highlightedIndex === index
                       ? styles.highlighted
                       : undefined
