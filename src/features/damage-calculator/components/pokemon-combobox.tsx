@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable react-hooks/refs -- the ref is read only inside IME event callbacks */
+
 /**
  * このファイルの役割:
  * Pokémon Champions対象ポケモンを、キーボードでも操作できる候補リストから選ぶ。
@@ -9,7 +11,7 @@
  */
 
 import { useCombobox } from "downshift";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import {
   normalizePokemonSearchText,
   pokemonNameIncludes,
@@ -58,6 +60,7 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
   onInputValueChange,
   onSelect,
 }: PokemonComboboxProps<TPokemon>) {
+  const isComposingRef = useRef(false);
   // 入力またはカタログが変わった場合だけ候補を再計算する。
   // 共通関数を使うことで「ふしぎだね」と「フシギダネ」を同一視する。
   const suggestions = useMemo(() => {
@@ -107,7 +110,8 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
         : changes,
     // 候補の絞り込みに使う検索文字列だけを親へ通知する。
     onInputValueChange: ({ inputValue }) => {
-      onInputValueChange(inputValue ?? "");
+      const nextValue = inputValue ?? "";
+      if (!isComposingRef.current) onInputValueChange(nextValue);
     },
     // Enter、クリック、タップのいずれでも同じ選択処理を呼ぶ。
     onSelectedItemChange: ({ selectedItem }) => {
@@ -131,6 +135,13 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
           placeholder: "ポケモン名を入力",
           // ブラウザ履歴の候補とポケモン候補が重ならないよう自動補完を止める。
           autoComplete: "off",
+          onCompositionStart: () => {
+            isComposingRef.current = true;
+          },
+          onCompositionEnd: (event) => {
+            isComposingRef.current = false;
+            onInputValueChange(event.currentTarget.value);
+          },
           onFocus: (event) => {
             // 既存のポケモン名をすぐ置き換えられるよう、フォーカス時に全選択する。
             // iOSでフォーカス処理が完了した後に選択するため、次のタスクへ遅延する。
