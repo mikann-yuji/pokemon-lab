@@ -9,7 +9,7 @@
  */
 
 import { useCombobox } from "downshift";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   normalizePokemonSearchText,
   pokemonNameIncludes,
@@ -59,11 +59,6 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
   onSelect,
 }: PokemonComboboxProps<TPokemon>) {
   const [draftValue, setDraftValue] = useState(inputValue);
-  useEffect(() => {
-    // External restores and side swaps must replace the local IME draft.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDraftValue(inputValue);
-  }, [inputValue]);
   // 入力またはカタログが変わった場合だけ候補を再計算する。
   // 共通関数を使うことで「ふしぎだね」と「フシギダネ」を同一視する。
   const suggestions = useMemo(() => {
@@ -101,9 +96,9 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
     // 絞り込み済みの配列だけを渡し、Downshiftには選択操作を担当させる。
     items: suggestions,
     selectedItem: selectedPokemon,
-    // 選択解除によるDownshift内部の入力リセットより、親が保持する入力値を優先する。
-    // 日本語IMEの変換途中もonInputValueChangeで受け取った文字列をそのまま戻す。
-    inputValue: draftValue,
+    // iOSのかな入力を壊さないよう、表示中の文字列はDownshiftに管理させる。
+    // Reactの制御入力にすると「か→が」の合成途中に再描画され、文字が重複する。
+    initialInputValue: inputValue,
     // 選択確定時に入力欄へ表示する文字列は日本語名に統一する。
     itemToString: (pokemon) => pokemon?.nameJa ?? "",
     // 入力途中でフォーカスが外れても、選択済み名称へ勝手に巻き戻さない。
