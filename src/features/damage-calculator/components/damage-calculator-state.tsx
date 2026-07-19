@@ -109,6 +109,39 @@ function calculateSpeedValue(
   return scarf ? Math.floor(speed * 1.5) : speed;
 }
 
+export function calculateDetailedSpeedValue(
+  pokemon: DamageCalculatorPokemon | null,
+  point: number,
+  nature: NatureCorrection,
+  rank: number,
+  itemId: string,
+) {
+  if (!pokemon) return null;
+  const baseSpeed = calculateActualStat(pokemon, "speed", point, nature);
+  const rankedSpeed = Math.floor(
+    baseSpeed * (rank >= 0 ? (2 + rank) / 2 : 2 / (2 - rank)),
+  );
+  const halfSpeedItems = [
+    "iron-ball",
+    "macho-brace",
+    "power-weight",
+    "power-bracer",
+    "power-belt",
+    "power-lens",
+    "power-band",
+    "power-anklet",
+  ];
+  const itemMultiplier =
+    itemId === "choice-scarf"
+      ? 1.5
+      : itemId === "quick-powder" && pokemon.name === "ditto"
+        ? 2
+        : halfSpeedItems.includes(itemId)
+          ? 0.5
+          : 1;
+  return Math.floor(rankedSpeed * itemMultiplier);
+}
+
 /**
  * ダメージ計算ページの素早さ比較モーダルに表示する代表行を作る。
  *

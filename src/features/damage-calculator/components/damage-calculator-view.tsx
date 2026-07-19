@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { CHAMPIONS_DAMAGE_RULESET } from "../config/champions-damage-ruleset";
 import type {
   DamageCalculatorHeldItem,
@@ -36,6 +37,7 @@ import {
   SpeedComparisonModal,
 } from "./damage-calculator-pokemon-widgets";
 import { DamageResult } from "./damage-calculator-result";
+import { DetailedSpeedComparisonModal } from "./detailed-speed-comparison-modal";
 import type {
   AdjustableStatId,
   CalculationResult,
@@ -207,6 +209,7 @@ export function DamageCalculatorView({
   onTerrainChange,
   onSpeedModalOpenChange,
 }: DamageCalculatorViewProps) {
+  const [detailedSpeedModalOpen, setDetailedSpeedModalOpen] = useState(false);
   const attackerAdjustmentStatIds = getAttackerAdjustmentStatIds(
     selectedMove,
     relevantStatIds.attacker,
@@ -349,12 +352,28 @@ export function DamageCalculatorView({
       >
         かんたん素早さ比較
       </button>
+      <button
+        className={`${styles.speedCompareButton} ${styles.detailedSpeedCompareButton}`}
+        type="button"
+        disabled={!attacker && !defender}
+        onClick={() => setDetailedSpeedModalOpen(true)}
+      >
+        詳細すばやさ比較
+      </button>
       {speedModalOpen ? (
         <SpeedComparisonModal
           attackerName={attacker?.nameJa ?? "攻撃側未選択"}
           defenderName={defender?.nameJa ?? "防御側未選択"}
           rows={speedComparisonRows}
           onClose={() => onSpeedModalOpenChange(false)}
+        />
+      ) : null}
+      {detailedSpeedModalOpen ? (
+        <DetailedSpeedComparisonModal
+          attacker={attacker}
+          defender={defender}
+          heldItems={heldItems}
+          onClose={() => setDetailedSpeedModalOpen(false)}
         />
       ) : null}
       {teamModalSide ? (

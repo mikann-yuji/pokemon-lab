@@ -1005,6 +1005,18 @@ a.pokemonSummary:focus-visible {
   background: #cf2f40;
 }
 
+.detailedSpeedCompareButton {
+  right: calc(max(0.75rem, env(safe-area-inset-right)) + 11.25rem);
+  border-color: #2857a4;
+  background: #2857a4;
+  box-shadow: 0 14px 36px rgb(40 87 164 / 28%);
+}
+
+.detailedSpeedCompareButton:not(:disabled):hover,
+.detailedSpeedCompareButton:not(:disabled):focus-visible {
+  background: #1f4789;
+}
+
 .resultHeader {
   display: flex;
   gap: 0.45rem;
@@ -1344,6 +1356,90 @@ a.pokemonSummary:focus-visible {
   color: #b51f2d;
 }
 
+.detailedSpeedPanel {
+  width: min(100%, 54rem);
+  max-height: min(92vh, 46rem);
+}
+
+.detailedSpeedGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.detailedSpeedSide {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border: 1px solid #c7d5e7;
+  border-radius: 10px;
+  background: white;
+}
+
+.detailedSpeedSide h3 {
+  margin: 0.1rem 0 0;
+  color: #172b4d;
+}
+
+.detailedSpeedSide label {
+  display: grid;
+  gap: 0.3rem;
+  color: #536376;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.detailedSpeedSide select {
+  min-height: 40px;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #b8c8dc;
+  border-radius: 8px;
+  background: white;
+  color: #172b4d;
+  font: inherit;
+}
+
+.detailedSpeedRange {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.detailedSpeedRange input {
+  min-width: 0;
+  width: 100%;
+}
+
+.detailedSpeedRange output {
+  min-width: 2rem;
+  color: #2857a4;
+  font-weight: 950;
+  text-align: right;
+}
+
+.detailedSpeedResult {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  padding: 0.7rem;
+  border-radius: 9px;
+  background: #eef6ff;
+  color: #172b4d;
+}
+
+.detailedSpeedResult small {
+  grid-column: 1 / -1;
+}
+
+.detailedSpeedResult strong {
+  font-size: 1.8rem;
+}
+
+.detailedSpeedResult span {
+  color: #536376;
+  font-weight: 950;
+}
+
 .teamModalOverlay {
   position: fixed;
   z-index: 260;
@@ -1622,6 +1718,14 @@ a.pokemonSummary:focus-visible {
     min-height: 34px;
     padding: 0.25rem 0.62rem;
     font-size: 0.7rem;
+  }
+
+  .detailedSpeedCompareButton {
+    right: calc(max(0.45rem, env(safe-area-inset-right)) + 9.8rem);
+  }
+
+  .detailedSpeedGrid {
+    grid-template-columns: 1fr;
   }
 
   .speedTableHead,
