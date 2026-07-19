@@ -89,6 +89,9 @@ function MoveOptionContent({
         {" / "}命中 {formatMoveAccuracy(move)}
         {formatMoveUsageRate(move)}
       </small>
+      {move.description ? (
+        <span className={styles.moveDescription}>{move.description}</span>
+      ) : null}
     </span>
   );
 }

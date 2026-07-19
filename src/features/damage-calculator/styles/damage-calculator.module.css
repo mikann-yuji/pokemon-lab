@@ -625,6 +625,18 @@ a.pokemonSummary:focus-visible {
   font-weight: 850;
 }
 
+.moveDescription {
+  display: -webkit-box;
+  grid-column: 2 / -1;
+  overflow: hidden;
+  color: #7a8798;
+  font-size: 0.52rem;
+  font-weight: 650;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .effectivenessBadge {
   justify-self: end;
   max-width: 6.4rem;
