@@ -68,7 +68,7 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
   // 共通関数を使うことで「ふしぎだね」と「フシギダネ」を同一視する。
   const suggestions = useMemo(() => {
     // ひらがな・カタカナ・大文字小文字などの表記差を検索前にそろえる。
-    const normalizedQuery = normalizePokemonSearchText(inputValue);
+    const normalizedQuery = normalizePokemonSearchText(draftValue);
     // 空欄または選択確定済みの名称なら、不要な候補一覧を閉じる。
     if (
       !normalizedQuery ||
@@ -87,7 +87,7 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
           pokemonNameIncludes(nameJa, normalizedQuery),
       )
       .slice(0, 8);
-  }, [inputValue, pokemonCatalog, selectedPokemon?.nameJa]);
+  }, [draftValue, pokemonCatalog, selectedPokemon?.nameJa]);
 
   // Downshiftから、ARIA対応済みの状態と各要素へ渡すprops生成関数を受け取る。
   const {
