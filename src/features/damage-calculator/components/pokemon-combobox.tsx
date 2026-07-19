@@ -1,7 +1,5 @@
 "use client";
 
-/* eslint-disable react-hooks/refs -- the ref is read only inside IME event callbacks */
-
 /**
  * このファイルの役割:
  * Pokémon Champions対象ポケモンを、キーボードでも操作できる候補リストから選ぶ。
@@ -11,7 +9,7 @@
  */
 
 import { useCombobox } from "downshift";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   normalizePokemonSearchText,
   pokemonNameIncludes,
@@ -60,7 +58,13 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
   onInputValueChange,
   onSelect,
 }: PokemonComboboxProps<TPokemon>) {
-  const isComposingRef = useRef(false);
+  const [draftValue, setDraftValue] = useState(inputValue);
+  const [isComposing, setIsComposing] = useState(false);
+  useEffect(() => {
+    // External restores and side swaps must replace the local IME draft.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDraftValue(inputValue);
+  }, [inputValue]);
   // 入力またはカタログが変わった場合だけ候補を再計算する。
   // 共通関数を使うことで「ふしぎだね」と「フシギダネ」を同一視する。
   const suggestions = useMemo(() => {
@@ -100,7 +104,7 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
     selectedItem: selectedPokemon,
     // 選択解除によるDownshift内部の入力リセットより、親が保持する入力値を優先する。
     // 日本語IMEの変換途中もonInputValueChangeで受け取った文字列をそのまま戻す。
-    inputValue,
+    inputValue: draftValue,
     // 選択確定時に入力欄へ表示する文字列は日本語名に統一する。
     itemToString: (pokemon) => pokemon?.nameJa ?? "",
     // 入力途中でフォーカスが外れても、選択済み名称へ勝手に巻き戻さない。
@@ -111,11 +115,13 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
     // 候補の絞り込みに使う検索文字列だけを親へ通知する。
     onInputValueChange: ({ inputValue }) => {
       const nextValue = inputValue ?? "";
-      if (!isComposingRef.current) onInputValueChange(nextValue);
+      setDraftValue(nextValue);
+      if (!isComposing) onInputValueChange(nextValue);
     },
     // Enter、クリック、タップのいずれでも同じ選択処理を呼ぶ。
     onSelectedItemChange: ({ selectedItem }) => {
       const nextPokemon = selectedItem ?? null;
+      setDraftValue(nextPokemon?.nameJa ?? "");
       onSelect(nextPokemon);
     },
   });
@@ -136,11 +142,13 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
           // ブラウザ履歴の候補とポケモン候補が重ならないよう自動補完を止める。
           autoComplete: "off",
           onCompositionStart: () => {
-            isComposingRef.current = true;
+            setIsComposing(true);
           },
           onCompositionEnd: (event) => {
-            isComposingRef.current = false;
-            onInputValueChange(event.currentTarget.value);
+            const nextValue = event.currentTarget.value;
+            setIsComposing(false);
+            setDraftValue(nextValue);
+            onInputValueChange(nextValue);
           },
           onFocus: (event) => {
             // 既存のポケモン名をすぐ置き換えられるよう、フォーカス時に全選択する。
