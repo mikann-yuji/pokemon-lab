@@ -123,8 +123,6 @@ export default function DamageAdjustmentMap(props: Props) {
   const [terrainId, setTerrainId] = useState("");
   const [wall, setWall] = useState(false);
   const [stab, setStab] = useState(true);
-  const [attackerSearch, setAttackerSearch] = useState(attackerBase?.nameJa ?? "");
-  const [defenderSearch, setDefenderSearch] = useState(defenderBase?.nameJa ?? "");
 
   const attackStatId =
     selectedMove?.damageClass === "special" ? "special-attack" : "attack";
@@ -284,14 +282,11 @@ export default function DamageAdjustmentMap(props: Props) {
   function selectAttacker(id: number) {
     const pokemon = props.pokemonCatalog.find((entry) => entry.id === id);
     setAttackerId(id);
-    setAttackerSearch(pokemon?.nameJa ?? "");
     setMoveId(pokemon?.moves[0]?.id ?? "");
   }
 
   function selectDefender(id: number) {
-    const pokemon = props.pokemonCatalog.find((entry) => entry.id === id);
     setDefenderId(id);
-    setDefenderSearch(pokemon?.nameJa ?? "");
   }
 
   return (
@@ -306,8 +301,6 @@ export default function DamageAdjustmentMap(props: Props) {
           statLabel={selectedMove?.damageClass === "special" ? "特攻" : "攻撃"}
           heldItems={props.heldItems}
           onPokemonChange={selectAttacker}
-          searchValue={attackerSearch}
-          onSearchValueChange={setAttackerSearch}
           onSettingsChange={setAttackerSettings}
         >
           <MoveSelect
@@ -332,8 +325,6 @@ export default function DamageAdjustmentMap(props: Props) {
           statLabel={selectedMove?.damageClass === "special" ? "特防" : "防御"}
           heldItems={props.heldItems}
           onPokemonChange={selectDefender}
-          searchValue={defenderSearch}
-          onSearchValueChange={setDefenderSearch}
           onSettingsChange={setDefenderSettings}
         >
           <PointControl label="HP能力ポイント" value={hpPoint} onChange={setHpPoint} />
@@ -397,13 +388,11 @@ export default function DamageAdjustmentMap(props: Props) {
 
 function SidePanel({
   title, open = false, pokemon, pokemonCatalog, settings, statLabel,
-  heldItems, onPokemonChange, searchValue, onSearchValueChange,
-  onSettingsChange, children,
+  heldItems, onPokemonChange, onSettingsChange, children,
 }: {
   title: string; open?: boolean; pokemon: DamageCalculatorPokemon | null;
   pokemonCatalog: DamageCalculatorPokemon[]; settings: SideSettings; statLabel: string;
   heldItems: DamageCalculatorHeldItem[]; onPokemonChange: (id: number) => void;
-  searchValue: string; onSearchValueChange: (value: string) => void;
   onSettingsChange: (value: SideSettings) => void; children?: React.ReactNode;
 }) {
   const patch = (value: Partial<SideSettings>) => onSettingsChange({ ...settings, ...value });
@@ -411,16 +400,11 @@ function SidePanel({
     <details className={styles.sidePanel} open={open}>
       <summary>{title}<span>{pokemon?.nameJa ?? "未選択"}</span></summary>
       <div className={styles.sideFields}>
-        <PokemonCombobox
+        <PokemonSearchField
           id={`${title}-pokemon`}
-          label="ポケモン"
           pokemonCatalog={pokemonCatalog}
-          selectedPokemon={pokemon}
-          inputValue={searchValue}
-          onInputValueChange={onSearchValueChange}
-          onSelect={(nextPokemon) => {
-            if (nextPokemon) onPokemonChange(nextPokemon.id);
-          }}
+          pokemon={pokemon}
+          onPokemonChange={onPokemonChange}
         />
         {children}
         <PointControl label={`${statLabel}能力ポイント`} value={settings.point} onChange={(point) => patch({ point })} />
@@ -439,6 +423,36 @@ function SidePanel({
         <label className={styles.check}><input type="checkbox" checked={settings.abilityCondition} onChange={(e) => patch({ abilityCondition: e.target.checked })} />条件付き特性を有効</label>
       </div>
     </details>
+  );
+}
+
+function PokemonSearchField({
+  id,
+  pokemonCatalog,
+  pokemon,
+  onPokemonChange,
+}: {
+  id: string;
+  pokemonCatalog: DamageCalculatorPokemon[];
+  pokemon: DamageCalculatorPokemon | null;
+  onPokemonChange: (id: number) => void;
+}) {
+  const [inputValue, setInputValue] = useState(pokemon?.nameJa ?? "");
+
+  return (
+    <PokemonCombobox
+      id={id}
+      label="ポケモン"
+      pokemonCatalog={pokemonCatalog}
+      selectedPokemon={pokemon}
+      inputValue={inputValue}
+      onInputValueChange={setInputValue}
+      onSelect={(nextPokemon) => {
+        if (!nextPokemon) return;
+        setInputValue(nextPokemon.nameJa);
+        onPokemonChange(nextPokemon.id);
+      }}
+    />
   );
 }
 
