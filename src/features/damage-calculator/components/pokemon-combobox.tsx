@@ -59,7 +59,6 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
   onSelect,
 }: PokemonComboboxProps<TPokemon>) {
   const [draftValue, setDraftValue] = useState(inputValue);
-  const [isComposing, setIsComposing] = useState(false);
   useEffect(() => {
     // External restores and side swaps must replace the local IME draft.
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -116,7 +115,7 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
     onInputValueChange: ({ inputValue }) => {
       const nextValue = inputValue ?? "";
       setDraftValue(nextValue);
-      if (!isComposing) onInputValueChange(nextValue);
+      onInputValueChange(nextValue);
     },
     // Enter、クリック、タップのいずれでも同じ選択処理を呼ぶ。
     onSelectedItemChange: ({ selectedItem }) => {
@@ -141,15 +140,6 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
           placeholder: "ポケモン名を入力",
           // ブラウザ履歴の候補とポケモン候補が重ならないよう自動補完を止める。
           autoComplete: "off",
-          onCompositionStart: () => {
-            setIsComposing(true);
-          },
-          onCompositionEnd: (event) => {
-            const nextValue = event.currentTarget.value;
-            setIsComposing(false);
-            setDraftValue(nextValue);
-            onInputValueChange(nextValue);
-          },
           onFocus: (event) => {
             // 既存のポケモン名をすぐ置き換えられるよう、フォーカス時に全選択する。
             // iOSでフォーカス処理が完了した後に選択するため、次のタスクへ遅延する。
