@@ -78,8 +78,9 @@ export function PokemonCombobox<TPokemon extends PokemonComboboxItem>({
   } = useCombobox({
     items: suggestions,
     selectedItem: selectedPokemon,
-    // 入力値そのものはDownshiftに任せ、IMEの変換途中にReactから書き戻さない。
-    initialInputValue: inputValue,
+    // 選択解除によるDownshift内部の入力リセットより、親が保持する入力値を優先する。
+    // 日本語IMEの変換途中もonInputValueChangeで受け取った文字列をそのまま戻す。
+    inputValue,
     itemToString: (pokemon) => pokemon?.nameJa ?? "",
     // 入力途中でフォーカスが外れても、選択済み名称へ勝手に巻き戻さない。
     stateReducer: (state, { type, changes }) =>
