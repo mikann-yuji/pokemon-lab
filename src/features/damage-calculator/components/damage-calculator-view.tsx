@@ -72,6 +72,8 @@ type DamageCalculatorViewProps = {
   attacker: DamageCalculatorPokemon | null;
   defender: DamageCalculatorPokemon | null;
   selectedMove: DamageCalculatorMove | undefined;
+  multiHitRange: { minimum: number; maximum: number } | null;
+  useMaximumHits: boolean;
   moveId: string;
   variableMovePowerOptions: readonly number[] | null;
   typeEffectivenessSource: TypeEffectivenessSource | null;
@@ -113,6 +115,7 @@ type DamageCalculatorViewProps = {
   onHeldItemChange: (side: DamageSide, itemId: string) => void;
   onMetronomeCountChange: (value: number) => void;
   onMoveChange: (moveId: string) => void;
+  onUseMaximumHitsChange: (enabled: boolean) => void;
   onVariableMovePowerChange: (power: number) => void;
   onStatAdjustmentChange: (
     side: DamageSide,
@@ -167,6 +170,8 @@ export function DamageCalculatorView({
   attacker,
   defender,
   selectedMove,
+  multiHitRange,
+  useMaximumHits,
   moveId,
   variableMovePowerOptions,
   typeEffectivenessSource,
@@ -202,6 +207,7 @@ export function DamageCalculatorView({
   onHeldItemChange,
   onMetronomeCountChange,
   onMoveChange,
+  onUseMaximumHitsChange,
   onVariableMovePowerChange,
   onStatAdjustmentChange,
   onSwapSides,
@@ -262,6 +268,18 @@ export function DamageCalculatorView({
           disabled={!attacker}
           onChange={onMoveChange}
         />
+        {multiHitRange && multiHitRange.maximum > multiHitRange.minimum ? (
+          <label className={styles.maximumHitsToggle}>
+            <input
+              type="checkbox"
+              checked={useMaximumHits}
+              onChange={(event) =>
+                onUseMaximumHitsChange(event.target.checked)
+              }
+            />
+            最大回数（{multiHitRange.maximum}回）で計算
+          </label>
+        ) : null}
         {selectedMove && variableMovePowerOptions ? (
           <VariableMovePowerField
             moveName={selectedMove.name}

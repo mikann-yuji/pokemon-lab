@@ -83,6 +83,7 @@ export type DamageCalculationInput = {
   attacker: DamageCalculatorPokemon;
   defender: DamageCalculatorPokemon;
   move: DamageCalculatorMove;
+  hits?: number;
   metronomeConsecutiveUseCount?: number;
   abilityConditionEnabled?: {
     attacker?: boolean;
@@ -630,6 +631,7 @@ export class SmogonDamageCalculator {
       input.isCritical ?? false,
       getEffectiveMovePower(input),
       getHeldItemPowerMultiplier(input) * getAbilityPowerMultiplier(input),
+      input.hits,
     );
     applyAttackingStatMultiplier(
       attacker,
@@ -743,6 +745,7 @@ export class SmogonDamageCalculator {
     isCritical: boolean,
     basePower: number,
     powerMultiplier: number,
+    hits?: number,
   ): Move {
     // 技名がSmogon側に存在すれば固有効果を利用し、存在しない場合でも
     // DBの威力・タイプ・分類を上書きして基本ダメージを計算する。
@@ -753,6 +756,7 @@ export class SmogonDamageCalculator {
       generation.moves.get(sourceId as never)?.name ?? "Pound";
     const options: MoveOptions = {
       isCrit: isCritical,
+      ...(hits ? { hits } : {}),
       overrides: {
         basePower: Math.max(1, Math.floor(basePower * powerMultiplier)),
         type: move.typeName,
@@ -765,6 +769,18 @@ export class SmogonDamageCalculator {
       calculatorMove,
       this.ruleset.customizeMove?.(move, options) ?? options,
     );
+  }
+
+  getMoveHitRange(move: DamageCalculatorMove) {
+    const generation = Generations.get(this.ruleset.generation);
+    const sourceId =
+      this.ruleset.resolveMoveId?.(move) ?? normalizeId(move.id);
+    const calculatorMove = generation.moves.get(sourceId as never);
+    const multihit = calculatorMove?.multihit;
+    if (!multihit) return null;
+    return Array.isArray(multihit)
+      ? { minimum: multihit[0], maximum: multihit[1] }
+      : { minimum: multihit, maximum: multihit };
   }
 }
 

@@ -66,6 +66,7 @@ export function DamageCalculator({
     moveId: string;
     power: number;
   } | null>(null);
+  const [useMaximumHits, setUseMaximumHits] = useState(false);
   const attacker = useDamageCalculatorStore((state) => state.pokemon.attacker);
   const defender = useDamageCalculatorStore((state) => state.pokemon.defender);
   const attackerQuery = useDamageCalculatorStore((state) => state.query.attacker);
@@ -389,6 +390,11 @@ export function DamageCalculator({
     selectedMoveBase && selectedMovePower !== undefined
       ? { ...selectedMoveBase, power: selectedMovePower }
       : selectedMoveBase;
+  const multiHitRange = selectedMoveBase
+    ? championsDamageCalculator.getMoveHitRange(selectedMoveBase)
+    : null;
+  const calculationHits =
+    useMaximumHits && multiHitRange ? multiHitRange.maximum : undefined;
   const selectedWeather =
     weathers.find(({ id }) => id === weatherId) ?? null;
   const selectedTerrain =
@@ -453,6 +459,7 @@ export function DamageCalculator({
             attacker: adjustedAttacker,
             defender: adjustedDefender,
             move: calculationMove,
+            hits: calculationHits,
             metronomeConsecutiveUseCount,
             abilityConditionEnabled,
             field: fieldOptions,
@@ -462,6 +469,7 @@ export function DamageCalculator({
             attacker: adjustedAttacker,
             defender: adjustedDefender,
             move: calculationMove,
+            hits: calculationHits,
             metronomeConsecutiveUseCount,
             abilityConditionEnabled,
             isCritical: true,
@@ -495,6 +503,7 @@ export function DamageCalculator({
     metronomeConsecutiveUseCount,
     selectedMoveBase,
     selectedMovePower,
+    calculationHits,
     typeEffectivenessSource,
   ]);
   useDamageHistoryPersistence({
@@ -516,6 +525,8 @@ export function DamageCalculator({
       attacker={attacker}
       defender={defender}
       selectedMove={selectedMove}
+      multiHitRange={multiHitRange}
+      useMaximumHits={useMaximumHits}
       moveId={moveId}
       variableMovePowerOptions={variableMovePowerOptions}
       typeEffectivenessSource={typeEffectivenessSource}
@@ -553,9 +564,11 @@ export function DamageCalculator({
       onHeldItemChange={changeHeldItem}
       onMetronomeCountChange={setMetronomeConsecutiveUseCount}
       onMoveChange={(nextMoveId) => {
+        setUseMaximumHits(false);
         setPreservedMove(null);
         setMoveId(nextMoveId);
       }}
+      onUseMaximumHitsChange={setUseMaximumHits}
       onVariableMovePowerChange={(power) => {
         if (selectedMoveBase) {
           setVariableMovePowerSelection({ moveId: selectedMoveBase.id, power });

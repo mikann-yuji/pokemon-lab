@@ -637,6 +637,26 @@ a.pokemonSummary:focus-visible {
   -webkit-line-clamp: 2;
 }
 
+.maximumHitsToggle {
+  display: flex !important;
+  align-items: center;
+  flex-direction: row !important;
+  gap: 0.45rem !important;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #b9cae0;
+  border-radius: 9px;
+  background: #eef6ff;
+  color: #2857a4 !important;
+  font-size: 0.78rem !important;
+  font-weight: 900 !important;
+}
+
+.maximumHitsToggle input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+}
+
 .effectivenessBadge {
   justify-self: end;
   max-width: 6.4rem;
