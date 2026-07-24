@@ -340,6 +340,15 @@
     font-size: 0.75rem;
   }
 
+  .detailSearchPanel {
+    max-height: calc(100vh - var(--site-header-height) - 6rem);
+    padding-inline: 0.4rem;
+  }
+
+  .statFilters {
+    grid-template-columns: 1fr;
+  }
+
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.65rem;
@@ -530,6 +539,8 @@
 }
 
 .detailSearchPanel {
+  overflow-y: auto;
+  max-height: min(70vh, 42rem);
   padding: 0.55rem 0.7rem 0.25rem;
   border-top: 1px solid #d9e2ef;
 }
@@ -548,6 +559,165 @@
   width: 1.1rem;
   height: 1.1rem;
   accent-color: #2857a4;
+}
+
+.advancedSearch {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.65rem;
+}
+
+.advancedSearch fieldset {
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid #c8d4e5;
+  border-radius: 12px;
+  margin: 0;
+  background: #f8fbff;
+}
+
+.advancedSearch legend {
+  padding-inline: 0.35rem;
+  color: #2857a4;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.typeFilters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.typeFilters label,
+.moveCombobox {
+  display: grid !important;
+  gap: 0.35rem !important;
+}
+
+.typeFilters select,
+.moveCombobox > input[type="search"] {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #9dafc6;
+  border-radius: 9px;
+  background: white;
+  color: #172b4d;
+  font: inherit;
+}
+
+.statFilters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.statFilters legend {
+  grid-column: 1 / -1;
+}
+
+.statRange {
+  min-width: 0;
+}
+
+.statRangeHeader {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.76rem;
+}
+
+.statRangeHeader span {
+  color: #52657e;
+  font-variant-numeric: tabular-nums;
+}
+
+.rangeTrack {
+  position: relative;
+  height: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.rangeTrack input[type="range"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 1.5rem;
+  margin: 0;
+  background: transparent;
+  pointer-events: none;
+}
+
+.rangeTrack input[type="range"]::-webkit-slider-thumb {
+  pointer-events: auto;
+}
+
+.rangeTrack input[type="range"]::-moz-range-thumb {
+  pointer-events: auto;
+}
+
+.rangeTrack input[type="range"]:disabled {
+  opacity: 0.28;
+}
+
+.rangeOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.rangeOptions label {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.detailSearchPanel .rangeOptions input {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.moveCombobox {
+  position: relative;
+}
+
+.moveCombobox small {
+  color: #9b3d24;
+  font-size: 0.7rem;
+}
+
+.moveSuggestionList {
+  position: absolute;
+  z-index: 35;
+  top: calc(100% - 1.15rem);
+  right: 0;
+  left: 0;
+  overflow-y: auto;
+  max-height: 15rem;
+  padding: 0.3rem;
+  border: 1px solid #b9c7da;
+  border-radius: 10px;
+  margin: 0;
+  background: white;
+  box-shadow: 0 12px 24px rgb(23 43 77 / 18%);
+  list-style: none;
+}
+
+.moveSuggestionList li {
+  padding: 0.5rem 0.65rem;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.moveSuggestionList li:hover {
+  background: #eaf3ff;
 }
 
 .statRow dd > span {
@@ -610,5 +780,15 @@
 
   .detailGrid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 35rem) {
+  .statFilters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .statRangeHeader {
+    font-size: 0.8rem;
   }
 }

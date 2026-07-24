@@ -5,8 +5,10 @@ import { useCombobox } from "downshift";
 import { useEffect, useState } from "react";
 import {
   searchPokemon,
+  type PokemonAdvancedSearchFilters,
   type PokemonSearchResult,
 } from "@/infrastructure/database/pokemon-search-repository";
+import { PokemonAdvancedSearch } from "./pokemon-advanced-search";
 import styles from "./pokemon-search.module.css";
 
 type PokemonSearchFormProps = {
@@ -20,6 +22,10 @@ type PokemonSearchFormProps = {
   resultBasePath?: string;
   /** trueならChampions絞り込みを固定し、チェックボックスを表示しない。 */
   championsOnlyLocked?: boolean;
+  advancedSearch?: {
+    initialFilters: PokemonAdvancedSearchFilters;
+    initialMoveName?: string;
+  };
 };
 
 /**
@@ -32,12 +38,20 @@ export function PokemonSearchForm({
   action = "/pokemon",
   resultBasePath = "/pokemon",
   championsOnlyLocked = false,
+  advancedSearch,
 }: PokemonSearchFormProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
   const [suggestions, setSuggestions] = useState<PokemonSearchResult[]>([]);
   const [championsOnly, setChampionsOnly] = useState(initialChampionsOnly);
-  const [showDetails, setShowDetails] = useState(initialChampionsOnly);
+  const [showDetails, setShowDetails] = useState(
+    Boolean(
+      advancedSearch &&
+        ((advancedSearch.initialFilters.types?.length ?? 0) > 0 ||
+          Object.keys(advancedSearch.initialFilters.stats ?? {}).length > 0 ||
+          advancedSearch.initialFilters.moveId),
+    ) || (!championsOnlyLocked && initialChampionsOnly),
+  );
 
   // Downshiftはキーボード操作・aria属性・候補選択をまとめて扱う。
   const {
@@ -120,7 +134,7 @@ export function PokemonSearchForm({
           })}
         />
         <button type="submit">けんさく</button>
-        {!championsOnlyLocked ? <button
+        {advancedSearch || !championsOnlyLocked ? <button
           type="button"
           className={styles.detailSearchButton}
           aria-expanded={showDetails}
@@ -131,24 +145,32 @@ export function PokemonSearchForm({
         </button> : null}
       </div>
 
-      {!championsOnlyLocked && showDetails ? (
+      {showDetails ? (
         <div
           id="pokemon-detail-search"
           className={styles.detailSearchPanel}
         >
-          <label>
-            <input
-              type="checkbox"
-              name="champions"
-              value="1"
-              checked={championsOnly}
-              onChange={(event) => {
-                setChampionsOnly(event.target.checked);
-                setSuggestions([]);
-              }}
+          {!championsOnlyLocked ? (
+            <label>
+              <input
+                type="checkbox"
+                name="champions"
+                value="1"
+                checked={championsOnly}
+                onChange={(event) => {
+                  setChampionsOnly(event.target.checked);
+                  setSuggestions([]);
+                }}
+              />
+              Pokémon Champions 登場ポケモン
+            </label>
+          ) : null}
+          {advancedSearch ? (
+            <PokemonAdvancedSearch
+              initialFilters={advancedSearch.initialFilters}
+              initialMoveName={advancedSearch.initialMoveName}
             />
-            Pokémon Champions 登場ポケモン
-          </label>
+          ) : null}
         </div>
       ) : championsOnly ? (
         <input type="hidden" name="champions" value="1" />

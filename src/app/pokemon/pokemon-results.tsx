@@ -12,6 +12,7 @@ import {
 } from "react";
 import {
   searchPokemon,
+  type PokemonAdvancedSearchFilters,
   type PokemonSearchResult,
 } from "@/infrastructure/database/pokemon-search-repository";
 import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
@@ -44,6 +45,8 @@ type PokemonResultsProps = {
   resultBasePath?: string;
   /** trueなら保存済み育成案を結果カードへ統合して表示する。 */
   includeTrainingBuilds?: boolean;
+  advancedFilters?: PokemonAdvancedSearchFilters;
+  advancedQueryParams?: Record<string, string>;
 };
 
 /** catalog.dbから1ページぶんを取得し、+1件取得で次ページ有無を判定する。 */
@@ -51,11 +54,13 @@ async function fetchPage(
   query: string,
   championsOnly: boolean,
   offset: number,
+  advancedFilters?: PokemonAdvancedSearchFilters,
 ): Promise<ResultPage> {
   const results = await searchPokemon(query, {
     limit: PAGE_SIZE + 1,
     offset,
     championsOnly,
+    advancedFilters,
   });
 
   return {
@@ -76,6 +81,8 @@ export function PokemonResults({
   initialHasMore = false,
   resultBasePath = "/pokemon",
   includeTrainingBuilds = false,
+  advancedFilters,
+  advancedQueryParams,
 }: PokemonResultsProps) {
   const [pages, setPages] = useState<ResultPage[]>([
     {
@@ -94,7 +101,7 @@ export function PokemonResults({
   // queryや絞り込みが変わったら、先頭ページから検索し直す。
   useEffect(() => {
     let active = true;
-    void fetchPage(query, championsOnly, 0)
+    void fetchPage(query, championsOnly, 0, advancedFilters)
       .then((page) => {
         if (!active) return;
         setPages([page]);
@@ -108,7 +115,7 @@ export function PokemonResults({
     return () => {
       active = false;
     };
-  }, [championsOnly, query]);
+  }, [advancedFilters, championsOnly, query]);
 
   // 育成画面では保存済み育成案へのショートカットを表示するため、必要な時だけ動的importする。
   useEffect(() => {
@@ -148,6 +155,7 @@ export function PokemonResults({
         query,
         championsOnly,
         previousOffset,
+        advancedFilters,
       );
       setPages((currentPages) => [
         previousPage,
@@ -166,7 +174,7 @@ export function PokemonResults({
     } finally {
       loadingRef.current = false;
     }
-  }, [championsOnly, pages, query]);
+  }, [advancedFilters, championsOnly, pages, query]);
 
   /** 下端sentinelに近づいた時、次ページを読み込む。古いページを捨てた分だけスクロール位置を補正する。 */
   const loadNext = useCallback(async () => {
@@ -184,7 +192,12 @@ export function PokemonResults({
         : 0;
 
     try {
-      const nextPage = await fetchPage(query, championsOnly, nextOffset);
+      const nextPage = await fetchPage(
+        query,
+        championsOnly,
+        nextOffset,
+        advancedFilters,
+      );
       setPages((currentPages) =>
         [...currentPages, nextPage].slice(-MAX_PAGES),
       );
@@ -198,7 +211,7 @@ export function PokemonResults({
     } finally {
       loadingRef.current = false;
     }
-  }, [championsOnly, pages, query]);
+  }, [advancedFilters, championsOnly, pages, query]);
 
   useEffect(() => {
     if (!loaded) return;
@@ -276,10 +289,11 @@ export function PokemonResults({
                 href={{
                   pathname: `${resultBasePath}/${pokemon.id}`,
                   query:
-                    query || championsOnly
+                    query || championsOnly || advancedQueryParams
                       ? {
                           ...(query ? { q: query } : {}),
                           ...(championsOnly ? { champions: "1" } : {}),
+                          ...advancedQueryParams,
                         }
                       : undefined,
                 }}

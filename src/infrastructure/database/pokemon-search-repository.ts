@@ -76,6 +76,27 @@ export type PokemonSearchResult = {
   typeNamesJa: string[];
 };
 
+export type PokemonStatRange = {
+  min?: number;
+  max?: number;
+};
+
+export type PokemonAdvancedSearchFilters = {
+  types?: TypeName[];
+  stats?: Partial<
+    Record<
+      "hp" | "attack" | "defense" | "special-attack" | "special-defense" | "speed",
+      PokemonStatRange
+    >
+  >;
+  moveId?: string;
+};
+
+export type MoveSearchResult = {
+  id: string;
+  name: string;
+};
+
 export type PokemonAbility = {
   id: string;
   name: string;
@@ -139,13 +160,45 @@ export async function searchPokemon(
     limit = 50,
     offset = 0,
     championsOnly = false,
-  }: { limit?: number; offset?: number; championsOnly?: boolean } = {},
+    advancedFilters,
+  }: {
+    limit?: number;
+    offset?: number;
+    championsOnly?: boolean;
+    advancedFilters?: PokemonAdvancedSearchFilters;
+  } = {},
 ): Promise<PokemonSearchResult[]> {
   const normalizedQuery = query.trim();
   // 日本語名はひらがな/カタカナ表記ゆれを吸収して同じSQLで検索する。
   const escapedQuery = escapeLikePattern(normalizedQuery);
   const hiraganaQuery = escapeLikePattern(toHiragana(normalizedQuery));
   const katakanaQuery = escapeLikePattern(toKatakana(normalizedQuery));
+  const selectedTypes = [...new Set(advancedFilters?.types ?? [])].slice(0, 2);
+  const statRanges = advancedFilters?.stats ?? {};
+  const statDefinitions = [
+    { id: "hp", parameter: "h" },
+    { id: "attack", parameter: "a" },
+    { id: "defense", parameter: "b" },
+    { id: "special-attack", parameter: "c" },
+    { id: "special-defense", parameter: "d" },
+    { id: "speed", parameter: "s" },
+  ] as const;
+  const statClauses = statDefinitions.map(
+    ({ id: statId, parameter }) => `
+      AND (
+        (@${parameter}Min IS NULL AND @${parameter}Max IS NULL)
+        OR EXISTS (
+          SELECT 1
+          FROM form_stats
+          WHERE
+            form_stats.form_id = forms.id
+            AND form_stats.stat_id = '${statId}'
+            AND (@${parameter}Min IS NULL OR form_stats.base_stat >= @${parameter}Min)
+            AND (@${parameter}Max IS NULL OR form_stats.base_stat <= @${parameter}Max)
+        )
+      )
+    `,
+  ).join("");
 
   // form_types JOINでタイプ数ぶん行が増えるため、後段でフォーム単位に畳み込む。
   const rows = await sqliteWorkerClient.catalogQuery<PokemonSearchRow>(
@@ -181,6 +234,43 @@ export async function searchPokemon(
               SELECT 1
               FROM champions_forms
               WHERE champions_forms.form_id = forms.id
+            )
+          )
+          AND (
+            @type1 = ''
+            OR EXISTS (
+              SELECT 1 FROM form_types
+              WHERE form_types.form_id = forms.id
+                AND form_types.type_name = @type1
+            )
+          )
+          AND (
+            @type2 = ''
+            OR EXISTS (
+              SELECT 1 FROM form_types
+              WHERE form_types.form_id = forms.id
+                AND form_types.type_name = @type2
+            )
+          )
+          ${statClauses}
+          AND (
+            @moveId = ''
+            OR EXISTS (
+              SELECT 1
+              FROM form_moves
+              WHERE
+                form_moves.move_id = @moveId
+                AND (
+                  form_moves.form_id = forms.id
+                  OR form_moves.form_id = (
+                    SELECT default_form.id
+                    FROM forms AS default_form
+                    WHERE
+                      default_form.species_id = forms.species_id
+                      AND default_form.is_default = 1
+                    LIMIT 1
+                  )
+                )
             )
           )
         ORDER BY
@@ -226,6 +316,15 @@ export async function searchPokemon(
       "@hiraganaPrefix": `${hiraganaQuery}%`,
       "@katakanaPrefix": `${katakanaQuery}%`,
       "@championsOnly": championsOnly ? 1 : 0,
+      "@type1": selectedTypes[0] ?? "",
+      "@type2": selectedTypes[1] ?? "",
+      "@moveId": advancedFilters?.moveId ?? "",
+      ...Object.fromEntries(
+        statDefinitions.flatMap(({ id: statId, parameter }) => [
+          [`@${parameter}Min`, statRanges[statId]?.min ?? null],
+          [`@${parameter}Max`, statRanges[statId]?.max ?? null],
+        ]),
+      ),
       "@limit": Math.max(1, Math.min(limit, 100)),
       "@offset": Math.max(0, offset),
     },
@@ -248,6 +347,50 @@ export async function searchPokemon(
   }
 
   return [...results.values()];
+}
+
+/** 技名の部分一致候補をcatalog.dbから取得する。 */
+export async function searchMoves(
+  query: string,
+  limit = 8,
+): Promise<MoveSearchResult[]> {
+  const normalizedQuery = query.trim();
+  if (!normalizedQuery) return [];
+
+  const escapedQuery = escapeLikePattern(normalizedQuery);
+  const hiraganaQuery = escapeLikePattern(toHiragana(normalizedQuery));
+  const katakanaQuery = escapeLikePattern(toKatakana(normalizedQuery));
+  return sqliteWorkerClient.catalogQuery<MoveSearchResult>(
+    `
+      SELECT moves.id, COALESCE(moves.name_ja, moves.id) AS name
+      FROM moves
+      WHERE
+        moves.id LIKE @pattern ESCAPE '\\'
+        OR moves.name_ja LIKE @pattern ESCAPE '\\'
+        OR moves.name_ja LIKE @hiraganaPattern ESCAPE '\\'
+        OR moves.name_ja LIKE @katakanaPattern ESCAPE '\\'
+      ORDER BY
+        CASE
+          WHEN moves.id LIKE @prefix ESCAPE '\\'
+            OR moves.name_ja LIKE @prefix ESCAPE '\\'
+            OR moves.name_ja LIKE @hiraganaPrefix ESCAPE '\\'
+            OR moves.name_ja LIKE @katakanaPrefix ESCAPE '\\'
+          THEN 0 ELSE 1
+        END,
+        moves.name_ja,
+        moves.id
+      LIMIT @limit
+    `,
+    {
+      "@pattern": `%${escapedQuery}%`,
+      "@hiraganaPattern": `%${hiraganaQuery}%`,
+      "@katakanaPattern": `%${katakanaQuery}%`,
+      "@prefix": `${escapedQuery}%`,
+      "@hiraganaPrefix": `${hiraganaQuery}%`,
+      "@katakanaPrefix": `${katakanaQuery}%`,
+      "@limit": Math.max(1, Math.min(limit, 20)),
+    },
+  );
 }
 
 /**
