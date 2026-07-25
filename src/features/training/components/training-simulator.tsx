@@ -29,6 +29,7 @@ import {
 import { TrainingMatchupSection } from "./training-matchup-section";
 import { TrainingMovesSection } from "./training-moves-section";
 import { TrainingSettingsSection } from "./training-settings-section";
+import { TrainingTypeBadge } from "./training-simulator-controls";
 import {
   STAT_IDS,
   calculateActualStat,
@@ -424,6 +425,14 @@ export function TrainingSimulator({
               ? `元のポケモン: ${pokemon.nameJa} / ${pokemon.name}`
               : pokemon.name}
           </span>
+          <div
+            className={styles.heroTypes}
+            aria-label={`${pokemon.nameJa}のタイプ`}
+          >
+            {pokemon.types.map((typeName) => (
+              <TrainingTypeBadge key={typeName} typeName={typeName} />
+            ))}
+          </div>
         </div>
         {pokemon.imageUrl ? <Image src={pokemon.imageUrl} alt={pokemon.nameJa} width={190} height={190} /> : null}
       </div>
