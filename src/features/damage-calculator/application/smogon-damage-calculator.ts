@@ -698,6 +698,12 @@ export class SmogonDamageCalculator {
       this.ruleset.resolveSpeciesId?.(pokemon) ?? normalizeId(pokemon.name);
     const calculatorSpecies =
       generation.species.get(sourceId as never)?.name ?? "Bulbasaur";
+    const heldItemId = pokemon.heldItem
+      ? normalizeId(pokemon.heldItem.id)
+      : null;
+    const calculatorItem = heldItemId
+      ? generation.items.get(heldItemId as never)?.name
+      : undefined;
     const types = (
       pokemon.types.length > 1
         ? [pokemon.types[0], pokemon.types[1]]
@@ -706,6 +712,7 @@ export class SmogonDamageCalculator {
     const options: PokemonOptions = {
       level: this.ruleset.level,
       ability: this.ruleset.ability ?? "None",
+      ...(calculatorItem ? { item: calculatorItem } : {}),
       nature: this.ruleset.nature,
       ivs: { ...this.ruleset.ivs },
       evs: { ...this.ruleset.evs },
