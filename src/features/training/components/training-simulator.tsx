@@ -7,7 +7,6 @@ import { getPokemonCardStyle } from "@/presentation/pokemon-type-colors";
 import {
   createTrainingBuildContentKey,
   deleteTrainingMatchupNote,
-  findTrainingBuildByContentKey,
   findTrainingBuildByName,
   getAllTrainingBuilds,
   getTrainingMatchupNotes,
@@ -254,7 +253,7 @@ export function TrainingSimulator({
 
   /**
    * 編集中の育成案をuser.dbへ保存する。
-   * 同じ名前、または同じ内容の育成案がある場合は、ユーザー確認後にそのレコードを更新する。
+   * 同じ名前の育成案がある場合は、ユーザー確認後にそのレコードを更新する。
    */
   async function save() {
     const normalizedName = buildName.trim();
@@ -275,32 +274,18 @@ export function TrainingSimulator({
     setIsSaving(true);
     try {
       const sameNameBuild = await findTrainingBuildByName(normalizedName);
-      let existing = sameNameBuild;
-      if (sameNameBuild) {
-        if (
-          !window.confirm(
-            `「${normalizedName}」という名前の育成案が既にあります。上書きしますか？`,
-          )
-        ) {
-          return;
-        }
-      } else {
-        const sameContentBuild =
-          await findTrainingBuildByContentKey(contentKey);
-        if (
-          sameContentBuild &&
-          !window.confirm(
-            `同じ内容の「${sameContentBuild.name}」が保存されています。上書きしますか？`,
-          )
-        ) {
-          return;
-        }
-        existing = sameContentBuild;
+      if (
+        sameNameBuild &&
+        !window.confirm(
+          `「${normalizedName}」という名前の育成案が既にあります。上書きしますか？`,
+        )
+      ) {
+        return;
       }
 
       const savedBuild = await saveTrainingBuild({
         ...buildData,
-        id: existing?.id,
+        id: sameNameBuild?.id,
         name: normalizedName,
         contentKey,
         updatedAt: Date.now(),
