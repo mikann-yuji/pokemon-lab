@@ -35,7 +35,9 @@ import {
   applyTrainingBuildToPokemon,
   createSpeedComparisonRows,
   createStatAdjustmentsFromBuild,
+  getAegislashForm,
   getRelevantStatIds,
+  switchAegislashForm,
 } from "./damage-calculator-state";
 import { useDamageCalculatorStore } from "./damage-calculator-store";
 import { useDamageCalculatorUserData } from "./use-damage-calculator-user-data";
@@ -264,6 +266,24 @@ export function DamageCalculator({
       selection.pokemon?.abilities.find(({ id }) => id === abilityId) ?? null;
     selectPokemon(side, applyAbility(selection.pokemon, ability));
     setAbilityConditionEnabled(side, false);
+  }
+
+  /** ギルガルドの種族値だけを交換し、他の育成・バトル条件は維持する。 */
+  function changeAegislashForm(
+    side: DamageSide,
+    form: "shield" | "blade",
+  ) {
+    const pokemon = side === "attacker" ? attacker : defender;
+    const currentForm = getAegislashForm(pokemon);
+    if (!pokemon || !currentForm || currentForm === form) return;
+
+    const targetName =
+      form === "shield" ? "aegislash-shield" : "aegislash-blade";
+    const targetForm =
+      pokemonCatalog.find(({ name }) => name === targetName);
+    if (!targetForm) return;
+
+    selectPokemon(side, switchAegislashForm(pokemon, targetForm));
   }
 
   /**
@@ -560,6 +580,7 @@ export function DamageCalculator({
       onSelectDefender={selectDefender}
       onRestoreHistory={restoreHistory}
       onAbilityChange={changeAbility}
+      onAegislashFormChange={changeAegislashForm}
       onAbilityConditionChange={setAbilityConditionEnabled}
       onHeldItemChange={changeHeldItem}
       onMetronomeCountChange={setMetronomeConsecutiveUseCount}

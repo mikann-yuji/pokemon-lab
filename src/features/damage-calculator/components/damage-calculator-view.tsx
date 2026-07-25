@@ -111,6 +111,10 @@ type DamageCalculatorViewProps = {
     history: DamageHistoryRecord,
   ) => void;
   onAbilityChange: (side: DamageSide, abilityId: string) => void;
+  onAegislashFormChange: (
+    side: DamageSide,
+    form: "shield" | "blade",
+  ) => void;
   onAbilityConditionChange: (side: DamageSide, enabled: boolean) => void;
   onHeldItemChange: (side: DamageSide, itemId: string) => void;
   onMetronomeCountChange: (value: number) => void;
@@ -203,6 +207,7 @@ export function DamageCalculatorView({
   onSelectDefender,
   onRestoreHistory,
   onAbilityChange,
+  onAegislashFormChange,
   onAbilityConditionChange,
   onHeldItemChange,
   onMetronomeCountChange,
@@ -247,6 +252,9 @@ export function DamageCalculatorView({
         onRestoreHistory={onRestoreHistory}
         getTrainingDetailHref={getTrainingDetailHref}
         onAbilityChange={(abilityId) => onAbilityChange("attacker", abilityId)}
+        onAegislashFormChange={(form) =>
+          onAegislashFormChange("attacker", form)
+        }
         onAbilityConditionChange={(enabled) =>
           onAbilityConditionChange("attacker", enabled)
         }
@@ -326,6 +334,9 @@ export function DamageCalculatorView({
         onRestoreHistory={onRestoreHistory}
         getTrainingDetailHref={getTrainingDetailHref}
         onAbilityChange={(abilityId) => onAbilityChange("defender", abilityId)}
+        onAegislashFormChange={(form) =>
+          onAegislashFormChange("defender", form)
+        }
         onAbilityConditionChange={(enabled) =>
           onAbilityConditionChange("defender", enabled)
         }
@@ -426,6 +437,7 @@ function BattleSidePanel({
   onRestoreHistory,
   getTrainingDetailHref,
   onAbilityChange,
+  onAegislashFormChange,
   onAbilityConditionChange,
   onHeldItemChange,
 }: {
@@ -454,6 +466,7 @@ function BattleSidePanel({
     buildId: number | null,
   ) => string | undefined;
   onAbilityChange: (abilityId: string) => void;
+  onAegislashFormChange: (form: "shield" | "blade") => void;
   onAbilityConditionChange: (enabled: boolean) => void;
   onHeldItemChange: (itemId: string) => void;
 }) {
@@ -513,6 +526,26 @@ function BattleSidePanel({
         pokemon={pokemon}
         href={getTrainingDetailHref(pokemon, selectedBuildId)}
       />
+      {pokemon?.name === "aegislash-shield" ||
+      pokemon?.name === "aegislash-blade" ? (
+        <fieldset className={styles.aegislashForm}>
+          <legend>バトルスイッチ</legend>
+          <button
+            type="button"
+            aria-pressed={pokemon.name === "aegislash-shield"}
+            onClick={() => onAegislashFormChange("shield")}
+          >
+            シールドフォルム
+          </button>
+          <button
+            type="button"
+            aria-pressed={pokemon.name === "aegislash-blade"}
+            onClick={() => onAegislashFormChange("blade")}
+          >
+            ブレードフォルム
+          </button>
+        </fieldset>
+      ) : null}
       <div className={styles.quickFields}>
         <AbilityField
           pokemon={pokemon}

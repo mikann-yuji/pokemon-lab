@@ -522,6 +522,44 @@ a.pokemonSummary:focus-visible {
   margin-top: 0.45rem;
 }
 
+.aegislashForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0.65rem;
+  border: 1px solid #b8c9df;
+  border-radius: 12px;
+  margin: 0;
+  background: #f7faff;
+}
+
+.aegislashForm legend {
+  padding-inline: 0.35rem;
+  color: #52657e;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.aegislashForm button {
+  min-height: 40px;
+  padding: 0.45rem;
+  border: 1px solid #8293aa;
+  border-radius: 9px;
+  background: white;
+  color: #394d68;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.aegislashForm button[aria-pressed="true"] {
+  border-color: #2857a4;
+  background: #2857a4;
+  color: white;
+  box-shadow: inset 0 -2px 0 rgb(23 43 77 / 22%);
+}
+
 .moveSelectField {
   display: grid;
   gap: 0.26rem;

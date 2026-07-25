@@ -23,6 +23,45 @@ export type StatAdjustmentState = Record<
   Record<AdjustableStatId, StatAdjustment>
 >;
 
+export type AegislashForm = "shield" | "blade";
+
+/** ギルガルドのフォームIDから、バトルスイッチの現在状態を判定する。 */
+export function getAegislashForm(
+  pokemon: DamageCalculatorPokemon | null,
+): AegislashForm | null {
+  if (pokemon?.name === "aegislash-shield") return "shield";
+  if (pokemon?.name === "aegislash-blade") return "blade";
+  return null;
+}
+
+/**
+ * バトルスイッチでA/B・C/Dの種族値だけを交換する。
+ * 能力ポイント・性格・ランクは別の入力状態にあるため変更しない。
+ */
+export function switchAegislashForm(
+  pokemon: DamageCalculatorPokemon,
+  targetForm: DamageCalculatorPokemon,
+): DamageCalculatorPokemon {
+  return {
+    ...pokemon,
+    id: targetForm.id,
+    name: targetForm.name,
+    nameJa: targetForm.nameJa,
+    imageUrl: targetForm.imageUrl,
+    fallbackImageUrl: targetForm.fallbackImageUrl,
+    stats: {
+      ...pokemon.stats,
+      attack: pokemon.stats.defense,
+      defense: pokemon.stats.attack,
+      "special-attack": pokemon.stats["special-defense"],
+      "special-defense": pokemon.stats["special-attack"],
+    },
+    // 旧フォームの種族値から作った実数値キャッシュは破棄し、
+    // 現在の能力ポイント・性格を使って次の計算時に作り直す。
+    actualStats: undefined,
+  };
+}
+
 /**
  * ダメージ計算ページで、能力補正入力の初期値を作る。
  *
