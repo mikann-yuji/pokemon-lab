@@ -8,6 +8,7 @@ import {
   createTrainingBuildContentKey,
   deleteTrainingMatchupNote,
   findTrainingBuildByContentKey,
+  findTrainingBuildByName,
   getAllTrainingBuilds,
   getTrainingMatchupNotes,
   loadLatestTrainingBuild,
@@ -253,7 +254,7 @@ export function TrainingSimulator({
 
   /**
    * 編集中の育成案をuser.dbへ保存する。
-   * 同じ内容の育成案が既にある場合は、ユーザー確認後にそのレコードを更新する。
+   * 同じ名前、または同じ内容の育成案がある場合は、ユーザー確認後にそのレコードを更新する。
    */
   async function save() {
     const normalizedName = buildName.trim();
@@ -273,14 +274,28 @@ export function TrainingSimulator({
     setToast(null);
     setIsSaving(true);
     try {
-      const existing = await findTrainingBuildByContentKey(contentKey);
-      if (
-        existing &&
-        !window.confirm(
-          `同じ内容の「${existing.name}」が保存されています。上書きしますか？`,
-        )
-      ) {
-        return;
+      const sameNameBuild = await findTrainingBuildByName(normalizedName);
+      let existing = sameNameBuild;
+      if (sameNameBuild) {
+        if (
+          !window.confirm(
+            `「${normalizedName}」という名前の育成案が既にあります。上書きしますか？`,
+          )
+        ) {
+          return;
+        }
+      } else {
+        const sameContentBuild =
+          await findTrainingBuildByContentKey(contentKey);
+        if (
+          sameContentBuild &&
+          !window.confirm(
+            `同じ内容の「${sameContentBuild.name}」が保存されています。上書きしますか？`,
+          )
+        ) {
+          return;
+        }
+        existing = sameContentBuild;
       }
 
       const savedBuild = await saveTrainingBuild({

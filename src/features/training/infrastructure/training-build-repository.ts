@@ -205,6 +205,22 @@ export async function findTrainingBuildByContentKey(contentKey: string) {
   return rows[0] ? toTrainingBuild(rows[0]) : undefined;
 }
 
+/** 保存名が完全一致する育成案を、上書き確認の対象として取得する。 */
+export async function findTrainingBuildByName(name: string) {
+  const normalizedName = name.trim();
+  if (!normalizedName) return undefined;
+
+  const rows = await sqliteWorkerClient.query<TrainingBuildRow>(
+    `SELECT ${BUILD_COLUMNS}
+     FROM training_builds
+     WHERE name = ? AND deleted_at IS NULL
+     ORDER BY updated_at DESC, id DESC
+     LIMIT 1`,
+    [normalizedName],
+  );
+  return rows[0] ? toTrainingBuild(rows[0]) : undefined;
+}
+
 /**
  * 育成案をuser.dbへINSERTまたはUPDATEする。
  * 能力ポイントと技ID配列は小さな構造体なのでJSON列として保存する。
