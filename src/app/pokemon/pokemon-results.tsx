@@ -23,8 +23,12 @@ import {
 } from "@/presentation/pokemon-type-colors";
 import styles from "./pokemon-search.module.css";
 
-const PAGE_SIZE = 25;
-const MAX_PAGES = 2;
+// 24はスマホ2列・タブレット3列・PC4列のいずれでも端数が出ない。
+const PAGE_SIZE = 24;
+// 先読みしたページをすぐ捨てないよう、最大72件をDOMに保持する。
+const MAX_PAGES = 3;
+// 下端へ到達する約2画面前から次ページを取得する。
+const PRELOAD_DISTANCE_PX = 1800;
 
 /** 無限スクロールで保持する1ページ分の検索結果。 */
 type ResultPage = {
@@ -72,7 +76,7 @@ async function fetchPage(
 
 /**
  * ポケモン検索結果リスト。
- * 最大2ページだけDOMに残し、上下スクロールで前後ページを読み替える。
+ * 最大3ページだけDOMに残し、上下スクロールで前後ページを読み替える。
  */
 export function PokemonResults({
   query,
@@ -96,7 +100,12 @@ export function PokemonResults({
   const [trainingBuilds, setTrainingBuilds] = useState<TrainingBuild[]>([]);
   const topSentinelRef = useRef<HTMLDivElement>(null);
   const bottomSentinelRef = useRef<HTMLDivElement>(null);
-  const loadingRef = useRef(false);
+  const loadingPreviousRef = useRef(false);
+  const loadingNextRef = useRef(false);
+  const nextPagePrefetchRef = useRef<{
+    offset: number;
+    promise: Promise<ResultPage | null>;
+  } | null>(null);
 
   // queryや絞り込みが変わったら、先頭ページから検索し直す。
   useEffect(() => {
@@ -116,6 +125,29 @@ export function PokemonResults({
       active = false;
     };
   }, [advancedFilters, championsOnly, query]);
+
+  // 表示中ページを読んでいる間に次ページをバックグラウンド取得する。
+  // DOMへはまだ追加しないため、初期描画量を増やさず下端で即座に展開できる。
+  useEffect(() => {
+    const lastPage = pages.at(-1);
+    if (!loaded || !lastPage?.hasMore) {
+      nextPagePrefetchRef.current = null;
+      return;
+    }
+
+    const nextOffset = lastPage.offset + PAGE_SIZE;
+    if (nextPagePrefetchRef.current?.offset === nextOffset) return;
+
+    nextPagePrefetchRef.current = {
+      offset: nextOffset,
+      promise: fetchPage(
+        query,
+        championsOnly,
+        nextOffset,
+        advancedFilters,
+      ).catch(() => null),
+    };
+  }, [advancedFilters, championsOnly, loaded, pages, query]);
 
   // 育成画面では保存済み育成案へのショートカットを表示するため、必要な時だけ動的importする。
   useEffect(() => {
@@ -144,9 +176,15 @@ export function PokemonResults({
   /** 上端sentinelに近づいた時、現在保持している最初のページより前を読み込む。 */
   const loadPrevious = useCallback(async () => {
     const firstPage = pages[0];
-    if (!firstPage || firstPage.offset === 0 || loadingRef.current) return;
+    if (
+      !firstPage ||
+      firstPage.offset === 0 ||
+      loadingPreviousRef.current
+    ) {
+      return;
+    }
 
-    loadingRef.current = true;
+    loadingPreviousRef.current = true;
     setError(null);
     const previousOffset = Math.max(0, firstPage.offset - PAGE_SIZE);
 
@@ -172,16 +210,16 @@ export function PokemonResults({
     } catch {
       setError("前のポケモンを読み込めませんでした。");
     } finally {
-      loadingRef.current = false;
+      loadingPreviousRef.current = false;
     }
   }, [advancedFilters, championsOnly, pages, query]);
 
   /** 下端sentinelに近づいた時、次ページを読み込む。古いページを捨てた分だけスクロール位置を補正する。 */
   const loadNext = useCallback(async () => {
     const lastPage = pages.at(-1);
-    if (!lastPage?.hasMore || loadingRef.current) return;
+    if (!lastPage?.hasMore || loadingNextRef.current) return;
 
-    loadingRef.current = true;
+    loadingNextRef.current = true;
     setError(null);
     const nextOffset = lastPage.offset + PAGE_SIZE;
     const removedHeight =
@@ -192,12 +230,19 @@ export function PokemonResults({
         : 0;
 
     try {
-      const nextPage = await fetchPage(
-        query,
-        championsOnly,
-        nextOffset,
-        advancedFilters,
-      );
+      const prefetchedPage =
+        nextPagePrefetchRef.current?.offset === nextOffset
+          ? await nextPagePrefetchRef.current.promise
+          : null;
+      const nextPage =
+        prefetchedPage ??
+        (await fetchPage(
+          query,
+          championsOnly,
+          nextOffset,
+          advancedFilters,
+        ));
+      nextPagePrefetchRef.current = null;
       setPages((currentPages) =>
         [...currentPages, nextPage].slice(-MAX_PAGES),
       );
@@ -209,7 +254,7 @@ export function PokemonResults({
     } catch {
       setError("次のポケモンを読み込めませんでした。");
     } finally {
-      loadingRef.current = false;
+      loadingNextRef.current = false;
     }
   }, [advancedFilters, championsOnly, pages, query]);
 
@@ -217,21 +262,26 @@ export function PokemonResults({
     if (!loaded) return;
     const topSentinel = topSentinelRef.current;
     const bottomSentinel = bottomSentinelRef.current;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          if (entry.target === topSentinel) void loadPrevious();
-          if (entry.target === bottomSentinel) void loadNext();
-        }
+    const previousObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) void loadPrevious();
       },
-      { rootMargin: "500px 0px" },
+      { rootMargin: `${PRELOAD_DISTANCE_PX}px 0px 0px` },
+    );
+    const nextObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) void loadNext();
+      },
+      { rootMargin: `0px 0px ${PRELOAD_DISTANCE_PX}px` },
     );
 
-    if (topSentinel) observer.observe(topSentinel);
-    if (bottomSentinel) observer.observe(bottomSentinel);
+    if (topSentinel) previousObserver.observe(topSentinel);
+    if (bottomSentinel) nextObserver.observe(bottomSentinel);
 
-    return () => observer.disconnect();
+    return () => {
+      previousObserver.disconnect();
+      nextObserver.disconnect();
+    };
   }, [loadNext, loadPrevious, loaded]);
 
   const visiblePokemonIds = useMemo(
