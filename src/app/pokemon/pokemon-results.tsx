@@ -23,9 +23,8 @@ import {
 } from "@/presentation/pokemon-type-colors";
 import styles from "./pokemon-search.module.css";
 
-// 24はスマホ2列・タブレット3列・PC4列のいずれでも端数が出ない。
-const PAGE_SIZE = 24;
-// 先読みしたページをすぐ捨てないよう、最大72件をDOMに保持する。
+const PAGE_SIZE = 25;
+// 先読みしたページをすぐ捨てないよう、最大75件をDOMに保持する。
 const MAX_PAGES = 3;
 // 下端へ到達する約2画面前から次ページを取得する。
 const PRELOAD_DISTANCE_PX = 1800;
@@ -187,6 +186,11 @@ export function PokemonResults({
     loadingPreviousRef.current = true;
     setError(null);
     const previousOffset = Math.max(0, firstPage.offset - PAGE_SIZE);
+    const anchorSelector =
+      `[data-result-page="${firstPage.offset}"] > :first-child`;
+    const anchorTopBefore =
+      document.querySelector<HTMLElement>(anchorSelector)
+        ?.getBoundingClientRect().top ?? null;
 
     try {
       const previousPage = await fetchPage(
@@ -200,11 +204,11 @@ export function PokemonResults({
         ...currentPages,
       ].slice(0, MAX_PAGES));
       requestAnimationFrame(() => {
-        const prependedPage = document.querySelector<HTMLElement>(
-          `[data-result-page="${previousOffset}"]`,
-        );
-        if (prependedPage) {
-          window.scrollBy({ top: prependedPage.offsetHeight + 16 });
+        const anchorTopAfter =
+          document.querySelector<HTMLElement>(anchorSelector)
+            ?.getBoundingClientRect().top ?? null;
+        if (anchorTopBefore !== null && anchorTopAfter !== null) {
+          window.scrollBy({ top: anchorTopAfter - anchorTopBefore });
         }
       });
     } catch {
@@ -222,12 +226,16 @@ export function PokemonResults({
     loadingNextRef.current = true;
     setError(null);
     const nextOffset = lastPage.offset + PAGE_SIZE;
-    const removedHeight =
-      pages.length >= MAX_PAGES
-        ? document.querySelector<HTMLElement>(
-            `[data-result-page="${pages[0].offset}"]`,
-          )?.offsetHeight ?? 0
-        : 0;
+    const retainedPageOffset =
+      pages.length >= MAX_PAGES ? pages[1]?.offset : undefined;
+    const anchorSelector =
+      retainedPageOffset === undefined
+        ? null
+        : `[data-result-page="${retainedPageOffset}"] > :first-child`;
+    const anchorTopBefore = anchorSelector
+      ? (document.querySelector<HTMLElement>(anchorSelector)
+          ?.getBoundingClientRect().top ?? null)
+      : null;
 
     try {
       const prefetchedPage =
@@ -246,9 +254,14 @@ export function PokemonResults({
       setPages((currentPages) =>
         [...currentPages, nextPage].slice(-MAX_PAGES),
       );
-      if (removedHeight > 0) {
+      if (anchorSelector && anchorTopBefore !== null) {
         requestAnimationFrame(() => {
-          window.scrollBy({ top: -(removedHeight + 16) });
+          const anchorTopAfter =
+            document.querySelector<HTMLElement>(anchorSelector)
+              ?.getBoundingClientRect().top ?? null;
+          if (anchorTopAfter !== null) {
+            window.scrollBy({ top: anchorTopAfter - anchorTopBefore });
+          }
         });
       }
     } catch {
@@ -325,12 +338,13 @@ export function PokemonResults({
       </div>
 
       <div ref={topSentinelRef} className={styles.scrollSentinel} />
-      {pages.map((page) => (
-        <div
-          className={styles.grid}
-          data-result-page={page.offset}
-          key={page.offset}
-        >
+      <div className={styles.grid}>
+        {pages.map((page) => (
+          <div
+            className={styles.resultPage}
+            data-result-page={page.offset}
+            key={page.offset}
+          >
           {page.items.map((pokemon) => (
             <Fragment key={pokemon.id}>
               <Link
@@ -401,8 +415,9 @@ export function PokemonResults({
               )}
             </Fragment>
           ))}
-        </div>
-      ))}
+          </div>
+        ))}
+      </div>
       <div ref={bottomSentinelRef} className={styles.scrollSentinel} />
       {error ? <p className={styles.loadError}>{error}</p> : null}
     </>

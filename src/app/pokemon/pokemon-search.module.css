@@ -228,8 +228,8 @@
   gap: 1rem;
 }
 
-.grid + .grid {
-  margin-top: 1rem;
+.resultPage {
+  display: contents;
 }
 
 .scrollSentinel {
