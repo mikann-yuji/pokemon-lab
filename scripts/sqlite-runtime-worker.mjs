@@ -7,7 +7,7 @@ import sqlite3InitModule from "/sqlite-wasm/index.mjs";
 
 const DATABASE_FILENAME = "/user.db";
 const CATALOG_DATABASE_FILENAME = "/catalog.db";
-const SUPPORTED_SCHEMA_VERSION = 5;
+const SUPPORTED_SCHEMA_VERSION = 6;
 const CATALOG_DATABASE_URL = "/sqlite-catalog.db.gz";
 const CATALOG_SEED_VERSION = "10";
 
@@ -190,6 +190,7 @@ function ensureUserSyncSchema() {
     addColumnIfMissing("training_builds", "created_at", "INTEGER");
     addColumnIfMissing("training_builds", "deleted_at", "INTEGER");
     addColumnIfMissing("battle_teams", "sync_id", "TEXT");
+    addColumnIfMissing("battle_teams", "memo", "TEXT NOT NULL DEFAULT ''");
     addColumnIfMissing("battle_teams", "created_at", "INTEGER");
     addColumnIfMissing("battle_teams", "deleted_at", "INTEGER");
     addColumnIfMissing("quiz_mistakes", "deleted_at", "INTEGER");
@@ -324,6 +325,7 @@ function migrateSchema() {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           sync_id TEXT UNIQUE,
           name TEXT NOT NULL,
+          memo TEXT NOT NULL DEFAULT '',
           created_at INTEGER,
           updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
           deleted_at INTEGER
@@ -403,7 +405,7 @@ function migrateSchema() {
         INSERT INTO schema_metadata (key, value)
         VALUES ('database_created_at', CAST(unixepoch() AS TEXT));
 
-        PRAGMA user_version = 5;
+        PRAGMA user_version = 6;
       `);
       database.exec("COMMIT");
     } catch (error) {

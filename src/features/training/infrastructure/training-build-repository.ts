@@ -24,6 +24,7 @@ export type TrainingBuild = {
 export type BattleTeam = {
   id?: number;
   name: string;
+  memo: string;
   buildIds: number[];
   updatedAt: number;
 };
@@ -60,6 +61,7 @@ type TrainingBuildRow = SqliteRow & {
 type BattleTeamRow = SqliteRow & {
   id: number;
   name: string;
+  memo: string;
   updated_at: number;
   build_ids: string | null;
 };
@@ -404,6 +406,7 @@ export async function getAllBattleTeams(): Promise<BattleTeam[]> {
     `SELECT
        teams.id,
        teams.name,
+       teams.memo,
        teams.updated_at,
        (
          SELECT GROUP_CONCAT(ordered.build_id, ',')
@@ -423,6 +426,7 @@ export async function getAllBattleTeams(): Promise<BattleTeam[]> {
   return rows.map((row) => ({
     id: Number(row.id),
     name: String(row.name),
+    memo: String(row.memo ?? ""),
     buildIds: row.build_ids
       ? String(row.build_ids).split(",").map(Number)
       : [],
@@ -534,6 +538,17 @@ export async function updateBattleTeam(
   const [teamResult] = await sqliteWorkerClient.transaction(statements);
   if (teamResult.changes !== 1) {
     throw new Error("更新するバトルチームが見つかりませんでした。");
+  }
+}
+
+/** 詳細画面のチームメモだけを更新する。空文字も有効な保存値として扱う。 */
+export async function updateBattleTeamMemo(id: number, memo: string) {
+  const result = await sqliteWorkerClient.execute(
+    "UPDATE battle_teams SET memo = ?, updated_at = ?, deleted_at = NULL WHERE id = ?",
+    [memo, Date.now(), id],
+  );
+  if (result.changes !== 1) {
+    throw new Error("メモを保存するバトルチームが見つかりませんでした。");
   }
 }
 

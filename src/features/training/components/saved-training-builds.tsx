@@ -13,12 +13,18 @@ import {
   pokemonNameIncludes,
 } from "@/domain/pokemon-name-search";
 import {
+  getPokemonDetail,
+  type PokemonDetail,
+} from "@/infrastructure/database/pokemon-search-repository";
+import { getTypeBadgeStyle } from "@/presentation/pokemon-type-colors";
+import {
   deleteBattleTeam,
   deleteTrainingBuild,
   getAllTrainingBuilds,
   getAllBattleTeams,
   saveBattleTeam,
   updateBattleTeam,
+  updateBattleTeamMemo,
   validateBattleTeamBuilds,
   type BattleTeam,
   type TrainingBuild,
@@ -85,6 +91,13 @@ export function SavedTrainingBuilds({
   );
   const [loadError, setLoadError] = useState("");
   const [actionError, setActionError] = useState("");
+  const [memoOpen, setMemoOpen] = useState(false);
+  const [memoDraft, setMemoDraft] = useState("");
+  const [memoOriginal, setMemoOriginal] = useState("");
+  const [memoSaving, setMemoSaving] = useState(false);
+  const [teamPokemonDetails, setTeamPokemonDetails] = useState<
+    Map<number, PokemonDetail>
+  >(new Map());
   const pokemonById = useMemo(
     () => new Map(pokemonCatalog.map((pokemon) => [pokemon.id, pokemon])),
     [pokemonCatalog],
@@ -112,6 +125,8 @@ export function SavedTrainingBuilds({
             return;
           }
           setTeamName(editingTeam.name);
+          setMemoDraft(editingTeam.memo);
+          setMemoOriginal(editingTeam.memo);
           setSelectedBuildIds(new Set(editingTeam.buildIds));
           setEditingTeamId(editingTeam.id);
         }
@@ -171,6 +186,35 @@ export function SavedTrainingBuilds({
       window.clearTimeout(timer);
     };
   }, [loadSavedData]);
+
+  useEffect(() => {
+    if (teamMode !== "edit" || selectedBuildIds.size === 0) return;
+    let active = true;
+    const pokemonIds = [
+      ...new Set(
+        [...selectedBuildIds]
+          .map((buildId) => buildById.get(buildId)?.pokemonId)
+          .filter((pokemonId): pokemonId is number => pokemonId !== undefined),
+      ),
+    ];
+    void Promise.all(pokemonIds.map((pokemonId) => getPokemonDetail(pokemonId)))
+      .then((details) => {
+        if (!active) return;
+        setTeamPokemonDetails(
+          new Map(
+            details.flatMap((detail) =>
+              detail ? [[detail.id, detail] as const] : [],
+            ),
+          ),
+        );
+      })
+      .catch((error: unknown) => {
+        console.error("チームメモ用のポケモン情報を読み込めませんでした。", error);
+      });
+    return () => {
+      active = false;
+    };
+  }, [buildById, selectedBuildIds, teamMode]);
 
   useEffect(() => {
     let active = true;
@@ -271,6 +315,34 @@ export function SavedTrainingBuilds({
     } catch (error: unknown) {
       console.error("Failed to delete training build.", error);
       setActionError("育成案を削除できませんでした。");
+    }
+  }
+
+  async function closeTeamMemo() {
+    if (memoSaving) return;
+    if (editingTeamId === undefined || memoDraft === memoOriginal) {
+      setMemoOpen(false);
+      return;
+    }
+    setMemoSaving(true);
+    setActionError("");
+    try {
+      await updateBattleTeamMemo(editingTeamId, memoDraft);
+      setMemoOriginal(memoDraft);
+      setTeams((current) =>
+        current.map((team) =>
+          team.id === editingTeamId
+            ? { ...team, memo: memoDraft, updatedAt: Date.now() }
+            : team,
+        ),
+      );
+      window.dispatchEvent(new CustomEvent(USER_RECORDS_LOCAL_CHANGED_EVENT));
+      setMemoOpen(false);
+    } catch (error: unknown) {
+      console.error("バトルチームのメモを保存できませんでした。", error);
+      setActionError("メモを保存できませんでした。");
+    } finally {
+      setMemoSaving(false);
     }
   }
 
@@ -427,6 +499,15 @@ export function SavedTrainingBuilds({
           >
             チームを保存
           </button>
+          {editingTeamId !== undefined ? (
+            <button
+              className={styles.memoButton}
+              type="button"
+              onClick={() => setMemoOpen(true)}
+            >
+              メモ
+            </button>
+          ) : null}
           {teams.length > 0 ? (
             <button
               className={styles.secondaryButton}
@@ -500,6 +581,91 @@ export function SavedTrainingBuilds({
               </article>
             );
           })}
+        </div>
+      ) : null}
+      {memoOpen && editingTeamId !== undefined ? (
+        <div className={styles.teamMemoOverlay}>
+          <button
+            className={styles.teamMemoBackdrop}
+            type="button"
+            aria-label="メモを閉じる"
+            onClick={() => void closeTeamMemo()}
+          />
+          <section
+            className={styles.teamMemoDialog}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="team-memo-title"
+            onKeyDown={(event) => {
+              if (event.key === "Escape") void closeTeamMemo();
+            }}
+          >
+            <header>
+              <div>
+                <small>BATTLE TEAM MEMO</small>
+                <h2 id="team-memo-title">{teamName}</h2>
+              </div>
+              <button
+                type="button"
+                aria-label="メモを閉じて保存"
+                disabled={memoSaving}
+                onClick={() => void closeTeamMemo()}
+              >
+                ×
+              </button>
+            </header>
+            <div className={styles.teamMemoMembers}>
+              {[...selectedBuildIds].map((buildId) => {
+                const build = buildById.get(buildId);
+                const detail = build
+                  ? teamPokemonDetails.get(build.pokemonId)
+                  : undefined;
+                const ability = detail?.abilities.find(
+                  (candidate) => candidate.id === build?.abilityId,
+                );
+                const moves =
+                  build?.moveIds
+                    .filter(Boolean)
+                    .map(
+                      (moveId) =>
+                        detail?.moves.find((move) => move.id === moveId)?.name ??
+                        moveId,
+                    ) ?? [];
+                return (
+                  <article key={buildId}>
+                    <strong>{detail?.nameJa ?? build?.name ?? "読込中"}</strong>
+                    <span className={styles.teamMemoTypes}>
+                      {detail?.types.map((typeName, index) => (
+                        <small
+                          key={typeName}
+                          style={getTypeBadgeStyle(typeName)}
+                        >
+                          {detail.typeNamesJa[index] ?? typeName}
+                        </small>
+                      ))}
+                    </span>
+                    <p>特性: {ability?.name ?? "特性なし"}</p>
+                    <p>技: {moves.length > 0 ? moves.join(" / ") : "未設定"}</p>
+                  </article>
+                );
+              })}
+            </div>
+            <label className={styles.teamMemoField}>
+              チームメモ
+              <textarea
+                autoFocus
+                maxLength={5000}
+                placeholder="立ち回り、選出、注意点など"
+                value={memoDraft}
+                onChange={(event) => setMemoDraft(event.target.value)}
+              />
+            </label>
+            <p className={styles.teamMemoHint}>
+              {memoSaving
+                ? "保存中…"
+                : "この画面を閉じると自動でuser.dbへ保存されます。"}
+            </p>
+          </section>
         </div>
       ) : null}
     </section>

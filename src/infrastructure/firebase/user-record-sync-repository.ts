@@ -221,6 +221,7 @@ async function exportLocalRecords(): Promise<UserSyncRecord[]> {
       SELECT
         teams.sync_id,
         teams.name,
+        teams.memo,
         teams.created_at,
         teams.updated_at,
         teams.deleted_at,
@@ -305,6 +306,7 @@ async function exportLocalRecords(): Promise<UserSyncRecord[]> {
       deletedAt: numberOrNull(row.deleted_at),
       data: {
         name: String(row.name),
+        memo: String(row.memo ?? ""),
         buildSyncIds: row.build_sync_ids ? String(row.build_sync_ids).split(",") : [],
         createdAt: numberOrNull(row.created_at),
       },
@@ -540,10 +542,11 @@ async function importRemoteRecords(records: UserSyncRecord[]) {
       const result = existingTeamId
         ? await sqliteWorkerClient.execute(
             `UPDATE battle_teams
-             SET name = ?, created_at = ?, updated_at = ?, deleted_at = ?
+             SET name = ?, memo = ?, created_at = ?, updated_at = ?, deleted_at = ?
              WHERE sync_id = ?`,
             [
               String(data.name ?? ""),
+              String(data.memo ?? ""),
               Number(data.createdAt ?? record.updatedAt),
               record.updatedAt,
               record.deletedAt,
@@ -552,11 +555,12 @@ async function importRemoteRecords(records: UserSyncRecord[]) {
           )
         : await sqliteWorkerClient.execute(
             `INSERT INTO battle_teams
-               (sync_id, name, created_at, updated_at, deleted_at)
-             VALUES (?, ?, ?, ?, ?)`,
+               (sync_id, name, memo, created_at, updated_at, deleted_at)
+             VALUES (?, ?, ?, ?, ?, ?)`,
             [
               record.recordId,
               String(data.name ?? ""),
+              String(data.memo ?? ""),
               Number(data.createdAt ?? record.updatedAt),
               record.updatedAt,
               record.deletedAt,
