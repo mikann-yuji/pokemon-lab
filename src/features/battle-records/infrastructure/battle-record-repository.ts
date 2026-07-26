@@ -6,6 +6,7 @@ export type BattleRecord = {
   battleAt: number;
   memo: string;
   imageDataUrl: string;
+  opponentNames: string[];
   createdAt: number;
   updatedAt: number;
 };
@@ -15,16 +16,29 @@ type BattleRecordRow = SqliteRow & {
   battle_at: number;
   memo: string;
   image_data_url: string;
+  opponent_names_json: string;
   created_at: number;
   updated_at: number;
 };
 
 function toBattleRecord(row: BattleRecordRow): BattleRecord {
+  let opponentNames: string[] = [];
+  try {
+    const parsed = JSON.parse(String(row.opponent_names_json ?? "[]")) as unknown;
+    if (Array.isArray(parsed)) {
+      opponentNames = parsed.filter(
+        (name): name is string => typeof name === "string" && name.length > 0,
+      );
+    }
+  } catch {
+    opponentNames = [];
+  }
   return {
     id: Number(row.id),
     battleAt: Number(row.battle_at),
     memo: String(row.memo),
     imageDataUrl: String(row.image_data_url),
+    opponentNames,
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at),
   };
@@ -32,7 +46,7 @@ function toBattleRecord(row: BattleRecordRow): BattleRecord {
 
 export async function getBattleRecords(): Promise<BattleRecord[]> {
   const rows = await sqliteWorkerClient.query<BattleRecordRow>(
-    `SELECT id, battle_at, memo, image_data_url, created_at, updated_at
+    `SELECT id, battle_at, memo, image_data_url, opponent_names_json, created_at, updated_at
      FROM battle_records
      WHERE deleted_at IS NULL
      ORDER BY battle_at DESC, id DESC`,
@@ -44,10 +58,12 @@ export async function saveBattleRecord({
   battleAt,
   memo,
   imageDataUrl,
+  opponentNames,
 }: {
   battleAt: number;
   memo: string;
   imageDataUrl: string;
+  opponentNames: string[];
 }): Promise<BattleRecord> {
   const normalizedMemo = memo.trim();
   if (!imageDataUrl) {
@@ -60,13 +76,21 @@ export async function saveBattleRecord({
   const now = Date.now();
   const result = await sqliteWorkerClient.execute(
     `INSERT INTO battle_records
-       (sync_id, battle_at, memo, image_data_url, created_at, updated_at, deleted_at)
-     VALUES (?, ?, ?, ?, ?, ?, NULL)`,
-    [crypto.randomUUID(), battleAt, normalizedMemo, imageDataUrl, now, now],
+       (sync_id, battle_at, memo, image_data_url, opponent_names_json, created_at, updated_at, deleted_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, NULL)`,
+    [
+      crypto.randomUUID(),
+      battleAt,
+      normalizedMemo,
+      imageDataUrl,
+      JSON.stringify(opponentNames),
+      now,
+      now,
+    ],
   );
 
   const rows = await sqliteWorkerClient.query<BattleRecordRow>(
-    `SELECT id, battle_at, memo, image_data_url, created_at, updated_at
+    `SELECT id, battle_at, memo, image_data_url, opponent_names_json, created_at, updated_at
      FROM battle_records
      WHERE id = ?
      LIMIT 1`,

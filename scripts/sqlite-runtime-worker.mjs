@@ -7,7 +7,7 @@ import sqlite3InitModule from "/sqlite-wasm/index.mjs";
 
 const DATABASE_FILENAME = "/user.db";
 const CATALOG_DATABASE_FILENAME = "/catalog.db";
-const SUPPORTED_SCHEMA_VERSION = 6;
+const SUPPORTED_SCHEMA_VERSION = 7;
 const CATALOG_DATABASE_URL = "/sqlite-catalog.db.gz";
 const CATALOG_SEED_VERSION = "10";
 
@@ -202,6 +202,11 @@ function ensureUserSyncSchema() {
     addColumnIfMissing("training_matchup_notes", "created_at", "INTEGER");
     addColumnIfMissing("training_matchup_notes", "deleted_at", "INTEGER");
     addColumnIfMissing("battle_records", "sync_id", "TEXT");
+    addColumnIfMissing(
+      "battle_records",
+      "opponent_names_json",
+      "TEXT NOT NULL DEFAULT '[]'",
+    );
     addColumnIfMissing("battle_records", "deleted_at", "INTEGER");
 
     for (const tableName of [
@@ -394,6 +399,7 @@ function migrateSchema() {
           battle_at INTEGER NOT NULL,
           memo TEXT NOT NULL,
           image_data_url TEXT NOT NULL,
+          opponent_names_json TEXT NOT NULL DEFAULT '[]',
           created_at INTEGER NOT NULL,
           updated_at INTEGER NOT NULL,
           deleted_at INTEGER
@@ -405,7 +411,7 @@ function migrateSchema() {
         INSERT INTO schema_metadata (key, value)
         VALUES ('database_created_at', CAST(unixepoch() AS TEXT));
 
-        PRAGMA user_version = 6;
+        PRAGMA user_version = 7;
       `);
       database.exec("COMMIT");
     } catch (error) {
@@ -523,6 +529,7 @@ function migrateSchema() {
       battle_at INTEGER NOT NULL,
       memo TEXT NOT NULL,
       image_data_url TEXT NOT NULL,
+      opponent_names_json TEXT NOT NULL DEFAULT '[]',
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
       deleted_at INTEGER

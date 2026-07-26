@@ -1,8 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  USER_RECORDS_LOCAL_CHANGED_EVENT,
+  USER_RECORDS_SYNCED_EVENT,
+} from "@/components/sync/user-database-sync";
 import { PokemonCombobox } from "@/features/damage-calculator/components/pokemon-combobox";
 import {
   deleteBattleRecord,
@@ -390,10 +393,14 @@ async function detectOpponentPokemon(imageDataUrl: string) {
 }
 
 export function BattleRecords() {
+  const editorRef = useRef<HTMLElement>(null);
   const [records, setRecords] = useState<BattleRecord[]>([]);
   const [battleAt, setBattleAt] = useState(() => toDateTimeLocalValue(Date.now()));
   const [memo, setMemo] = useState("");
   const [imageDataUrl, setImageDataUrl] = useState("");
+  const [restoredOpponentNames, setRestoredOpponentNames] = useState<string[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [detecting, setDetecting] = useState(false);
@@ -486,6 +493,7 @@ export function BattleRecords() {
       setDetections([]);
       setCorrectionBySlot({});
       setCorrectionInputBySlot({});
+      setRestoredOpponentNames([]);
       return;
     }
     if (!file.type.startsWith("image/")) {
@@ -497,6 +505,7 @@ export function BattleRecords() {
       setDetections([]);
       setCorrectionBySlot({});
       setCorrectionInputBySlot({});
+      setRestoredOpponentNames([]);
     } catch (resizeError: unknown) {
       console.error("Failed to resize battle image.", resizeError);
       setError("写真を読み込めませんでした。");
@@ -508,16 +517,31 @@ export function BattleRecords() {
     setMessage("");
     setSaving(true);
     try {
+      const selectedOpponentNames =
+        detections.length > 0
+          ? detections.flatMap((slot) => {
+              const pokemonId = Number(correctionBySlot[slot.slot]);
+              const pokemon = iconCatalog.find(
+                (candidate) => candidate.id === pokemonId,
+              );
+              const name =
+                pokemon?.nameJa ?? correctionInputBySlot[slot.slot]?.trim();
+              return name ? [name] : [];
+            })
+          : restoredOpponentNames;
       const savedRecord = await saveBattleRecord({
         battleAt: fromDateTimeLocalValue(battleAt),
         memo,
         imageDataUrl,
+        opponentNames: selectedOpponentNames,
       });
       setRecords((current) => [savedRecord, ...current]);
       setMemo("");
       setImageDataUrl("");
+      setRestoredOpponentNames([]);
       setBattleAt(toDateTimeLocalValue(Date.now()));
       setMessage("保存しました。");
+      window.dispatchEvent(new CustomEvent(USER_RECORDS_LOCAL_CHANGED_EVENT));
     } catch (saveError: unknown) {
       setError(
         saveError instanceof Error
@@ -559,6 +583,7 @@ export function BattleRecords() {
           ),
         ),
       );
+      setRestoredOpponentNames([]);
       setMessage("相手側6枠の候補を検出しました。");
     } catch (detectError: unknown) {
       console.error("Failed to detect opponent Pokemon.", detectError);
@@ -602,6 +627,20 @@ export function BattleRecords() {
     setMessage("");
     await deleteBattleRecord(id);
     setRecords((current) => current.filter((record) => record.id !== id));
+    window.dispatchEvent(new CustomEvent(USER_RECORDS_LOCAL_CHANGED_EVENT));
+  }
+
+  function restoreRecord(record: BattleRecord) {
+    setBattleAt(toDateTimeLocalValue(record.battleAt));
+    setMemo(record.memo);
+    setImageDataUrl(record.imageDataUrl);
+    setRestoredOpponentNames(record.opponentNames);
+    setDetections([]);
+    setCorrectionBySlot({});
+    setCorrectionInputBySlot({});
+    setError("");
+    setMessage("保存済みの記録を編集欄へ反映しました。");
+    editorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   return (
@@ -616,7 +655,11 @@ export function BattleRecords() {
         <h1 id="battle-record-title">バトル記録</h1>
       </section>
 
-      <section className={styles.editor} aria-label="バトル記録の追加">
+      <section
+        className={styles.editor}
+        aria-label="バトル記録の追加"
+        ref={editorRef}
+      >
         <div className={styles.formGrid}>
           <label className={styles.field}>
             <span>日時</span>
@@ -768,25 +811,29 @@ export function BattleRecords() {
           <div className={styles.recordGrid}>
             {records.map((record) => (
               <article className={styles.recordCard} key={record.id}>
-                <Image
-                  src={record.imageDataUrl}
-                  alt={`${formatBattleAt(record.battleAt)}の選出画面`}
-                  width={1280}
-                  height={720}
-                  unoptimized
-                />
-                <div className={styles.recordBody}>
+                <button
+                  className={styles.recordSelectButton}
+                  type="button"
+                  onClick={() => restoreRecord(record)}
+                >
                   <time dateTime={new Date(record.battleAt).toISOString()}>
                     {formatBattleAt(record.battleAt)}
                   </time>
-                  {record.memo ? <p>{record.memo}</p> : <p>メモなし</p>}
-                  <button
-                    type="button"
-                    onClick={() => void handleDelete(record.id)}
-                  >
-                    削除
-                  </button>
-                </div>
+                  <strong>
+                    {record.opponentNames.length > 0
+                      ? record.opponentNames.join(" / ")
+                      : "相手ポケモン未登録"}
+                  </strong>
+                  <p>{record.memo || "メモなし"}</p>
+                </button>
+                <button
+                  className={styles.recordDeleteButton}
+                  type="button"
+                  aria-label={`${formatBattleAt(record.battleAt)}の記録を削除`}
+                  onClick={() => void handleDelete(record.id)}
+                >
+                  削除
+                </button>
               </article>
             ))}
           </div>

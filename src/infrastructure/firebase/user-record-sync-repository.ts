@@ -271,7 +271,8 @@ async function exportLocalRecords(): Promise<UserSyncRecord[]> {
       WHERE notes.sync_id IS NOT NULL
     `),
     sqliteWorkerClient.query(`
-      SELECT sync_id, battle_at, memo, image_data_url, created_at, updated_at, deleted_at
+      SELECT sync_id, battle_at, memo, image_data_url, opponent_names_json,
+             created_at, updated_at, deleted_at
       FROM battle_records
       WHERE sync_id IS NOT NULL
     `),
@@ -382,6 +383,7 @@ async function exportLocalRecords(): Promise<UserSyncRecord[]> {
         battleAt: Number(row.battle_at),
         memo: String(row.memo),
         imageDataUrl: String(row.image_data_url),
+        opponentNamesJson: String(row.opponent_names_json ?? "[]"),
         createdAt: Number(row.created_at),
       },
     });
@@ -632,12 +634,14 @@ async function importRemoteRecords(records: UserSyncRecord[]) {
     if (record.table === "battle_records") {
       await sqliteWorkerClient.execute(
         `INSERT INTO battle_records (
-           sync_id, battle_at, memo, image_data_url, created_at, updated_at, deleted_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?)
+           sync_id, battle_at, memo, image_data_url, opponent_names_json,
+           created_at, updated_at, deleted_at
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(sync_id) DO UPDATE SET
            battle_at = excluded.battle_at,
            memo = excluded.memo,
            image_data_url = excluded.image_data_url,
+           opponent_names_json = excluded.opponent_names_json,
            created_at = excluded.created_at,
            updated_at = excluded.updated_at,
            deleted_at = excluded.deleted_at`,
@@ -646,6 +650,7 @@ async function importRemoteRecords(records: UserSyncRecord[]) {
           Number(data.battleAt ?? 0),
           String(data.memo ?? ""),
           String(data.imageDataUrl ?? ""),
+          String(data.opponentNamesJson ?? "[]"),
           Number(data.createdAt ?? record.updatedAt),
           record.updatedAt,
           record.deletedAt,
