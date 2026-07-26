@@ -66,6 +66,7 @@ type ChampionsIcon = {
 };
 
 type LearnedDetection = DetectionLearningSample;
+type SelectionOrder = 1 | 2 | 3;
 
 function toDateTimeLocalValue(timestamp: number) {
   const date = new Date(timestamp);
@@ -412,6 +413,9 @@ export function BattleRecords() {
   const [correctionInputBySlot, setCorrectionInputBySlot] = useState<
     Record<number, string>
   >({});
+  const [selectionOrderBySlot, setSelectionOrderBySlot] = useState<
+    Record<number, SelectionOrder>
+  >({});
   const [message, setMessage] = useState("");
   const [toast, setToast] = useState("");
   const [error, setError] = useState("");
@@ -493,6 +497,7 @@ export function BattleRecords() {
       setDetections([]);
       setCorrectionBySlot({});
       setCorrectionInputBySlot({});
+      setSelectionOrderBySlot({});
       setRestoredOpponentNames([]);
       return;
     }
@@ -505,6 +510,7 @@ export function BattleRecords() {
       setDetections([]);
       setCorrectionBySlot({});
       setCorrectionInputBySlot({});
+      setSelectionOrderBySlot({});
       setRestoredOpponentNames([]);
     } catch (resizeError: unknown) {
       console.error("Failed to resize battle image.", resizeError);
@@ -519,15 +525,22 @@ export function BattleRecords() {
     try {
       const selectedOpponentNames =
         detections.length > 0
-          ? detections.flatMap((slot) => {
-              const pokemonId = Number(correctionBySlot[slot.slot]);
-              const pokemon = iconCatalog.find(
-                (candidate) => candidate.id === pokemonId,
-              );
-              const name =
-                pokemon?.nameJa ?? correctionInputBySlot[slot.slot]?.trim();
-              return name ? [name] : [];
-            })
+          ? detections
+              .filter((slot) => selectionOrderBySlot[slot.slot] !== undefined)
+              .sort(
+                (left, right) =>
+                  selectionOrderBySlot[left.slot] -
+                  selectionOrderBySlot[right.slot],
+              )
+              .flatMap((slot) => {
+                const pokemonId = Number(correctionBySlot[slot.slot]);
+                const pokemon = iconCatalog.find(
+                  (candidate) => candidate.id === pokemonId,
+                );
+                const name =
+                  pokemon?.nameJa ?? correctionInputBySlot[slot.slot]?.trim();
+                return name ? [name] : [];
+              })
           : restoredOpponentNames;
       const savedRecord = await saveBattleRecord({
         battleAt: fromDateTimeLocalValue(battleAt),
@@ -539,6 +552,7 @@ export function BattleRecords() {
       setMemo("");
       setImageDataUrl("");
       setRestoredOpponentNames([]);
+      setSelectionOrderBySlot({});
       setBattleAt(toDateTimeLocalValue(Date.now()));
       setMessage("保存しました。");
       window.dispatchEvent(new CustomEvent(USER_RECORDS_LOCAL_CHANGED_EVENT));
@@ -583,6 +597,7 @@ export function BattleRecords() {
           ),
         ),
       );
+      setSelectionOrderBySlot({});
       setRestoredOpponentNames([]);
       setMessage("相手側6枠の候補を検出しました。");
     } catch (detectError: unknown) {
@@ -630,6 +645,19 @@ export function BattleRecords() {
     window.dispatchEvent(new CustomEvent(USER_RECORDS_LOCAL_CHANGED_EVENT));
   }
 
+  function assignSelectionOrder(slot: number, order: SelectionOrder) {
+    setSelectionOrderBySlot((current) => {
+      const next = Object.fromEntries(
+        Object.entries(current).filter(
+          ([currentSlot, currentOrder]) =>
+            Number(currentSlot) !== slot && currentOrder !== order,
+        ),
+      ) as Record<number, SelectionOrder>;
+      if (current[slot] !== order) next[slot] = order;
+      return next;
+    });
+  }
+
   function restoreRecord(record: BattleRecord) {
     setBattleAt(toDateTimeLocalValue(record.battleAt));
     setMemo(record.memo);
@@ -638,6 +666,7 @@ export function BattleRecords() {
     setDetections([]);
     setCorrectionBySlot({});
     setCorrectionInputBySlot({});
+    setSelectionOrderBySlot({});
     setError("");
     setMessage("保存済みの記録を編集欄へ反映しました。");
     editorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -793,6 +822,23 @@ export function BattleRecords() {
                       正解登録
                     </button>
                   </div>
+                  <div
+                    className={styles.selectionOrder}
+                    aria-label={`枠${slot.slot}の選出順`}
+                  >
+                    <span>相手の選出</span>
+                    {([1, 2, 3] as const).map((order) => (
+                      <button
+                        type="button"
+                        aria-pressed={selectionOrderBySlot[slot.slot] === order}
+                        disabled={!correctionBySlot[slot.slot]}
+                        onClick={() => assignSelectionOrder(slot.slot, order)}
+                        key={order}
+                      >
+                        {order}
+                      </button>
+                    ))}
+                  </div>
                 </article>
               ))}
             </div>
@@ -816,14 +862,19 @@ export function BattleRecords() {
                   type="button"
                   onClick={() => restoreRecord(record)}
                 >
+                  <strong className={styles.recordOpponentOrder}>
+                    {record.opponentNames.length > 0
+                      ? record.opponentNames.map((name, index) => (
+                          <span key={`${index}-${name}`}>
+                            <b>{index + 1}</b>
+                            {name}
+                          </span>
+                        ))
+                      : "相手選出未登録"}
+                  </strong>
                   <time dateTime={new Date(record.battleAt).toISOString()}>
                     {formatBattleAt(record.battleAt)}
                   </time>
-                  <strong>
-                    {record.opponentNames.length > 0
-                      ? record.opponentNames.join(" / ")
-                      : "相手ポケモン未登録"}
-                  </strong>
                   <p>{record.memo || "メモなし"}</p>
                 </button>
                 <button
