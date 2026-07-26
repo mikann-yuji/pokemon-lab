@@ -551,15 +551,6 @@ export function SavedTrainingBuilds({
               メモ
             </button>
           ) : null}
-          {teams.length > 0 ? (
-            <button
-              className={styles.secondaryButton}
-              type="button"
-              onClick={showTeamList}
-            >
-              一覧に戻る
-            </button>
-          ) : null}
           {teamError ? <p role="alert">{teamError}</p> : null}
           {teamSaved ? <p className={styles.success}>保存しました。</p> : null}
         </div>
