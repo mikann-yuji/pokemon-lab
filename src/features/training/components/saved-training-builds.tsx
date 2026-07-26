@@ -39,6 +39,39 @@ import {
 } from "../infrastructure/training-catalog-repository";
 import styles from "../styles/saved-training-builds.module.css";
 
+type TeamPokemonNotes = Record<string, string>;
+
+function parseTeamPokemonNotes(
+  memo: string,
+  firstPokemonId?: number,
+): TeamPokemonNotes {
+  if (!memo) return {};
+  try {
+    const parsed = JSON.parse(memo) as {
+      pokemonNotes?: Record<string, unknown>;
+    };
+    if (!parsed.pokemonNotes || typeof parsed.pokemonNotes !== "object") {
+      return {};
+    }
+    return Object.fromEntries(
+      Object.entries(parsed.pokemonNotes)
+        .filter((entry): entry is [string, string] => typeof entry[1] === "string")
+        .map(([pokemonId, note]) => [pokemonId, note]),
+    );
+  } catch {
+    return firstPokemonId === undefined ? {} : { [firstPokemonId]: memo };
+  }
+}
+
+function serializeTeamPokemonNotes(notes: TeamPokemonNotes) {
+  const pokemonNotes = Object.fromEntries(
+    Object.entries(notes).filter(([, note]) => note.length > 0),
+  );
+  return Object.keys(pokemonNotes).length === 0
+    ? ""
+    : JSON.stringify({ version: 1, pokemonNotes });
+}
+
 /**
  * 保存済み育成案の一覧と、必要に応じたバトルチーム編成UI。
  * user.dbの育成案/チームと、catalog.dbのポケモン名/持ち物名を結合して表示する。
@@ -92,7 +125,7 @@ export function SavedTrainingBuilds({
   const [loadError, setLoadError] = useState("");
   const [actionError, setActionError] = useState("");
   const [memoOpen, setMemoOpen] = useState(false);
-  const [memoDraft, setMemoDraft] = useState("");
+  const [memoDraft, setMemoDraft] = useState<TeamPokemonNotes>({});
   const [memoOriginal, setMemoOriginal] = useState("");
   const [memoSaving, setMemoSaving] = useState(false);
   const [teamPokemonDetails, setTeamPokemonDetails] = useState<
@@ -125,7 +158,12 @@ export function SavedTrainingBuilds({
             return;
           }
           setTeamName(editingTeam.name);
-          setMemoDraft(editingTeam.memo);
+          const firstPokemonId = savedBuilds.find(
+            (build) => build.id === editingTeam.buildIds[0],
+          )?.pokemonId;
+          setMemoDraft(
+            parseTeamPokemonNotes(editingTeam.memo, firstPokemonId),
+          );
           setMemoOriginal(editingTeam.memo);
           setSelectedBuildIds(new Set(editingTeam.buildIds));
           setEditingTeamId(editingTeam.id);
@@ -320,19 +358,20 @@ export function SavedTrainingBuilds({
 
   async function closeTeamMemo() {
     if (memoSaving) return;
-    if (editingTeamId === undefined || memoDraft === memoOriginal) {
+    const serializedMemo = serializeTeamPokemonNotes(memoDraft);
+    if (editingTeamId === undefined || serializedMemo === memoOriginal) {
       setMemoOpen(false);
       return;
     }
     setMemoSaving(true);
     setActionError("");
     try {
-      await updateBattleTeamMemo(editingTeamId, memoDraft);
-      setMemoOriginal(memoDraft);
+      await updateBattleTeamMemo(editingTeamId, serializedMemo);
+      setMemoOriginal(serializedMemo);
       setTeams((current) =>
         current.map((team) =>
           team.id === editingTeamId
-            ? { ...team, memo: memoDraft, updatedAt: Date.now() }
+            ? { ...team, memo: serializedMemo, updatedAt: Date.now() }
             : team,
         ),
       );
@@ -469,17 +508,21 @@ export function SavedTrainingBuilds({
         </>
       ) : null}
       {teamFormVisible ? (
-        <div className={styles.teamBuilder}>
-          <div>
+        <div
+          className={`${styles.teamBuilder} ${
+            editingTeamId !== undefined ? styles.teamBuilderCompact : ""
+          }`}
+        >
+          {editingTeamId === undefined ? (
+            <div>
             <strong>
-              {editingTeamId === undefined
-                ? "バトルチームを作る"
-                : "バトルチームを編集"}
+                バトルチームを作る
             </strong>
             <small>
               育成案を最大6体選択。同じポケモン・持ち物は登録できません。
             </small>
-          </div>
+            </div>
+          ) : null}
           <span>{selectedBuildIds.size} / 6</span>
           <input
             aria-label="チーム名"
@@ -633,33 +676,46 @@ export function SavedTrainingBuilds({
                     ) ?? [];
                 return (
                   <article key={buildId}>
-                    <strong>{detail?.nameJa ?? build?.name ?? "読込中"}</strong>
-                    <span className={styles.teamMemoTypes}>
-                      {detail?.types.map((typeName, index) => (
-                        <small
-                          key={typeName}
-                          style={getTypeBadgeStyle(typeName)}
-                        >
-                          {detail.typeNamesJa[index] ?? typeName}
-                        </small>
-                      ))}
-                    </span>
-                    <p>特性: {ability?.name ?? "特性なし"}</p>
-                    <p>技: {moves.length > 0 ? moves.join(" / ") : "未設定"}</p>
+                    <div>
+                      <strong>
+                        {detail?.nameJa ?? build?.name ?? "読込中"}
+                      </strong>
+                      <span className={styles.teamMemoTypes}>
+                        {detail?.types.map((typeName, index) => (
+                          <small
+                            key={typeName}
+                            style={getTypeBadgeStyle(typeName)}
+                          >
+                            {detail.typeNamesJa[index] ?? typeName}
+                          </small>
+                        ))}
+                      </span>
+                      <p>特性: {ability?.name ?? "特性なし"}</p>
+                      <p>
+                        技: {moves.length > 0 ? moves.join(" / ") : "未設定"}
+                      </p>
+                    </div>
+                    <label>
+                      {detail?.nameJa ?? build?.name ?? "ポケモン"}のメモ
+                      <textarea
+                        maxLength={2000}
+                        placeholder="役割、選出、立ち回りなど"
+                        value={
+                          build ? (memoDraft[String(build.pokemonId)] ?? "") : ""
+                        }
+                        onChange={(event) => {
+                          if (!build) return;
+                          setMemoDraft((current) => ({
+                            ...current,
+                            [String(build.pokemonId)]: event.target.value,
+                          }));
+                        }}
+                      />
+                    </label>
                   </article>
                 );
               })}
             </div>
-            <label className={styles.teamMemoField}>
-              チームメモ
-              <textarea
-                autoFocus
-                maxLength={5000}
-                placeholder="立ち回り、選出、注意点など"
-                value={memoDraft}
-                onChange={(event) => setMemoDraft(event.target.value)}
-              />
-            </label>
             <p className={styles.teamMemoHint}>
               {memoSaving
                 ? "保存中…"

@@ -173,6 +173,24 @@
   background: #eef6ff;
 }
 
+.teamBuilderCompact {
+  grid-template-columns: auto minmax(8rem, 1fr) repeat(3, auto);
+  gap: 0.4rem;
+  padding: 0.45rem;
+}
+
+.teamBuilderCompact > span {
+  font-size: 0.7rem;
+}
+
+.teamBuilderCompact input,
+.teamBuilderCompact button {
+  min-height: 32px;
+  padding: 0.3rem 0.55rem;
+  border-width: 1px;
+  font-size: 0.7rem;
+}
+
 .teamBuilder > div small {
   display: block;
   margin-top: 0.2rem;
@@ -403,6 +421,8 @@
 }
 
 .teamMemoMembers article {
+  display: grid;
+  gap: 0.3rem;
   min-width: 0;
   padding: 0.4rem;
   border: 1px solid #dce5f0;
@@ -423,6 +443,33 @@
   overflow-wrap: anywhere;
 }
 
+.teamMemoMembers article > label {
+  display: grid;
+  gap: 0.2rem;
+  color: #52657e;
+  font-size: 0.52rem;
+  font-weight: 900;
+}
+
+.teamMemoMembers article textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 4.2rem;
+  resize: vertical;
+  padding: 0.38rem;
+  border: 1px solid #b9c7da;
+  border-radius: 7px;
+  color: #172b4d;
+  font: inherit;
+  font-size: 0.66rem;
+  line-height: 1.45;
+}
+
+.teamMemoMembers article textarea:focus {
+  border-color: #2857a4;
+  outline: 2px solid rgb(40 87 164 / 16%);
+}
+
 .teamMemoTypes {
   display: inline-flex;
   gap: 0.16rem;
@@ -441,32 +488,6 @@
   text-align: center;
 }
 
-.teamMemoField {
-  display: grid;
-  gap: 0.3rem;
-  font-size: 0.72rem;
-  font-weight: 900;
-}
-
-.teamMemoField textarea {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 11rem;
-  resize: vertical;
-  padding: 0.65rem;
-  border: 2px solid #b9c7da;
-  border-radius: 10px;
-  color: #172b4d;
-  font: inherit;
-  font-size: 0.82rem;
-  line-height: 1.55;
-}
-
-.teamMemoField textarea:focus {
-  border-color: #2857a4;
-  outline: 3px solid rgb(40 87 164 / 16%);
-}
-
 .teamMemoHint {
   margin: 0;
   color: #52657e;
@@ -482,6 +503,27 @@
   .teamBuilder input,
   .teamBuilder button {
     grid-column: 1 / -1;
+  }
+
+  .teamBuilderCompact {
+    grid-template-columns: auto minmax(0, 1fr) repeat(3, auto);
+  }
+
+  .teamBuilderCompact input {
+    grid-column: 2 / -1;
+    grid-row: 1;
+  }
+
+  .teamBuilderCompact > span {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .teamBuilderCompact button {
+    grid-column: auto;
+    min-width: 0;
+    white-space: nowrap;
   }
 
   .teamActions {
@@ -509,7 +551,4 @@
     grid-template-columns: 1fr;
   }
 
-  .teamMemoField textarea {
-    min-height: 9rem;
-  }
 }
