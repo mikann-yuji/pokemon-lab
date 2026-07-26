@@ -132,6 +132,7 @@
 }
 
 .teamPicker span {
+  flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
   color: #536376;
@@ -139,6 +140,28 @@
   font-weight: 850;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.teamPicker .clearTeamButton {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 22px;
+  min-height: 22px;
+  padding: 0;
+  border: 1px solid #b9c7da;
+  border-radius: 50%;
+  background: white;
+  color: #536376;
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.teamPicker .clearTeamButton:hover,
+.teamPicker .clearTeamButton:focus-visible {
+  border-color: #2857a4;
+  outline: 2px solid rgb(40 87 164 / 18%);
+  color: #2857a4;
 }
 
 .teamError {

@@ -101,6 +101,7 @@ type DamageCalculatorViewProps = {
     buildId: number | null,
   ) => string | undefined;
   onOpenTeamModal: (side: DamageSide) => void;
+  onClearTeam: (side: DamageSide) => void;
   onSelectTeam: (team: BattleTeam) => void;
   onCloseTeamModal: () => void;
   onSelectTeamMember: (side: DamageSide, build: TrainingBuild) => void;
@@ -200,6 +201,7 @@ export function DamageCalculatorView({
   speedComparisonRows,
   getTrainingDetailHref,
   onOpenTeamModal,
+  onClearTeam,
   onSelectTeam,
   onCloseTeamModal,
   onSelectTeamMember,
@@ -247,6 +249,7 @@ export function DamageCalculatorView({
         heldItems={heldItems}
         abilityConditionEnabled={abilityConditionEnabled.attacker}
         onOpenTeam={() => onOpenTeamModal("attacker")}
+        onClearTeam={() => onClearTeam("attacker")}
         onSelectTeamMember={(build) => onSelectTeamMember("attacker", build)}
         onSelectPokemon={onSelectAttacker}
         onRestoreHistory={onRestoreHistory}
@@ -329,6 +332,7 @@ export function DamageCalculatorView({
         heldItems={heldItems}
         abilityConditionEnabled={abilityConditionEnabled.defender}
         onOpenTeam={() => onOpenTeamModal("defender")}
+        onClearTeam={() => onClearTeam("defender")}
         onSelectTeamMember={(build) => onSelectTeamMember("defender", build)}
         onSelectPokemon={onSelectDefender}
         onRestoreHistory={onRestoreHistory}
@@ -432,6 +436,7 @@ function BattleSidePanel({
   abilityConditionEnabled,
   children,
   onOpenTeam,
+  onClearTeam,
   onSelectTeamMember,
   onSelectPokemon,
   onRestoreHistory,
@@ -455,6 +460,7 @@ function BattleSidePanel({
   abilityConditionEnabled: boolean;
   children?: React.ReactNode;
   onOpenTeam: () => void;
+  onClearTeam: () => void;
   onSelectTeamMember: (build: TrainingBuild) => void;
   onSelectPokemon: (pokemon: DamageCalculatorPokemon | null) => void;
   onRestoreHistory: (
@@ -480,6 +486,17 @@ function BattleSidePanel({
           バトルチームを選択
         </button>
         <span>{team?.name ?? "未選択"}</span>
+        {team ? (
+          <button
+            className={styles.clearTeamButton}
+            type="button"
+            aria-label={`${title}のバトルチーム選択を解除`}
+            title="バトルチーム選択を解除"
+            onClick={onClearTeam}
+          >
+            ×
+          </button>
+        ) : null}
       </div>
       {teamLoadError ? (
         <p className={styles.teamError} role="alert">

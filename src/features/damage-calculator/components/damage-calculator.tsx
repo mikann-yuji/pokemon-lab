@@ -571,6 +571,7 @@ export function DamageCalculator({
       speedComparisonRows={speedComparisonRows}
       getTrainingDetailHref={getTrainingDetailHref}
       onOpenTeamModal={setTeamModalSide}
+      onClearTeam={(side) => setSelectedTeamId(side, null)}
       onSelectTeam={(team) => {
         if (teamModalSide) selectBattleTeam(teamModalSide, team);
       }}

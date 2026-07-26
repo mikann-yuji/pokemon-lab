@@ -332,6 +332,9 @@ export function ReverseDamageCalculator({
           statLabel={STAT_LABELS[relevantStatIds.attacker]}
           showControls={unknownSide !== "attacker"}
           onOpenTeam={() => setTeamModalSide("attacker")}
+          onClearTeam={() =>
+            setSelectedTeamIds((current) => ({ ...current, attacker: null }))
+          }
           onSelectTeamMember={(build) => selectTeamMember("attacker", build)}
           onSelectPokemon={(pokemon) => selectPokemon("attacker", pokemon)}
           onRestore={restoreHistory}
@@ -376,6 +379,9 @@ export function ReverseDamageCalculator({
           statLabel={STAT_LABELS[relevantStatIds.defender]}
           showControls={unknownSide !== "defender"}
           onOpenTeam={() => setTeamModalSide("defender")}
+          onClearTeam={() =>
+            setSelectedTeamIds((current) => ({ ...current, defender: null }))
+          }
           onSelectTeamMember={(build) => selectTeamMember("defender", build)}
           onSelectPokemon={(pokemon) => selectPokemon("defender", pokemon)}
           onRestore={restoreHistory}

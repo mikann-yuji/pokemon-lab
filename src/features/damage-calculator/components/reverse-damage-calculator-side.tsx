@@ -47,6 +47,7 @@ export function SideContent({
   showControls,
   children,
   onOpenTeam,
+  onClearTeam,
   onSelectTeamMember,
   onSelectPokemon,
   onRestore,
@@ -72,6 +73,7 @@ export function SideContent({
   showControls: boolean;
   children?: ReactNode;
   onOpenTeam: () => void;
+  onClearTeam: () => void;
   onSelectTeamMember: (build: TrainingBuild) => void;
   onSelectPokemon: (pokemon: DamageCalculatorPokemon | null) => void;
   onRestore: (side: DamageHistorySide, history: DamageHistoryRecord) => void;
@@ -91,6 +93,17 @@ export function SideContent({
           バトルチームを選択
         </button>
         <span>{selectedTeam?.name ?? "未選択"}</span>
+        {selectedTeam ? (
+          <button
+            className={damageStyles.clearTeamButton}
+            type="button"
+            aria-label={`${title}のバトルチーム選択を解除`}
+            title="バトルチーム選択を解除"
+            onClick={onClearTeam}
+          >
+            ×
+          </button>
+        ) : null}
       </div>
       {teamLoadError ? (
         <p className={damageStyles.teamError} role="alert">
