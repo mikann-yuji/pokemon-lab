@@ -18,6 +18,8 @@ import styles from "./user-database-sync.module.css";
 const LAST_SYNC_PREFIX = "pokemon-lab:user-db:last-sync:";
 const AUTO_SYNC_INTERVAL_MS = 5 * 60 * 1000;
 const AUTO_SYNC_MIN_INTERVAL_MS = 30 * 1000;
+const INITIAL_AUTO_SYNC_DELAY_MS = 5 * 1000;
+const LOCAL_CHANGE_SYNC_DELAY_MS = 10 * 1000;
 export const USER_RECORDS_SYNCED_EVENT = "pokemon-lab:user-records-synced";
 export const USER_RECORDS_LOCAL_CHANGED_EVENT =
   "pokemon-lab:user-records-local-changed";
@@ -86,6 +88,22 @@ function getSyncErrorMessage(error: unknown) {
   return message ? `同期失敗: ${message}` : "同期失敗";
 }
 
+type NetworkInformation = {
+  effectiveType?: string;
+  saveData?: boolean;
+};
+
+function hasConstrainedConnection() {
+  const connection = (
+    navigator as Navigator & { connection?: NetworkInformation }
+  ).connection;
+  return (
+    connection?.saveData === true ||
+    connection?.effectiveType === "slow-2g" ||
+    connection?.effectiveType === "2g"
+  );
+}
+
 export function UserDatabaseSync() {
   const [user, setUser] = useState<User | null>(null);
   const [online, setOnline] = useState(() =>
@@ -99,6 +117,7 @@ export function UserDatabaseSync() {
   const [visible, setVisible] = useState(true);
   const syncingRef = useRef(false);
   const lastAutoSyncAttemptRef = useRef(0);
+  const localChangeTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (nextUser) => {
@@ -126,8 +145,12 @@ export function UserDatabaseSync() {
     };
   }, []);
 
-  async function syncUserDatabase(activeUser = user) {
+  async function syncUserDatabase(activeUser = user, manual = false) {
     if (!activeUser || !navigator.onLine || syncingRef.current) return;
+    if (!manual && hasConstrainedConnection()) {
+      setMessage("低速回線のため自動同期を保留");
+      return;
+    }
     lastAutoSyncAttemptRef.current = Date.now();
     syncingRef.current = true;
     setSyncing(true);
@@ -172,7 +195,10 @@ export function UserDatabaseSync() {
 
   useEffect(() => {
     if (!user || !online) return;
-    const timer = window.setTimeout(() => void syncUserDatabase(user), 0);
+    const timer = window.setTimeout(
+      () => void syncUserDatabase(user),
+      INITIAL_AUTO_SYNC_DELAY_MS,
+    );
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, online]);
@@ -188,7 +214,15 @@ export function UserDatabaseSync() {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") requestAutoSync(user);
     };
-    const handleLocalChanged = () => requestAutoSync(user, 0);
+    const handleLocalChanged = () => {
+      if (localChangeTimerRef.current !== null) {
+        window.clearTimeout(localChangeTimerRef.current);
+      }
+      localChangeTimerRef.current = window.setTimeout(() => {
+        localChangeTimerRef.current = null;
+        requestAutoSync(user, 0);
+      }, LOCAL_CHANGE_SYNC_DELAY_MS);
+    };
     window.addEventListener("focus", handleFocus);
     window.addEventListener("pageshow", handlePageShow);
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -202,6 +236,10 @@ export function UserDatabaseSync() {
         USER_RECORDS_LOCAL_CHANGED_EVENT,
         handleLocalChanged,
       );
+      if (localChangeTimerRef.current !== null) {
+        window.clearTimeout(localChangeTimerRef.current);
+        localChangeTimerRef.current = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, online]);
@@ -233,7 +271,7 @@ export function UserDatabaseSync() {
     setDetailOpen(false);
     try {
       const result = await signInWithGoogle();
-      await syncUserDatabase(result.user);
+      await syncUserDatabase(result.user, true);
     } catch (error) {
       console.warn("Failed to sign in with Google.", error);
       if (shouldUseRedirectSignIn(error)) {
@@ -282,7 +320,7 @@ export function UserDatabaseSync() {
         </button>
         {user ? (
           <>
-            <button type="button" disabled={syncing || !online} onClick={() => void syncUserDatabase()}>
+            <button type="button" disabled={syncing || !online} onClick={() => void syncUserDatabase(user, true)}>
               同期
             </button>
             <button type="button" onClick={() => void handleSignOut()}>

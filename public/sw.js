@@ -1,4 +1,4 @@
-const CACHE_NAME = "pokemon-lab-v15";
+const CACHE_NAME = "pokemon-lab-v16";
 const IMAGE_CACHE_NAME = "pokemon-lab-images-v1";
 const IMAGE_CACHE_LIMIT = 300;
 
@@ -94,7 +94,6 @@ async function cacheAppShell() {
 
 self.addEventListener("install", (event) => {
   event.waitUntil(cacheAppShell());
-  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
@@ -110,6 +109,12 @@ self.addEventListener("activate", (event) => {
       ),
   );
   self.clients.claim();
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 async function trimImageCache(cache) {
@@ -169,39 +174,19 @@ async function respondWithCachedFirst(request) {
   return response;
 }
 
-async function respondWithNetworkFirstAsset(request) {
-  try {
-    const response = await fetch(request, { cache: "no-store" });
-    if (response.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      await cache.put(request, response.clone());
-    }
-    return response;
-  } catch {
-    const cached = await caches.match(request);
-    if (cached) return cached;
-    throw new Error("Offline asset is unavailable.");
-  }
-}
+async function respondWithLocalFirst(request, fallbackPath) {
+  const cached =
+    (await caches.match(request)) ??
+    (fallbackPath ? await caches.match(fallbackPath) : null);
 
-async function respondWithNavigation(request) {
-  try {
-    const response = await fetch(request);
-    if (response.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      await cache.put(request, response.clone());
-    }
-    return response;
-  } catch {
-    const cached = (await caches.match(request)) ?? (await caches.match("/"));
-    return (
-      cached ??
-      new Response("Offline", {
-        status: 503,
-        headers: { "Content-Type": "text/plain; charset=utf-8" },
-      })
-    );
+  if (cached) return cached;
+
+  const response = await fetch(request);
+  if (response.ok) {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put(request, response.clone());
   }
+  return response;
 }
 
 self.addEventListener("fetch", (event) => {
@@ -234,12 +219,12 @@ self.addEventListener("fetch", (event) => {
     url.pathname === "/sqlite-runtime-worker.mjs" ||
     url.pathname === "/sqlite-catalog.db.gz"
   ) {
-    event.respondWith(respondWithNetworkFirstAsset(request));
+    event.respondWith(respondWithLocalFirst(request));
     return;
   }
 
   if (request.mode === "navigate") {
-    event.respondWith(respondWithNavigation(request));
+    event.respondWith(respondWithLocalFirst(request, "/"));
     return;
   }
 

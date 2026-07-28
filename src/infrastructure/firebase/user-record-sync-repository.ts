@@ -58,9 +58,14 @@ function latestTimestamp(record: Pick<UserSyncRecord, "updatedAt" | "deletedAt">
 
 async function loadRemoteRecords(uid: string) {
   const database = getFirebaseFirestore();
+  const tableSnapshots = await Promise.all(
+    SYNC_TABLES.map(async (table) => ({
+      table,
+      snapshots: await getDocs(recordCollection(database, uid, table)),
+    })),
+  );
   const records: UserSyncRecord[] = [];
-  for (const table of SYNC_TABLES) {
-    const snapshots = await getDocs(recordCollection(database, uid, table));
+  for (const { table, snapshots } of tableSnapshots) {
     for (const snapshot of snapshots.docs) {
       const value = snapshot.data();
       records.push({
