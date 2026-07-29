@@ -8,8 +8,7 @@ import sqlite3InitModule from "/sqlite-wasm/index.mjs";
 const DATABASE_FILENAME = "/user.db";
 const CATALOG_DATABASE_FILENAME = "/catalog.db";
 const SUPPORTED_SCHEMA_VERSION = 7;
-const CATALOG_SEED_VERSION = "11";
-const CATALOG_DATABASE_URL = `/sqlite-catalog.db.gz?v=${CATALOG_SEED_VERSION}`;
+const CATALOG_MANIFEST_URL = "/catalog-manifest.json";
 
 // OPFS上のSQLite接続はWorker内でだけ保持し、UIスレッドへDBオブジェクトを渡さない。
 let database = null;
@@ -548,15 +547,38 @@ function migrateSchema() {
  * publicに置いたgzip圧縮済みcatalog.dbを取得し、ブラウザ標準のDecompressionStreamで展開する。
  * カタログは配布物なので、ユーザーDBとは別ファイルとしてOPFSへimportする。
  */
-async function fetchCompressedCatalogDatabase() {
+async function fetchCatalogManifest() {
   let response = null;
   try {
-    response = await fetch(CATALOG_DATABASE_URL, { cache: "no-store" });
+    response = await fetch(CATALOG_MANIFEST_URL, { cache: "no-store" });
   } catch {
     response = null;
   }
   if ((!response || !response.ok) && typeof caches !== "undefined") {
-    response = await caches.match(CATALOG_DATABASE_URL);
+    response = await caches.match(CATALOG_MANIFEST_URL);
+  }
+  if (!response?.ok) return null;
+  const manifest = await response.json();
+  if (
+    typeof manifest?.version !== "string" ||
+    !manifest.version ||
+    typeof manifest?.catalogUrl !== "string" ||
+    !manifest.catalogUrl.startsWith("/")
+  ) {
+    throw new Error("配布用カタログマニフェストが不正です。");
+  }
+  return manifest;
+}
+
+async function fetchCompressedCatalogDatabase(catalogUrl) {
+  let response = null;
+  try {
+    response = await fetch(catalogUrl, { cache: "no-store" });
+  } catch {
+    response = null;
+  }
+  if ((!response || !response.ok) && typeof caches !== "undefined") {
+    response = await caches.match(catalogUrl);
   }
   if (!response || !response.ok) {
     throw new Error(
@@ -591,13 +613,19 @@ async function ensureCatalogDatabase() {
   } catch {
     currentSeedVersion = null;
   }
-  if (String(currentSeedVersion) === CATALOG_SEED_VERSION) return false;
+  const manifest = await fetchCatalogManifest();
+  if (!manifest) {
+    if (currentSeedVersion !== null) return false;
+    throw new Error("配布用カタログマニフェストを取得できませんでした。");
+  }
+  if (String(currentSeedVersion) === manifest.version) return false;
 
   catalogDatabase.close();
   catalogDatabase = null;
   let catalogDatabaseBytes;
   try {
-    catalogDatabaseBytes = await fetchCompressedCatalogDatabase();
+    const versionedUrl = `${manifest.catalogUrl}?v=${encodeURIComponent(manifest.version)}`;
+    catalogDatabaseBytes = await fetchCompressedCatalogDatabase(versionedUrl);
   } catch (error) {
     catalogDatabase = new sahPool.OpfsSAHPoolDb(CATALOG_DATABASE_FILENAME);
     if (currentSeedVersion !== null) return false;
@@ -606,6 +634,12 @@ async function ensureCatalogDatabase() {
   sahPool.unlink(CATALOG_DATABASE_FILENAME);
   await sahPool.importDb(CATALOG_DATABASE_FILENAME, catalogDatabaseBytes);
   catalogDatabase = new sahPool.OpfsSAHPoolDb(CATALOG_DATABASE_FILENAME);
+  const importedVersion = catalogDatabase.selectValue(
+    "SELECT value FROM catalog_metadata WHERE key = 'catalog_seed_version'",
+  );
+  if (String(importedVersion) !== manifest.version) {
+    throw new Error("取得したcatalog.dbのバージョンがマニフェストと一致しません。");
+  }
   return true;
 }
 

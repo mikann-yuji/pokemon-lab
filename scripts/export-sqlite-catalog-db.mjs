@@ -4,6 +4,7 @@
  */
 
 import Database from "better-sqlite3";
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { gzipSync } from "node:zlib";
@@ -14,13 +15,12 @@ const publicDirectory = path.join(rootDirectory, "public");
 const temporaryDirectory = path.join(rootDirectory, ".tmp");
 const databasePath = path.join(temporaryDirectory, "sqlite-catalog.db");
 const outputPath = path.join(publicDirectory, "sqlite-catalog.db.gz");
+const manifestPath = path.join(publicDirectory, "catalog-manifest.json");
 const championsIconManifestPath = path.join(
   publicDirectory,
   "champions-icons",
   "manifest.json",
 );
-
-const seedVersion = 11;
 
 // publicへ配布するcatalog.dbにも、通常DBと同じ親子関係順でCSVを投入する。
 const seedTableOrder = [
@@ -222,6 +222,17 @@ const tables = Object.fromEntries(
     ),
   ]),
 );
+const catalogVersion = createHash("sha256")
+  .update(
+    seedTableOrder
+      .map(
+        (tableName) =>
+          `${tableName}\0${readFileSync(path.join(seedsDirectory, `${tableName}.csv`), "utf8")}`,
+      )
+      .join("\0"),
+  )
+  .digest("hex")
+  .slice(0, 20);
 
 /** テーブルごとに列番号を名前で引けるようにする小ヘルパー。 */
 function columnIndex(tableName, columnName) {
@@ -378,7 +389,7 @@ try {
   `);
   database
     .prepare("INSERT INTO catalog_metadata (key, value) VALUES (?, ?)")
-    .run("catalog_seed_version", String(seedVersion));
+    .run("catalog_seed_version", catalogVersion);
 
   const insertTables = database.transaction(() => {
     for (const tableName of seedTableOrder) {
@@ -406,7 +417,20 @@ try {
 
 const rawDatabase = readFileSync(databasePath);
 writeFileSync(outputPath, gzipSync(rawDatabase, { level: 9 }));
+writeFileSync(
+  manifestPath,
+  `${JSON.stringify(
+    {
+      version: catalogVersion,
+      catalogUrl: "/sqlite-catalog.db.gz",
+      generatedAt: new Date().toISOString(),
+    },
+    null,
+    2,
+  )}\n`,
+  "utf8",
+);
 
 console.log(
-  `Exported compressed SQLite catalog DB to ${outputPath} (${rawDatabase.length} bytes -> ${readFileSync(outputPath).length} bytes)`,
+  `Exported catalog ${catalogVersion} to ${outputPath} (${rawDatabase.length} bytes -> ${readFileSync(outputPath).length} bytes)`,
 );

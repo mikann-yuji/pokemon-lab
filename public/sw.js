@@ -1,4 +1,4 @@
-const CACHE_NAME = "pokemon-lab-v20";
+const CACHE_NAME = "pokemon-lab-v21";
 const IMAGE_CACHE_NAME = "pokemon-lab-images-v1";
 const IMAGE_CACHE_LIMIT = 300;
 
@@ -26,6 +26,7 @@ const CORE_ASSETS = [
   "/screenshots/desktop-wide.png",
   "/screenshots/mobile.png",
   "/sqlite-runtime-worker.mjs",
+  "/catalog-manifest.json",
   "/sqlite-catalog.db.gz",
   "/champions-icons/manifest.json",
   "/sqlite-wasm/index.mjs",
