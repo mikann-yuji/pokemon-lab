@@ -1,4 +1,4 @@
-const CACHE_NAME = "pokemon-lab-v22";
+const CACHE_NAME = "pokemon-lab-v23";
 const IMAGE_CACHE_NAME = "pokemon-lab-images-v1";
 const IMAGE_CACHE_LIMIT = 300;
 
@@ -191,6 +191,31 @@ async function respondWithLocalFirst(request, fallbackPath) {
   return response;
 }
 
+async function respondWithNavigation(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const url = new URL(request.url);
+    const routeFallback =
+      (await caches.match(url.pathname)) ?? (await caches.match("/"));
+    return (
+      routeFallback ??
+      new Response("Offline", {
+        status: 503,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      })
+    );
+  }
+}
+
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
@@ -226,7 +251,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.mode === "navigate") {
-    event.respondWith(respondWithLocalFirst(request, "/"));
+    event.respondWith(respondWithNavigation(request));
     return;
   }
 
