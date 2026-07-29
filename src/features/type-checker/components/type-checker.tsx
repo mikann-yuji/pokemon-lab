@@ -57,7 +57,7 @@ type KnockoutCandidate = {
   defender: DamageCalculatorPokemon;
   move: DamageCalculatorMove;
   result: DamageCalculation;
-  usageRate: number;
+  usageRate: number | null;
 };
 
 function applyRankedAbilityPoints(
@@ -403,7 +403,10 @@ function PokemonDetail({
                   {rank}位 {defender.nameJa}
                 </strong>
                 <span>
-                  {move.name}・配分採用率 {usageRate.toFixed(1)}%
+                  {move.name}
+                  {usageRate === null
+                    ? "・能力ポイント配分を更新待ち"
+                    : `・配分採用率 ${usageRate.toFixed(1)}%`}
                 </span>
                 <span className={styles.defenderStats}>
                   {STAT_IDS.map(

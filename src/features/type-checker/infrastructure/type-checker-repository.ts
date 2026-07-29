@@ -9,7 +9,7 @@ export type RankedPokemon = {
   formId: number;
   rank: number;
   abilityPoints: Record<string, number>;
-  usageRate: number;
+  usageRate: number | null;
 };
 
 type RankedPokemonRow = SqliteRow & {
@@ -27,8 +27,8 @@ type RankedPokemonRow = SqliteRow & {
 export async function getTopRankedPokemon(
   battleFormat: TypeCheckerBattleFormat,
 ): Promise<RankedPokemon[]> {
-  const rows = await sqliteWorkerClient.catalogQuery<RankedPokemonRow>(
-    `
+  try {
+    const rows = await sqliteWorkerClient.catalogQuery<RankedPokemonRow>(`
       SELECT
         rankings.form_id AS formId,
         rankings.usage_rank AS rank,
@@ -46,20 +46,47 @@ export async function getTopRankedPokemon(
       WHERE rankings.battle_format = ?
         AND rankings.usage_rank <= 30
       ORDER BY usage_rank, form_id
-    `,
-    [battleFormat],
-  );
-  return rows.map((row) => ({
-    formId: Number(row.formId),
-    rank: Number(row.rank),
-    abilityPoints: {
-      hp: Number(row.hp),
-      attack: Number(row.attack),
-      defense: Number(row.defense),
-      "special-attack": Number(row.specialAttack),
-      "special-defense": Number(row.specialDefense),
-      speed: Number(row.speed),
-    },
-    usageRate: Number(row.usageRate),
-  }));
+      `,
+      [battleFormat],
+    );
+    return rows.map((row) => ({
+      formId: Number(row.formId),
+      rank: Number(row.rank),
+      abilityPoints: {
+        hp: Number(row.hp),
+        attack: Number(row.attack),
+        defense: Number(row.defense),
+        "special-attack": Number(row.specialAttack),
+        "special-defense": Number(row.specialDefense),
+        speed: Number(row.speed),
+      },
+      usageRate: Number(row.usageRate),
+    }));
+  } catch (error) {
+    if (
+      !(error instanceof Error) ||
+      !error.message.includes("no such table: champions_form_stat_points")
+    ) {
+      throw error;
+    }
+    const rows = await sqliteWorkerClient.catalogQuery<{
+      formId: number;
+      rank: number;
+    }>(
+      `
+        SELECT form_id AS formId, usage_rank AS rank
+        FROM champions_form_usage_rankings
+        WHERE battle_format = ?
+          AND usage_rank <= 30
+        ORDER BY usage_rank, form_id
+      `,
+      [battleFormat],
+    );
+    return rows.map((row) => ({
+      formId: Number(row.formId),
+      rank: Number(row.rank),
+      abilityPoints: {},
+      usageRate: null,
+    }));
+  }
 }

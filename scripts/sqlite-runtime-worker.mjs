@@ -8,8 +8,8 @@ import sqlite3InitModule from "/sqlite-wasm/index.mjs";
 const DATABASE_FILENAME = "/user.db";
 const CATALOG_DATABASE_FILENAME = "/catalog.db";
 const SUPPORTED_SCHEMA_VERSION = 7;
-const CATALOG_DATABASE_URL = "/sqlite-catalog.db.gz";
 const CATALOG_SEED_VERSION = "11";
+const CATALOG_DATABASE_URL = `/sqlite-catalog.db.gz?v=${CATALOG_SEED_VERSION}`;
 
 // OPFS上のSQLite接続はWorker内でだけ保持し、UIスレッドへDBオブジェクトを渡さない。
 let database = null;

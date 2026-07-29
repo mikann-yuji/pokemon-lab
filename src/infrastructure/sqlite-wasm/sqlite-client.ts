@@ -13,10 +13,11 @@ import type {
   SqliteWorkerResultMap,
 } from "./worker-protocol";
 
-const DEFAULT_TIMEOUT_MS = 20_000;
+const DEFAULT_TIMEOUT_MS = 60_000;
 const STORAGE_API_TIMEOUT_MS = 3_000;
-const SQLITE_WORKER_VERSION = "10";
+const SQLITE_WORKER_VERSION = "11";
 const SQLITE_CLOSE_REQUEST_KEY = "pokemon-lab:sqlite-close-request";
+const WORKER_IDLE_CLOSE_MS = 30_000;
 
 /**
  * Workerへ送ったリクエストの待ち受け情報。
@@ -231,7 +232,7 @@ class SqliteWorkerClient {
     this.autoCloseTimer = window.setTimeout(() => {
       this.autoCloseTimer = null;
       void this.closeAndTerminate();
-    }, 250);
+    }, WORKER_IDLE_CLOSE_MS);
   }
 
   private handleMessage = (event: MessageEvent<SqliteWorkerResponse>) => {
@@ -303,7 +304,7 @@ class SqliteWorkerClient {
     this.requestOtherTabsToClose();
     for (let attempt = 0; attempt < 5; attempt += 1) {
       try {
-        return await this.request("initialize", undefined);
+        return await this.request("initialize", undefined, 120_000);
       } catch (error) {
         this.terminate();
         if (attempt === 4) throw error;
