@@ -1,4 +1,4 @@
-const CACHE_NAME = "pokemon-lab-v16";
+const CACHE_NAME = "pokemon-lab-v17";
 const IMAGE_CACHE_NAME = "pokemon-lab-images-v1";
 const IMAGE_CACHE_LIMIT = 300;
 
@@ -15,6 +15,7 @@ const APP_ROUTES = [
   "/battle-simulator",
   "/battle-simulator/battle",
   "/battle-records",
+  "/type-checker",
   "/sqlite-diagnostics",
 ];
 

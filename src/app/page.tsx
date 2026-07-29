@@ -38,6 +38,11 @@ const researchCards = [
     link: "/battle-records",
   },
   {
+    title: "Type Checker",
+    body: "Check shared team weaknesses and the offensive coverage of every saved move set.",
+    link: "/type-checker",
+  },
+  {
     title: "Type Quiz",
     body: "Test your knowledge of Pokémon type matchups with an interactive quiz.",
     link: "/quiz",

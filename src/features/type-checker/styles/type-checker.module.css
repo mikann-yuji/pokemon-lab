@@ -1,0 +1,287 @@
+.page {
+  min-height: 100vh;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  background:
+    radial-gradient(circle at 10% 5%, rgb(255 202 40 / 18%), transparent 22rem),
+    linear-gradient(145deg, #f4f8fb, #eef6f5);
+  color: #172b4d;
+}
+
+.hero,
+.content {
+  width: min(100%, 78rem);
+  margin-inline: auto;
+}
+
+.hero {
+  margin-bottom: 1.25rem;
+}
+
+.hero h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+}
+
+.hero p,
+.panelHeading p {
+  margin: 0;
+  color: #52647a;
+  line-height: 1.65;
+}
+
+.content {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.teamSelector {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #c7d4df;
+  border-radius: 0.85rem;
+  background: #fff;
+}
+
+.teamSelector label {
+  font-weight: 800;
+}
+
+.teamSelector select {
+  min-width: min(24rem, 70vw);
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #91a5b8;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: #172b4d;
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.legend span {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.legend strong {
+  font-size: 1.1rem;
+}
+
+.warnings {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 2px solid #e05252;
+  border-radius: 0.85rem;
+  background: #fff0f0;
+}
+
+.warnings p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.warnings strong {
+  color: #a32222;
+}
+
+.warnings span,
+.noWarning {
+  color: #52647a;
+}
+
+.noWarning,
+.empty,
+.status {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.panel {
+  overflow: hidden;
+  border: 1px solid #bdcad6;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 0.5rem 1.5rem rgb(23 43 77 / 8%);
+}
+
+.panelHeading {
+  padding: 1rem 1.1rem;
+}
+
+.panelHeading h2 {
+  margin: 0 0 0.25rem;
+}
+
+.tableScroller {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.matrix {
+  width: 100%;
+  min-width: 48rem;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.matrix th,
+.matrix td {
+  height: 2.5rem;
+  padding: 0.15rem;
+  border-top: 1px solid #d7e0e7;
+  border-right: 1px solid #d7e0e7;
+  text-align: center;
+}
+
+.matrix thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 5.5rem;
+  background: #172b4d;
+  color: #fff;
+  font-size: 0.7rem;
+}
+
+.matrix th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  width: 7rem;
+  border-left: 0;
+}
+
+.matrix thead th:first-child {
+  z-index: 3;
+}
+
+.matrix tbody th {
+  background: #f6f9fb;
+}
+
+.verticalType {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 0.95;
+}
+
+.pokemonHeader {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.pokemonHeader img,
+.imageFallback {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+}
+
+.pokemonHeader > span:last-child {
+  overflow: hidden;
+  font-size: 0.58rem;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imageFallback {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #dce5ec;
+}
+
+.matrix td > span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.multiplier0 {
+  color: #59636c;
+  background: #e7ebee;
+}
+
+.multiplier0_25,
+.multiplier0_5 {
+  color: #8a5700;
+  background: #fff0cf;
+}
+
+.multiplier1 {
+  color: #45566a;
+}
+
+.multiplier2 {
+  color: #147028;
+  background: #dff3e2;
+}
+
+.multiplier4 {
+  color: #9d241e;
+  background: #ffe0de;
+}
+
+@media (max-width: 40rem) {
+  .page {
+    padding-inline: 0.6rem;
+  }
+
+  .teamSelector {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .teamSelector select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .matrix {
+    min-width: 39rem;
+  }
+
+  .matrix th:first-child {
+    width: 4rem;
+  }
+
+  .pokemonHeader {
+    grid-template-columns: 1.75rem;
+    justify-content: center;
+  }
+
+  .pokemonHeader img,
+  .imageFallback {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .pokemonHeader > span:last-child {
+    display: none;
+  }
+}

@@ -18,6 +18,7 @@ const navigationItems = [
   { href: "/battle-team", label: "バトルチーム編成" },
   { href: "/battle-simulator", label: "対戦シミュレータ" },
   { href: "/battle-records", label: "バトル記録" },
+  { href: "/type-checker", label: "タイプチェッカー" },
   { href: "/quiz", label: "タイプ相性クイズ" },
   { href: "/move-quiz", label: "ポケモン技クイズ" },
   { href: "/base-stat-quiz", label: "種族値クイズ" },
