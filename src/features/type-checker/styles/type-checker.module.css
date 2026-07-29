@@ -44,8 +44,15 @@
   background: #fff;
 }
 
+.teamSelector > div {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .teamSelector label {
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .teamSelector select {
@@ -247,6 +254,177 @@
   background: #ffe0de;
 }
 
+.memberDetails {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.memberDetailsHeading p,
+.subsectionHeading p {
+  margin: 0;
+  color: #52647a;
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.memberDetailsHeading h2,
+.subsectionHeading h4 {
+  margin: 0 0 0.3rem;
+}
+
+.pokemonDetail {
+  overflow: hidden;
+  border: 1px solid #bdcad6;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 0.5rem 1.5rem rgb(23 43 77 / 8%);
+}
+
+.pokemonDetailHeader {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(8rem, auto) minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: center;
+  padding: 1rem;
+}
+
+.pokemonDetailHeader > img,
+.detailImageFallback {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: contain;
+}
+
+.detailImageFallback {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #dce5ec;
+}
+
+.pokemonDetailHeader h3,
+.pokemonDetailHeader p {
+  margin: 0;
+}
+
+.pokemonDetailHeader h3 {
+  font-size: 1.05rem;
+}
+
+.pokemonDetailHeader p {
+  margin-top: 0.2rem;
+  color: #697b8e;
+  font-size: 0.72rem;
+}
+
+.buildFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin: 0;
+}
+
+.buildFacts div {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.buildFacts dt,
+.actualStats dt {
+  color: #718194;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.buildFacts dd,
+.actualStats dd {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.actualStats {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(2.8rem, 1fr));
+  gap: 1px;
+  margin: 0;
+  border-block: 1px solid #d7e0e7;
+  background: #d7e0e7;
+}
+
+.actualStats div {
+  display: grid;
+  place-items: center;
+  padding: 0.45rem;
+  background: #f6f9fb;
+}
+
+.subsectionHeading {
+  padding: 1rem 1rem 0.65rem;
+}
+
+.moveMatrix tbody th {
+  overflow: hidden;
+  padding-inline: 0.35rem;
+  font-size: 0.62rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+}
+
+.emptyInline {
+  margin: 0 1rem 1rem;
+  padding: 0.75rem;
+  border-radius: 0.6rem;
+  background: #f2f6f9;
+  color: #52647a;
+  font-size: 0.82rem;
+}
+
+.knockoutList {
+  display: grid;
+  gap: 1px;
+  border-top: 1px solid #d7e0e7;
+  background: #d7e0e7;
+}
+
+.knockoutList article {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  background: #fff;
+}
+
+.knockoutList img {
+  width: 2.15rem;
+  height: 2.15rem;
+  object-fit: contain;
+}
+
+.knockoutList article > div {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.knockoutList strong {
+  font-size: 0.8rem;
+}
+
+.knockoutList span {
+  color: #637487;
+  font-size: 0.7rem;
+}
+
+.damageSummary {
+  justify-items: end;
+  text-align: right;
+}
+
+.damageSummary strong {
+  color: #a32222;
+}
+
 @media (max-width: 40rem) {
   .page {
     padding-inline: 0.6rem;
@@ -255,6 +433,10 @@
   .teamSelector {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .teamSelector > div {
+    display: grid;
   }
 
   .teamSelector select {
@@ -283,5 +465,35 @@
 
   .pokemonHeader > span:last-child {
     display: none;
+  }
+
+  .pokemonDetailHeader {
+    grid-template-columns: 3.25rem minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+
+  .pokemonDetailHeader > img,
+  .detailImageFallback {
+    width: 3.25rem;
+    height: 3.25rem;
+  }
+
+  .buildFacts {
+    grid-column: 1 / -1;
+  }
+
+  .actualStats {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .knockoutList article {
+    grid-template-columns: 2.2rem minmax(0, 1fr);
+    padding-inline: 0.7rem;
+  }
+
+  .damageSummary {
+    grid-column: 2;
+    justify-items: start;
+    text-align: left;
   }
 }

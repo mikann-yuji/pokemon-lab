@@ -4,18 +4,31 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { USER_RECORDS_SYNCED_EVENT } from "@/components/sync/user-database-sync";
 import type { TypeMatchup, TypeName } from "@/domain/type-matchup";
+import type { TypeEffectivenessSource } from "@/domain/type-matchup";
+import type { DamageCalculation } from "@/features/damage-calculator/application/smogon-damage-calculator";
+import { championsDamageCalculator } from "@/features/damage-calculator/config/champions-damage-ruleset";
+import { useDamageCalculatorCatalogStore } from "@/features/damage-calculator/components/damage-calculator-catalog-store";
+import {
+  applyTrainingBuildToPokemon,
+} from "@/features/damage-calculator/components/damage-calculator-state";
+import { BASE_STAT_LABELS } from "@/features/damage-calculator/components/damage-calculator-display";
+import type {
+  DamageCalculatorMove,
+  DamageCalculatorPokemon,
+} from "@/features/damage-calculator/domain/damage-calculator-types";
 import {
   getAllBattleTeams,
   getAllTrainingBuilds,
   type BattleTeam,
   type TrainingBuild,
 } from "@/features/training/infrastructure/training-build-repository";
-import {
-  getPracticeMemberCatalog,
-  type PracticeMemberCatalog,
-} from "@/features/quiz/infrastructure/practice-quiz-repository";
-import type { PracticeMove } from "@/features/quiz/practice-quiz-logic";
+import { getNatures } from "@/features/training/infrastructure/training-catalog-repository";
 import { getTypeMatchups } from "@/features/quiz/infrastructure/quiz-catalog-repository";
+import {
+  getTopRankedPokemon,
+  type RankedPokemon,
+  type TypeCheckerBattleFormat,
+} from "../infrastructure/type-checker-repository";
 import {
   findSharedWeaknesses,
   getBestMoveMultiplier,
@@ -31,7 +44,15 @@ type TeamMember = {
   pokemonName: string;
   imageUrl: string | null;
   types: TypeName[];
-  moves: PracticeMove[];
+  pokemon: DamageCalculatorPokemon;
+  moves: DamageCalculatorMove[];
+};
+
+type KnockoutCandidate = {
+  rank: number;
+  defender: DamageCalculatorPokemon;
+  move: DamageCalculatorMove;
+  result: DamageCalculation;
 };
 
 function VerticalTypeLabel({ children }: { children: string }) {
@@ -162,10 +183,226 @@ function Matrix({
   );
 }
 
+function MoveMatrix({
+  member,
+  typeMatchups,
+}: {
+  member: TeamMember;
+  typeMatchups: TypeMatchup[];
+}) {
+  const matchupsByType = useMemo(
+    () => new Map(typeMatchups.map((type) => [type.name, type])),
+    [typeMatchups],
+  );
+  return (
+    <div className={styles.tableScroller}>
+      <table className={`${styles.matrix} ${styles.moveMatrix}`}>
+        <thead>
+          <tr>
+            <th scope="col">技＼防</th>
+            {typeMatchups.map((type) => (
+              <th scope="col" key={type.name}>
+                <VerticalTypeLabel>{type.nameJa}</VerticalTypeLabel>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {member.moves.map((move) => (
+            <tr key={move.id}>
+              <th scope="row" title={move.name}>
+                {move.name}
+              </th>
+              {typeMatchups.map((type) => (
+                <td key={type.name}>
+                  <EffectivenessMark
+                    multiplier={getBestMoveMultiplier(
+                      [move],
+                      type.name,
+                      matchupsByType,
+                    )}
+                    detail={`${move.name}→${type.nameJa}`}
+                  />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function getKnockoutCandidates(
+  member: TeamMember,
+  rankings: RankedPokemon[],
+  pokemonCatalog: DamageCalculatorPokemon[],
+  typeEffectivenessSource: TypeEffectivenessSource | null,
+) {
+  if (!typeEffectivenessSource || member.moves.length === 0) return [];
+  const pokemonById = new Map(
+    pokemonCatalog.map((pokemon) => [pokemon.id, pokemon]),
+  );
+  return rankings.flatMap((ranking): KnockoutCandidate[] => {
+    const defender = pokemonById.get(ranking.formId);
+    if (!defender || defender.id === member.pokemon.id) return [];
+    const results = member.moves.flatMap((move) => {
+      try {
+        return [
+          {
+            move,
+            result: championsDamageCalculator.calculate({
+              attacker: member.pokemon,
+              defender,
+              move,
+              typeEffectivenessSource,
+            }),
+          },
+        ];
+      } catch {
+        return [];
+      }
+    });
+    const best = results
+      .filter(({ result }) => result.koHits > 0 && result.koHits <= 2)
+      .sort((left, right) => {
+        const hits = left.result.koHits - right.result.koHits;
+        if (hits !== 0) return hits;
+        const probability =
+          (right.result.koProbability ?? 0) -
+          (left.result.koProbability ?? 0);
+        if (probability !== 0) return probability;
+        return right.result.maximumPercent - left.result.maximumPercent;
+      })[0];
+    return best
+      ? [{ rank: ranking.rank, defender, move: best.move, result: best.result }]
+      : [];
+  }).slice(0, 5);
+}
+
+function PokemonDetail({
+  member,
+  typeMatchups,
+  candidates,
+}: {
+  member: TeamMember;
+  typeMatchups: TypeMatchup[];
+  candidates: KnockoutCandidate[];
+}) {
+  const typeLabels = new Map(
+    typeMatchups.map((type) => [type.name, type.nameJa]),
+  );
+  const itemName = member.pokemon.heldItem?.name ?? "なし";
+  const abilityName = member.pokemon.selectedAbility?.name ?? "なし";
+  return (
+    <section className={styles.pokemonDetail}>
+      <header className={styles.pokemonDetailHeader}>
+        {member.imageUrl ? (
+          <Image
+            src={member.imageUrl}
+            alt={member.pokemonName}
+            width={56}
+            height={56}
+            unoptimized
+          />
+        ) : (
+          <span className={styles.detailImageFallback}>?</span>
+        )}
+        <div>
+          <h3>{member.pokemonName}</h3>
+          <p>{member.buildName}</p>
+        </div>
+        <dl className={styles.buildFacts}>
+          <div>
+            <dt>タイプ</dt>
+            <dd>
+              {member.types.map((type) => typeLabels.get(type) ?? type).join(" / ")}
+            </dd>
+          </div>
+          <div>
+            <dt>特性</dt>
+            <dd>{abilityName}</dd>
+          </div>
+          <div>
+            <dt>持ち物</dt>
+            <dd>{itemName}</dd>
+          </div>
+        </dl>
+      </header>
+
+      <dl className={styles.actualStats}>
+        {Object.entries(BASE_STAT_LABELS).map(([statId, label]) => (
+          <div key={statId}>
+            <dt>{label}</dt>
+            <dd>
+              {member.pokemon.actualStats?.[statId] ??
+                member.pokemon.stats[statId] ??
+                "—"}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <div className={styles.subsectionHeading}>
+        <h4>技ごとのタイプ相性</h4>
+        <p>縦軸が採用技、横軸が防御側の単タイプです。</p>
+      </div>
+      {member.moves.length > 0 ? (
+        <MoveMatrix member={member} typeMatchups={typeMatchups} />
+      ) : (
+        <p className={styles.emptyInline}>攻撃技が登録されていません。</p>
+      )}
+
+      <div className={styles.subsectionHeading}>
+        <h4>採用率上位30位への2発以内</h4>
+        <p>
+          レベル50・個体値31・防御側無振りの通常状態。攻撃側は保存した能力値・特性・持ち物を反映しています。
+        </p>
+      </div>
+      {candidates.length > 0 ? (
+        <div className={styles.knockoutList}>
+          {candidates.map(({ rank, defender, move, result }) => (
+            <article key={defender.id}>
+              {defender.imageUrl ?? defender.fallbackImageUrl ? (
+                <Image
+                  src={(defender.imageUrl ?? defender.fallbackImageUrl) as string}
+                  alt={defender.nameJa}
+                  width={34}
+                  height={34}
+                  unoptimized
+                />
+              ) : null}
+              <div>
+                <strong>
+                  {rank}位 {defender.nameJa}
+                </strong>
+                <span>{move.name}</span>
+              </div>
+              <div className={styles.damageSummary}>
+                <strong>{result.koLabel}</strong>
+                <span>
+                  {result.minimumPercent.toFixed(1)}〜
+                  {result.maximumPercent.toFixed(1)}%
+                </span>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p className={styles.emptyInline}>2発以内を取れる相手はいません。</p>
+      )}
+    </section>
+  );
+}
+
 function prepareMembers(
   team: BattleTeam | undefined,
   builds: TrainingBuild[],
-  catalog: PracticeMemberCatalog,
+  pokemonCatalog: DamageCalculatorPokemon[],
+  natures: Awaited<ReturnType<typeof getNatures>>,
+  heldItems: ReturnType<
+    typeof useDamageCalculatorCatalogStore.getState
+  >["heldItems"],
 ) {
   if (!team) return [];
   const buildsById = new Map(
@@ -173,36 +410,56 @@ function prepareMembers(
       build.id === undefined ? [] : ([[build.id, build]] as const),
     ),
   );
+  const pokemonById = new Map(
+    pokemonCatalog.map((pokemon) => [pokemon.id, pokemon]),
+  );
   return team.buildIds.flatMap((buildId): TeamMember[] => {
     const build = buildsById.get(buildId);
-    const pokemon = build
-      ? catalog.pokemonByFormId.get(build.pokemonId)
-      : undefined;
+    const pokemon = build ? pokemonById.get(build.pokemonId) : undefined;
     if (!build || !pokemon) return [];
-    const selectedMoveIds = new Set(build.moveIds);
+    const trainedPokemon = applyTrainingBuildToPokemon(
+      pokemon,
+      build,
+      natures,
+      heldItems,
+    );
     return [
       {
         buildId,
         buildName: build.name,
         pokemonName: pokemon.nameJa,
-        imageUrl: pokemon.imageUrl,
-        types: pokemon.types,
-        moves: (catalog.movesByFormId.get(build.pokemonId) ?? []).filter(
-          (move) => selectedMoveIds.has(move.id),
-        ),
+        imageUrl: pokemon.imageUrl ?? pokemon.fallbackImageUrl,
+        types: trainedPokemon.types,
+        pokemon: trainedPokemon,
+        moves: trainedPokemon.moves,
       },
     ];
   });
 }
 
 export default function TypeChecker() {
+  const pokemonCatalog = useDamageCalculatorCatalogStore(
+    (state) => state.pokemonCatalog,
+  );
+  const heldItems = useDamageCalculatorCatalogStore((state) => state.heldItems);
+  const typeEffectivenessSource = useDamageCalculatorCatalogStore(
+    (state) => state.typeEffectivenessSource,
+  );
+  const catalogStatus = useDamageCalculatorCatalogStore((state) => state.status);
+  const ensureCatalogLoaded = useDamageCalculatorCatalogStore(
+    (state) => state.ensureLoaded,
+  );
   const [teams, setTeams] = useState<BattleTeam[]>([]);
   const [builds, setBuilds] = useState<TrainingBuild[]>([]);
-  const [catalog, setCatalog] = useState<PracticeMemberCatalog>({
-    pokemonByFormId: new Map(),
-    movesByFormId: new Map(),
-  });
+  const [natures, setNatures] = useState<
+    Awaited<ReturnType<typeof getNatures>>
+  >([]);
   const [typeMatchups, setTypeMatchups] = useState<TypeMatchup[]>([]);
+  const [rankingsByFormat, setRankingsByFormat] = useState<
+    Record<TypeCheckerBattleFormat, RankedPokemon[]>
+  >({ single: [], double: [] });
+  const [battleFormat, setBattleFormat] =
+    useState<TypeCheckerBattleFormat>("single");
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -211,19 +468,31 @@ export default function TypeChecker() {
     let active = true;
     async function load() {
       try {
-        const [loadedTeams, loadedBuilds, loadedMatchups] = await Promise.all([
+        await ensureCatalogLoaded();
+        const [
+          loadedTeams,
+          loadedBuilds,
+          loadedNatures,
+          loadedMatchups,
+          singleRankings,
+          doubleRankings,
+        ] = await Promise.all([
           getAllBattleTeams(),
           getAllTrainingBuilds(),
+          getNatures(),
           getTypeMatchups(),
+          getTopRankedPokemon("single"),
+          getTopRankedPokemon("double"),
         ]);
-        const loadedCatalog = await getPracticeMemberCatalog(
-          loadedBuilds.map((build) => build.pokemonId),
-        );
         if (!active) return;
         setTeams(loadedTeams);
         setBuilds(loadedBuilds);
-        setCatalog(loadedCatalog);
+        setNatures(loadedNatures);
         setTypeMatchups(loadedMatchups);
+        setRankingsByFormat({
+          single: singleRankings,
+          double: doubleRankings,
+        });
         setSelectedTeamId((current) =>
           loadedTeams.some((team) => team.id === current)
             ? current
@@ -243,37 +512,84 @@ export default function TypeChecker() {
       active = false;
       window.removeEventListener(USER_RECORDS_SYNCED_EVENT, load);
     };
-  }, []);
+  }, [ensureCatalogLoaded]);
 
   const selectedTeam = teams.find((team) => team.id === selectedTeamId);
   const members = useMemo(
-    () => prepareMembers(selectedTeam, builds, catalog),
-    [builds, catalog, selectedTeam],
+    () =>
+      prepareMembers(
+        selectedTeam,
+        builds,
+        pokemonCatalog,
+        natures,
+        heldItems,
+      ),
+    [builds, heldItems, natures, pokemonCatalog, selectedTeam],
   );
   const sharedWeaknesses = useMemo(
     () => findSharedWeaknesses(members, typeMatchups),
     [members, typeMatchups],
   );
+  const candidatesByBuildId = useMemo(
+    () =>
+      new Map(
+        members.map((member) => [
+          member.buildId,
+          getKnockoutCandidates(
+            member,
+            rankingsByFormat[battleFormat],
+            pokemonCatalog,
+            typeEffectivenessSource,
+          ),
+        ]),
+      ),
+    [
+      battleFormat,
+      members,
+      pokemonCatalog,
+      rankingsByFormat,
+      typeEffectivenessSource,
+    ],
+  );
 
-  if (loading) return <p className={styles.status}>ローカルDBを読み込み中…</p>;
+  if (loading || catalogStatus === "loading") {
+    return <p className={styles.status}>ローカルDBを読み込み中…</p>;
+  }
   if (error) return <p className={styles.status}>{error}</p>;
 
   return (
     <div className={styles.content}>
       <section className={styles.teamSelector}>
-        <label htmlFor="type-checker-team">バトルチーム</label>
-        <select
-          id="type-checker-team"
-          value={selectedTeamId ?? ""}
-          onChange={(event) => setSelectedTeamId(Number(event.target.value))}
-        >
-          {teams.length === 0 ? <option value="">チームがありません</option> : null}
-          {teams.map((team) => (
-            <option value={team.id} key={team.id}>
-              {team.name}
-            </option>
-          ))}
-        </select>
+        <div>
+          <label htmlFor="type-checker-team">バトルチーム</label>
+          <select
+            id="type-checker-team"
+            value={selectedTeamId ?? ""}
+            onChange={(event) => setSelectedTeamId(Number(event.target.value))}
+          >
+            {teams.length === 0 ? (
+              <option value="">チームがありません</option>
+            ) : null}
+            {teams.map((team) => (
+              <option value={team.id} key={team.id}>
+                {team.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="type-checker-format">採用率ランキング</label>
+          <select
+            id="type-checker-format"
+            value={battleFormat}
+            onChange={(event) =>
+              setBattleFormat(event.target.value as TypeCheckerBattleFormat)
+            }
+          >
+            <option value="single">シングル</option>
+            <option value="double">ダブル</option>
+          </select>
+        </div>
       </section>
 
       {members.length === 0 ? (
@@ -322,6 +638,22 @@ export default function TypeChecker() {
             typeMatchups={typeMatchups}
             mode="offense"
           />
+          <section className={styles.memberDetails}>
+            <div className={styles.memberDetailsHeading}>
+              <h2>ポケモン別の技とダメージ</h2>
+              <p>
+                保存済み育成案の実数値・特性・持ち物を使い、ダメージ計算ページと同じロジックで計算します。
+              </p>
+            </div>
+            {members.map((member) => (
+              <PokemonDetail
+                key={member.buildId}
+                member={member}
+                typeMatchups={typeMatchups}
+                candidates={candidatesByBuildId.get(member.buildId) ?? []}
+              />
+            ))}
+          </section>
         </>
       )}
     </div>
