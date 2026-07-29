@@ -283,9 +283,14 @@ class SqliteWorkerClient {
 
     return new Promise((resolve, reject) => {
       const timer = window.setTimeout(() => {
-        this.pending.delete(id);
-        this.scheduleAutoClose();
-        reject(new Error(`SQLite Worker の ${type} 処理がタイムアウトしました。`));
+        if (!this.pending.has(id)) return;
+        const error = new Error(
+          `SQLite Worker の ${type} 処理がタイムアウトしました。`,
+        );
+        // 応答不能なWorkerを残すと、以降の全ページが同じWorkerへ要求を送り続ける。
+        // 待機中の要求をまとめて失敗させ、次回要求で新しいWorkerを作れる状態へ戻す。
+        this.rejectAll(error);
+        this.terminate();
       }, timeoutMs);
       this.pending.set(id, {
         resolve: resolve as (value: unknown) => void,
@@ -324,7 +329,7 @@ class SqliteWorkerClient {
     sql: string,
     bind?: SqliteBind,
   ): Promise<Row[]> {
-    return this.request("query", { sql, bind }) as Promise<Row[]>;
+    return this.retryReadRequest("query", { sql, bind }) as Promise<Row[]>;
   }
 
   /** 配布カタログ用のcatalog.dbへ読み取り専用クエリを投げる。 */
@@ -332,7 +337,37 @@ class SqliteWorkerClient {
     sql: string,
     bind?: SqliteBind,
   ): Promise<Row[]> {
-    return this.request("catalogQuery", { sql, bind }) as Promise<Row[]>;
+    return this.retryReadRequest("catalogQuery", {
+      sql,
+      bind,
+    }) as Promise<Row[]>;
+  }
+
+  /**
+   * 読み取り処理だけはWorker障害時に新しいWorkerで一度再試行する。
+   * SELECTは副作用がないため、応答前にWorkerが停止しても二重更新にはならない。
+   */
+  private async retryReadRequest<
+    Type extends "query" | "catalogQuery",
+  >(
+    type: Type,
+    payload: SqliteWorkerRequestMap[Type],
+  ): Promise<SqliteWorkerResultMap[Type]> {
+    try {
+      return await this.request(type, payload);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const recoverable =
+        message.includes("タイムアウト") ||
+        message.includes("SQLite Worker") ||
+        message.includes("Access Handles") ||
+        message.includes("locked");
+      if (!recoverable) throw error;
+      this.terminate();
+      this.requestOtherTabsToClose();
+      await this.wait(300);
+      return this.request(type, payload);
+    }
   }
 
   /** user.dbへ単一のINSERT/UPDATE/DELETEを実行し、変更件数とlast_insert_rowidを返す。 */

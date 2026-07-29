@@ -32,6 +32,7 @@ export function TrainingSimulatorLoader({
   >([]);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
 
   // 対象外フォームを弾くため、詳細取得とChampions対象判定を同時に行う。
   useEffect(() => {
@@ -58,7 +59,7 @@ export function TrainingSimulatorLoader({
     return () => {
       active = false;
     };
-  }, [pokemonId]);
+  }, [pokemonId, retryCount]);
 
   if (!Number.isInteger(pokemonId)) {
     return <p className={pageStyles.empty}>育成対象のポケモンが見つかりませんでした。</p>;
@@ -69,7 +70,21 @@ export function TrainingSimulatorLoader({
   }
 
   if (error) {
-    return <p className={pageStyles.loadError}>{error}</p>;
+    return (
+      <div className={pageStyles.loadError} role="alert">
+        <p>{error}</p>
+        <button
+          type="button"
+          onClick={() => {
+            setLoaded(false);
+            setError("");
+            setRetryCount((count) => count + 1);
+          }}
+        >
+          もう一度読み込む
+        </button>
+      </div>
+    );
   }
 
   if (!pokemon) {

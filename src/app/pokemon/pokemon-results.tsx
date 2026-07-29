@@ -109,10 +109,12 @@ export function PokemonResults({
   // queryや絞り込みが変わったら、先頭ページから検索し直す。
   useEffect(() => {
     let active = true;
+    nextPagePrefetchRef.current = null;
     void fetchPage(query, championsOnly, 0, advancedFilters)
       .then((page) => {
         if (!active) return;
         setPages([page]);
+        setError(null);
       })
       .catch(() => {
         if (active) setError("ポケモンを読み込めませんでした。");
