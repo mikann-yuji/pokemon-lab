@@ -43,6 +43,7 @@ import {
 import { TrainingSaveDialog } from "./training-save-dialog";
 import { TrainingStatEditor } from "./training-stat-editor";
 import { TrainingToast, type TrainingToastState } from "./training-toast";
+import { TrainingDamagePreview } from "./training-damage-preview";
 import {
   useTrainingBuildList,
   useTrainingCatalogOptions,
@@ -496,6 +497,15 @@ export function TrainingSimulator({
         savingKind={matchupSavingKind}
         onSave={saveMatchup}
         onDelete={(noteId) => void deleteMatchupNote(noteId)}
+      />
+      <TrainingDamagePreview
+        pokemonId={pokemon.id}
+        nature={nature}
+        abilityPoints={abilityPoints}
+        moveIds={moveIds}
+        itemId={itemId}
+        abilityId={abilityId}
+        natures={natures}
       />
       <TrainingToast toast={toast} />
       {isSaveDialogOpen ? (
