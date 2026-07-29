@@ -45,7 +45,7 @@ export async function getTopRankedPokemon(
         AND points.battle_format = rankings.battle_format
       WHERE rankings.battle_format = ?
         AND rankings.usage_rank <= 30
-      ORDER BY usage_rank, form_id
+      ORDER BY rankings.usage_rank, rankings.form_id
       `,
       [battleFormat],
     );
