@@ -10,8 +10,12 @@ import { championsDamageCalculator } from "@/features/damage-calculator/config/c
 import { useDamageCalculatorCatalogStore } from "@/features/damage-calculator/components/damage-calculator-catalog-store";
 import {
   applyTrainingBuildToPokemon,
+  calculateActualStat,
 } from "@/features/damage-calculator/components/damage-calculator-state";
-import { BASE_STAT_LABELS } from "@/features/damage-calculator/components/damage-calculator-display";
+import {
+  BASE_STAT_LABELS,
+  STAT_IDS,
+} from "@/features/damage-calculator/components/damage-calculator-display";
 import type {
   DamageCalculatorMove,
   DamageCalculatorPokemon,
@@ -53,7 +57,23 @@ type KnockoutCandidate = {
   defender: DamageCalculatorPokemon;
   move: DamageCalculatorMove;
   result: DamageCalculation;
+  usageRate: number;
 };
+
+function applyRankedAbilityPoints(
+  pokemon: DamageCalculatorPokemon,
+  abilityPoints: Record<string, number>,
+) {
+  return {
+    ...pokemon,
+    actualStats: Object.fromEntries(
+      STAT_IDS.map((statId) => [
+        statId,
+        calculateActualStat(pokemon, statId, abilityPoints[statId] ?? 0),
+      ]),
+    ),
+  };
+}
 
 function VerticalTypeLabel({ children }: { children: string }) {
   return (
@@ -244,8 +264,12 @@ function getKnockoutCandidates(
     pokemonCatalog.map((pokemon) => [pokemon.id, pokemon]),
   );
   return rankings.flatMap((ranking): KnockoutCandidate[] => {
-    const defender = pokemonById.get(ranking.formId);
-    if (!defender || defender.id === member.pokemon.id) return [];
+    const sourceDefender = pokemonById.get(ranking.formId);
+    if (!sourceDefender) return [];
+    const defender = applyRankedAbilityPoints(
+      sourceDefender,
+      ranking.abilityPoints,
+    );
     const results = member.moves.flatMap((move) => {
       try {
         return [
@@ -264,20 +288,22 @@ function getKnockoutCandidates(
       }
     });
     const best = results
-      .filter(({ result }) => result.koHits > 0 && result.koHits <= 2)
       .sort((left, right) => {
-        const hits = left.result.koHits - right.result.koHits;
-        if (hits !== 0) return hits;
-        const probability =
-          (right.result.koProbability ?? 0) -
-          (left.result.koProbability ?? 0);
-        if (probability !== 0) return probability;
+        const minimum =
+          right.result.minimumPercent - left.result.minimumPercent;
+        if (minimum !== 0) return minimum;
         return right.result.maximumPercent - left.result.maximumPercent;
       })[0];
     return best
-      ? [{ rank: ranking.rank, defender, move: best.move, result: best.result }]
+      ? [{
+          rank: ranking.rank,
+          defender,
+          move: best.move,
+          result: best.result,
+          usageRate: ranking.usageRate,
+        }]
       : [];
-  }).slice(0, 5);
+  });
 }
 
 function PokemonDetail({
@@ -354,14 +380,14 @@ function PokemonDetail({
       )}
 
       <div className={styles.subsectionHeading}>
-        <h4>採用率上位30位への2発以内</h4>
+        <h4>採用率上位30位へのダメージ</h4>
         <p>
-          レベル50・個体値31・防御側無振りの通常状態。攻撃側は保存した能力値・特性・持ち物を反映しています。
+          防御側は採用率1位の能力ポイント配分、攻撃側は保存した能力値・特性・持ち物を反映しています。
         </p>
       </div>
       {candidates.length > 0 ? (
-        <div className={styles.knockoutList}>
-          {candidates.map(({ rank, defender, move, result }) => (
+        <div className={`${styles.knockoutList} ${styles.damageResultScroller}`}>
+          {candidates.map(({ rank, defender, move, result, usageRate }) => (
             <article key={defender.id}>
               {defender.imageUrl ?? defender.fallbackImageUrl ? (
                 <Image
@@ -376,7 +402,15 @@ function PokemonDetail({
                 <strong>
                   {rank}位 {defender.nameJa}
                 </strong>
-                <span>{move.name}</span>
+                <span>
+                  {move.name}・配分採用率 {usageRate.toFixed(1)}%
+                </span>
+                <span className={styles.defenderStats}>
+                  {STAT_IDS.map(
+                    (statId) =>
+                      `${BASE_STAT_LABELS[statId]} ${defender.actualStats?.[statId] ?? "—"}`,
+                  ).join(" / ")}
+                </span>
               </div>
               <div className={styles.damageSummary}>
                 <strong>{result.koLabel}</strong>
@@ -389,7 +423,7 @@ function PokemonDetail({
           ))}
         </div>
       ) : (
-        <p className={styles.emptyInline}>2発以内を取れる相手はいません。</p>
+        <p className={styles.emptyInline}>ダメージを計算できる相手がいません。</p>
       )}
     </section>
   );
@@ -551,6 +585,26 @@ export default function TypeChecker() {
       typeEffectivenessSource,
     ],
   );
+  const teamWalls = useMemo(() => {
+    const resultsByFormId = new Map<number, KnockoutCandidate[]>();
+    for (const candidates of candidatesByBuildId.values()) {
+      for (const candidate of candidates) {
+        const current = resultsByFormId.get(candidate.defender.id) ?? [];
+        current.push(candidate);
+        resultsByFormId.set(candidate.defender.id, current);
+      }
+    }
+    return rankingsByFormat[battleFormat].flatMap((ranking) => {
+      const results = resultsByFormId.get(ranking.formId) ?? [];
+      if (
+        results.some((candidate) => candidate.result.minimumPercent >= 50)
+      ) {
+        return [];
+      }
+      const representative = results[0];
+      return representative ? [representative] : [];
+    });
+  }, [battleFormat, candidatesByBuildId, rankingsByFormat]);
 
   if (loading || catalogStatus === "loading") {
     return <p className={styles.status}>ローカルDBを読み込み中…</p>;
@@ -653,6 +707,45 @@ export default function TypeChecker() {
                 candidates={candidatesByBuildId.get(member.buildId) ?? []}
               />
             ))}
+          </section>
+          <section className={`${styles.panel} ${styles.teamWalls}`}>
+            <div className={styles.panelHeading}>
+              <h2>チームで一貫して確定2発にできないポケモン</h2>
+              <p>
+                チーム内のどのポケモンでも、最大打点の最低ダメージが50%未満になる相手です。
+              </p>
+            </div>
+            {teamWalls.length > 0 ? (
+              <div className={styles.teamWallList}>
+                {teamWalls.map(({ rank, defender }) => (
+                  <article key={defender.id}>
+                    {defender.imageUrl ?? defender.fallbackImageUrl ? (
+                      <Image
+                        src={(defender.imageUrl ??
+                          defender.fallbackImageUrl) as string}
+                        alt={defender.nameJa}
+                        width={40}
+                        height={40}
+                        unoptimized
+                      />
+                    ) : null}
+                    <strong>
+                      {rank}位 {defender.nameJa}
+                    </strong>
+                    <span>
+                      {STAT_IDS.map(
+                        (statId) =>
+                          `${BASE_STAT_LABELS[statId]} ${defender.actualStats?.[statId] ?? "—"}`,
+                      ).join(" / ")}
+                    </span>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className={styles.emptyInline}>
+                採用率上位30位すべてを、チーム内の誰かが確定2発以内にできます。
+              </p>
+            )}
           </section>
         </>
       )}

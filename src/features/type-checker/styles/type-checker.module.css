@@ -387,6 +387,12 @@
   background: #d7e0e7;
 }
 
+.damageResultScroller {
+  max-height: 28rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .knockoutList article {
   display: grid;
   grid-template-columns: 2.2rem minmax(0, 1fr) auto;
@@ -416,6 +422,12 @@
   font-size: 0.7rem;
 }
 
+.knockoutList .defenderStats {
+  color: #3f5268;
+  font-size: 0.64rem;
+  line-height: 1.45;
+}
+
 .damageSummary {
   justify-items: end;
   text-align: right;
@@ -423,6 +435,44 @@
 
 .damageSummary strong {
   color: #a32222;
+}
+
+.teamWalls {
+  overflow: hidden;
+}
+
+.teamWallList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1px;
+  border-top: 1px solid #d7e0e7;
+  background: #d7e0e7;
+}
+
+.teamWallList article {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.15rem 0.65rem;
+  align-items: center;
+  padding: 0.75rem;
+  background: #fff;
+}
+
+.teamWallList img {
+  grid-row: 1 / 3;
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+}
+
+.teamWallList strong {
+  font-size: 0.8rem;
+}
+
+.teamWallList span {
+  color: #52647a;
+  font-size: 0.62rem;
+  line-height: 1.4;
 }
 
 @media (max-width: 40rem) {
@@ -476,6 +526,16 @@
   .detailImageFallback {
     width: 3.25rem;
     height: 3.25rem;
+  }
+
+  .knockoutList article {
+    grid-template-columns: 2.2rem minmax(0, 1fr);
+  }
+
+  .damageSummary {
+    grid-column: 2;
+    justify-items: start;
+    text-align: left;
   }
 
   .buildFacts {

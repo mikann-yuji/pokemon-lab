@@ -116,7 +116,7 @@ export function createDefaultAdjustmentState(): StatAdjustmentState {
  * @param nature - 性格補正の向き。HPでは無視する。
  * @returns 指定能力の実数値。
  */
-function calculateActualStat(
+export function calculateActualStat(
   pokemon: DamageCalculatorPokemon,
   statId: (typeof STAT_IDS)[number],
   point = 0,
