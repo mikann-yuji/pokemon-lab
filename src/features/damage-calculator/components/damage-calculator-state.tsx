@@ -160,6 +160,15 @@ export function calculateDetailedSpeedValue(
   const rankedSpeed = Math.floor(
     baseSpeed * (rank >= 0 ? (2 + rank) / 2 : 2 / (2 - rank)),
   );
+  return applyHeldItemSpeedModifier(pokemon, rankedSpeed, itemId);
+}
+
+/** 実数値へ素早さに影響する持ち物補正だけを適用する。 */
+export function applyHeldItemSpeedModifier(
+  pokemon: DamageCalculatorPokemon,
+  speed: number,
+  itemId: string,
+) {
   const halfSpeedItems = [
     "iron-ball",
     "macho-brace",
@@ -178,7 +187,7 @@ export function calculateDetailedSpeedValue(
         : halfSpeedItems.includes(itemId)
           ? 0.5
           : 1;
-  return Math.floor(rankedSpeed * itemMultiplier);
+  return Math.floor(speed * itemMultiplier);
 }
 
 /**

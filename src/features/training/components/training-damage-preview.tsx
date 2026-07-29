@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { championsDamageCalculator } from "@/features/damage-calculator/config/champions-damage-ruleset";
 import { useDamageCalculatorCatalogStore } from "@/features/damage-calculator/components/damage-calculator-catalog-store";
 import {
+  applyHeldItemSpeedModifier,
   applyTrainingBuildToPokemon,
   calculateActualStat,
 } from "@/features/damage-calculator/components/damage-calculator-state";
@@ -32,6 +33,9 @@ type DamagePreviewResult = {
   minimumPercent: number;
   maximumPercent: number;
   koLabel: string;
+  attackerSpeed: number;
+  defenderSpeed: number;
+  turnOrder: "先攻" | "後攻" | "同速";
 };
 
 function applyRankedStats(
@@ -134,6 +138,11 @@ export function TrainingDamagePreview({
       heldItems,
     );
     if (attacker.moves.length === 0) return [];
+    const attackerSpeed = applyHeldItemSpeedModifier(
+      attacker,
+      attacker.actualStats?.speed ?? attacker.stats.speed ?? 0,
+      itemId,
+    );
     const pokemonById = new Map(
       pokemonCatalog.map((candidate) => [candidate.id, candidate]),
     );
@@ -142,6 +151,8 @@ export function TrainingDamagePreview({
         const defenderSource = pokemonById.get(ranking.formId);
         if (!defenderSource) return [];
         const defender = applyRankedStats(defenderSource, ranking);
+        const defenderSpeed =
+          defender.actualStats?.speed ?? defender.stats.speed ?? 0;
         const best = attacker.moves
           .flatMap((move) => {
             try {
@@ -172,6 +183,14 @@ export function TrainingDamagePreview({
                 minimumPercent: best.calculation.minimumPercent,
                 maximumPercent: best.calculation.maximumPercent,
                 koLabel: best.calculation.koLabel,
+                attackerSpeed,
+                defenderSpeed,
+                turnOrder:
+                  attackerSpeed > defenderSpeed
+                    ? "先攻"
+                    : attackerSpeed < defenderSpeed
+                      ? "後攻"
+                      : "同速",
               },
             ]
           : [];
@@ -225,7 +244,7 @@ export function TrainingDamagePreview({
       ) : null}
       {results.length > 0 ? (
         <div className={styles.damagePreviewScroller}>
-          {results.map(({ rank, defender, move, minimumPercent, maximumPercent, koLabel }) => (
+          {results.map(({ rank, defender, move, minimumPercent, maximumPercent, koLabel, attackerSpeed, defenderSpeed, turnOrder }) => (
             <article className={styles.damagePreviewRow} key={defender.id}>
               {defender.imageUrl ?? defender.fallbackImageUrl ? (
                 <Image
@@ -258,6 +277,9 @@ export function TrainingDamagePreview({
                   {minimumPercent.toFixed(1)}〜{maximumPercent.toFixed(1)}%
                 </span>
                 <small>{koLabel}</small>
+                <small className={styles[`turnOrder${turnOrder}`]}>
+                  {turnOrder}（{attackerSpeed} / 相手 {defenderSpeed}）
+                </small>
               </div>
             </article>
           ))}
