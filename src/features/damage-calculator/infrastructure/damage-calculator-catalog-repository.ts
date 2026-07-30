@@ -42,6 +42,7 @@ type PokemonMoveRow = SqliteRow & {
   power: number;
   accuracy: number | null;
   usageRate: number | null;
+  usageRank: number | null;
 };
 
 type PokemonAbilityRow = SqliteRow & {
@@ -180,6 +181,19 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
             LIMIT 1
           ) AS versionGroupId
         FROM move_sources
+      ),
+      ranked_move_usage AS (
+        SELECT
+          champions_form_move_usage.form_id,
+          champions_form_move_usage.move_id,
+          champions_form_move_usage.usage_rate,
+          ROW_NUMBER() OVER (
+            PARTITION BY champions_form_move_usage.form_id
+            ORDER BY
+              champions_form_move_usage.usage_rate DESC,
+              champions_form_move_usage.move_id
+          ) AS usageRank
+        FROM champions_form_move_usage
       )
       SELECT DISTINCT
         latest_versions.formId,
@@ -190,25 +204,26 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
         moves.damage_class_name AS damageClass,
         COALESCE(moves.power, 0) AS power,
         moves.accuracy,
-        champions_form_move_usage.usage_rate AS usageRate
+        ranked_move_usage.usage_rate AS usageRate,
+        ranked_move_usage.usageRank
       FROM latest_versions
       JOIN form_moves
         ON form_moves.form_id = latest_versions.moveSourceId
         AND form_moves.version_group_id = latest_versions.versionGroupId
       JOIN moves ON moves.id = form_moves.move_id
-      LEFT JOIN champions_form_move_usage
-        ON champions_form_move_usage.form_id = latest_versions.formId
-        AND champions_form_move_usage.move_id = moves.id
+      LEFT JOIN ranked_move_usage
+        ON ranked_move_usage.form_id = latest_versions.formId
+        AND ranked_move_usage.move_id = moves.id
       WHERE
         moves.damage_class_name IN ('physical', 'special')
         AND (
           moves.power > 0
-          OR champions_form_move_usage.move_id IS NOT NULL
+          OR ranked_move_usage.move_id IS NOT NULL
         )
       ORDER BY
         latest_versions.formId,
-        champions_form_move_usage.usage_rate IS NULL,
-        champions_form_move_usage.usage_rate DESC,
+        ranked_move_usage.usageRank IS NULL,
+        ranked_move_usage.usageRank,
         moves.name_ja,
         moves.id
     `),

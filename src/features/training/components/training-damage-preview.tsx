@@ -38,6 +38,18 @@ type DamagePreviewResult = {
   turnOrder: "先攻" | "後攻" | "同速";
 };
 
+type ReceivedDamagePreviewResult = {
+  rank: number;
+  attacker: DamageCalculatorPokemon;
+  move: DamageCalculatorMove | null;
+  minimumPercent: number | null;
+  maximumPercent: number | null;
+  koLabel: string;
+  attackerSpeed: number;
+  defenderSpeed: number;
+  turnOrder: "先攻" | "後攻" | "同速";
+};
+
 function applyRankedStats(
   pokemon: DamageCalculatorPokemon,
   ranking: RankedPokemon,
@@ -91,6 +103,7 @@ export function TrainingDamagePreview({
     Record<TypeCheckerBattleFormat, RankedPokemon[]>
   >({ single: [], double: [] });
   const [loadError, setLoadError] = useState("");
+  const [rankingsLoaded, setRankingsLoaded] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -103,11 +116,13 @@ export function TrainingDamagePreview({
         if (!active) return;
         setRankingsByFormat({ single, double });
         setLoadError("");
+        setRankingsLoaded(true);
       })
       .catch((error: unknown) => {
         console.error("採用率上位へのダメージを準備できませんでした。", error);
         if (active) {
           setLoadError("採用率上位へのダメージを読み込めませんでした。");
+          setRankingsLoaded(false);
         }
       });
     return () => {
@@ -115,14 +130,13 @@ export function TrainingDamagePreview({
     };
   }, [ensureCatalogLoaded]);
 
-  const results = useMemo(() => {
-    if (!typeEffectivenessSource) return [];
-    const attackerSource = pokemonCatalog.find(
+  const trainedPokemon = useMemo(() => {
+    const pokemonSource = pokemonCatalog.find(
       (candidate) => candidate.id === pokemonId,
     );
-    if (!attackerSource) return [];
-    const attacker = applyTrainingBuildToPokemon(
-      attackerSource,
+    if (!pokemonSource) return null;
+    return applyTrainingBuildToPokemon(
+      pokemonSource,
       {
         name: "",
         contentKey: "",
@@ -137,11 +151,26 @@ export function TrainingDamagePreview({
       natures,
       heldItems,
     );
+  }, [
+    abilityId,
+    abilityPoints,
+    heldItems,
+    itemId,
+    moveIds,
+    nature,
+    natures,
+    pokemonCatalog,
+    pokemonId,
+  ]);
+
+  const results = useMemo(() => {
+    if (!typeEffectivenessSource || !trainedPokemon) return [];
+    const attacker = trainedPokemon;
     if (attacker.moves.length === 0) return [];
     const attackerSpeed = applyHeldItemSpeedModifier(
       attacker,
       attacker.actualStats?.speed ?? attacker.stats.speed ?? 0,
-      itemId,
+      attacker.heldItem?.id ?? "",
     );
     const pokemonById = new Map(
       pokemonCatalog.map((candidate) => [candidate.id, candidate]),
@@ -197,94 +226,291 @@ export function TrainingDamagePreview({
       },
     );
   }, [
-    abilityId,
-    abilityPoints,
     battleFormat,
-    heldItems,
-    itemId,
-    moveIds,
-    nature,
-    natures,
     pokemonCatalog,
-    pokemonId,
     rankingsByFormat,
+    trainedPokemon,
+    typeEffectivenessSource,
+  ]);
+
+  const receivedResults = useMemo(() => {
+    if (!typeEffectivenessSource || !trainedPokemon) return [];
+    const defender = trainedPokemon;
+    const defenderSpeed = applyHeldItemSpeedModifier(
+      defender,
+      defender.actualStats?.speed ?? defender.stats.speed ?? 0,
+      defender.heldItem?.id ?? "",
+    );
+    const pokemonById = new Map(
+      pokemonCatalog.map((candidate) => [candidate.id, candidate]),
+    );
+
+    return rankingsByFormat[battleFormat].flatMap(
+      (ranking): ReceivedDamagePreviewResult[] => {
+        const attackerSource = pokemonById.get(ranking.formId);
+        if (!attackerSource) return [];
+        const attacker = applyRankedStats(attackerSource, ranking);
+        const attackerSpeed =
+          attacker.actualStats?.speed ?? attacker.stats.speed ?? 0;
+        const turnOrder =
+          defenderSpeed > attackerSpeed
+            ? "先攻"
+            : defenderSpeed < attackerSpeed
+              ? "後攻"
+              : "同速";
+        const best = attacker.moves
+          .filter(
+            (move) =>
+              move.usageRank !== null &&
+              move.usageRank !== undefined &&
+              move.usageRank <= 4,
+          )
+          .flatMap((move) => {
+            try {
+              const calculation = championsDamageCalculator.calculate({
+                attacker,
+                defender,
+                move,
+                typeEffectivenessSource,
+              });
+              return [{ move, calculation }];
+            } catch {
+              return [];
+            }
+          })
+          .sort(
+            (left, right) =>
+              right.calculation.minimumPercent -
+                left.calculation.minimumPercent ||
+              right.calculation.maximumPercent -
+                left.calculation.maximumPercent,
+          )[0];
+
+        return [
+          {
+            rank: ranking.rank,
+            attacker,
+            move: best?.move ?? null,
+            minimumPercent: best?.calculation.minimumPercent ?? null,
+            maximumPercent: best?.calculation.maximumPercent ?? null,
+            koLabel:
+              best?.calculation.koLabel ?? "採用率上位4技に攻撃技なし",
+            attackerSpeed,
+            defenderSpeed,
+            turnOrder,
+          },
+        ];
+      },
+    );
+  }, [
+    battleFormat,
+    pokemonCatalog,
+    rankingsByFormat,
+    trainedPokemon,
     typeEffectivenessSource,
   ]);
 
   return (
-    <section className={styles.damagePreview}>
-      <header className={styles.damagePreviewHeader}>
-        <div>
-          <h2>採用率上位100体＋メガシンカへのダメージ</h2>
-          <p>
-            メガシンカできる相手はメガシンカ後も含め、現在設定中の能力値・特性・持ち物・技で計算します。相手の能力ポイントは採用率1位の配分です。
-          </p>
-        </div>
-        <label>
-          ルール
-          <select
+    <>
+      <section className={styles.damagePreview}>
+        <header className={styles.damagePreviewHeader}>
+          <div>
+            <h2>採用率上位100体＋メガシンカへのダメージ</h2>
+            <p>
+              メガシンカできる相手はメガシンカ後も含め、現在設定中の能力値・特性・持ち物・技で計算します。相手の能力ポイントは採用率1位の配分です。
+            </p>
+          </div>
+          <BattleFormatSelect
             value={battleFormat}
-            onChange={(event) =>
-              setBattleFormat(event.target.value as TypeCheckerBattleFormat)
-            }
-          >
-            <option value="single">シングル</option>
-            <option value="double">ダブル</option>
-          </select>
-        </label>
-      </header>
-      {loadError ? <p className={styles.damagePreviewStatus}>{loadError}</p> : null}
-      {!loadError && catalogStatus !== "loaded" ? (
-        <p className={styles.damagePreviewStatus}>ダメージ計算を準備中…</p>
-      ) : null}
-      {!loadError && catalogStatus === "loaded" && results.length === 0 ? (
-        <p className={styles.damagePreviewStatus}>
-          ダメージ技を設定すると計算結果を表示します。
-        </p>
-      ) : null}
-      {results.length > 0 ? (
-        <div className={styles.damagePreviewScroller}>
-          {results.map(({ rank, defender, move, minimumPercent, maximumPercent, koLabel, attackerSpeed, defenderSpeed, turnOrder }) => (
-            <article className={styles.damagePreviewRow} key={defender.id}>
-              {defender.imageUrl ?? defender.fallbackImageUrl ? (
-                <Image
-                  src={(defender.imageUrl ?? defender.fallbackImageUrl) as string}
-                  alt={defender.nameJa}
-                  width={38}
-                  height={38}
-                  unoptimized
-                />
-              ) : null}
-              <div className={styles.damagePreviewPokemon}>
-                <strong>
-                  {rank}位 {defender.nameJa}
-                </strong>
-                <span>
-                  {defender.types
-                    .map((typeName) => TYPE_LABELS[typeName])
-                    .join(" / ")}
-                </span>
-                <small>
-                  {STAT_IDS.map(
-                    (statId) =>
-                      `${BASE_STAT_LABELS[statId]} ${defender.actualStats?.[statId] ?? "—"}`,
-                  ).join(" / ")}
-                </small>
-              </div>
-              <div className={styles.damagePreviewResult}>
-                <strong>{move.name}</strong>
-                <span>
-                  {minimumPercent.toFixed(1)}〜{maximumPercent.toFixed(1)}%
-                </span>
-                <small>{koLabel}</small>
-                <small className={styles[`turnOrder${turnOrder}`]}>
-                  {turnOrder}（{attackerSpeed} / 相手 {defenderSpeed}）
-                </small>
-              </div>
-            </article>
-          ))}
-        </div>
-      ) : null}
-    </section>
+            onChange={setBattleFormat}
+          />
+        </header>
+        {loadError ? (
+          <p className={styles.damagePreviewStatus}>{loadError}</p>
+        ) : null}
+        {!loadError &&
+        (catalogStatus !== "loaded" || !rankingsLoaded) ? (
+          <p className={styles.damagePreviewStatus}>ダメージ計算を準備中…</p>
+        ) : null}
+        {!loadError &&
+        catalogStatus === "loaded" &&
+        rankingsLoaded &&
+        results.length === 0 ? (
+          <p className={styles.damagePreviewStatus}>
+            ダメージ技を設定すると計算結果を表示します。
+          </p>
+        ) : null}
+        {results.length > 0 ? (
+          <div className={styles.damagePreviewScroller}>
+            {results.map(
+              ({
+                rank,
+                defender,
+                move,
+                minimumPercent,
+                maximumPercent,
+                koLabel,
+                attackerSpeed,
+                defenderSpeed,
+                turnOrder,
+              }) => (
+                <article className={styles.damagePreviewRow} key={defender.id}>
+                  <PokemonPreviewImage pokemon={defender} />
+                  <PreviewPokemonSummary rank={rank} pokemon={defender} />
+                  <div className={styles.damagePreviewResult}>
+                    <strong>{move.name}</strong>
+                    <span>
+                      {minimumPercent.toFixed(1)}〜
+                      {maximumPercent.toFixed(1)}%
+                    </span>
+                    <small>{koLabel}</small>
+                    <small className={styles[`turnOrder${turnOrder}`]}>
+                      {turnOrder}（{attackerSpeed} / 相手 {defenderSpeed}）
+                    </small>
+                  </div>
+                </article>
+              ),
+            )}
+          </div>
+        ) : null}
+      </section>
+
+      <section className={styles.damagePreview}>
+        <header className={styles.damagePreviewHeader}>
+          <div>
+            <h2>採用率上位100体＋メガシンカから受けるダメージ</h2>
+            <p>
+              相手の採用率上位4技に入る攻撃技を比較し、現在設定中の能力値・特性・持ち物に最も大きなダメージを与える技で計算します。
+            </p>
+          </div>
+          <BattleFormatSelect
+            value={battleFormat}
+            onChange={setBattleFormat}
+          />
+        </header>
+        {loadError ? (
+          <p className={styles.damagePreviewStatus}>{loadError}</p>
+        ) : null}
+        {!loadError &&
+        (catalogStatus !== "loaded" || !rankingsLoaded) ? (
+          <p className={styles.damagePreviewStatus}>
+            受けるダメージを準備中…
+          </p>
+        ) : null}
+        {!loadError &&
+        catalogStatus === "loaded" &&
+        rankingsLoaded &&
+        receivedResults.length === 0 ? (
+          <p className={styles.damagePreviewStatus}>
+            受けるダメージを計算できませんでした。
+          </p>
+        ) : null}
+        {receivedResults.length > 0 ? (
+          <div className={styles.damagePreviewScroller}>
+            {receivedResults.map(
+              ({
+                rank,
+                attacker,
+                move,
+                minimumPercent,
+                maximumPercent,
+                koLabel,
+                attackerSpeed,
+                defenderSpeed,
+                turnOrder,
+              }) => (
+                <article className={styles.damagePreviewRow} key={attacker.id}>
+                  <PokemonPreviewImage pokemon={attacker} />
+                  <PreviewPokemonSummary rank={rank} pokemon={attacker} />
+                  <div className={styles.damagePreviewResult}>
+                    <strong>
+                      {move
+                        ? `${move.name}（採用率${move.usageRank}位）`
+                        : "対象攻撃技なし"}
+                    </strong>
+                    {minimumPercent !== null && maximumPercent !== null ? (
+                      <span>
+                        {minimumPercent.toFixed(1)}〜
+                        {maximumPercent.toFixed(1)}%
+                      </span>
+                    ) : null}
+                    <small>{koLabel}</small>
+                    <small className={styles[`turnOrder${turnOrder}`]}>
+                      こちら{turnOrder}（{defenderSpeed} / 相手{" "}
+                      {attackerSpeed}）
+                    </small>
+                  </div>
+                </article>
+              ),
+            )}
+          </div>
+        ) : null}
+      </section>
+    </>
+  );
+}
+
+function BattleFormatSelect({
+  value,
+  onChange,
+}: {
+  value: TypeCheckerBattleFormat;
+  onChange: (value: TypeCheckerBattleFormat) => void;
+}) {
+  return (
+    <label>
+      ルール
+      <select
+        value={value}
+        onChange={(event) =>
+          onChange(event.target.value as TypeCheckerBattleFormat)
+        }
+      >
+        <option value="single">シングル</option>
+        <option value="double">ダブル</option>
+      </select>
+    </label>
+  );
+}
+
+function PokemonPreviewImage({
+  pokemon,
+}: {
+  pokemon: DamageCalculatorPokemon;
+}) {
+  const imageUrl = pokemon.imageUrl ?? pokemon.fallbackImageUrl;
+  return imageUrl ? (
+    <Image
+      src={imageUrl}
+      alt={pokemon.nameJa}
+      width={38}
+      height={38}
+      unoptimized
+    />
+  ) : null;
+}
+
+function PreviewPokemonSummary({
+  rank,
+  pokemon,
+}: {
+  rank: number;
+  pokemon: DamageCalculatorPokemon;
+}) {
+  return (
+    <div className={styles.damagePreviewPokemon}>
+      <strong>
+        {rank}位 {pokemon.nameJa}
+      </strong>
+      <span>
+        {pokemon.types.map((typeName) => TYPE_LABELS[typeName]).join(" / ")}
+      </span>
+      <small>
+        {STAT_IDS.map(
+          (statId) =>
+            `${BASE_STAT_LABELS[statId]} ${pokemon.actualStats?.[statId] ?? "—"}`,
+        ).join(" / ")}
+      </small>
+    </div>
   );
 }
