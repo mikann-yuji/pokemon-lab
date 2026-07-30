@@ -96,8 +96,8 @@ export function TrainingDamagePreview({
     let active = true;
     void Promise.all([
       ensureCatalogLoaded(),
-      getTopRankedPokemon("single"),
-      getTopRankedPokemon("double"),
+      getTopRankedPokemon("single", 100),
+      getTopRankedPokemon("double", 100),
     ])
       .then(([, single, double]) => {
         if (!active) return;
@@ -215,7 +215,7 @@ export function TrainingDamagePreview({
     <section className={styles.damagePreview}>
       <header className={styles.damagePreviewHeader}>
         <div>
-          <h2>採用率上位30体へのダメージ</h2>
+          <h2>採用率上位100体へのダメージ</h2>
           <p>
             現在設定中の能力値・特性・持ち物・技を使用し、相手は採用率1位の能力ポイント配分で計算します。
           </p>

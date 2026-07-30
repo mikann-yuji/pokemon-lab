@@ -26,7 +26,9 @@ type RankedPokemonRow = SqliteRow & {
 
 export async function getTopRankedPokemon(
   battleFormat: TypeCheckerBattleFormat,
+  rankLimit = 30,
 ): Promise<RankedPokemon[]> {
+  const normalizedRankLimit = Math.max(1, Math.trunc(rankLimit));
   try {
     const rows = await sqliteWorkerClient.catalogQuery<RankedPokemonRow>(`
       SELECT
@@ -44,10 +46,10 @@ export async function getTopRankedPokemon(
         ON points.form_id = rankings.form_id
         AND points.battle_format = rankings.battle_format
       WHERE rankings.battle_format = ?
-        AND rankings.usage_rank <= 30
+        AND rankings.usage_rank <= ?
       ORDER BY rankings.usage_rank, rankings.form_id
       `,
-      [battleFormat],
+      [battleFormat, normalizedRankLimit],
     );
     return rows.map((row) => ({
       formId: Number(row.formId),
@@ -77,10 +79,10 @@ export async function getTopRankedPokemon(
         SELECT form_id AS formId, usage_rank AS rank
         FROM champions_form_usage_rankings
         WHERE battle_format = ?
-          AND usage_rank <= 30
+          AND usage_rank <= ?
         ORDER BY usage_rank, form_id
       `,
-      [battleFormat],
+      [battleFormat, normalizedRankLimit],
     );
     return rows.map((row) => ({
       formId: Number(row.formId),

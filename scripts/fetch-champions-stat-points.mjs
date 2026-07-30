@@ -1,5 +1,5 @@
 /**
- * OP.GG Pokémon Championsから、採用率上位30体の最頻能力ポイント配分を取得する。
+ * OP.GG Pokémon Championsから、採用率上位100体の最頻能力ポイント配分を取得する。
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
@@ -8,6 +8,7 @@ import { load } from "cheerio";
 
 const SOURCE_ORIGIN = "https://op.gg";
 const FORMATS = ["single", "double"];
+const RANK_LIMIT = 100;
 const seedDirectory = path.join(process.cwd(), "database", "seeds");
 const slugOverrides = new Map([
   ["pyroar-male", "pyroar"],
@@ -78,7 +79,7 @@ const formsById = new Map(
   parseCsv("forms.csv").map((record) => [record.id, record]),
 );
 const rankings = parseCsv("champions_form_usage_rankings.csv")
-  .filter((record) => Number(record.usage_rank) <= 30)
+  .filter((record) => Number(record.usage_rank) <= RANK_LIMIT)
   .sort(
     (left, right) =>
       left.battle_format.localeCompare(right.battle_format) ||
@@ -143,8 +144,11 @@ for (const ranking of rankings) {
   );
 }
 
-if (output.length !== 60) {
-  throw new Error(`Expected 60 stat point records, found ${output.length}.`);
+const expectedRecordCount = FORMATS.length * RANK_LIMIT;
+if (output.length !== expectedRecordCount) {
+  throw new Error(
+    `Expected ${expectedRecordCount} stat point records, found ${output.length}.`,
+  );
 }
 
 const headers = [
