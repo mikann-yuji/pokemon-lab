@@ -194,6 +194,9 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
               champions_form_move_usage.move_id
           ) AS usageRank
         FROM champions_form_move_usage
+        JOIN moves AS usage_moves
+          ON usage_moves.id = champions_form_move_usage.move_id
+        WHERE usage_moves.damage_class_name IN ('physical', 'special')
       )
       SELECT DISTINCT
         latest_versions.formId,

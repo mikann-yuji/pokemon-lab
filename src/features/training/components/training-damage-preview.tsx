@@ -294,7 +294,7 @@ export function TrainingDamagePreview({
             minimumPercent: best?.calculation.minimumPercent ?? null,
             maximumPercent: best?.calculation.maximumPercent ?? null,
             koLabel:
-              best?.calculation.koLabel ?? "採用率上位4技に攻撃技なし",
+              best?.calculation.koLabel ?? "採用率上位4位以内に攻撃技なし",
             attackerSpeed,
             defenderSpeed,
             turnOrder,
@@ -380,7 +380,7 @@ export function TrainingDamagePreview({
           <div>
             <h2>採用率上位100体＋メガシンカから受けるダメージ</h2>
             <p>
-              相手の採用率上位4技に入る攻撃技を比較し、現在設定中の能力値・特性・持ち物に最も大きなダメージを与える技で計算します。
+              相手の攻撃技を採用率順に並べた上位4技を比較し、現在設定中の能力値・特性・持ち物に最も大きなダメージを与える技で計算します。
             </p>
           </div>
           <BattleFormatSelect

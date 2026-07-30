@@ -50,7 +50,7 @@ export type DamageCalculatorMove = {
   /** 命中率。必中や特殊判定の技はnull。 */
   accuracy: number | null;
   usageRate: number | null;
-  /** 全技を対象にした採用率順位。採用率データがない技はnull。 */
+  /** 攻撃技だけを対象にした採用率順位。採用率データがない技はnull。 */
   usageRank?: number | null;
 };
 
