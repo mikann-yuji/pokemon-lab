@@ -47,3 +47,4 @@ id,ability_id,modifier_kind,multiplier,condition,move_type_name
 46,fluffy,received_damage,2,type_match,Fire
 47,water-bubble,received_damage,0.5,type_match,Fire
 48,purifying-salt,received_damage,0.5,type_match,Ghost
+49,protean,stab,1.5,manual,

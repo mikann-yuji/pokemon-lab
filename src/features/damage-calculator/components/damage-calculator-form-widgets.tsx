@@ -324,7 +324,7 @@ export function AbilityField({
             checked={conditionEnabled}
             onChange={(event) => onConditionChange(event.target.checked)}
           />
-          条件を有効
+          {selectedAbility?.id === "protean" ? "特性を適用" : "条件を有効"}
         </label>
       ) : null}
     </div>

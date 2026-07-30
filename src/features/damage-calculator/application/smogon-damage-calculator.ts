@@ -471,7 +471,18 @@ function getAbilityPowerMultiplier(input: DamageCalculationInput) {
       (modifier) =>
         modifier.modifierKind === "power" || modifier.modifierKind === "stab",
     )
-    .reduce((multiplier, modifier) => multiplier * modifier.multiplier, 1);
+    .reduce((multiplier, modifier) => {
+      // へんげんじざいの技が元タイプと一致している場合、通常のタイプ一致1.5倍は
+      // @smogon/calc側ですでに適用されるため、追加の1.5倍を重ねない。
+      if (
+        modifier.modifierKind === "stab" &&
+        modifier.condition === "manual" &&
+        input.attacker.types.includes(input.move.typeName)
+      ) {
+        return multiplier;
+      }
+      return multiplier * modifier.multiplier;
+    }, 1);
 }
 
 /**
