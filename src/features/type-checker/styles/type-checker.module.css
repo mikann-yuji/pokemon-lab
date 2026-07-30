@@ -437,6 +437,21 @@
   color: #a32222;
 }
 
+.damageSummary .turnOrderFirst {
+  color: #147028;
+  font-weight: 800;
+}
+
+.damageSummary .turnOrderLater {
+  color: #a32222;
+  font-weight: 800;
+}
+
+.damageSummary .turnOrderTie {
+  color: #8a5700;
+  font-weight: 800;
+}
+
 .teamWalls {
   overflow: hidden;
 }

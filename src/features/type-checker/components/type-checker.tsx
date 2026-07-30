@@ -9,6 +9,7 @@ import type { DamageCalculation } from "@/features/damage-calculator/application
 import { championsDamageCalculator } from "@/features/damage-calculator/config/champions-damage-ruleset";
 import { useDamageCalculatorCatalogStore } from "@/features/damage-calculator/components/damage-calculator-catalog-store";
 import {
+  applyHeldItemSpeedModifier,
   applyTrainingBuildToPokemon,
   calculateActualStat,
 } from "@/features/damage-calculator/components/damage-calculator-state";
@@ -58,6 +59,9 @@ type KnockoutCandidate = {
   move: DamageCalculatorMove;
   result: DamageCalculation;
   usageRate: number | null;
+  attackerSpeed: number;
+  defenderSpeed: number;
+  turnOrder: "先攻" | "後攻" | "同速";
 };
 
 function applyRankedAbilityPoints(
@@ -263,6 +267,13 @@ function getKnockoutCandidates(
   const pokemonById = new Map(
     pokemonCatalog.map((pokemon) => [pokemon.id, pokemon]),
   );
+  const attackerSpeed = applyHeldItemSpeedModifier(
+    member.pokemon,
+    member.pokemon.actualStats?.speed ??
+      member.pokemon.stats.speed ??
+      0,
+    member.pokemon.heldItem?.id ?? "",
+  );
   return rankings.flatMap((ranking): KnockoutCandidate[] => {
     const sourceDefender = pokemonById.get(ranking.formId);
     if (!sourceDefender) return [];
@@ -270,6 +281,8 @@ function getKnockoutCandidates(
       sourceDefender,
       ranking.abilityPoints,
     );
+    const defenderSpeed =
+      defender.actualStats?.speed ?? defender.stats.speed ?? 0;
     const results = member.moves.flatMap((move) => {
       try {
         return [
@@ -301,6 +314,14 @@ function getKnockoutCandidates(
           move: best.move,
           result: best.result,
           usageRate: ranking.usageRate,
+          attackerSpeed,
+          defenderSpeed,
+          turnOrder:
+            attackerSpeed > defenderSpeed
+              ? "先攻"
+              : attackerSpeed < defenderSpeed
+                ? "後攻"
+                : "同速",
         }]
       : [];
   });
@@ -387,7 +408,16 @@ function PokemonDetail({
       </div>
       {candidates.length > 0 ? (
         <div className={`${styles.knockoutList} ${styles.damageResultScroller}`}>
-          {candidates.map(({ rank, defender, move, result, usageRate }) => (
+          {candidates.map(({
+            rank,
+            defender,
+            move,
+            result,
+            usageRate,
+            attackerSpeed,
+            defenderSpeed,
+            turnOrder,
+          }) => (
             <article key={defender.id}>
               {defender.imageUrl ?? defender.fallbackImageUrl ? (
                 <Image
@@ -420,6 +450,17 @@ function PokemonDetail({
                 <span>
                   {result.minimumPercent.toFixed(1)}〜
                   {result.maximumPercent.toFixed(1)}%
+                </span>
+                <span
+                  className={
+                    turnOrder === "先攻"
+                      ? styles.turnOrderFirst
+                      : turnOrder === "後攻"
+                        ? styles.turnOrderLater
+                        : styles.turnOrderTie
+                  }
+                >
+                  {turnOrder}（{attackerSpeed} / 相手 {defenderSpeed}）
                 </span>
               </div>
             </article>
@@ -600,7 +641,11 @@ export default function TypeChecker() {
     return rankingsByFormat[battleFormat].flatMap((ranking) => {
       const results = resultsByFormId.get(ranking.formId) ?? [];
       if (
-        results.some((candidate) => candidate.result.minimumPercent >= 50)
+        results.some(
+          (candidate) =>
+            candidate.turnOrder === "先攻" &&
+            candidate.result.minimumPercent >= 50,
+        )
       ) {
         return [];
       }
@@ -713,9 +758,9 @@ export default function TypeChecker() {
           </section>
           <section className={`${styles.panel} ${styles.teamWalls}`}>
             <div className={styles.panelHeading}>
-              <h2>チームで一貫して確定2発にできないポケモン</h2>
+              <h2>チームで先攻して確定2発にできないポケモン</h2>
               <p>
-                チーム内のどのポケモンでも、最大打点の最低ダメージが50%未満になる相手です。
+                チーム内に、相手より速く、最大打点の最低ダメージが50%以上になるポケモンがいない相手です。
               </p>
             </div>
             {teamWalls.length > 0 ? (
@@ -746,7 +791,7 @@ export default function TypeChecker() {
               </div>
             ) : (
               <p className={styles.emptyInline}>
-                採用率上位30位すべてを、チーム内の誰かが確定2発以内にできます。
+                採用率上位30位すべてを、チーム内の誰かが先攻して確定2発以内にできます。
               </p>
             )}
           </section>
