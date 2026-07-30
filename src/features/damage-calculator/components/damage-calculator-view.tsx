@@ -38,6 +38,7 @@ import {
 } from "./damage-calculator-pokemon-widgets";
 import { DamageResult } from "./damage-calculator-result";
 import { DetailedSpeedComparisonModal } from "./detailed-speed-comparison-modal";
+import { DamageSurvivalCheck } from "./damage-survival-check";
 import type {
   AdjustableStatId,
   CalculationResult,
@@ -79,6 +80,10 @@ type DamageCalculatorViewProps = {
   typeEffectivenessSource: TypeEffectivenessSource | null;
   selectedTeams: Record<DamageSide, BattleTeam | null>;
   selectedTeamMembers: TeamMembersBySide;
+  survivalTeamMembers: {
+    build: TrainingBuild;
+    pokemon: DamageCalculatorPokemon;
+  }[];
   selectedBuildIds: Record<DamageSide, number | null>;
   attackerHistory: DamageHistoryRecord[];
   defenderHistory: DamageHistoryRecord[];
@@ -182,6 +187,7 @@ export function DamageCalculatorView({
   typeEffectivenessSource,
   selectedTeams,
   selectedTeamMembers,
+  survivalTeamMembers,
   selectedBuildIds,
   attackerHistory,
   defenderHistory,
@@ -407,6 +413,13 @@ export function DamageCalculatorView({
           defender={defender}
           heldItems={heldItems}
           onClose={() => setDetailedSpeedModalOpen(false)}
+        />
+      ) : null}
+      {typeEffectivenessSource ? (
+        <DamageSurvivalCheck
+          members={survivalTeamMembers}
+          pokemonCatalog={pokemonCatalog}
+          typeEffectivenessSource={typeEffectivenessSource}
         />
       ) : null}
       {teamModalSide ? (

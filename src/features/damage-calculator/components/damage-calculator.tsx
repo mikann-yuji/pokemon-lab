@@ -191,6 +191,19 @@ export function DamageCalculator({
       defender: toMembers(selectedTeams.defender),
     };
   }, [buildById, pokemonCatalog, selectedTeams]);
+  const survivalTeamMembers = useMemo(
+    () =>
+      selectedTeamMembers.attacker.map(({ build, pokemon }) => ({
+        build,
+        pokemon: applyTrainingBuildToPokemon(
+          pokemon,
+          build,
+          natures,
+          heldItems,
+        ),
+      })),
+    [heldItems, natures, selectedTeamMembers.attacker],
+  );
   /**
    * ダメージ計算ページで、選択中ポケモンから育成詳細ページへのリンクを作る。
    *
@@ -552,6 +565,7 @@ export function DamageCalculator({
       typeEffectivenessSource={typeEffectivenessSource}
       selectedTeams={selectedTeams}
       selectedTeamMembers={selectedTeamMembers}
+      survivalTeamMembers={survivalTeamMembers}
       selectedBuildIds={selectedBuildIds}
       attackerHistory={attackerHistory}
       defenderHistory={defenderHistory}

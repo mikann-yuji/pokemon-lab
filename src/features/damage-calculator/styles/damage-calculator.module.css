@@ -1110,6 +1110,298 @@ a.pokemonSummary:focus-visible {
   background: #1f4789;
 }
 
+.survivalCheckButton {
+  position: fixed;
+  z-index: 220;
+  top: calc(4.6rem + env(safe-area-inset-top));
+  right: max(0.65rem, env(safe-area-inset-right));
+  min-height: 28px;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid #8296ad;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 92%);
+  color: #344760;
+  box-shadow: 0 6px 18px rgb(23 43 77 / 14%);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+.survivalCheckButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.survivalCheckButton:not(:disabled):hover,
+.survivalCheckButton:not(:disabled):focus-visible {
+  border-color: #2857a4;
+  outline: 3px solid rgb(40 87 164 / 15%);
+  background: #eef6ff;
+}
+
+.survivalOverlay {
+  position: fixed;
+  z-index: 320;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding:
+    calc(0.75rem + env(safe-area-inset-top))
+    calc(0.75rem + env(safe-area-inset-right))
+    calc(0.75rem + env(safe-area-inset-bottom))
+    calc(0.75rem + env(safe-area-inset-left));
+}
+
+.survivalBackdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgb(10 22 39 / 68%);
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+.survivalPanel {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  width: min(64rem, 100%);
+  max-height: calc(100dvh - 1.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow: hidden;
+  border: 1px solid #b9cae0;
+  border-radius: 16px;
+  background: #f6f9fc;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 35%);
+}
+
+.survivalHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid #cbd7e3;
+  background: #172b4d;
+  color: #fff;
+}
+
+.survivalHeader h2,
+.survivalHeader small {
+  display: block;
+  margin: 0;
+}
+
+.survivalHeader h2 {
+  font-size: 1rem;
+}
+
+.survivalHeader small {
+  margin-bottom: 0.1rem;
+  color: #a8c8f5;
+  font-size: 0.58rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+
+.survivalHeader label {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.survivalHeader select {
+  min-height: 30px;
+  border: 1px solid #7890aa;
+  border-radius: 7px;
+  background: #fff;
+  color: #172b4d;
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.survivalHeader > button {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.2rem;
+}
+
+.survivalStatus {
+  margin: 0;
+  padding: 1rem;
+  color: #52647a;
+  font-weight: 850;
+  text-align: center;
+}
+
+.survivalProgress {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid #d7e0e7;
+  background: #eef6ff;
+}
+
+.survivalProgress img {
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.survivalProgress div {
+  display: grid;
+  min-width: 0;
+}
+
+.survivalProgress strong {
+  font-size: 0.8rem;
+}
+
+.survivalProgress span {
+  color: #52647a;
+  font-size: 0.66rem;
+  line-height: 1.4;
+}
+
+.survivalList {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #d7e0e7;
+}
+
+.survivalList article {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  align-items: center;
+  min-height: 3.35rem;
+  margin-bottom: 1px;
+  padding: 0.5rem 0.75rem;
+  background: #fff;
+}
+
+.survivalList article > img {
+  width: 2.15rem;
+  height: 2.15rem;
+  object-fit: contain;
+}
+
+.survivalList article > div {
+  display: grid;
+  min-width: 0;
+}
+
+.survivalList strong {
+  font-size: 0.75rem;
+}
+
+.survivalList span,
+.survivalList small {
+  color: #52647a;
+  font-size: 0.62rem;
+  line-height: 1.4;
+}
+
+.survivalList article > div > small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.survivalOutcome {
+  justify-items: end;
+  text-align: right;
+}
+
+.survivalOutcome > span {
+  font-weight: 900;
+}
+
+.survivalOutcome > span[data-order="first"] {
+  color: #147028;
+}
+
+.survivalOutcome > span[data-order="later"] {
+  color: #a32222;
+}
+
+.survivalOutcome > span[data-order="tie"] {
+  color: #8a5700;
+}
+
+.survivalOutcome label {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  margin-top: 0.15rem;
+  color: #8f1f2d;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.survivalOutcome input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: #e63946;
+}
+
+.survivalOutcome > small {
+  color: #8f1f2d;
+  font-weight: 800;
+}
+
+.survivalFooter {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-top: 1px solid #cbd7e3;
+  background: #fff;
+}
+
+.survivalFooter > span {
+  color: #52647a;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.survivalFooter button {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+  min-height: 36px;
+  padding: 0.35rem 0.8rem;
+  border: 0;
+  border-radius: 999px;
+  background: #2857a4;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.survivalFooter img {
+  width: 1.6rem;
+  height: 1.6rem;
+  object-fit: contain;
+}
+
 .resultHeader {
   display: flex;
   gap: 0.45rem;
@@ -1815,6 +2107,80 @@ a.pokemonSummary:focus-visible {
 
   .detailedSpeedCompareButton {
     right: calc(max(0.45rem, env(safe-area-inset-right)) + 9.8rem);
+  }
+
+  .survivalCheckButton {
+    top: calc(4.2rem + env(safe-area-inset-top));
+    right: max(0.45rem, env(safe-area-inset-right));
+    min-height: 26px;
+    font-size: 0.58rem;
+  }
+
+  .survivalOverlay {
+    padding:
+      env(safe-area-inset-top)
+      env(safe-area-inset-right)
+      env(safe-area-inset-bottom)
+      env(safe-area-inset-left);
+  }
+
+  .survivalPanel {
+    width: 100%;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .survivalHeader {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.45rem;
+    padding: 0.6rem;
+  }
+
+  .survivalHeader label {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    justify-content: space-between;
+  }
+
+  .survivalHeader > button {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .survivalProgress {
+    padding: 0.55rem 0.6rem;
+  }
+
+  .survivalList article {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: 0.45rem;
+    padding: 0.45rem 0.55rem;
+  }
+
+  .survivalList article > img {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .survivalOutcome {
+    grid-column: 2;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.35rem;
+    align-items: center;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .survivalFooter {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.55rem;
+  }
+
+  .survivalFooter button {
+    justify-content: center;
+    width: 100%;
   }
 
   .detailedSpeedGrid {
