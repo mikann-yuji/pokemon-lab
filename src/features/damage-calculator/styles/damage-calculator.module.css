@@ -1259,9 +1259,10 @@ a.pokemonSummary:focus-visible {
   object-fit: contain;
 }
 
-.survivalProgress div {
+.survivalMemberSummary {
   display: grid;
   min-width: 0;
+  flex: 1 1 15rem;
 }
 
 .survivalProgress strong {
@@ -1272,6 +1273,59 @@ a.pokemonSummary:focus-visible {
   color: #52647a;
   font-size: 0.66rem;
   line-height: 1.4;
+}
+
+.survivalMemberControls {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.survivalMemberControls > label {
+  display: grid;
+  gap: 0.12rem;
+  color: #41556d;
+  font-size: 0.56rem;
+  font-weight: 850;
+}
+
+.survivalMemberControls select {
+  width: 3.15rem;
+  min-height: 27px;
+  padding: 0.15rem 0.25rem;
+  border: 1px solid #a8bad0;
+  border-radius: 6px;
+  background: #fff;
+  color: #172b4d;
+  font: inherit;
+  font-size: 0.68rem;
+}
+
+.survivalMemberControls > .survivalAbilityToggle {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  min-height: 27px;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid #a8bad0;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.62rem;
+}
+
+.survivalAbilityToggle input {
+  width: 0.9rem;
+  height: 0.9rem;
+  margin: 0 0.25rem 0 0;
+}
+
+.survivalAbilityToggle small {
+  grid-column: 2;
+  color: #64778d;
+  font-size: 0.52rem;
 }
 
 .survivalList {
@@ -2148,7 +2202,17 @@ a.pokemonSummary:focus-visible {
   }
 
   .survivalProgress {
+    flex-wrap: wrap;
     padding: 0.55rem 0.6rem;
+  }
+
+  .survivalMemberSummary {
+    flex-basis: calc(100% - 3rem);
+  }
+
+  .survivalMemberControls {
+    flex-basis: 100%;
+    justify-content: flex-start;
   }
 
   .survivalList article {

@@ -21,6 +21,7 @@ import {
   BASE_STAT_LABELS,
   STAT_IDS,
 } from "./damage-calculator-display";
+import { hasManualAbilityCondition } from "./damage-calculator-form-widgets";
 import type { TypeEffectivenessSource } from "@/domain/type-matchup";
 import styles from "../styles/damage-calculator.module.css";
 
@@ -41,6 +42,46 @@ type SurvivalResult = {
   turnOrder: "先攻" | "後攻" | "同速";
   canRemove: boolean;
 };
+
+const SURVIVAL_RANK_STAT_IDS = [
+  "attack",
+  "defense",
+  "special-attack",
+  "special-defense",
+  "speed",
+] as const;
+
+type SurvivalRankStatId = (typeof SURVIVAL_RANK_STAT_IDS)[number];
+
+type SurvivalMemberCondition = {
+  ranks: Record<SurvivalRankStatId, number>;
+  abilityEnabled: boolean;
+};
+
+const SURVIVAL_RANK_LABELS: Record<SurvivalRankStatId, string> = {
+  attack: "攻撃",
+  defense: "防御",
+  "special-attack": "特攻",
+  "special-defense": "特防",
+  speed: "素早さ",
+};
+
+const DEFAULT_MEMBER_CONDITION: SurvivalMemberCondition = {
+  ranks: {
+    attack: 0,
+    defense: 0,
+    "special-attack": 0,
+    "special-defense": 0,
+    speed: 0,
+  },
+  abilityEnabled: false,
+};
+
+function applyRankMultiplier(value: number, rank: number) {
+  return Math.floor(
+    value * (rank >= 0 ? (2 + rank) / 2 : 2 / (2 - rank)),
+  );
+}
 
 function applyRankedStats(
   pokemon: DamageCalculatorPokemon,
@@ -66,11 +107,22 @@ function calculateMemberResults(
   rankings: RankedPokemon[],
   pokemonCatalog: DamageCalculatorPokemon[],
   typeEffectivenessSource: TypeEffectivenessSource,
+  condition: SurvivalMemberCondition,
 ): SurvivalResult[] {
-  const attacker = member.pokemon;
+  const attacker: DamageCalculatorPokemon = {
+    ...member.pokemon,
+    boosts: {
+      ...member.pokemon.boosts,
+      ...condition.ranks,
+    },
+  };
+  const rankedAttackerSpeed = applyRankMultiplier(
+    attacker.actualStats?.speed ?? attacker.stats.speed ?? 0,
+    condition.ranks.speed,
+  );
   const attackerSpeed = applyHeldItemSpeedModifier(
     attacker,
-    attacker.actualStats?.speed ?? attacker.stats.speed ?? 0,
+    rankedAttackerSpeed,
     attacker.heldItem?.id ?? "",
   );
   const pokemonById = new Map(
@@ -97,6 +149,9 @@ function calculateMemberResults(
             defender,
             move,
             typeEffectivenessSource,
+            abilityConditionEnabled: {
+              attacker: condition.abilityEnabled,
+            },
           });
           return [{ move, calculation }];
         } catch {
@@ -155,6 +210,9 @@ export function DamageSurvivalCheck({
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [completed, setCompleted] = useState(false);
+  const [memberConditions, setMemberConditions] = useState<
+    Record<number, SurvivalMemberCondition>
+  >({});
 
   useEffect(() => {
     if (!open) return;
@@ -170,6 +228,7 @@ export function DamageSurvivalCheck({
         setRemainingRankings(nextRankings[battleFormat]);
         setMemberIndex(0);
         setUnfavorableFormIds(new Set());
+        setMemberConditions({});
         setCompleted(false);
       })
       .catch((error: unknown) => {
@@ -187,6 +246,8 @@ export function DamageSurvivalCheck({
   }, [battleFormat, open]);
 
   const currentMember = members[memberIndex] ?? null;
+  const currentCondition =
+    memberConditions[memberIndex] ?? DEFAULT_MEMBER_CONDITION;
   const results = useMemo(
     () =>
       currentMember
@@ -195,10 +256,12 @@ export function DamageSurvivalCheck({
             remainingRankings,
             pokemonCatalog,
             typeEffectivenessSource,
+            currentCondition,
           )
         : [],
     [
       currentMember,
+      currentCondition,
       pokemonCatalog,
       remainingRankings,
       typeEffectivenessSource,
@@ -212,7 +275,37 @@ export function DamageSurvivalCheck({
   function openCheck() {
     setLoading(true);
     setLoadError("");
+    setMemberConditions({});
     setOpen(true);
+  }
+
+  function updateCurrentRank(statId: SurvivalRankStatId, rank: number) {
+    setMemberConditions((current) => {
+      const condition = current[memberIndex] ?? DEFAULT_MEMBER_CONDITION;
+      return {
+        ...current,
+        [memberIndex]: {
+          ...condition,
+          ranks: {
+            ...condition.ranks,
+            [statId]: rank,
+          },
+        },
+      };
+    });
+  }
+
+  function updateCurrentAbility(enabled: boolean) {
+    setMemberConditions((current) => {
+      const condition = current[memberIndex] ?? DEFAULT_MEMBER_CONDITION;
+      return {
+        ...current,
+        [memberIndex]: {
+          ...condition,
+          abilityEnabled: enabled,
+        },
+      };
+    });
   }
 
   function moveToNextMember() {
@@ -238,6 +331,7 @@ export function DamageSurvivalCheck({
     setRemainingRankings(rankingsByFormat[nextFormat]);
     setMemberIndex(0);
     setUnfavorableFormIds(new Set());
+    setMemberConditions({});
     setCompleted(false);
   }
 
@@ -356,7 +450,7 @@ export function DamageSurvivalCheck({
                       unoptimized
                     />
                   ) : null}
-                  <div>
+                  <div className={styles.survivalMemberSummary}>
                     <strong>
                       {memberIndex + 1}/{members.length}　
                       {currentMember.build.name ||
@@ -365,6 +459,48 @@ export function DamageSurvivalCheck({
                     <span>
                       対象 {results.length}体。不利にした相手と、先攻確定2発にできない相手を次へ持ち越します。
                     </span>
+                  </div>
+                  <div className={styles.survivalMemberControls}>
+                    {SURVIVAL_RANK_STAT_IDS.map((statId) => (
+                      <label key={statId}>
+                        {SURVIVAL_RANK_LABELS[statId]}
+                        <select
+                          aria-label={`${SURVIVAL_RANK_LABELS[statId]}の能力ランク`}
+                          value={currentCondition.ranks[statId]}
+                          onChange={(event) =>
+                            updateCurrentRank(
+                              statId,
+                              Number(event.target.value),
+                            )
+                          }
+                        >
+                          {Array.from({ length: 13 }, (_, index) => index - 6).map(
+                            (rank) => (
+                              <option key={rank} value={rank}>
+                                {rank > 0 ? `+${rank}` : rank}
+                              </option>
+                            ),
+                          )}
+                        </select>
+                      </label>
+                    ))}
+                    {hasManualAbilityCondition(
+                      currentMember.pokemon.selectedAbility ?? null,
+                    ) ? (
+                      <label className={styles.survivalAbilityToggle}>
+                        <input
+                          type="checkbox"
+                          checked={currentCondition.abilityEnabled}
+                          onChange={(event) =>
+                            updateCurrentAbility(event.target.checked)
+                          }
+                        />
+                        特性を適用
+                        <small>
+                          {currentMember.pokemon.selectedAbility?.name}
+                        </small>
+                      </label>
+                    ) : null}
                   </div>
                 </div>
                 <div className={styles.survivalList}>

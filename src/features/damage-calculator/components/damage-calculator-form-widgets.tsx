@@ -219,7 +219,9 @@ export function VariableMovePowerField({
   );
 }
 
-function hasManualAbilityCondition(ability: DamageCalculatorAbility | null) {
+export function hasManualAbilityCondition(
+  ability: DamageCalculatorAbility | null,
+) {
   // 条件付きで発動する特性だけ、手動ON/OFFのチェックボックスを出す。
   // 常時発動する補正は選択した時点で計算へ渡すので、追加UIは不要。
   return Boolean(
