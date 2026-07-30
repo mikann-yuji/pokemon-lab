@@ -10,7 +10,6 @@ import {
   findTrainingBuildByName,
   getAllTrainingBuilds,
   getTrainingMatchupNotes,
-  loadLatestTrainingBuild,
   loadTrainingBuild,
   saveTrainingMatchupNote,
   saveTrainingBuild,
@@ -111,14 +110,12 @@ export function TrainingSimulator({
     const timer = window.setTimeout(() => setToast(null), 3000);
     return () => window.clearTimeout(timer);
   }, [toast]);
-  // URLで指定された育成案、または同じポケモンの最新育成案を画面状態へ復元する。
+  // 保存済み育成案へのリンクでbuild IDが指定された場合だけ画面状態へ復元する。
+  // 通常のポケモン詳細画面では、過去の育成案を勝手に適用しない。
   useEffect(() => {
-    if (natures.length === 0) return;
+    if (!initialBuildId || natures.length === 0) return;
     let active = true;
-    const buildPromise = initialBuildId
-      ? loadTrainingBuild(initialBuildId)
-      : loadLatestTrainingBuild(pokemon.id);
-    void buildPromise.then((build) => {
+    void loadTrainingBuild(initialBuildId).then((build) => {
       if (!active || !build) return;
       if (build.pokemonId !== pokemon.id) return;
       setNature(build.nature);
