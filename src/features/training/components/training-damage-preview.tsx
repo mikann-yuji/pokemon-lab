@@ -215,9 +215,9 @@ export function TrainingDamagePreview({
     <section className={styles.damagePreview}>
       <header className={styles.damagePreviewHeader}>
         <div>
-          <h2>採用率上位100体へのダメージ</h2>
+          <h2>採用率上位100体＋メガシンカへのダメージ</h2>
           <p>
-            現在設定中の能力値・特性・持ち物・技を使用し、相手は採用率1位の能力ポイント配分で計算します。
+            メガシンカできる相手はメガシンカ後も含め、現在設定中の能力値・特性・持ち物・技で計算します。相手の能力ポイントは採用率1位の配分です。
           </p>
         </div>
         <label>

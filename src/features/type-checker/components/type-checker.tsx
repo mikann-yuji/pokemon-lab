@@ -401,9 +401,9 @@ function PokemonDetail({
       )}
 
       <div className={styles.subsectionHeading}>
-        <h4>採用率上位30位へのダメージ</h4>
+        <h4>採用率上位30位＋メガシンカへのダメージ</h4>
         <p>
-          防御側は採用率1位の能力ポイント配分、攻撃側は保存した能力値・特性・持ち物を反映しています。
+          メガシンカできる相手はメガシンカ後も含めます。防御側は採用率1位の能力ポイント配分、攻撃側は保存した能力値・特性・持ち物を反映しています。
         </p>
       </div>
       {candidates.length > 0 ? (
@@ -791,7 +791,7 @@ export default function TypeChecker() {
               </div>
             ) : (
               <p className={styles.emptyInline}>
-                採用率上位30位すべてを、チーム内の誰かが先攻して確定2発以内にできます。
+                採用率上位30位と該当するメガシンカすべてを、チーム内の誰かが先攻して確定2発以内にできます。
               </p>
             )}
           </section>
