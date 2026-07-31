@@ -1346,6 +1346,24 @@ a.pokemonSummary:focus-visible {
   background: #fff;
 }
 
+.survivalList article.survivalGuaranteedOneHitRow {
+  background: #fff4e5;
+  box-shadow: inset 4px 0 #e65300;
+}
+
+.survivalGuaranteedOneHitBadge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  background: #b42318;
+  color: #fff;
+  font-size: 0.56rem;
+  font-weight: 950;
+  line-height: 1.35;
+  vertical-align: 0.08rem;
+}
+
 .survivalList article > img {
   width: 2.15rem;
   height: 2.15rem;

@@ -585,8 +585,16 @@ function SurvivalResultRow({
     turnOrder,
     canRemove,
   } = result;
+  const isGuaranteedFirstTurnOneHit =
+    turnOrder === "先攻" && (minimumPercent ?? 0) >= 100;
   return (
-    <article>
+    <article
+      className={
+        isGuaranteedFirstTurnOneHit
+          ? styles.survivalGuaranteedOneHitRow
+          : undefined
+      }
+    >
       {defender.imageUrl ?? defender.fallbackImageUrl ? (
         <Image
           src={(defender.imageUrl ?? defender.fallbackImageUrl) as string}
@@ -599,6 +607,11 @@ function SurvivalResultRow({
       <div>
         <strong>
           {ranking.rank}位 {defender.nameJa}
+          {isGuaranteedFirstTurnOneHit ? (
+            <mark className={styles.survivalGuaranteedOneHitBadge}>
+              先攻確定1発
+            </mark>
+          ) : null}
         </strong>
         <span>
           {move?.name ?? "攻撃技なし"}・{koLabel}
