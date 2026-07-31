@@ -1,5 +1,5 @@
 /**
- * OP.GG Pokémon Championsから、採用率上位100体の最頻能力ポイント配分を取得する。
+ * OP.GG Pokémon Championsから、採用率上位100体の最頻能力ポイント配分と性格を取得する。
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
@@ -78,6 +78,9 @@ function csvValue(value) {
 const formsById = new Map(
   parseCsv("forms.csv").map((record) => [record.id, record]),
 );
+const natureIds = new Set(
+  parseCsv("natures.csv").map((record) => record.id),
+);
 const rankings = parseCsv("champions_form_usage_rankings.csv")
   .filter((record) => Number(record.usage_rank) <= RANK_LIMIT)
   .sort(
@@ -86,7 +89,8 @@ const rankings = parseCsv("champions_form_usage_rankings.csv")
       Number(left.usage_rank) - Number(right.usage_rank),
   );
 const scrapedAt = new Date().toISOString();
-const output = [];
+const statPointOutput = [];
+const natureOutput = [];
 
 for (const ranking of rankings) {
   if (!FORMATS.includes(ranking.battle_format)) continue;
@@ -106,9 +110,10 @@ for (const ranking of rankings) {
   if (!response?.ok) throw new Error(`OP.GG returned HTTP ${response?.status} for ${sourceUrl}.`);
 
   const $ = load(await response.text());
-  const firstCardText = $("div.relative.grid.min-h-16")
+  const cardTexts = $("div.relative.grid.min-h-16")
     .toArray()
-    .map((card) => $(card).text().replaceAll(/\s+/g, ""))
+    .map((card) => $(card).text().replaceAll(/\s+/g, ""));
+  const firstCardText = cardTexts
     .find(
       (text) =>
         text.startsWith("1") &&
@@ -124,8 +129,16 @@ for (const ranking of rankings) {
   if (!match) {
     throw new Error(`Could not parse the top stat points for ${form.name} (${ranking.battle_format}).`);
   }
+  const natureMatch = cardTexts
+    .map((text) => text.match(/^1([\d.]+)%([A-Za-z]+)(?:\+|$)/))
+    .find((candidate) => candidate && natureIds.has(candidate[2].toLowerCase()));
+  if (!natureMatch) {
+    throw new Error(`Could not parse the top nature for ${form.name} (${ranking.battle_format}).`);
+  }
   const [, usageRate, hp, attack, defense, specialAttack, specialDefense, speed] = match;
-  output.push({
+  const [, natureUsageRate, natureName] = natureMatch;
+  const natureId = natureName.toLowerCase();
+  statPointOutput.push({
     form_id: ranking.form_id,
     battle_format: ranking.battle_format,
     hp,
@@ -139,15 +152,29 @@ for (const ranking of rankings) {
     source_url: sourceUrl,
     scraped_at: scrapedAt,
   });
+  natureOutput.push({
+    form_id: ranking.form_id,
+    battle_format: ranking.battle_format,
+    nature_id: natureId,
+    usage_rate: natureUsageRate,
+    season: ranking.season,
+    source_url: sourceUrl,
+    scraped_at: scrapedAt,
+  });
   console.log(
-    `${ranking.battle_format} #${ranking.usage_rank} ${form.name}: ${hp}-${attack}-${defense}-${specialAttack}-${specialDefense}-${speed}`,
+    `${ranking.battle_format} #${ranking.usage_rank} ${form.name}: ${hp}-${attack}-${defense}-${specialAttack}-${specialDefense}-${speed} / ${natureId}`,
   );
 }
 
 const expectedRecordCount = FORMATS.length * RANK_LIMIT;
-if (output.length !== expectedRecordCount) {
+if (statPointOutput.length !== expectedRecordCount) {
   throw new Error(
-    `Expected ${expectedRecordCount} stat point records, found ${output.length}.`,
+    `Expected ${expectedRecordCount} stat point records, found ${statPointOutput.length}.`,
+  );
+}
+if (natureOutput.length !== expectedRecordCount) {
+  throw new Error(
+    `Expected ${expectedRecordCount} nature records, found ${natureOutput.length}.`,
   );
 }
 
@@ -167,7 +194,7 @@ const headers = [
 ];
 const csv = [
   headers.join(","),
-  ...output.map((record) =>
+  ...statPointOutput.map((record) =>
     headers.map((header) => csvValue(record[header])).join(","),
   ),
 ].join("\n");
@@ -176,4 +203,25 @@ writeFileSync(
   `${csv}\n`,
   "utf8",
 );
-console.log(`Generated champions_form_stat_points.csv with ${output.length} rows.`);
+const natureHeaders = [
+  "form_id",
+  "battle_format",
+  "nature_id",
+  "usage_rate",
+  "season",
+  "source_url",
+  "scraped_at",
+];
+const natureCsv = [
+  natureHeaders.join(","),
+  ...natureOutput.map((record) =>
+    natureHeaders.map((header) => csvValue(record[header])).join(","),
+  ),
+].join("\n");
+writeFileSync(
+  path.join(seedDirectory, "champions_form_natures.csv"),
+  `${natureCsv}\n`,
+  "utf8",
+);
+console.log(`Generated champions_form_stat_points.csv with ${statPointOutput.length} rows.`);
+console.log(`Generated champions_form_natures.csv with ${natureOutput.length} rows.`);

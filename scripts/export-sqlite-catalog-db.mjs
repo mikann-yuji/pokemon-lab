@@ -43,6 +43,7 @@ const seedTableOrder = [
   "champions_form_move_usage",
   "champions_form_usage_rankings",
   "champions_form_stat_points",
+  "champions_form_natures",
   "champions_items",
   "champions_item_damage_modifiers",
   "champions_ability_damage_modifiers",
@@ -135,6 +136,7 @@ const numericColumns = new Map([
       "usage_rate",
     ]),
   ],
+  ["champions_form_natures", new Set(["form_id", "usage_rate"])],
   [
     "champions_item_damage_modifiers",
     new Set(["multiplier", "max_multiplier"]),
@@ -359,6 +361,11 @@ filterRows("champions_form_usage_rankings", (row) =>
 filterRows("champions_form_stat_points", (row) =>
   championFormIds.has(
     row[columnIndex("champions_form_stat_points", "form_id")],
+  ),
+);
+filterRows("champions_form_natures", (row) =>
+  championFormIds.has(
+    row[columnIndex("champions_form_natures", "form_id")],
   ),
 );
 

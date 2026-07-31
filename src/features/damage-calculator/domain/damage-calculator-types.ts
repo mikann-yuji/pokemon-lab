@@ -104,6 +104,13 @@ export type DamageCalculatorAbility = {
   damageModifiers: DamageCalculatorAbilityDamageModifier[];
 };
 
+/** 採用率データや育成案から実数値へ反映する性格補正。 */
+export type DamageCalculatorNature = {
+  id: string;
+  increasedStatId: string | null;
+  decreasedStatId: string | null;
+};
+
 /**
  * 1フォーム分のダメージ計算用ポケモン情報。
  * ページ生成時にSQLiteから読み込み、ブラウザへ渡すのでオフラインでも利用できる。

@@ -10,8 +10,8 @@ import { championsDamageCalculator } from "@/features/damage-calculator/config/c
 import { useDamageCalculatorCatalogStore } from "@/features/damage-calculator/components/damage-calculator-catalog-store";
 import {
   applyHeldItemSpeedModifier,
+  applyPopularStatPointsToPokemon,
   applyTrainingBuildToPokemon,
-  calculateActualStat,
 } from "@/features/damage-calculator/components/damage-calculator-state";
 import {
   BASE_STAT_LABELS,
@@ -63,21 +63,6 @@ type KnockoutCandidate = {
   defenderSpeed: number;
   turnOrder: "先攻" | "後攻" | "同速";
 };
-
-function applyRankedAbilityPoints(
-  pokemon: DamageCalculatorPokemon,
-  abilityPoints: Record<string, number>,
-) {
-  return {
-    ...pokemon,
-    actualStats: Object.fromEntries(
-      STAT_IDS.map((statId) => [
-        statId,
-        calculateActualStat(pokemon, statId, abilityPoints[statId] ?? 0),
-      ]),
-    ),
-  };
-}
 
 function VerticalTypeLabel({ children }: { children: string }) {
   return (
@@ -277,9 +262,10 @@ function getKnockoutCandidates(
   return rankings.flatMap((ranking): KnockoutCandidate[] => {
     const sourceDefender = pokemonById.get(ranking.formId);
     if (!sourceDefender) return [];
-    const defender = applyRankedAbilityPoints(
+    const defender = applyPopularStatPointsToPokemon(
       sourceDefender,
       ranking.abilityPoints,
+      ranking.nature,
     );
     const defenderSpeed =
       defender.actualStats?.speed ?? defender.stats.speed ?? 0;
@@ -403,7 +389,7 @@ function PokemonDetail({
       <div className={styles.subsectionHeading}>
         <h4>採用率上位30位＋メガシンカへのダメージ</h4>
         <p>
-          メガシンカできる相手はメガシンカ後も含めます。防御側は採用率1位の能力ポイント配分、攻撃側は保存した能力値・特性・持ち物を反映しています。
+          メガシンカできる相手はメガシンカ後も含めます。防御側は採用率1位の能力ポイント配分と性格、攻撃側は保存した能力値・特性・持ち物を反映しています。
         </p>
       </div>
       {candidates.length > 0 ? (
@@ -435,7 +421,7 @@ function PokemonDetail({
                 <span>
                   {move.name}
                   {usageRate === null
-                    ? "・能力ポイント配分を更新待ち"
+                    ? "・能力ポイント・性格を更新待ち"
                     : `・配分採用率 ${usageRate.toFixed(1)}%`}
                 </span>
                 <span className={styles.defenderStats}>

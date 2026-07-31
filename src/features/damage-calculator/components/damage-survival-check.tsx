@@ -19,12 +19,9 @@ import type {
 } from "../domain/damage-calculator-types";
 import {
   applyHeldItemSpeedModifier,
-  calculateActualStat,
+  applyPopularStatPointsToPokemon,
 } from "./damage-calculator-state";
-import {
-  BASE_STAT_LABELS,
-  STAT_IDS,
-} from "./damage-calculator-display";
+import { BASE_STAT_LABELS, STAT_IDS } from "./damage-calculator-display";
 import { hasManualAbilityCondition } from "./damage-calculator-form-widgets";
 import {
   getSurvivalCheckHistories,
@@ -92,25 +89,6 @@ function applyRankMultiplier(value: number, rank: number) {
   );
 }
 
-function applyRankedStats(
-  pokemon: DamageCalculatorPokemon,
-  ranking: RankedPokemon,
-) {
-  return {
-    ...pokemon,
-    actualStats: Object.fromEntries(
-      STAT_IDS.map((statId) => [
-        statId,
-        calculateActualStat(
-          pokemon,
-          statId,
-          ranking.abilityPoints[statId] ?? 0,
-        ),
-      ]),
-    ),
-  };
-}
-
 function calculateMemberResults(
   member: SurvivalTeamMember,
   rankings: RankedPokemon[],
@@ -141,7 +119,11 @@ function calculateMemberResults(
   return rankings.flatMap((ranking): SurvivalResult[] => {
     const sourceDefender = pokemonById.get(ranking.formId);
     if (!sourceDefender) return [];
-    const defender = applyRankedStats(sourceDefender, ranking);
+    const defender = applyPopularStatPointsToPokemon(
+      sourceDefender,
+      ranking.abilityPoints,
+      ranking.nature,
+    );
     const defenderSpeed =
       defender.actualStats?.speed ?? defender.stats.speed ?? 0;
     const turnOrder =

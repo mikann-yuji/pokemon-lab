@@ -29,6 +29,7 @@ const catalogTableNames = [
   "champions_form_move_usage",
   "champions_form_usage_rankings",
   "champions_form_stat_points",
+  "champions_form_natures",
   "form_moves",
   "move_learn_methods",
   "version_groups",

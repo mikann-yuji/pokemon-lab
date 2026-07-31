@@ -1,4 +1,4 @@
-const CACHE_NAME = "pokemon-lab-v39";
+const CACHE_NAME = "pokemon-lab-v40";
 const IMAGE_CACHE_NAME = "pokemon-lab-images-v1";
 const IMAGE_CACHE_LIMIT = 300;
 

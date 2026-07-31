@@ -5,6 +5,7 @@ import type {
   DamageCalculatorAbility,
   DamageCalculatorHeldItem,
   DamageCalculatorMove,
+  DamageCalculatorNature,
   DamageCalculatorPokemon,
 } from "../domain/damage-calculator-types";
 import type { Nature } from "@/features/training/infrastructure/training-catalog-repository";
@@ -112,6 +113,7 @@ export function createDefaultAdjustmentState(): StatAdjustmentState {
  */
 export function createStatAdjustmentsFromPoints(
   abilityPoints: Record<string, number>,
+  nature: DamageCalculatorNature | null = null,
 ): StatAdjustmentState[DamageSide] {
   return Object.fromEntries(
     ADJUSTABLE_STAT_IDS.map((statId) => [
@@ -119,7 +121,7 @@ export function createStatAdjustmentsFromPoints(
       {
         point: abilityPoints[statId] ?? 0,
         rank: 0,
-        nature: "neutral",
+        nature: getPopularNatureCorrection(nature, statId),
       },
     ]),
   ) as StatAdjustmentState[DamageSide];
@@ -131,6 +133,7 @@ export function createStatAdjustmentsFromPoints(
 export function applyPopularStatPointsToPokemon(
   pokemon: DamageCalculatorPokemon,
   abilityPoints: Record<string, number>,
+  nature: DamageCalculatorNature | null = null,
 ): DamageCalculatorPokemon {
   return {
     ...pokemon,
@@ -141,10 +144,28 @@ export function applyPopularStatPointsToPokemon(
           pokemon,
           statId,
           abilityPoints[statId] ?? 0,
+          getPopularNatureCorrection(nature, statId),
         ),
       ]),
     ),
   };
+}
+
+/** 採用率1位の性格を、能力ごとの補正方向へ変換する。 */
+function getPopularNatureCorrection(
+  nature: DamageCalculatorNature | null,
+  statId: (typeof STAT_IDS)[number],
+): NatureCorrection {
+  if (
+    !nature ||
+    nature.increasedStatId === nature.decreasedStatId ||
+    statId === "hp"
+  ) {
+    return "neutral";
+  }
+  if (nature.increasedStatId === statId) return "up";
+  if (nature.decreasedStatId === statId) return "down";
+  return "neutral";
 }
 
 /**

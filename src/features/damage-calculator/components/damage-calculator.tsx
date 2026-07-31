@@ -45,7 +45,7 @@ import { useDamageCalculatorStore } from "./damage-calculator-store";
 import { useDamageCalculatorUserData } from "./use-damage-calculator-user-data";
 import { useDamageHistoryPersistence } from "./use-damage-history-persistence";
 import { getVariableMovePowers } from "../domain/variable-move-power";
-import { getPopularStatPoints } from "../infrastructure/popular-stat-points-repository";
+import { getPopularStatProfile } from "../infrastructure/popular-stat-points-repository";
 
 /**
  * ダメージ計算ページで、画面状態・保存済みデータ・計算実行をつなぐcontroller。
@@ -233,7 +233,7 @@ export function DamageCalculator({
   };
 
   /**
-   * 育成案を使わず直接選んだポケモンへ、採用率1位の能力ポイントを非同期反映する。
+   * 育成案を使わず直接選んだポケモンへ、採用率1位の能力ポイントと性格を非同期反映する。
    */
   function selectDirectPokemon(
     side: DamageSide,
@@ -245,10 +245,10 @@ export function DamageCalculator({
     resetSideForDirectPokemon(side);
     if (!pokemon) return;
 
-    void getPopularStatPoints(pokemon.id)
-      .then((abilityPoints) => {
+    void getPopularStatProfile(pokemon.id)
+      .then((profile) => {
         if (
-          !abilityPoints ||
+          !profile ||
           directSelectionRequestRef.current[side] !== requestId
         ) {
           return;
@@ -258,15 +258,25 @@ export function DamageCalculator({
         if (!currentPokemon || currentPokemon.id !== pokemon.id) return;
         selectPokemon(
           side,
-          applyPopularStatPointsToPokemon(currentPokemon, abilityPoints),
+          applyPopularStatPointsToPokemon(
+            currentPokemon,
+            profile.abilityPoints,
+            profile.nature,
+          ),
         );
         setSideStatAdjustments(
           side,
-          createStatAdjustmentsFromPoints(abilityPoints),
+          createStatAdjustmentsFromPoints(
+            profile.abilityPoints,
+            profile.nature,
+          ),
         );
       })
       .catch((error: unknown) => {
-        console.warn("採用率1位の能力ポイントを読み込めませんでした。", error);
+        console.warn(
+          "採用率1位の能力ポイントと性格を読み込めませんでした。",
+          error,
+        );
       });
   }
 

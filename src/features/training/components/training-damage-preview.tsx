@@ -6,8 +6,8 @@ import { championsDamageCalculator } from "@/features/damage-calculator/config/c
 import { useDamageCalculatorCatalogStore } from "@/features/damage-calculator/components/damage-calculator-catalog-store";
 import {
   applyHeldItemSpeedModifier,
+  applyPopularStatPointsToPokemon,
   applyTrainingBuildToPokemon,
-  calculateActualStat,
 } from "@/features/damage-calculator/components/damage-calculator-state";
 import {
   BASE_STAT_LABELS,
@@ -49,25 +49,6 @@ type ReceivedDamagePreviewResult = {
   defenderSpeed: number;
   turnOrder: "先攻" | "後攻" | "同速";
 };
-
-function applyRankedStats(
-  pokemon: DamageCalculatorPokemon,
-  ranking: RankedPokemon,
-) {
-  return {
-    ...pokemon,
-    actualStats: Object.fromEntries(
-      STAT_IDS.map((statId) => [
-        statId,
-        calculateActualStat(
-          pokemon,
-          statId,
-          ranking.abilityPoints[statId] ?? 0,
-        ),
-      ]),
-    ),
-  };
-}
 
 export function TrainingDamagePreview({
   pokemonId,
@@ -179,7 +160,11 @@ export function TrainingDamagePreview({
       (ranking): DamagePreviewResult[] => {
         const defenderSource = pokemonById.get(ranking.formId);
         if (!defenderSource) return [];
-        const defender = applyRankedStats(defenderSource, ranking);
+        const defender = applyPopularStatPointsToPokemon(
+          defenderSource,
+          ranking.abilityPoints,
+          ranking.nature,
+        );
         const defenderSpeed =
           defender.actualStats?.speed ?? defender.stats.speed ?? 0;
         const best = attacker.moves
@@ -249,7 +234,11 @@ export function TrainingDamagePreview({
       (ranking): ReceivedDamagePreviewResult[] => {
         const attackerSource = pokemonById.get(ranking.formId);
         if (!attackerSource) return [];
-        const attacker = applyRankedStats(attackerSource, ranking);
+        const attacker = applyPopularStatPointsToPokemon(
+          attackerSource,
+          ranking.abilityPoints,
+          ranking.nature,
+        );
         const attackerSpeed =
           attacker.actualStats?.speed ?? attacker.stats.speed ?? 0;
         const turnOrder =
@@ -317,7 +306,7 @@ export function TrainingDamagePreview({
           <div>
             <h2>採用率上位100体＋メガシンカへのダメージ</h2>
             <p>
-              メガシンカできる相手はメガシンカ後も含め、現在設定中の能力値・特性・持ち物・技で計算します。相手の能力ポイントは採用率1位の配分です。
+              メガシンカできる相手はメガシンカ後も含め、現在設定中の能力値・特性・持ち物・技で計算します。相手の能力ポイントと性格は採用率1位の構成です。
             </p>
           </div>
           <BattleFormatSelect
