@@ -38,6 +38,8 @@ type FieldOptions = ConstructorParameters<typeof Field>[0];
 
 export type DamageCalculation = {
   damageRolls: number[];
+  /** 1回の技に含まれる各段のダメージ乱数。連続技の途中で発動する回復判定に使う。 */
+  damageRollGroups: number[][];
   minimum: number;
   maximum: number;
   defenderHp: number;
@@ -63,6 +65,17 @@ function flattenDamageRolls(damage: Result["damage"]): number[] {
           : [Number(value)],
       )
     : [Number(damage)];
+}
+
+function groupDamageRolls(damage: Result["damage"]): number[][] {
+  if (!Array.isArray(damage)) return [[Number(damage)]];
+  if (damage.length === 0) return [];
+  if (!Array.isArray(damage[0])) {
+    return [damage.map((value) => Number(value)) as number[]];
+  }
+  return (damage as number[][]).map((rolls) =>
+    rolls.map((value) => Number(value)),
+  );
 }
 
 function hitProbability(rolls: number[], hp: number, hits: 1 | 2) {
@@ -705,6 +718,7 @@ export class SmogonDamageCalculator {
         : sourceResult.kochance();
     const result: DamageCalculation = {
       damageRolls,
+      damageRollGroups: groupDamageRolls(sourceResult.damage),
       minimum,
       maximum,
       defenderHp,

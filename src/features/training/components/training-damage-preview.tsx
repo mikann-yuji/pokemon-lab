@@ -24,6 +24,7 @@ import {
   type TypeCheckerBattleFormat,
 } from "@/features/type-checker/infrastructure/type-checker-repository";
 import type { Nature } from "../infrastructure/training-catalog-repository";
+import { calculateSitrusBerryKo } from "../domain/sitrus-berry-ko";
 import styles from "../styles/training-simulator.module.css";
 
 type DamagePreviewResult = {
@@ -85,6 +86,9 @@ export function TrainingDamagePreview({
   >({ single: [], double: [] });
   const [loadError, setLoadError] = useState("");
   const [rankingsLoaded, setRankingsLoaded] = useState(false);
+  const [considerSitrusBerry, setConsiderSitrusBerry] = useState(false);
+  const canConsiderSitrusBerry = itemId === "sitrus-berry";
+  const sitrusBerryEnabled = canConsiderSitrusBerry && considerSitrusBerry;
 
   useEffect(() => {
     let active = true;
@@ -282,8 +286,14 @@ export function TrainingDamagePreview({
             move: best?.move ?? null,
             minimumPercent: best?.calculation.minimumPercent ?? null,
             maximumPercent: best?.calculation.maximumPercent ?? null,
-            koLabel:
-              best?.calculation.koLabel ?? "採用率上位4位以内に攻撃技なし",
+            koLabel: best
+              ? sitrusBerryEnabled
+                ? calculateSitrusBerryKo(
+                    best.calculation.damageRollGroups,
+                    best.calculation.defenderHp,
+                  ).label
+                : best.calculation.koLabel
+              : "採用率上位4位以内に攻撃技なし",
             attackerSpeed,
             defenderSpeed,
             turnOrder,
@@ -295,6 +305,7 @@ export function TrainingDamagePreview({
     battleFormat,
     pokemonCatalog,
     rankingsByFormat,
+    sitrusBerryEnabled,
     trainedPokemon,
     typeEffectivenessSource,
   ]);
@@ -372,10 +383,27 @@ export function TrainingDamagePreview({
               相手の攻撃技を採用率順に並べた上位4技を比較し、現在設定中の能力値・特性・持ち物に最も大きなダメージを与える技で計算します。
             </p>
           </div>
-          <BattleFormatSelect
-            value={battleFormat}
-            onChange={setBattleFormat}
-          />
+          <div className={styles.damagePreviewControls}>
+            {canConsiderSitrusBerry ? (
+              <label className={styles.sitrusBerryToggle}>
+                <input
+                  type="checkbox"
+                  checked={sitrusBerryEnabled}
+                  onChange={(event) =>
+                    setConsiderSitrusBerry(event.target.checked)
+                  }
+                />
+                <span>
+                  オボンのみ考慮
+                  <small>残りHPが半分以下で1/4回復</small>
+                </span>
+              </label>
+            ) : null}
+            <BattleFormatSelect
+              value={battleFormat}
+              onChange={setBattleFormat}
+            />
+          </div>
         </header>
         {loadError ? (
           <p className={styles.damagePreviewStatus}>{loadError}</p>
