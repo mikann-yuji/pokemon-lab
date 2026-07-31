@@ -7,7 +7,7 @@ import sqlite3InitModule from "/sqlite-wasm/index.mjs";
 
 const DATABASE_FILENAME = "/user.db";
 const CATALOG_DATABASE_FILENAME = "/catalog.db";
-const SUPPORTED_SCHEMA_VERSION = 7;
+const SUPPORTED_SCHEMA_VERSION = 8;
 const CATALOG_MANIFEST_URL = "/catalog-manifest.json";
 
 // OPFS上のSQLite接続はWorker内でだけ保持し、UIスレッドへDBオブジェクトを渡さない。
@@ -186,6 +186,23 @@ function backfillSyncColumns(tableName) {
 function ensureUserSyncSchema() {
   database.exec("BEGIN IMMEDIATE");
   try {
+    database.exec(`
+      CREATE TABLE IF NOT EXISTS survival_check_histories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sync_id TEXT UNIQUE,
+        checked_at INTEGER NOT NULL,
+        team_name TEXT NOT NULL,
+        battle_format TEXT NOT NULL CHECK (battle_format IN ('single', 'double')),
+        team_json TEXT NOT NULL,
+        result_json TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        deleted_at INTEGER
+      );
+
+      CREATE INDEX IF NOT EXISTS survival_check_histories_checked_at
+        ON survival_check_histories(checked_at DESC, id DESC);
+    `);
     addColumnIfMissing("training_builds", "sync_id", "TEXT");
     addColumnIfMissing("training_builds", "created_at", "INTEGER");
     addColumnIfMissing("training_builds", "deleted_at", "INTEGER");
@@ -208,6 +225,9 @@ function ensureUserSyncSchema() {
       "TEXT NOT NULL DEFAULT '[]'",
     );
     addColumnIfMissing("battle_records", "deleted_at", "INTEGER");
+    addColumnIfMissing("survival_check_histories", "sync_id", "TEXT");
+    addColumnIfMissing("survival_check_histories", "created_at", "INTEGER");
+    addColumnIfMissing("survival_check_histories", "deleted_at", "INTEGER");
 
     for (const tableName of [
       "training_builds",
@@ -217,6 +237,7 @@ function ensureUserSyncSchema() {
       "damage_history",
       "training_matchup_notes",
       "battle_records",
+      "survival_check_histories",
     ]) {
       backfillSyncColumns(tableName);
     }
@@ -230,6 +251,8 @@ function ensureUserSyncSchema() {
         ON training_matchup_notes(sync_id);
       CREATE UNIQUE INDEX IF NOT EXISTS battle_records_sync_id
         ON battle_records(sync_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS survival_check_histories_sync_id
+        ON survival_check_histories(sync_id);
       PRAGMA user_version = ${SUPPORTED_SCHEMA_VERSION};
     `);
     database.exec("COMMIT");
@@ -408,10 +431,26 @@ function migrateSchema() {
         CREATE INDEX battle_records_battle_at
           ON battle_records(battle_at DESC, id DESC);
 
+        CREATE TABLE survival_check_histories (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          sync_id TEXT UNIQUE,
+          checked_at INTEGER NOT NULL,
+          team_name TEXT NOT NULL,
+          battle_format TEXT NOT NULL CHECK (battle_format IN ('single', 'double')),
+          team_json TEXT NOT NULL,
+          result_json TEXT NOT NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL,
+          deleted_at INTEGER
+        );
+
+        CREATE INDEX survival_check_histories_checked_at
+          ON survival_check_histories(checked_at DESC, id DESC);
+
         INSERT INTO schema_metadata (key, value)
         VALUES ('database_created_at', CAST(unixepoch() AS TEXT));
 
-        PRAGMA user_version = 7;
+        PRAGMA user_version = 8;
       `);
       database.exec("COMMIT");
     } catch (error) {
@@ -537,6 +576,22 @@ function migrateSchema() {
 
     CREATE INDEX IF NOT EXISTS battle_records_battle_at
       ON battle_records(battle_at DESC, id DESC);
+
+    CREATE TABLE IF NOT EXISTS survival_check_histories (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      sync_id TEXT UNIQUE,
+      checked_at INTEGER NOT NULL,
+      team_name TEXT NOT NULL,
+      battle_format TEXT NOT NULL CHECK (battle_format IN ('single', 'double')),
+      team_json TEXT NOT NULL,
+      result_json TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      deleted_at INTEGER
+    );
+
+    CREATE INDEX IF NOT EXISTS survival_check_histories_checked_at
+      ON survival_check_histories(checked_at DESC, id DESC);
   `);
 
   ensureUserSyncSchema();

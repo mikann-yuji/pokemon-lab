@@ -417,6 +417,7 @@ export function DamageCalculatorView({
       ) : null}
       {typeEffectivenessSource ? (
         <DamageSurvivalCheck
+          team={selectedTeams.attacker}
           members={survivalTeamMembers}
           pokemonCatalog={pokemonCatalog}
           typeEffectivenessSource={typeEffectivenessSource}

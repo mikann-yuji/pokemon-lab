@@ -7,7 +7,11 @@ import {
   type RankedPokemon,
   type TypeCheckerBattleFormat,
 } from "@/features/type-checker/infrastructure/type-checker-repository";
-import type { TrainingBuild } from "@/features/training/infrastructure/training-build-repository";
+import type {
+  BattleTeam,
+  TrainingBuild,
+} from "@/features/training/infrastructure/training-build-repository";
+import { USER_RECORDS_LOCAL_CHANGED_EVENT } from "@/components/sync/user-database-sync";
 import { championsDamageCalculator } from "../config/champions-damage-ruleset";
 import type {
   DamageCalculatorMove,
@@ -22,6 +26,11 @@ import {
   STAT_IDS,
 } from "./damage-calculator-display";
 import { hasManualAbilityCondition } from "./damage-calculator-form-widgets";
+import {
+  getSurvivalCheckHistories,
+  saveSurvivalCheckHistory,
+  type SurvivalCheckHistory,
+} from "../infrastructure/survival-check-history-repository";
 import type { TypeEffectivenessSource } from "@/domain/type-matchup";
 import styles from "../styles/damage-calculator.module.css";
 
@@ -186,10 +195,12 @@ function calculateMemberResults(
 }
 
 export function DamageSurvivalCheck({
+  team,
   members,
   pokemonCatalog,
   typeEffectivenessSource,
 }: {
+  team: BattleTeam | null;
   members: SurvivalTeamMember[];
   pokemonCatalog: DamageCalculatorPokemon[];
   typeEffectivenessSource: TypeEffectivenessSource;
@@ -213,6 +224,16 @@ export function DamageSurvivalCheck({
   const [memberConditions, setMemberConditions] = useState<
     Record<number, SurvivalMemberCondition>
   >({});
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [histories, setHistories] = useState<SurvivalCheckHistory[]>([]);
+  const [selectedHistory, setSelectedHistory] =
+    useState<SurvivalCheckHistory | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState("");
+  const [historySaveStatus, setHistorySaveStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const [completedAt, setCompletedAt] = useState(0);
 
   useEffect(() => {
     if (!open) return;
@@ -276,7 +297,69 @@ export function DamageSurvivalCheck({
     setLoading(true);
     setLoadError("");
     setMemberConditions({});
+    setHistorySaveStatus("idle");
+    setCompletedAt(0);
     setOpen(true);
+  }
+
+  function openHistory() {
+    setOpen(false);
+    setHistoryOpen(true);
+    setSelectedHistory(null);
+    setHistoryLoading(true);
+    setHistoryError("");
+    void getSurvivalCheckHistories()
+      .then(setHistories)
+      .catch((error: unknown) => {
+        console.error("勝ち残り確認履歴を読み込めませんでした。", error);
+        setHistoryError("確認履歴を読み込めませんでした。");
+      })
+      .finally(() => setHistoryLoading(false));
+  }
+
+  async function persistCompletedHistory(
+    rankings: RankedPokemon[],
+    checkedAt: number,
+  ) {
+    setHistorySaveStatus("saving");
+    try {
+      const pokemonById = new Map(
+        pokemonCatalog.map((pokemon) => [pokemon.id, pokemon]),
+      );
+      const saved = await saveSurvivalCheckHistory({
+        checkedAt,
+        teamName: team?.name || "バトルチーム",
+        battleFormat,
+        members: members.map(({ build, pokemon }) => ({
+          pokemonId: pokemon.id,
+          pokemonName: pokemon.nameJa,
+          buildName: build.name || pokemon.nameJa,
+        })),
+        remainingTargets: rankings.flatMap((ranking) => {
+          const pokemon = pokemonById.get(ranking.formId);
+          return pokemon
+            ? [
+                {
+                  pokemonId: pokemon.id,
+                  pokemonName: pokemon.nameJa,
+                  rank: ranking.rank,
+                },
+              ]
+            : [];
+        }),
+      });
+      setHistories((current) => [
+        saved,
+        ...current.filter(({ id }) => id !== saved.id),
+      ]);
+      setHistorySaveStatus("saved");
+      window.dispatchEvent(
+        new CustomEvent(USER_RECORDS_LOCAL_CHANGED_EVENT),
+      );
+    } catch (error) {
+      console.error("勝ち残り確認結果を保存できませんでした。", error);
+      setHistorySaveStatus("error");
+    }
   }
 
   function updateCurrentRank(statId: SurvivalRankStatId, rank: number) {
@@ -318,7 +401,10 @@ export function DamageSurvivalCheck({
     setRemainingRankings(nextRemaining);
     setUnfavorableFormIds(new Set());
     if (memberIndex >= members.length - 1) {
+      const checkedAt = Date.now();
       setCompleted(true);
+      setCompletedAt(checkedAt);
+      void persistCompletedHistory(nextRemaining, checkedAt);
       return;
     }
     setMemberIndex((current) => current + 1);
@@ -332,6 +418,8 @@ export function DamageSurvivalCheck({
     setMemberIndex(0);
     setUnfavorableFormIds(new Set());
     setMemberConditions({});
+    setHistorySaveStatus("idle");
+    setCompletedAt(0);
     setCompleted(false);
   }
 
@@ -339,6 +427,13 @@ export function DamageSurvivalCheck({
 
   return (
     <>
+      <button
+        className={styles.survivalHistoryButton}
+        type="button"
+        onClick={openHistory}
+      >
+        履歴確認
+      </button>
       <button
         className={styles.survivalCheckButton}
         type="button"
@@ -402,12 +497,47 @@ export function DamageSurvivalCheck({
             {!loading && !loadError && completed ? (
               <>
                 <div className={styles.survivalProgress}>
-                  <strong>チーム確認完了</strong>
-                  <span>
-                    最後まで残った相手は{remainingRankings.length}体です。
-                  </span>
+                  <div className={styles.survivalUsedPokemon}>
+                    {members.map(({ build, pokemon }) => (
+                      pokemon.imageUrl ?? pokemon.fallbackImageUrl ? (
+                        <Image
+                          key={build.id ?? pokemon.id}
+                          src={
+                            (pokemon.imageUrl ??
+                              pokemon.fallbackImageUrl) as string
+                          }
+                          alt={pokemon.nameJa}
+                          title={build.name || pokemon.nameJa}
+                          width={30}
+                          height={30}
+                          unoptimized
+                        />
+                      ) : null
+                    ))}
+                  </div>
+                  <div className={styles.survivalMemberSummary}>
+                    <strong>
+                      {team?.name || "バトルチーム"}　確認完了
+                    </strong>
+                    <span>
+                      {completedAt ? `${formatHistoryDate(completedAt)}　` : ""}
+                      最後まで残った相手は{remainingRankings.length}体です。
+                      {historySaveStatus === "saving"
+                        ? " 履歴へ保存中…"
+                        : historySaveStatus === "saved"
+                          ? " 履歴へ自動保存しました。"
+                          : historySaveStatus === "error"
+                            ? " 履歴の自動保存に失敗しました。"
+                            : ""}
+                    </span>
+                  </div>
                 </div>
                 <div className={styles.survivalList}>
+                  {results.length === 0 ? (
+                    <p className={styles.survivalEmptyResult}>
+                      最後まで残った相手はいません。
+                    </p>
+                  ) : null}
                   {results.map(({ ranking, defender }) => (
                     <article key={defender.id}>
                       {defender.imageUrl ?? defender.fallbackImageUrl ? (
@@ -560,7 +690,209 @@ export function DamageSurvivalCheck({
           </section>
         </div>
       ) : null}
+      {historyOpen ? (
+        <div
+          className={styles.survivalOverlay}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="survival-history-title"
+        >
+          <button
+            className={styles.survivalBackdrop}
+            type="button"
+            aria-label="勝ち残り確認履歴を閉じる"
+            onClick={() => setHistoryOpen(false)}
+          />
+          <section
+            className={`${styles.survivalPanel} ${styles.survivalHistoryPanel}`}
+          >
+            <header className={styles.survivalHeader}>
+              <div>
+                <small>BATTLE TEAM SURVIVAL HISTORY</small>
+                <h2 id="survival-history-title">
+                  {selectedHistory ? "勝ち残り確認結果" : "勝ち残り確認履歴"}
+                </h2>
+              </div>
+              <span className={styles.survivalHistoryHeaderMeta}>
+                {selectedHistory
+                  ? selectedHistory.battleFormat === "single"
+                    ? "シングル"
+                    : "ダブル"
+                  : `${histories.length}件`}
+              </span>
+              <button
+                type="button"
+                aria-label="閉じる"
+                onClick={() => setHistoryOpen(false)}
+              >
+                ×
+              </button>
+            </header>
+
+            <div className={styles.survivalHistoryBody}>
+              {selectedHistory ? (
+                <>
+                <div className={styles.survivalHistoryDetailHeader}>
+                  <button
+                    className={styles.survivalHistoryBackButton}
+                    type="button"
+                    onClick={() => setSelectedHistory(null)}
+                  >
+                    ← 履歴一覧
+                  </button>
+                  <div className={styles.survivalHistoryDetailTitle}>
+                    <strong>{selectedHistory.teamName}</strong>
+                    <span>{formatHistoryDate(selectedHistory.checkedAt)}</span>
+                  </div>
+                  <HistoryPokemonImages
+                    pokemonIds={selectedHistory.members.map(
+                      ({ pokemonId }) => pokemonId,
+                    )}
+                    pokemonCatalog={pokemonCatalog}
+                  />
+                </div>
+                <div className={styles.survivalList}>
+                  {selectedHistory.remainingTargets.length === 0 ? (
+                    <p className={styles.survivalEmptyResult}>
+                      最後まで残った相手はいません。
+                    </p>
+                  ) : null}
+                  {selectedHistory.remainingTargets.map((target) => {
+                    const pokemon = pokemonCatalog.find(
+                      ({ id }) => id === target.pokemonId,
+                    );
+                    return (
+                      <article key={`${target.rank}:${target.pokemonId}`}>
+                        {pokemon ? (
+                          <HistoryPokemonImage
+                            pokemon={pokemon}
+                            alt={target.pokemonName}
+                            size={34}
+                          />
+                        ) : null}
+                        <div>
+                          <strong>
+                            {target.rank}位 {target.pokemonName}
+                          </strong>
+                          <span>チームで対応候補に残りました</span>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+                </>
+              ) : (
+                <>
+                {historyLoading ? (
+                  <p className={styles.survivalStatus}>履歴を読み込み中…</p>
+                ) : null}
+                {historyError ? (
+                  <p className={styles.survivalStatus} role="alert">
+                    {historyError}
+                  </p>
+                ) : null}
+                {!historyLoading && !historyError ? (
+                  <div className={styles.survivalHistoryList}>
+                    {histories.length === 0 ? (
+                      <p className={styles.survivalEmptyResult}>
+                        保存された確認履歴はありません。
+                      </p>
+                    ) : null}
+                    {histories.map((history) => (
+                      <button
+                        key={history.id}
+                        className={styles.survivalHistoryEntry}
+                        type="button"
+                        onClick={() => setSelectedHistory(history)}
+                      >
+                        <span className={styles.survivalHistoryEntryText}>
+                          <strong>{formatHistoryDate(history.checkedAt)}</strong>
+                          <small>
+                            {history.teamName}・
+                            {history.battleFormat === "single"
+                              ? "シングル"
+                              : "ダブル"}
+                          </small>
+                        </span>
+                        <HistoryPokemonImages
+                          pokemonIds={history.members.map(
+                            ({ pokemonId }) => pokemonId,
+                          )}
+                          pokemonCatalog={pokemonCatalog}
+                        />
+                        <span className={styles.survivalHistoryEntryCount}>
+                          残り{history.remainingTargets.length}体
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+                </>
+              )}
+            </div>
+          </section>
+        </div>
+      ) : null}
     </>
+  );
+}
+
+function formatHistoryDate(timestamp: number) {
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(new Date(timestamp));
+}
+
+function HistoryPokemonImage({
+  pokemon,
+  alt,
+  size,
+}: {
+  pokemon: DamageCalculatorPokemon;
+  alt: string;
+  size: number;
+}) {
+  const imageUrl = pokemon.imageUrl ?? pokemon.fallbackImageUrl;
+  return imageUrl ? (
+    <Image
+      src={imageUrl}
+      alt={alt}
+      width={size}
+      height={size}
+      unoptimized
+    />
+  ) : null;
+}
+
+function HistoryPokemonImages({
+  pokemonIds,
+  pokemonCatalog,
+}: {
+  pokemonIds: number[];
+  pokemonCatalog: DamageCalculatorPokemon[];
+}) {
+  const pokemonById = new Map(
+    pokemonCatalog.map((pokemon) => [pokemon.id, pokemon]),
+  );
+  return (
+    <span className={styles.survivalHistoryPokemonImages}>
+      {pokemonIds.map((pokemonId, index) => {
+        const pokemon = pokemonById.get(pokemonId);
+        return pokemon ? (
+          <HistoryPokemonImage
+            key={`${pokemonId}:${index}`}
+            pokemon={pokemon}
+            alt={pokemon.nameJa}
+            size={26}
+          />
+        ) : null;
+      })}
+    </span>
   );
 }
 

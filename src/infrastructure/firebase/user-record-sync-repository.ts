@@ -22,6 +22,7 @@ const SYNC_TABLES = [
   "damage_history",
   "training_matchup_notes",
   "battle_records",
+  "survival_check_histories",
 ] as const;
 
 type SyncTable = (typeof SYNC_TABLES)[number];
@@ -215,6 +216,7 @@ async function exportLocalRecords(): Promise<UserSyncRecord[]> {
     damageHistory,
     matchupNotes,
     battleRecords,
+    survivalCheckHistories,
   ] = await Promise.all([
     sqliteWorkerClient.query(`
       SELECT sync_id, name, content_key, pokemon_id, nature, item_id, ability_id,
@@ -279,6 +281,12 @@ async function exportLocalRecords(): Promise<UserSyncRecord[]> {
       SELECT sync_id, battle_at, memo, image_data_url, opponent_names_json,
              created_at, updated_at, deleted_at
       FROM battle_records
+      WHERE sync_id IS NOT NULL
+    `),
+    sqliteWorkerClient.query(`
+      SELECT sync_id, checked_at, team_name, battle_format, team_json,
+             result_json, created_at, updated_at, deleted_at
+      FROM survival_check_histories
       WHERE sync_id IS NOT NULL
     `),
   ]);
@@ -389,6 +397,23 @@ async function exportLocalRecords(): Promise<UserSyncRecord[]> {
         memo: String(row.memo),
         imageDataUrl: String(row.image_data_url),
         opponentNamesJson: String(row.opponent_names_json ?? "[]"),
+        createdAt: Number(row.created_at),
+      },
+    });
+  }
+
+  for (const row of survivalCheckHistories) {
+    records.push({
+      table: "survival_check_histories",
+      recordId: String(row.sync_id),
+      updatedAt: Number(row.updated_at),
+      deletedAt: numberOrNull(row.deleted_at),
+      data: {
+        checkedAt: Number(row.checked_at),
+        teamName: String(row.team_name),
+        battleFormat: String(row.battle_format),
+        teamJson: String(row.team_json),
+        resultJson: String(row.result_json),
         createdAt: Number(row.created_at),
       },
     });
@@ -521,6 +546,35 @@ async function importRemoteRecords(records: UserSyncRecord[]) {
           String(data.side ?? "attacker"),
           Number(data.pokemonId ?? 0),
           data.moveId === null ? null : String(data.moveId ?? ""),
+          Number(data.createdAt ?? record.updatedAt),
+          record.updatedAt,
+          record.deletedAt,
+        ],
+      });
+    }
+
+    if (record.table === "survival_check_histories") {
+      statements.push({
+        sql: `INSERT INTO survival_check_histories (
+               sync_id, checked_at, team_name, battle_format, team_json,
+               result_json, created_at, updated_at, deleted_at
+             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(sync_id) DO UPDATE SET
+               checked_at = excluded.checked_at,
+               team_name = excluded.team_name,
+               battle_format = excluded.battle_format,
+               team_json = excluded.team_json,
+               result_json = excluded.result_json,
+               created_at = excluded.created_at,
+               updated_at = excluded.updated_at,
+               deleted_at = excluded.deleted_at`,
+        bind: [
+          record.recordId,
+          Number(data.checkedAt ?? record.updatedAt),
+          String(data.teamName ?? ""),
+          String(data.battleFormat ?? "single"),
+          String(data.teamJson ?? "[]"),
+          String(data.resultJson ?? "[]"),
           Number(data.createdAt ?? record.updatedAt),
           record.updatedAt,
           record.deletedAt,
