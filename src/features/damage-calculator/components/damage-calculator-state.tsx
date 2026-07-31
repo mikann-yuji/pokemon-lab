@@ -108,6 +108,46 @@ export function createDefaultAdjustmentState(): StatAdjustmentState {
 }
 
 /**
+ * 採用率1位の能力ポイント配分を、片側の入力UIへ反映できる補正値に変換する。
+ */
+export function createStatAdjustmentsFromPoints(
+  abilityPoints: Record<string, number>,
+): StatAdjustmentState[DamageSide] {
+  return Object.fromEntries(
+    ADJUSTABLE_STAT_IDS.map((statId) => [
+      statId,
+      {
+        point: abilityPoints[statId] ?? 0,
+        rank: 0,
+        nature: "neutral",
+      },
+    ]),
+  ) as StatAdjustmentState[DamageSide];
+}
+
+/**
+ * 採用率1位の能力ポイント配分から、素早さを含む全能力の実数値を作る。
+ */
+export function applyPopularStatPointsToPokemon(
+  pokemon: DamageCalculatorPokemon,
+  abilityPoints: Record<string, number>,
+): DamageCalculatorPokemon {
+  return {
+    ...pokemon,
+    actualStats: Object.fromEntries(
+      STAT_IDS.map((statId) => [
+        statId,
+        calculateActualStat(
+          pokemon,
+          statId,
+          abilityPoints[statId] ?? 0,
+        ),
+      ]),
+    ),
+  };
+}
+
+/**
  * ダメージ計算ページで、Lv.50・個体値31前提の実数値を計算する。
  *
  * @param pokemon - 実数値を計算する対象ポケモン。

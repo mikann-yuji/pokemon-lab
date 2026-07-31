@@ -2,7 +2,7 @@
 
 /** Page-level state controller for the damage calculator. */
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { championsDamageCalculator } from "../config/champions-damage-ruleset";
 import type {
   DamageCalculatorHeldItem,
@@ -31,10 +31,12 @@ import type {
 import {
   applyAbility,
   applyHeldItem,
+  applyPopularStatPointsToPokemon,
   applyStatAdjustment,
   applyTrainingBuildToPokemon,
   createSpeedComparisonRows,
   createStatAdjustmentsFromBuild,
+  createStatAdjustmentsFromPoints,
   getAegislashForm,
   getRelevantStatIds,
   switchAegislashForm,
@@ -43,6 +45,7 @@ import { useDamageCalculatorStore } from "./damage-calculator-store";
 import { useDamageCalculatorUserData } from "./use-damage-calculator-user-data";
 import { useDamageHistoryPersistence } from "./use-damage-history-persistence";
 import { getVariableMovePowers } from "../domain/variable-move-power";
+import { getPopularStatPoints } from "../infrastructure/popular-stat-points-repository";
 
 /**
  * ダメージ計算ページで、画面状態・保存済みデータ・計算実行をつなぐcontroller。
@@ -69,6 +72,10 @@ export function DamageCalculator({
     power: number;
   } | null>(null);
   const [useMaximumHits, setUseMaximumHits] = useState(false);
+  const directSelectionRequestRef = useRef<Record<DamageSide, number>>({
+    attacker: 0,
+    defender: 0,
+  });
   const attacker = useDamageCalculatorStore((state) => state.pokemon.attacker);
   const defender = useDamageCalculatorStore((state) => state.pokemon.defender);
   const attackerQuery = useDamageCalculatorStore((state) => state.query.attacker);
@@ -226,14 +233,51 @@ export function DamageCalculator({
   };
 
   /**
+   * 育成案を使わず直接選んだポケモンへ、採用率1位の能力ポイントを非同期反映する。
+   */
+  function selectDirectPokemon(
+    side: DamageSide,
+    pokemon: DamageCalculatorPokemon | null,
+  ) {
+    const requestId = directSelectionRequestRef.current[side] + 1;
+    directSelectionRequestRef.current[side] = requestId;
+    selectPokemon(side, pokemon);
+    resetSideForDirectPokemon(side);
+    if (!pokemon) return;
+
+    void getPopularStatPoints(pokemon.id)
+      .then((abilityPoints) => {
+        if (
+          !abilityPoints ||
+          directSelectionRequestRef.current[side] !== requestId
+        ) {
+          return;
+        }
+        const currentPokemon =
+          useDamageCalculatorStore.getState().pokemon[side];
+        if (!currentPokemon || currentPokemon.id !== pokemon.id) return;
+        selectPokemon(
+          side,
+          applyPopularStatPointsToPokemon(currentPokemon, abilityPoints),
+        );
+        setSideStatAdjustments(
+          side,
+          createStatAdjustmentsFromPoints(abilityPoints),
+        );
+      })
+      .catch((error: unknown) => {
+        console.warn("採用率1位の能力ポイントを読み込めませんでした。", error);
+      });
+  }
+
+  /**
    * ダメージ計算ページで、攻撃側ポケモンの直接選択を反映する。
    *
    * @param pokemon - 新しく攻撃側に選ぶポケモン。選択解除ならnull。
    * @returns 戻り値なし。
    */
   function selectAttacker(pokemon: DamageCalculatorPokemon | null) {
-    selectPokemon("attacker", pokemon);
-    resetSideForDirectPokemon("attacker");
+    selectDirectPokemon("attacker", pokemon);
     setMetronomeConsecutiveUseCount(1);
     setMoveId("");
     setPreservedMove(null);
@@ -246,8 +290,7 @@ export function DamageCalculator({
    * @returns 戻り値なし。
    */
   function selectDefender(pokemon: DamageCalculatorPokemon | null) {
-    selectPokemon("defender", pokemon);
-    resetSideForDirectPokemon("defender");
+    selectDirectPokemon("defender", pokemon);
   }
 
   /**
@@ -335,6 +378,7 @@ export function DamageCalculator({
    * @returns 戻り値なし。
    */
   function selectTeamMember(side: DamageSide, build: TrainingBuild) {
+    directSelectionRequestRef.current[side] += 1;
     const pokemon = pokemonCatalog.find(({ id }) => id === build.pokemonId);
     if (!pokemon) return;
 
@@ -392,8 +436,7 @@ export function DamageCalculator({
     if (!pokemon) return;
 
     if (side === "attacker") {
-      selectPokemon("attacker", pokemon);
-      setSelectedBuildId("attacker", null);
+      selectDirectPokemon("attacker", pokemon);
       setPreservedMove(null);
       setMoveId(
         pokemon.moves.some(({ id }) => id === history.moveId)
@@ -401,8 +444,7 @@ export function DamageCalculator({
           : "",
       );
     } else {
-      selectPokemon("defender", pokemon);
-      setSelectedBuildId("defender", null);
+      selectDirectPokemon("defender", pokemon);
     }
   }
 
