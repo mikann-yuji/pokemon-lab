@@ -492,9 +492,21 @@ function getAbilityPowerMultiplier(input: DamageCalculationInput) {
  * @returns 攻撃または特攻にかける倍率。
  */
 function getAbilityAttackingStatMultiplier(input: DamageCalculationInput) {
-  return getAbilityModifiers("attacker", input)
+  const catalogMultiplier = getAbilityModifiers("attacker", input)
     .filter((modifier) => modifier.modifierKind === "attacking_stat")
     .reduce((multiplier, modifier) => multiplier * modifier.multiplier, 1);
+  const abilityId = input.attacker.selectedAbility?.id;
+
+  // ちからもち・ヨガパワーは物理技で攻撃実数値を2倍にする常時特性。
+  // 古いcatalog.dbに補正行がない端末でも、特性選択直後から正しく計算する。
+  if (
+    input.move.damageClass === "physical" &&
+    (abilityId === "huge-power" || abilityId === "pure-power")
+  ) {
+    return Math.max(2, catalogMultiplier);
+  }
+
+  return catalogMultiplier;
 }
 
 /**
@@ -578,18 +590,35 @@ function applyAttackingStatMultiplier(
   pokemon: Pokemon,
   move: DamageCalculatorMove,
   multiplier: number,
+  ruleset: DamageCalculatorRuleset,
 ) {
   if (multiplier === 1) return;
 
   const stat = move.damageClass === "physical" ? "atk" : "spa";
-  pokemon.rawStats[stat] = Math.max(
+  const databaseStat =
+    move.damageClass === "physical" ? "attack" : "special-attack";
+  const multipliedStat = Math.max(
     1,
     Math.floor(pokemon.rawStats[stat] * multiplier),
   );
-  pokemon.stats[stat] = Math.max(
-    1,
-    Math.floor(pokemon.stats[stat] * multiplier),
-  );
+  const multipliedBaseStat = findBaseStatForActualStat({
+    stat: databaseStat,
+    actualStat: multipliedStat,
+    ruleset,
+  });
+
+  // @smogon/calcはcalculate開始時にPokemonをcloneし、species.baseStatsから
+  // rawStatsを作り直す。実数値だけの変更は失われるため、clone元の種族値にも
+  // 同じ実数値を再現できる値を保持しておく。
+  pokemon.species = {
+    ...pokemon.species,
+    baseStats: {
+      ...pokemon.species.baseStats,
+      [stat]: multipliedBaseStat,
+    },
+  };
+  pokemon.rawStats[stat] = multipliedStat;
+  pokemon.stats[stat] = multipliedStat;
 }
 
 /**
@@ -649,6 +678,7 @@ export class SmogonDamageCalculator {
       input.move,
       getAttackingStatItemMultiplier(input) *
         getAbilityAttackingStatMultiplier(input),
+      this.ruleset,
     );
     const field = new Field({
       ...this.ruleset.createField?.(input),
