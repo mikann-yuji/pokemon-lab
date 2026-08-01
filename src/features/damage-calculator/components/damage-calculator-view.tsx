@@ -239,7 +239,12 @@ export function DamageCalculatorView({
   );
 
   return (
-    <form className={styles.calculator} onSubmit={(event) => event.preventDefault()}>
+    <form
+      className={styles.calculator}
+      data-weather={weatherId || undefined}
+      data-terrain={terrainId || undefined}
+      onSubmit={(event) => event.preventDefault()}
+    >
       {/* 攻撃側。技選択と攻撃側補正はchildrenとしてこのパネルに差し込む。 */}
       <BattleSidePanel
         side="attacker"

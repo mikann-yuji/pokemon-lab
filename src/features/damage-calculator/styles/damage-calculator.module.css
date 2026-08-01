@@ -1,11 +1,59 @@
 .page {
+  --weather-background: linear-gradient(transparent, transparent);
+  --terrain-background: linear-gradient(transparent, transparent);
+
   min-height: 100vh;
   padding: clamp(1rem, 4vw, 2.5rem);
   padding-bottom: calc(8.5rem + env(safe-area-inset-bottom));
   background:
+    var(--weather-background),
+    var(--terrain-background),
     radial-gradient(circle at 10% 10%, rgb(255 213 79 / 25%), transparent 22rem),
     linear-gradient(145deg, #eef7ff, #e5f0fa 55%, #f7fbff);
   color: #172b4d;
+  transition: background 240ms ease;
+}
+
+.page:has(.calculator[data-weather="sun"]) {
+  --weather-background: linear-gradient(145deg, rgb(255 224 130 / 34%), rgb(255 245 210 / 16%));
+}
+
+.page:has(.calculator[data-weather="rain"]),
+.page:has(.calculator[data-weather="heavy-rain"]) {
+  --weather-background: linear-gradient(145deg, rgb(100 181 246 / 27%), rgb(187 222 251 / 16%));
+}
+
+.page:has(.calculator[data-weather="sand"]) {
+  --weather-background: linear-gradient(145deg, rgb(210 180 140 / 30%), rgb(239 225 196 / 16%));
+}
+
+.page:has(.calculator[data-weather="snow"]),
+.page:has(.calculator[data-weather="hail"]) {
+  --weather-background: linear-gradient(145deg, rgb(178 235 242 / 30%), rgb(240 249 255 / 20%));
+}
+
+.page:has(.calculator[data-weather="harsh-sunshine"]) {
+  --weather-background: linear-gradient(145deg, rgb(255 171 64 / 34%), rgb(255 224 178 / 16%));
+}
+
+.page:has(.calculator[data-weather="strong-winds"]) {
+  --weather-background: linear-gradient(145deg, rgb(128 203 196 / 25%), rgb(207 235 239 / 16%));
+}
+
+.page:has(.calculator[data-terrain="electric"]) {
+  --terrain-background: radial-gradient(circle at 82% 18%, rgb(255 235 59 / 28%), transparent 32rem);
+}
+
+.page:has(.calculator[data-terrain="grassy"]) {
+  --terrain-background: radial-gradient(circle at 82% 18%, rgb(129 199 132 / 28%), transparent 32rem);
+}
+
+.page:has(.calculator[data-terrain="psychic"]) {
+  --terrain-background: radial-gradient(circle at 82% 18%, rgb(206 147 216 / 27%), transparent 32rem);
+}
+
+.page:has(.calculator[data-terrain="misty"]) {
+  --terrain-background: radial-gradient(circle at 82% 18%, rgb(244 143 177 / 24%), transparent 32rem);
 }
 
 .hero {
