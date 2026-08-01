@@ -21,6 +21,7 @@ import {
 import {
   getTypeEffectiveness,
   type TypeEffectivenessSource,
+  type TypeName,
 } from "@/domain/type-matchup";
 import { DamageCalculatorView } from "./damage-calculator-view";
 import type {
@@ -47,6 +48,30 @@ import { useDamageHistoryPersistence } from "./use-damage-history-persistence";
 import { getVariableMovePowers } from "../domain/variable-move-power";
 import { resolveAbilityMoveConversion } from "../domain/ability-move-conversion";
 import { getPopularStatProfile } from "../infrastructure/popular-stat-points-repository";
+
+function getWeatherDamageNote(
+  weather: DamageCalculatorWeather | null,
+  moveType: TypeName,
+) {
+  if (!weather) return "";
+  if (["Sun", "Harsh Sunshine"].includes(weather.smogonWeather)) {
+    if (moveType === "Fire") return "（ほのお技×1.5）";
+    if (moveType === "Water") {
+      return weather.smogonWeather === "Harsh Sunshine"
+        ? "（みず技は無効）"
+        : "（みず技×0.5）";
+    }
+  }
+  if (["Rain", "Heavy Rain"].includes(weather.smogonWeather)) {
+    if (moveType === "Water") return "（みず技×1.5）";
+    if (moveType === "Fire") {
+      return weather.smogonWeather === "Heavy Rain"
+        ? "（ほのお技は無効）"
+        : "（ほのお技×0.5）";
+    }
+  }
+  return "";
+}
 
 /**
  * ダメージ計算ページで、画面状態・保存済みデータ・計算実行をつなぐcontroller。
@@ -574,6 +599,14 @@ export function DamageCalculator({
             defender.types,
             typeEffectivenessSource,
           ),
+          fieldConditionLabels: [
+            ...(selectedWeather
+              ? [
+                  `天候: ${selectedWeather.name}${getWeatherDamageNote(selectedWeather, effectiveMoveType)}`,
+                ]
+              : []),
+            ...(selectedTerrain ? [`フィールド: ${selectedTerrain.name}`] : []),
+          ],
         },
         error: null,
       };
@@ -594,6 +627,8 @@ export function DamageCalculator({
     selectedMoveBase,
     selectedMovePower,
     calculationHits,
+    selectedTerrain,
+    selectedWeather,
     typeEffectivenessSource,
   ]);
   useDamageHistoryPersistence({

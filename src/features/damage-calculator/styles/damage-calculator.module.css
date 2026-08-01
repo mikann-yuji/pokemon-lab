@@ -980,13 +980,31 @@ a.pokemonSummary:focus-visible {
 
 .fieldConditions {
   display: grid;
-  grid-template-columns: minmax(10rem, 1fr) repeat(2, minmax(10rem, 14rem));
+  grid-template-columns: minmax(10rem, 1fr) repeat(2, minmax(10rem, 14rem)) auto;
   gap: 0.8rem;
   align-items: end;
   padding: 0.85rem;
   border: 1px solid #c9d9ec;
   border-radius: 12px;
   background: #f8fbff;
+}
+
+.fieldConditionsReset {
+  min-height: 42px;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #9db4d1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #2857a4;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.fieldConditionsReset:disabled {
+  cursor: default;
+  opacity: 0.42;
 }
 
 .fieldConditions p {
@@ -1682,6 +1700,23 @@ a.pokemonSummary:focus-visible {
   color: #91e687;
   font-size: 0.58rem;
   font-weight: 950;
+}
+
+.resultConditions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: -0.05rem 0 0.35rem;
+}
+
+.resultConditions span {
+  padding: 0.12rem 0.35rem;
+  border: 1px solid rgb(255 209 102 / 45%);
+  border-radius: 999px;
+  background: rgb(255 209 102 / 16%);
+  color: #ffe29a;
+  font-size: 0.58rem;
+  font-weight: 900;
 }
 
 .outcomeGrid {
