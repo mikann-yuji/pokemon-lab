@@ -31,5 +31,4 @@ export type CalculationResult = {
   defenderName: string;
   moveName: string;
   moveEffectiveness: number;
-  fieldConditionLabels: string[];
 };

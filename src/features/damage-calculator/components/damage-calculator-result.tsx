@@ -59,13 +59,6 @@ export function DamageResult({ result }: { result: CalculationResult }) {
           <small>x{result.moveEffectiveness}</small>
         </span>
       </div>
-      {result.fieldConditionLabels.length > 0 ? (
-        <div className={styles.resultConditions} aria-label="適用中の場の条件">
-          {result.fieldConditionLabels.map((label) => (
-            <span key={label}>{label}</span>
-          ))}
-        </div>
-      ) : null}
       <div className={styles.outcomeGrid}>
         <DamageOutcome title="通常" outcome={result.normal} />
         <DamageOutcome title="急所" outcome={result.critical} critical />

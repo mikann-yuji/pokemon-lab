@@ -379,10 +379,6 @@ export function DamageCalculatorView({
         terrainId={terrainId}
         onWeatherChange={onWeatherChange}
         onTerrainChange={onTerrainChange}
-        onReset={() => {
-          onWeatherChange("");
-          onTerrainChange("");
-        }}
       />
 
       <div className={styles.conditions}>
@@ -612,7 +608,6 @@ function FieldConditionSection({
   terrainId,
   onWeatherChange,
   onTerrainChange,
-  onReset,
 }: {
   weathers: DamageCalculatorWeather[];
   terrains: DamageCalculatorTerrain[];
@@ -620,7 +615,6 @@ function FieldConditionSection({
   terrainId: string;
   onWeatherChange: (weatherId: string) => void;
   onTerrainChange: (terrainId: string) => void;
-  onReset: () => void;
 }) {
   // 場の条件だけを扱う小さなセクション。今後条件が増えたらここに集約する。
   return (
@@ -659,14 +653,6 @@ function FieldConditionSection({
           ))}
         </select>
       </label>
-      <button
-        className={styles.fieldConditionsReset}
-        type="button"
-        disabled={!weatherId && !terrainId}
-        onClick={onReset}
-      >
-        場の条件をリセット
-      </button>
     </section>
   );
 }
