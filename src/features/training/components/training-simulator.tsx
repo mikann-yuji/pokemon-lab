@@ -503,6 +503,7 @@ export function TrainingSimulator({
         itemId={itemId}
         abilityId={abilityId}
         natures={natures}
+        buildName={savedBuildName ?? buildName}
       />
       <TrainingToast toast={toast} />
       {isSaveDialogOpen ? (

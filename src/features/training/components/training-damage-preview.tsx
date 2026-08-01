@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { championsDamageCalculator } from "@/features/damage-calculator/config/champions-damage-ruleset";
+import { DamageSurvivalCheck } from "@/features/damage-calculator/components/damage-survival-check";
 import { useDamageCalculatorCatalogStore } from "@/features/damage-calculator/components/damage-calculator-catalog-store";
 import {
   applyHeldItemSpeedModifier,
@@ -59,6 +60,7 @@ export function TrainingDamagePreview({
   itemId,
   abilityId,
   natures,
+  buildName,
 }: {
   pokemonId: number;
   nature: string;
@@ -67,6 +69,7 @@ export function TrainingDamagePreview({
   itemId: string;
   abilityId: string;
   natures: Nature[];
+  buildName: string;
 }) {
   const pokemonCatalog = useDamageCalculatorCatalogStore(
     (state) => state.pokemonCatalog,
@@ -147,6 +150,21 @@ export function TrainingDamagePreview({
     pokemonCatalog,
     pokemonId,
   ]);
+
+  const survivalMembers = useMemo(
+    () =>
+      trainedPokemon
+        ? [
+            {
+              build: {
+                name: buildName.trim() || `${trainedPokemon.nameJa}の育成案`,
+              },
+              pokemon: trainedPokemon,
+            },
+          ]
+        : [],
+    [buildName, trainedPokemon],
+  );
 
   const results = useMemo(() => {
     if (!typeEffectivenessSource || !trainedPokemon) return [];
@@ -312,6 +330,18 @@ export function TrainingDamagePreview({
 
   return (
     <>
+      {typeEffectivenessSource && trainedPokemon ? (
+        <DamageSurvivalCheck
+          team={null}
+          members={survivalMembers}
+          pokemonCatalog={pokemonCatalog}
+          typeEffectivenessSource={typeEffectivenessSource}
+          scope="single-pokemon"
+          subjectName={
+            buildName.trim() || `${trainedPokemon.nameJa}の育成案`
+          }
+        />
+      ) : null}
       <section className={styles.damagePreview}>
         <header className={styles.damagePreviewHeader}>
           <div>

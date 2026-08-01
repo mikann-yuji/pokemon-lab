@@ -32,9 +32,11 @@ import type { TypeEffectivenessSource } from "@/domain/type-matchup";
 import styles from "../styles/damage-calculator.module.css";
 
 type SurvivalTeamMember = {
-  build: TrainingBuild;
+  build: Pick<TrainingBuild, "id" | "name">;
   pokemon: DamageCalculatorPokemon;
 };
+
+type SurvivalCheckScope = "team" | "single-pokemon";
 
 type SurvivalResult = {
   ranking: RankedPokemon;
@@ -181,11 +183,15 @@ export function DamageSurvivalCheck({
   members,
   pokemonCatalog,
   typeEffectivenessSource,
+  scope = "team",
+  subjectName,
 }: {
   team: BattleTeam | null;
   members: SurvivalTeamMember[];
   pokemonCatalog: DamageCalculatorPokemon[];
   typeEffectivenessSource: TypeEffectivenessSource;
+  scope?: SurvivalCheckScope;
+  subjectName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [battleFormat, setBattleFormat] =
@@ -216,6 +222,13 @@ export function DamageSurvivalCheck({
     "idle" | "saving" | "saved" | "error"
   >("idle");
   const [completedAt, setCompletedAt] = useState(0);
+  const isSinglePokemon = scope === "single-pokemon";
+  const checkName =
+    subjectName ||
+    team?.name ||
+    members[0]?.build.name ||
+    members[0]?.pokemon.nameJa ||
+    (isSinglePokemon ? "育成対象" : "バトルチーム");
 
   useEffect(() => {
     if (!open) return;
@@ -310,7 +323,7 @@ export function DamageSurvivalCheck({
       );
       const saved = await saveSurvivalCheckHistory({
         checkedAt,
-        teamName: team?.name || "バトルチーム",
+        teamName: checkName,
         battleFormat,
         members: members.map(({ build, pokemon }) => ({
           pokemonId: pokemon.id,
@@ -422,8 +435,12 @@ export function DamageSurvivalCheck({
         disabled={members.length === 0}
         title={
           members.length === 0
-            ? "攻撃側のバトルチームを選択してください"
-            : "バトルチームのダメージ勝ち残り確認"
+            ? isSinglePokemon
+              ? "育成対象を読み込んでいます"
+              : "攻撃側のバトルチームを選択してください"
+            : isSinglePokemon
+              ? "育成対象1匹のダメージ勝ち残り確認"
+              : "バトルチームのダメージ勝ち残り確認"
         }
         onClick={openCheck}
       >
@@ -445,7 +462,11 @@ export function DamageSurvivalCheck({
           <section className={styles.survivalPanel}>
             <header className={styles.survivalHeader}>
               <div>
-                <small>BATTLE TEAM SURVIVAL CHECK</small>
+                <small>
+                  {isSinglePokemon
+                    ? "SINGLE POKEMON SURVIVAL CHECK"
+                    : "BATTLE TEAM SURVIVAL CHECK"}
+                </small>
                 <h2 id="survival-check-title">ダメージ勝ち残り確認</h2>
               </div>
               <label>
@@ -499,7 +520,7 @@ export function DamageSurvivalCheck({
                   </div>
                   <div className={styles.survivalMemberSummary}>
                     <strong>
-                      {team?.name || "バトルチーム"}　確認完了
+                      {checkName}　確認完了
                     </strong>
                     <span>
                       {completedAt ? `${formatHistoryDate(completedAt)}　` : ""}
@@ -538,7 +559,11 @@ export function DamageSurvivalCheck({
                         <strong>
                           {ranking.rank}位 {defender.nameJa}
                         </strong>
-                        <span>チームで対応候補に残りました</span>
+                        <span>
+                          {isSinglePokemon
+                            ? "このポケモンで対応候補に残りました"
+                            : "チームで対応候補に残りました"}
+                        </span>
                       </div>
                     </article>
                   ))}
@@ -569,7 +594,9 @@ export function DamageSurvivalCheck({
                         currentMember.pokemon.nameJa}
                     </strong>
                     <span>
-                      対象 {results.length}体。不利にした相手と、先攻確定2発にできない相手を次へ持ち越します。
+                      {isSinglePokemon
+                        ? `対象 ${results.length}体。この1匹で先攻確定2発にできない相手を確認します。`
+                        : `対象 ${results.length}体。不利にした相手と、先攻確定2発にできない相手を次へ持ち越します。`}
                     </span>
                   </div>
                   <div className={styles.survivalMemberControls}>
@@ -756,7 +783,7 @@ export function DamageSurvivalCheck({
                           <strong>
                             {target.rank}位 {target.pokemonName}
                           </strong>
-                          <span>チームで対応候補に残りました</span>
+                          <span>対応候補に残りました</span>
                         </div>
                       </article>
                     );
