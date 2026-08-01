@@ -4,6 +4,7 @@ import {
   hasAbilityMoveConversion,
   resolveAbilityMoveConversion,
 } from "../src/features/damage-calculator/domain/ability-move-conversion.ts";
+import { getTypeEffectiveness } from "../src/domain/type-matchup.ts";
 
 const normalSkinCases = [
   ["refrigerate", "Ice"],
@@ -58,4 +59,18 @@ test("an unrelated ability leaves the move unchanged", () => {
     powerMultiplier: 1,
   });
   assert.equal(hasAbilityMoveConversion("huge-power"), false);
+});
+
+test("dragonize Double-Edge is neutral against Rock and Dark", () => {
+  const source = {
+    Normal: { Rock: 0.5, Dark: 1 },
+    Dragon: { Rock: 1, Dark: 1 },
+  };
+  const conversion = resolveAbilityMoveConversion("dragonize", "Normal");
+
+  assert.equal(getTypeEffectiveness("Normal", ["Rock", "Dark"], source), 0.5);
+  assert.equal(
+    getTypeEffectiveness(conversion.effectiveType, ["Rock", "Dark"], source),
+    1,
+  );
 });

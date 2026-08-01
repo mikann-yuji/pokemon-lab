@@ -45,6 +45,7 @@ import { useDamageCalculatorStore } from "./damage-calculator-store";
 import { useDamageCalculatorUserData } from "./use-damage-calculator-user-data";
 import { useDamageHistoryPersistence } from "./use-damage-history-persistence";
 import { getVariableMovePowers } from "../domain/variable-move-power";
+import { resolveAbilityMoveConversion } from "../domain/ability-move-conversion";
 import { getPopularStatProfile } from "../infrastructure/popular-stat-points-repository";
 
 /**
@@ -538,6 +539,10 @@ export function DamageCalculator({
         ...selectedMoveBase,
         power: selectedMovePower ?? selectedMoveBase.power,
       };
+      const effectiveMoveType = resolveAbilityMoveConversion(
+        adjustedAttacker.selectedAbility?.id,
+        calculationMove.typeName,
+      ).effectiveType;
       return {
         result: {
           normal: championsDamageCalculator.calculate({
@@ -565,7 +570,7 @@ export function DamageCalculator({
           defenderName: defender.nameJa,
           moveName: calculationMove.name,
           moveEffectiveness: getTypeEffectiveness(
-            calculationMove.typeName,
+            effectiveMoveType,
             defender.types,
             typeEffectivenessSource,
           ),
