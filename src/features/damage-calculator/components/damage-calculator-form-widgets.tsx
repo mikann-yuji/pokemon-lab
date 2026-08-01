@@ -11,6 +11,10 @@ import type {
   DamageCalculatorMove,
   DamageCalculatorPokemon,
 } from "../domain/damage-calculator-types";
+import {
+  hasAbilityMoveConversion,
+  resolveAbilityMoveConversion,
+} from "../domain/ability-move-conversion";
 import { TYPE_LABELS } from "./damage-calculator-display";
 import { TypeBadge } from "./damage-calculator-pokemon-widgets";
 import type { NatureCorrection, StatAdjustment } from "./damage-calculator-types";
@@ -61,31 +65,35 @@ function MoveEffectivenessBadge({ effectiveness }: { effectiveness: number }) {
 
 function MoveOptionContent({
   move,
+  abilityId,
   defenderTypes,
   typeEffectivenessSource,
 }: {
   move: DamageCalculatorMove;
+  abilityId: string | null | undefined;
   defenderTypes: DamageCalculatorPokemon["types"];
   typeEffectivenessSource: TypeEffectivenessSource | null;
 }) {
   // 技の候補行。タイプ、技名、相性、威力/命中/採用率を1行にまとめる。
   // 選択済みボタンと候補リストの両方で同じ見た目を使う。
+  const conversion = resolveAbilityMoveConversion(abilityId, move.typeName);
   const effectiveness =
     defenderTypes.length === 0
       ? 1
       : getTypeEffectiveness(
-          move.typeName,
+          conversion.effectiveType,
           defenderTypes,
           typeEffectivenessSource,
         );
 
   return (
     <span className={styles.moveOptionContent}>
-      <TypeBadge typeName={move.typeName} />
+      <TypeBadge typeName={conversion.effectiveType} />
       <strong>{move.name}</strong>
       <MoveEffectivenessBadge effectiveness={effectiveness} />
       <small>
         威力 {formatMovePower(move)}
+        {conversion.applies ? ` × ${conversion.powerMultiplier}` : ""}
         {" / "}命中 {formatMoveAccuracy(move)}
         {formatMoveUsageRate(move)}
       </small>
@@ -101,6 +109,7 @@ export function MoveSelect({
   moves,
   defenderTypes,
   typeEffectivenessSource,
+  abilityId,
   selectedMoveId,
   selectedMoveFallback,
   disabled,
@@ -110,6 +119,7 @@ export function MoveSelect({
   moves: DamageCalculatorMove[];
   defenderTypes: DamageCalculatorPokemon["types"];
   typeEffectivenessSource: TypeEffectivenessSource | null;
+  abilityId?: string | null;
   selectedMoveId: string;
   selectedMoveFallback?: DamageCalculatorMove;
   disabled: boolean;
@@ -149,6 +159,7 @@ export function MoveSelect({
           {selectedMove ? (
             <MoveOptionContent
               move={selectedMove}
+              abilityId={abilityId}
               defenderTypes={defenderTypes}
               typeEffectivenessSource={typeEffectivenessSource}
             />
@@ -178,6 +189,7 @@ export function MoveSelect({
               >
                 <MoveOptionContent
                   move={move}
+                  abilityId={abilityId}
                   defenderTypes={defenderTypes}
                   typeEffectivenessSource={typeEffectivenessSource}
                 />
@@ -239,7 +251,9 @@ export function hasManualAbilityCondition(
 }
 
 function formatAbilityModifier(ability: DamageCalculatorAbility) {
-  return ability.damageModifiers.length > 0 ? " / ダメージ補正あり" : "";
+  return ability.damageModifiers.length > 0 || hasAbilityMoveConversion(ability.id)
+    ? " / ダメージ補正あり"
+    : "";
 }
 
 function AbilityOptionContent({ ability }: { ability: DamageCalculatorAbility }) {

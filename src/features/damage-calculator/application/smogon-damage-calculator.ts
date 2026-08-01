@@ -27,6 +27,7 @@ import type {
   DamageCalculatorMove,
   DamageCalculatorPokemon,
 } from "../domain/damage-calculator-types";
+import { resolveAbilityMoveConversion } from "../domain/ability-move-conversion";
 
 type BattleSide = "attacker" | "defender";
 /** @smogon/calcのPokemonコンストラクター第3引数。rulesetのフックで部分上書きする。 */
@@ -676,33 +677,45 @@ export class SmogonDamageCalculator {
    * @returns 最小/最大ダメージ、割合、KO表示を含む計算結果。
    */
   calculate(input: DamageCalculationInput): DamageCalculation {
+    const moveConversion = resolveAbilityMoveConversion(
+      input.attacker.selectedAbility?.id,
+      input.move.typeName,
+    );
+    const effectiveInput: DamageCalculationInput = moveConversion.typeChanged
+      ? {
+          ...input,
+          move: { ...input.move, typeName: moveConversion.effectiveType },
+        }
+      : input;
     const generation = Generations.get(this.ruleset.generation);
-    const attacker = this.toPokemon("attacker", input.attacker);
-    const defender = this.toPokemon("defender", input.defender);
+    const attacker = this.toPokemon("attacker", effectiveInput.attacker);
+    const defender = this.toPokemon("defender", effectiveInput.defender);
     const move = this.toMove(
-      input.move,
-      input.isCritical ?? false,
-      getEffectiveMovePower(input),
-      getHeldItemPowerMultiplier(input) * getAbilityPowerMultiplier(input),
-      input.hits,
+      effectiveInput.move,
+      effectiveInput.isCritical ?? false,
+      getEffectiveMovePower(effectiveInput),
+      getHeldItemPowerMultiplier(effectiveInput) *
+        getAbilityPowerMultiplier(effectiveInput) *
+        moveConversion.powerMultiplier,
+      effectiveInput.hits,
     );
     applyAttackingStatMultiplier(
       attacker,
-      input.move,
-      getAttackingStatItemMultiplier(input) *
-        getAbilityAttackingStatMultiplier(input),
+      effectiveInput.move,
+      getAttackingStatItemMultiplier(effectiveInput) *
+        getAbilityAttackingStatMultiplier(effectiveInput),
       this.ruleset,
     );
     const field = new Field({
-      ...this.ruleset.createField?.(input),
-      ...input.field,
+      ...this.ruleset.createField?.(effectiveInput),
+      ...effectiveInput.field,
     });
     const sourceResult = this.ruleset.calculate
       ? this.ruleset.calculate(generation, attacker, defender, move, field)
       : calculate(generation, attacker, defender, move, field);
     const receivedDamageMultiplier =
-      getReceivedDamageItemMultiplier(input) *
-      getAbilityReceivedDamageMultiplier(input);
+      getReceivedDamageItemMultiplier(effectiveInput) *
+      getAbilityReceivedDamageMultiplier(effectiveInput);
     if (receivedDamageMultiplier !== 1) {
       sourceResult.damage = scaleDamage(
         sourceResult.damage,
@@ -732,7 +745,10 @@ export class SmogonDamageCalculator {
       twoHitProbability: hitProbability(damageRolls, defenderHp, 2),
     };
 
-    return this.ruleset.transformResult?.(result, sourceResult, input) ?? result;
+    return (
+      this.ruleset.transformResult?.(result, sourceResult, effectiveInput) ??
+      result
+    );
   }
 
   /**

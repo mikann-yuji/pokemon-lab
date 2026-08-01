@@ -21,6 +21,7 @@ import type {
   DamageCalculatorMove,
   DamageCalculatorPokemon,
 } from "@/features/damage-calculator/domain/damage-calculator-types";
+import { resolveAbilityMoveConversion } from "@/features/damage-calculator/domain/ability-move-conversion";
 import {
   getAllBattleTeams,
   getAllTrainingBuilds,
@@ -63,6 +64,23 @@ type KnockoutCandidate = {
   defenderSpeed: number;
   turnOrder: "先攻" | "後攻" | "同速";
 };
+
+function getAbilityAdjustedMove(
+  member: TeamMember,
+  move: DamageCalculatorMove,
+) {
+  const conversion = resolveAbilityMoveConversion(
+    member.pokemon.selectedAbility?.id,
+    move.typeName,
+  );
+  return conversion.typeChanged
+    ? { ...move, typeName: conversion.effectiveType }
+    : move;
+}
+
+function getAbilityAdjustedMoves(member: TeamMember) {
+  return member.moves.map((move) => getAbilityAdjustedMove(member, move));
+}
 
 function VerticalTypeLabel({ children }: { children: string }) {
   return (
@@ -166,7 +184,7 @@ function Matrix({
                           matchupsByType,
                         )
                       : getBestMoveMultiplier(
-                          member.moves,
+                          getAbilityAdjustedMoves(member),
                           type.name,
                           matchupsByType,
                         );
@@ -226,7 +244,7 @@ function MoveMatrix({
                 <td key={type.name}>
                   <EffectivenessMark
                     multiplier={getBestMoveMultiplier(
-                      [move],
+                      [getAbilityAdjustedMove(member, move)],
                       type.name,
                       matchupsByType,
                     )}

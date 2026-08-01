@@ -280,6 +280,7 @@ export function DamageCalculatorView({
           moves={attacker?.moves ?? []}
           defenderTypes={defender?.types ?? []}
           typeEffectivenessSource={typeEffectivenessSource}
+          abilityId={attacker?.selectedAbility?.id}
           selectedMoveId={moveId}
           selectedMoveFallback={selectedMove}
           disabled={!attacker}
