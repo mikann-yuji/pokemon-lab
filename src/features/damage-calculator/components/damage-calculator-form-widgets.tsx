@@ -13,6 +13,7 @@ import type {
 } from "../domain/damage-calculator-types";
 import {
   hasAbilityMoveConversion,
+  hasMoveTypeChangingAbility,
   resolveAbilityMoveConversion,
 } from "../domain/ability-move-conversion";
 import { TYPE_LABELS } from "./damage-calculator-display";
@@ -237,16 +238,17 @@ export function hasManualAbilityCondition(
   // 条件付きで発動する特性だけ、手動ON/OFFのチェックボックスを出す。
   // 常時発動する補正は選択した時点で計算へ渡すので、追加UIは不要。
   return Boolean(
-    ability?.damageModifiers.some((modifier) =>
-      [
-        "low_power_move",
-        "not_very_effective",
-        "manual",
-        "manual_type_match",
-        "manual_physical",
-        "manual_special",
-      ].includes(modifier.condition),
-    ),
+    hasMoveTypeChangingAbility(ability?.id) ||
+      ability?.damageModifiers.some((modifier) =>
+        [
+          "low_power_move",
+          "not_very_effective",
+          "manual",
+          "manual_type_match",
+          "manual_physical",
+          "manual_special",
+        ].includes(modifier.condition),
+      ),
   );
 }
 
@@ -340,7 +342,9 @@ export function AbilityField({
             checked={conditionEnabled}
             onChange={(event) => onConditionChange(event.target.checked)}
           />
-          {selectedAbility?.id === "protean" ? "特性を適用" : "条件を有効"}
+          {hasMoveTypeChangingAbility(selectedAbility?.id)
+            ? "特性を適用"
+            : "条件を有効"}
         </label>
       ) : null}
     </div>

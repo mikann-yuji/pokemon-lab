@@ -41,6 +41,8 @@ const ABILITY_MOVE_CONVERSIONS: Readonly<
   },
 };
 
+const MOVE_TYPE_CHANGING_ABILITIES = new Set(["protean", "libero"]);
+
 export function hasAbilityMoveConversion(abilityId: string | null | undefined) {
   return Boolean(abilityId && ABILITY_MOVE_CONVERSIONS[abilityId]);
 }
@@ -64,4 +66,21 @@ export function resolveAbilityMoveConversion(
     typeChanged: effectiveType !== moveType,
     powerMultiplier: applies ? conversion!.powerMultiplier : 1,
   };
+}
+
+export function resolveAbilityAttackerTypes(
+  abilityId: string | null | undefined,
+  moveType: TypeName,
+  conditionEnabled: boolean,
+  originalTypes: readonly TypeName[],
+): TypeName[] {
+  return conditionEnabled && abilityId && MOVE_TYPE_CHANGING_ABILITIES.has(abilityId)
+    ? [moveType]
+    : [...originalTypes];
+}
+
+export function hasMoveTypeChangingAbility(
+  abilityId: string | null | undefined,
+) {
+  return Boolean(abilityId && MOVE_TYPE_CHANGING_ABILITIES.has(abilityId));
 }

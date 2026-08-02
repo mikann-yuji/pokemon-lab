@@ -27,7 +27,10 @@ import type {
   DamageCalculatorMove,
   DamageCalculatorPokemon,
 } from "../domain/damage-calculator-types";
-import { resolveAbilityMoveConversion } from "../domain/ability-move-conversion";
+import {
+  resolveAbilityAttackerTypes,
+  resolveAbilityMoveConversion,
+} from "../domain/ability-move-conversion";
 
 type BattleSide = "attacker" | "defender";
 /** @smogon/calcのPokemonコンストラクター第3引数。rulesetのフックで部分上書きする。 */
@@ -681,12 +684,20 @@ export class SmogonDamageCalculator {
       input.attacker.selectedAbility?.id,
       input.move.typeName,
     );
-    const effectiveInput: DamageCalculationInput = moveConversion.typeChanged
-      ? {
-          ...input,
-          move: { ...input.move, typeName: moveConversion.effectiveType },
-        }
-      : input;
+    const effectiveMove = moveConversion.typeChanged
+      ? { ...input.move, typeName: moveConversion.effectiveType }
+      : input.move;
+    const effectiveAttackerTypes = resolveAbilityAttackerTypes(
+      input.attacker.selectedAbility?.id,
+      effectiveMove.typeName,
+      input.abilityConditionEnabled?.attacker ?? false,
+      input.attacker.types,
+    );
+    const effectiveInput: DamageCalculationInput = {
+      ...input,
+      move: effectiveMove,
+      attacker: { ...input.attacker, types: effectiveAttackerTypes },
+    };
     const generation = Generations.get(this.ruleset.generation);
     const attacker = this.toPokemon("attacker", effectiveInput.attacker);
     const defender = this.toPokemon("defender", effectiveInput.defender);

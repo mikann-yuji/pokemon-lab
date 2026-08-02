@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   hasAbilityMoveConversion,
+  hasMoveTypeChangingAbility,
+  resolveAbilityAttackerTypes,
   resolveAbilityMoveConversion,
 } from "../src/features/damage-calculator/domain/ability-move-conversion.ts";
 import { getTypeEffectiveness } from "../src/domain/type-matchup.ts";
@@ -74,3 +76,20 @@ test("dragonize Double-Edge is neutral against Rock and Dark", () => {
     1,
   );
 });
+
+for (const abilityId of ["protean", "libero"]) {
+  test(`${abilityId} changes the attacker to the selected move type`, () => {
+    assert.deepEqual(
+      resolveAbilityAttackerTypes(abilityId, "Ice", true, ["Water", "Dark"]),
+      ["Ice"],
+    );
+    assert.equal(hasMoveTypeChangingAbility(abilityId), true);
+  });
+
+  test(`${abilityId} keeps the original types when disabled`, () => {
+    assert.deepEqual(
+      resolveAbilityAttackerTypes(abilityId, "Ice", false, ["Water", "Dark"]),
+      ["Water", "Dark"],
+    );
+  });
+}
