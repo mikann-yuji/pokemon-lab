@@ -28,8 +28,8 @@ import type {
   DamageCalculatorPokemon,
 } from "../domain/damage-calculator-types";
 import {
-  resolveAbilityAttackerTypes,
   resolveAbilityMoveConversion,
+  resolveMoveTypeChangingAbilityStabMultiplier,
 } from "../domain/ability-move-conversion";
 
 type BattleSide = "attacker" | "defender";
@@ -483,10 +483,14 @@ function getAbilityModifiers(
  * @returns 特性補正を含む威力倍率。
  */
 function getAbilityPowerMultiplier(input: DamageCalculationInput) {
-  return getAbilityModifiers("attacker", input)
+  const selectedAbilityId = input.attacker.selectedAbility?.id;
+  const catalogMultiplier = getAbilityModifiers("attacker", input)
     .filter(
       (modifier) =>
-        modifier.modifierKind === "power" || modifier.modifierKind === "stab",
+        modifier.modifierKind === "power" ||
+        (modifier.modifierKind === "stab" &&
+          selectedAbilityId !== "protean" &&
+          selectedAbilityId !== "libero"),
     )
     .reduce((multiplier, modifier) => {
       // へんげんじざいの技が元タイプと一致している場合、通常のタイプ一致1.5倍は
@@ -500,6 +504,16 @@ function getAbilityPowerMultiplier(input: DamageCalculationInput) {
       }
       return multiplier * modifier.multiplier;
     }, 1);
+
+  return (
+    catalogMultiplier *
+    resolveMoveTypeChangingAbilityStabMultiplier(
+      selectedAbilityId,
+      input.move.typeName,
+      input.abilityConditionEnabled?.attacker ?? false,
+      input.attacker.types,
+    )
+  );
 }
 
 /**
@@ -687,16 +701,9 @@ export class SmogonDamageCalculator {
     const effectiveMove = moveConversion.typeChanged
       ? { ...input.move, typeName: moveConversion.effectiveType }
       : input.move;
-    const effectiveAttackerTypes = resolveAbilityAttackerTypes(
-      input.attacker.selectedAbility?.id,
-      effectiveMove.typeName,
-      input.abilityConditionEnabled?.attacker ?? false,
-      input.attacker.types,
-    );
     const effectiveInput: DamageCalculationInput = {
       ...input,
       move: effectiveMove,
-      attacker: { ...input.attacker, types: effectiveAttackerTypes },
     };
     const generation = Generations.get(this.ruleset.generation);
     const attacker = this.toPokemon("attacker", effectiveInput.attacker);

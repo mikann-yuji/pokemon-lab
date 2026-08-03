@@ -5,6 +5,7 @@ import {
   hasMoveTypeChangingAbility,
   resolveAbilityAttackerTypes,
   resolveAbilityMoveConversion,
+  resolveMoveTypeChangingAbilityStabMultiplier,
 } from "../src/features/damage-calculator/domain/ability-move-conversion.ts";
 import { getTypeEffectiveness } from "../src/domain/type-matchup.ts";
 
@@ -90,6 +91,39 @@ for (const abilityId of ["protean", "libero"]) {
     assert.deepEqual(
       resolveAbilityAttackerTypes(abilityId, "Ice", false, ["Water", "Dark"]),
       ["Water", "Dark"],
+    );
+  });
+
+  test(`${abilityId} explicitly applies STAB to a different-type move`, () => {
+    assert.equal(
+      resolveMoveTypeChangingAbilityStabMultiplier(
+        abilityId,
+        "Ice",
+        true,
+        ["Grass", "Dark"],
+      ),
+      1.5,
+    );
+    assert.equal(
+      resolveMoveTypeChangingAbilityStabMultiplier(
+        abilityId,
+        "Ice",
+        false,
+        ["Grass", "Dark"],
+      ),
+      1,
+    );
+  });
+
+  test(`${abilityId} does not duplicate existing STAB`, () => {
+    assert.equal(
+      resolveMoveTypeChangingAbilityStabMultiplier(
+        abilityId,
+        "Grass",
+        true,
+        ["Grass", "Dark"],
+      ),
+      1,
     );
   });
 }

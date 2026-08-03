@@ -79,6 +79,24 @@ export function resolveAbilityAttackerTypes(
     : [...originalTypes];
 }
 
+export function resolveMoveTypeChangingAbilityStabMultiplier(
+  abilityId: string | null | undefined,
+  moveType: TypeName,
+  conditionEnabled: boolean,
+  originalTypes: readonly TypeName[],
+) {
+  if (
+    !conditionEnabled ||
+    !abilityId ||
+    !MOVE_TYPE_CHANGING_ABILITIES.has(abilityId) ||
+    originalTypes.includes(moveType)
+  ) {
+    return 1;
+  }
+
+  return 1.5;
+}
+
 export function hasMoveTypeChangingAbility(
   abilityId: string | null | undefined,
 ) {
