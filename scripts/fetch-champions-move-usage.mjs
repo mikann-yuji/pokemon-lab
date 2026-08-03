@@ -118,25 +118,37 @@ function scrapeMoveUsage(html) {
     .first();
   if (moveSection.length === 0) return [];
 
-  const moveIds = moveSection
+  return moveSection
     .find('a[href^="/pokemon-champions/moves/"]')
-    .map((_, anchor) =>
-      $(anchor).attr("href")?.split("/").filter(Boolean).at(-1),
-    )
+    .map((_, anchor) => {
+      const moveId = $(anchor).attr("href")?.split("/").filter(Boolean).at(-1);
+      if (!moveId) return null;
+
+      // A move link contains other percentages such as accuracy (often 100%).
+      // Walk outwards and read only the usage percentage beside the link.
+      let container = $(anchor).parent();
+      while (container.length > 0 && !container.is(moveSection)) {
+        const containerWithoutMoveLinks = container
+          .clone()
+          .find('a[href^="/pokemon-champions/moves/"]')
+          .remove()
+          .end();
+        const usageRate = containerWithoutMoveLinks
+          .find("span")
+          .map((_, span) => $(span).text().trim())
+          .get()
+          .find((text) => /^[0-9]+(?:\.[0-9]+)?%$/.test(text))
+          ?.replace("%", "");
+        if (usageRate !== undefined) {
+          return { move_id: moveId, usage_rate: Number(usageRate) };
+        }
+        container = container.parent();
+      }
+
+      return null;
+    })
     .get()
     .filter(Boolean);
-  const usageRates = moveSection
-    .find("span")
-    .map((_, span) => $(span).text().trim())
-    .get()
-    .filter((text) => /^[0-9]+(?:\.[0-9]+)?%$/.test(text))
-    .map((text) => Number(text.replace("%", "")));
-
-  return moveIds.flatMap((moveId, index) =>
-    usageRates[index] === undefined
-      ? []
-      : [{ move_id: moveId, usage_rate: usageRates[index] }],
-  );
 }
 
 const forms = new Map(parseCsv("forms.csv").map((record) => [record.id, record]));
