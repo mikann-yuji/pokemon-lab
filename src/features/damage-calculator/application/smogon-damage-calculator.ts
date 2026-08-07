@@ -28,6 +28,7 @@ import type {
   DamageCalculatorPokemon,
 } from "../domain/damage-calculator-types";
 import {
+  resolveAbilityAttackerTypes,
   resolveAbilityMoveConversion,
   resolveMoveTypeChangingAbilityStabMultiplier,
 } from "../domain/ability-move-conversion";
@@ -701,9 +702,16 @@ export class SmogonDamageCalculator {
     const effectiveMove = moveConversion.typeChanged
       ? { ...input.move, typeName: moveConversion.effectiveType }
       : input.move;
+    const effectiveAttackerTypes = resolveAbilityAttackerTypes(
+      input.attacker.selectedAbility?.id,
+      effectiveMove.typeName,
+      input.abilityConditionEnabled?.attacker ?? false,
+      input.attacker.types,
+    );
     const effectiveInput: DamageCalculationInput = {
       ...input,
       move: effectiveMove,
+      attacker: { ...input.attacker, types: effectiveAttackerTypes },
     };
     const generation = Generations.get(this.ruleset.generation);
     const attacker = this.toPokemon("attacker", effectiveInput.attacker);
