@@ -42,3 +42,4 @@ export default function BaseStatQuizLoader() {
   if (error) return <p className={styles.status} role="alert">{error}</p>;
   return <BaseStatQuizGame pokemonByFormat={pokemonByFormat} />;
 }
+// 種族値クイズ用カタログの読込状態を管理してゲーム本体へ渡す。

@@ -84,3 +84,4 @@ export async function getMoveQuizPokemon(
     (pokemon) => pokemon.moves.length >= 10,
   );
 }
+// catalog.dbから技クイズの出題に必要な技・ポケモン情報を取得する。

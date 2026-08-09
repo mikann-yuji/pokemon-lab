@@ -15,3 +15,4 @@ export default function BattleSimulatorPage() {
     </main>
   );
 }
+// 対戦シミュレーターの準備画面へルーティングするサーバーページ。

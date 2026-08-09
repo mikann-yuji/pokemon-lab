@@ -165,3 +165,4 @@ export default function BaseStatQuizGame({
     </section>
   );
 }
+// 種族値クイズの回答入力、採点結果、連続出題を管理するゲーム画面。

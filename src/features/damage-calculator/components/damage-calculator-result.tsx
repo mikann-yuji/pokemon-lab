@@ -66,3 +66,4 @@ export function DamageResult({ result }: { result: CalculationResult }) {
     </section>
   );
 }
+// 計算済みダメージを割合、乱数幅、確定数として読みやすく表示する。

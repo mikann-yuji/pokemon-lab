@@ -804,3 +804,4 @@ export default function TypeChecker() {
     </div>
   );
 }
+// 攻撃・防御タイプの入力と相性結果を一画面で操作できるよう統合する。

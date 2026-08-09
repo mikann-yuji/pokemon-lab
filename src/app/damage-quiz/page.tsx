@@ -16,3 +16,4 @@ export default function DamageQuizPage() {
     </main>
   );
 }
+// ダメージクイズへルーティングするApp Routerのサーバーページ。

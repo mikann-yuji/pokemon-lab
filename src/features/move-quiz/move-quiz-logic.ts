@@ -107,3 +107,4 @@ export function createMoveComparisonQuestion(
     key: String(selectedPokemon.formId),
   };
 }
+// 技クイズの出題候補、正誤判定、次問への遷移を純粋関数として扱う。

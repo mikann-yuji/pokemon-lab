@@ -431,3 +431,4 @@ function MoveComparisonGame({ pokemonByFormat }: Props) {
     </section>
   );
 }
+// 技クイズの選択、回答評価、結果表示、次問遷移を一連の画面にまとめる。

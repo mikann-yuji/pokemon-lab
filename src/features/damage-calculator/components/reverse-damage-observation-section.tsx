@@ -114,3 +114,4 @@ export function ReverseDamageObservationSection({
     </section>
   );
 }
+// 実測ダメージと対戦条件を入力し、逆算候補の絞り込み条件を構成する。

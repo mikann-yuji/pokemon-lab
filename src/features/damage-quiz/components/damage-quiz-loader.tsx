@@ -113,3 +113,4 @@ export default function DamageQuizLoader() {
     />
   );
 }
+// ダメージクイズの計算用カタログを準備してゲーム画面へ引き渡す。

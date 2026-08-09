@@ -120,3 +120,4 @@ await writeFile(
   `${JSON.stringify(manifest, null, 2)}\n`,
 );
 console.log(`Wrote ${manifest.length} icons to ${outputDir}`);
+// Pokémon Champions向けの画像を取得し、アプリで参照できる形式へ揃える。

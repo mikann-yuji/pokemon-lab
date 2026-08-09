@@ -15,3 +15,4 @@ export default function KnowledgePage() {
     </main>
   );
 }
+// 知識ボードへルーティングするApp Routerのサーバーページ。

@@ -83,3 +83,4 @@ export async function getBaseStatQuizPokemon(
     STAT_IDS.every((statId) => Number.isFinite(pokemon.stats[statId])),
   );
 }
+// catalog.dbから種族値クイズの出題候補を取得して正規化する。

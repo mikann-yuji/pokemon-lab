@@ -36,3 +36,4 @@ export function selectKnowledgeExamples(
       actualValue: calculateUninvestedStat(entry.stats[statId], statId),
     }));
 }
+// 知識ボードで扱うカテゴリと項目のドメイン表現を定義する。

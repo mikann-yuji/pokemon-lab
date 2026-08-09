@@ -14,3 +14,4 @@ export default function TypeCheckerPage() {
     </main>
   );
 }
+// タイプ相性チェッカーへルーティングするApp Routerのサーバーページ。

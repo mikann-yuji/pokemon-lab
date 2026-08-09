@@ -68,3 +68,4 @@ export function findSharedWeaknesses(
     return count >= 3 ? [{ typeName: type.name, nameJa: type.nameJa, count }] : [];
   });
 }
+// タイプ相性チェッカーの入力を、検索・集計しやすい表示モデルへ変換する。

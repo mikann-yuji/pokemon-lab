@@ -83,3 +83,4 @@ export function formatBaseStats(stats: Record<BaseStatId, number>): string {
     stats.speed,
   ].join("-");
 }
+// 種族値クイズの問題生成と回答評価をUIから独立した規則として定義する。

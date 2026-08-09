@@ -249,3 +249,4 @@ export async function getPracticeMemberCatalog(
   }
   return { pokemonByFormId, movesByFormId };
 }
+// 練習クイズの習熟度と出題履歴をユーザーDBへ永続化する。

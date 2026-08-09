@@ -16,3 +16,4 @@ export default function BaseStatQuizPage() {
     </main>
   );
 }
+// 種族値クイズへルーティングするApp Routerのサーバーページ。

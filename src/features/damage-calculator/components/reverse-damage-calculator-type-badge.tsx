@@ -16,3 +16,4 @@ export function TypeBadge({
     </span>
   );
 }
+// 逆算結果で使うタイプ名を共通配色のバッジとして表示する。

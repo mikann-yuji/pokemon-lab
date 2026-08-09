@@ -109,3 +109,4 @@ export async function deleteBattleRecord(id: number) {
     [now, now, id],
   );
 }
+// 対戦履歴をユーザーDBへ保存し、一覧・集計用に読み出す。

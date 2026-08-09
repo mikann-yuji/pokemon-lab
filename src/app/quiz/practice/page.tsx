@@ -18,3 +18,4 @@ export default function PracticeQuizPage() {
     </main>
   );
 }
+// 弱点クイズの練習モードへルーティングするApp Routerのサーバーページ。

@@ -67,3 +67,4 @@ export type BattleState = {
   pendingCommands: Record<BattlePlayerId, BattleCommand | null>;
   log: BattleLogEntry[];
 };
+// 対戦シミュレーター内で共有する状態・行動・保存形式を定義する。

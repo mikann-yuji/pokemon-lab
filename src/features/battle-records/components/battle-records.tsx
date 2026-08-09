@@ -893,3 +893,4 @@ export function BattleRecords() {
     </main>
   );
 }
+// 対戦履歴の検索・編集・集計と、学習データへの反映をまとめて扱う画面。

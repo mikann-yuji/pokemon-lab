@@ -22,3 +22,4 @@ export function TrainingToast({ toast }: { toast: TrainingToastState }) {
     </div>
   );
 }
+// 育成画面の操作結果を短時間だけ通知するトースト表示を提供する。

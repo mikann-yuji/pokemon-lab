@@ -450,3 +450,4 @@ export default function PracticeQuizGame({
     </section>
   );
 }
+// 習熟度に応じた出題、回答、復習間隔の更新を操作可能な画面にまとめる。

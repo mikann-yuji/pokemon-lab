@@ -32,3 +32,4 @@ export type CalculationResult = {
   moveName: string;
   moveEffectiveness: number;
 };
+// ダメージ計算画面のフォーム、履歴、表示間で共有する型を定義する。

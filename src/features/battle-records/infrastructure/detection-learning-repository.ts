@@ -73,3 +73,4 @@ export async function saveRemoteDetectionSample(
     updatedAt: Date.now(),
   });
 }
+// 対戦中に判明した情報を蓄積し、次回の推測に使う学習データを永続化する。

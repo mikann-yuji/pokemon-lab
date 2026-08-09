@@ -1083,3 +1083,4 @@ export function BattleSimulator({
     </div>
   );
 }
+// ターン進行、技選択、判明情報、ログを統合して模擬対戦を進行する。

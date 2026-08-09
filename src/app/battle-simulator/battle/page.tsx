@@ -33,3 +33,4 @@ export default async function BattleSimulatorBattlePage({
     </main>
   );
 }
+// 保存済みチームを受け取り、対戦シミュレーター本体を表示するページ。

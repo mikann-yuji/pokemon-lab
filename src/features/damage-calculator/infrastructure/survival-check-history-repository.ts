@@ -102,3 +102,4 @@ export async function saveSurvivalCheckHistory({
   }
   return toHistory(rows[0]);
 }
+// 耐久チェックの履歴をユーザーDBへ保存し、再利用可能な形で読み戻す。

@@ -19,3 +19,4 @@ export default function DamageAdjustmentMapPage() {
     </main>
   );
 }
+// ダメージ調整マップへルーティングするApp Routerのサーバーページ。

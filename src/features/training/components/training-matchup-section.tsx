@@ -65,3 +65,4 @@ export function TrainingMatchupSection({
     </section>
   );
 }
+// 育成案に紐づく対面メモを相手ごとに整理して編集可能にする。

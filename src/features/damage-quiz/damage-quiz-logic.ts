@@ -126,3 +126,4 @@ export function createDamageQuizQuestion({
     key: `${pair.attacker.id}:${pair.defender.id}`,
   };
 }
+// ダメージクイズの問題生成、許容誤差、得点計算をUIから分離する。

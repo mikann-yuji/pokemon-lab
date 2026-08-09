@@ -206,3 +206,4 @@ export function isExactPracticeAnswer(
     [...selectedBuildIds].every((buildId) => correct.has(buildId))
   );
 }
+// 弱点クイズ練習モードの候補生成と習熟度更新を管理する。

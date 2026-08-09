@@ -220,3 +220,4 @@ export async function getTopRankedPokemon(
     }));
   }
 }
+// catalog.dbからタイプ相性チェッカーに必要なポケモン情報を読み出す。

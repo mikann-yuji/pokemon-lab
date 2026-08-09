@@ -38,3 +38,4 @@ test("同じ耐久指数でもHPと防御の内訳は保持され、正式計算
   assert.equal(durabilityIndex(150, 180, 0), durabilityIndex(180, 150, 0));
   assert.notDeepEqual({ hp: 150, defense: 180 }, { hp: 180, defense: 150 });
 });
+// ダメージ調整マップの境界値と表示用集計を回帰検証する。

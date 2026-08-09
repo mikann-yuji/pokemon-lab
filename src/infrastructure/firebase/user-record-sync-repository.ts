@@ -736,3 +736,4 @@ export async function syncUserRecords(uid: string): Promise<SyncResult> {
     deleted: remoteDeleted + mergedDeleted,
   };
 }
+// ローカル記録とFirebase上の記録を突き合わせ、競合を避けながら同期する。

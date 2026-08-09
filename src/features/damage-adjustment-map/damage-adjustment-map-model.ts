@@ -56,3 +56,4 @@ export function durabilityIndex(
 ) {
   return hp * Math.floor(defenseStat * rankMultiplier(rank));
 }
+// 調整マップの各セルに表示するダメージ帯と判定結果を組み立てる。

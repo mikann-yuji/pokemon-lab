@@ -37,3 +37,4 @@ export async function getDamageQuizTargetIds(
   );
   return rows.map((row) => Number(row.formId));
 }
+// catalog.dbからダメージクイズの攻撃側・防御側候補を取得する。

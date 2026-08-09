@@ -50,3 +50,4 @@ export default function MoveQuizLoader() {
   }
   return <MoveQuizGame pokemonByFormat={pokemonByFormat} />;
 }
+// 技クイズ用カタログを読み込み、失敗・待機・ゲーム表示を切り替える。

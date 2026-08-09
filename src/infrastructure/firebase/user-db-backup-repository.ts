@@ -153,3 +153,4 @@ export async function deleteUserDatabaseBackup(uid: string) {
   batch.delete(getBackupDoc(database, uid));
   await batch.commit();
 }
+// ユーザーDBのバックアップをFirebaseへ保存・復元する永続化境界。

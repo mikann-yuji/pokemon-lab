@@ -27,3 +27,4 @@ export default function DamageAdjustmentMapLoader() {
     />
   );
 }
+// 調整マップ用カタログを非同期取得し、読込状態と本体表示を切り替える。

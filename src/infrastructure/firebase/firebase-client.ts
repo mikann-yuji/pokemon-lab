@@ -73,3 +73,4 @@ export async function getGoogleRedirectResult() {
 export async function signOutFirebaseUser() {
   await signOut(getFirebaseAuth());
 }
+// ブラウザーで共有するFirebaseクライアントを環境設定から初期化する。

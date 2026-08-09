@@ -561,3 +561,4 @@ function PreviewPokemonSummary({
     </div>
   );
 }
+// 現在の育成値から主要な攻撃・被ダメージを即時計算して比較表示する。

@@ -997,3 +997,4 @@ function SurvivalResultRow({
     </article>
   );
 }
+// 連続被弾、回復、乱数を考慮し、指定回数を耐える確率と調整候補を求める。

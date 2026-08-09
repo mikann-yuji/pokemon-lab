@@ -1,3 +1,4 @@
+// 特性が技タイプや一致補正を変える規則を、ダメージ計算用に正規化する。
 import type { TypeName } from "@/domain/type-matchup";
 
 type AbilityMoveConversion = {
@@ -6,6 +7,8 @@ type AbilityMoveConversion = {
   powerMultiplier: number;
 };
 
+// 皮膚系特性は「変換元」「変換先」「威力補正」を同じ表で管理する。
+// ノーマルスキンだけは全タイプを対象にするため、fromTypeをnullにする。
 const ABILITY_MOVE_CONVERSIONS: Readonly<
   Record<string, AbilityMoveConversion>
 > = {
@@ -41,6 +44,7 @@ const ABILITY_MOVE_CONVERSIONS: Readonly<
   },
 };
 
+// へんげんじざい系は技自体ではなく、攻撃側の現在タイプを変化させる。
 const MOVE_TYPE_CHANGING_ABILITIES = new Set(["protean", "libero"]);
 
 export function hasAbilityMoveConversion(abilityId: string | null | undefined) {
@@ -51,6 +55,7 @@ export function resolveAbilityMoveConversion(
   abilityId: string | null | undefined,
   moveType: TypeName,
 ) {
+  // 未対応特性は変換なしとして扱い、呼び出し側の分岐を増やさない。
   const conversion = abilityId
     ? ABILITY_MOVE_CONVERSIONS[abilityId]
     : undefined;
@@ -58,6 +63,7 @@ export function resolveAbilityMoveConversion(
     conversion &&
       (conversion.fromType === null || conversion.fromType === moveType),
   );
+  // 相性計算とタイプ一致判定は、ここで確定した実効タイプを共通利用する。
   const effectiveType = applies ? conversion!.toType : moveType;
 
   return {
@@ -74,6 +80,7 @@ export function resolveAbilityAttackerTypes(
   conditionEnabled: boolean,
   originalTypes: readonly TypeName[],
 ): TypeName[] {
+  // 条件OFF時は元配列を複製し、呼び出し側からの意図しない変更を防ぐ。
   return conditionEnabled && abilityId && MOVE_TYPE_CHANGING_ABILITIES.has(abilityId)
     ? [moveType]
     : [...originalTypes];
@@ -85,6 +92,7 @@ export function resolveMoveTypeChangingAbilityStabMultiplier(
   conditionEnabled: boolean,
   originalTypes: readonly TypeName[],
 ) {
+  // 元からタイプ一致する技は通常の一致計算に任せ、ここでは重複加算しない。
   if (
     !conditionEnabled ||
     !abilityId ||
@@ -94,6 +102,7 @@ export function resolveMoveTypeChangingAbilityStabMultiplier(
     return 1;
   }
 
+  // 変化後の攻撃側タイプと技タイプが一致するため、通常のSTABを明示的に補う。
   return 1.5;
 }
 

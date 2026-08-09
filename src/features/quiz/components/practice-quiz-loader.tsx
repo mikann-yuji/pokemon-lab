@@ -109,3 +109,4 @@ export default function PracticeQuizLoader() {
     />
   );
 }
+// 練習問題と習熟度を非同期で準備し、練習ゲームへ受け渡す。

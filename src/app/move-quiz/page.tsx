@@ -18,3 +18,4 @@ export default function MoveQuizPage() {
     </main>
   );
 }
+// 技クイズへルーティングするApp Routerのサーバーページ。

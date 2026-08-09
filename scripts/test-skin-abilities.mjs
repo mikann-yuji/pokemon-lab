@@ -1,3 +1,4 @@
+// 皮膚系特性とへんげんじざい系特性のタイプ変換・威力補正を回帰検証する。
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
@@ -9,6 +10,7 @@ import {
 } from "../src/features/damage-calculator/domain/ability-move-conversion.ts";
 import { getTypeEffectiveness } from "../src/domain/type-matchup.ts";
 
+// 同じ規則を持つ特性は表形式にし、追加時にも同じ期待値を必ず検証する。
 const normalSkinCases = [
   ["refrigerate", "Ice"],
   ["pixilate", "Fairy"],
@@ -18,6 +20,7 @@ const normalSkinCases = [
 ];
 
 for (const [abilityId, expectedType] of normalSkinCases) {
+  // 対象となるノーマル技では、タイプ変換と1.2倍補正の両方が必要になる。
   test(`${abilityId} converts Normal moves to ${expectedType} at 1.2x power`, () => {
     const result = resolveAbilityMoveConversion(abilityId, "Normal");
     assert.deepEqual(result, {
@@ -29,6 +32,7 @@ for (const [abilityId, expectedType] of normalSkinCases) {
     assert.equal(hasAbilityMoveConversion(abilityId), true);
   });
 
+  // 変換対象外の技まで変わる回帰を、各特性について個別に防止する。
   test(`${abilityId} does not change non-Normal moves`, () => {
     assert.deepEqual(resolveAbilityMoveConversion(abilityId, "Fire"), {
       applies: false,
@@ -78,6 +82,7 @@ test("dragonize Double-Edge is neutral against Rock and Dark", () => {
   );
 });
 
+// へんげんじざいとリベロは同じ計算経路を通るため、共通ケースで保証する。
 for (const abilityId of ["protean", "libero"]) {
   test(`${abilityId} changes the attacker to the selected move type`, () => {
     assert.deepEqual(
@@ -94,6 +99,7 @@ for (const abilityId of ["protean", "libero"]) {
     );
   });
 
+  // マスカーニャのトリプルアクセルのような元タイプ外の技が主な回帰対象。
   test(`${abilityId} explicitly applies STAB to a different-type move`, () => {
     assert.equal(
       resolveMoveTypeChangingAbilityStabMultiplier(
@@ -115,6 +121,7 @@ for (const abilityId of ["protean", "libero"]) {
     );
   });
 
+  // 元から一致する技へ1.5倍を二重適用しないことも同時に確認する。
   test(`${abilityId} does not duplicate existing STAB`, () => {
     assert.equal(
       resolveMoveTypeChangingAbilityStabMultiplier(

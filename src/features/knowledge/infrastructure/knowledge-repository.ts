@@ -89,3 +89,4 @@ export async function getKnowledgePokemon(): Promise<KnowledgePokemon[]> {
     STAT_IDS.every((statId) => Number.isFinite(pokemon.stats[statId])),
   );
 }
+// catalog.dbから知識ボードに表示するデータを取得して表示モデルへ整える。
