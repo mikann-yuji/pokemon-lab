@@ -196,6 +196,8 @@ function toDamageMove(move: BattlePokemon["moves"][number]): DamageCalculatorMov
     damageClass: move.damageClass,
     power: move.power,
     accuracy: move.accuracy,
+    // 対戦用の保存形式には追加効果率がないため、ちからずくの自動判定対象外にする。
+    effectChance: null,
     usageRate: null,
   };
 }

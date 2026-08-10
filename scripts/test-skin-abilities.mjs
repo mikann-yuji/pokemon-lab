@@ -7,6 +7,7 @@ import {
   resolveAbilityAttackerTypes,
   resolveAbilityMoveConversion,
   resolveMoveTypeChangingAbilityStabMultiplier,
+  resolveSheerForcePowerMultiplier,
 } from "../src/features/damage-calculator/domain/ability-move-conversion.ts";
 import { getTypeEffectiveness } from "../src/domain/type-matchup.ts";
 
@@ -134,3 +135,14 @@ for (const abilityId of ["protean", "libero"]) {
     );
   });
 }
+
+test("sheer force boosts a damaging move with an additional effect", () => {
+  assert.equal(resolveSheerForcePowerMultiplier("sheer-force", 30), 1.3);
+  assert.equal(resolveSheerForcePowerMultiplier("sheer-force", 100), 1.3);
+});
+
+test("sheer force leaves moves without an additional effect unchanged", () => {
+  assert.equal(resolveSheerForcePowerMultiplier("sheer-force", null), 1);
+  assert.equal(resolveSheerForcePowerMultiplier("sheer-force", 0), 1);
+  assert.equal(resolveSheerForcePowerMultiplier("huge-power", 30), 1);
+});

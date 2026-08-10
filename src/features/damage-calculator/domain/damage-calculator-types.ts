@@ -49,6 +49,8 @@ export type DamageCalculatorMove = {
   power: number;
   /** 命中率。必中や特殊判定の技はnull。 */
   accuracy: number | null;
+  /** 相手へ発生する追加効果の確率。追加効果がない技はnull。 */
+  effectChance: number | null;
   usageRate: number | null;
   /** 攻撃技だけを対象にした採用率順位。採用率データがない技はnull。 */
   usageRank?: number | null;

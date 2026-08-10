@@ -31,6 +31,7 @@ import {
   resolveAbilityAttackerTypes,
   resolveAbilityMoveConversion,
   resolveMoveTypeChangingAbilityStabMultiplier,
+  resolveSheerForcePowerMultiplier,
 } from "../domain/ability-move-conversion";
 
 type BattleSide = "attacker" | "defender";
@@ -508,6 +509,11 @@ function getAbilityPowerMultiplier(input: DamageCalculationInput) {
 
   return (
     catalogMultiplier *
+    // ちからずくは任意条件ではなく、追加効果を持つ技なら常に発動する。
+    resolveSheerForcePowerMultiplier(
+      selectedAbilityId,
+      input.move.effectChance,
+    ) *
     resolveMoveTypeChangingAbilityStabMultiplier(
       selectedAbilityId,
       input.move.typeName,

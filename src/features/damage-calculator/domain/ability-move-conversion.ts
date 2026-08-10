@@ -111,3 +111,16 @@ export function hasMoveTypeChangingAbility(
 ) {
   return Boolean(abilityId && MOVE_TYPE_CHANGING_ABILITIES.has(abilityId));
 }
+
+/**
+ * ちからずくによる技威力補正を返す。
+ *
+ * PokeAPIのeffect_chanceは、ひるみ・状態異常・相手の能力低下など、
+ * ちからずくが取り除く追加効果を持つ攻撃技で正の値になる。
+ */
+export function resolveSheerForcePowerMultiplier(
+  abilityId: string | null | undefined,
+  effectChance: number | null | undefined,
+) {
+  return abilityId === "sheer-force" && (effectChance ?? 0) > 0 ? 1.3 : 1;
+}
