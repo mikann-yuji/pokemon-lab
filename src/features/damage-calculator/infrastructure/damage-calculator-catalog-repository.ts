@@ -224,6 +224,8 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
         AND (
           moves.power > 0
           OR ranked_move_usage.move_id IS NOT NULL
+          -- 体重から実効威力を求める技はマスタ上の威力がnullでも選択対象にする。
+          OR moves.id IN ('low-kick', 'grass-knot')
         )
       ORDER BY
         latest_versions.formId,
