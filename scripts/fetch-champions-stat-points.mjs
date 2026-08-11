@@ -81,6 +81,19 @@ const formsById = new Map(
 const natureIds = new Set(
   parseCsv("natures.csv").map((record) => record.id),
 );
+// OP.GGが一時的に個別カードを返さない場合に備え、直前の正常値を退避しておく。
+const previousStatPointsByKey = new Map(
+  parseCsv("champions_form_stat_points.csv").map((record) => [
+    `${record.form_id}:${record.battle_format}`,
+    record,
+  ]),
+);
+const previousNaturesByKey = new Map(
+  parseCsv("champions_form_natures.csv").map((record) => [
+    `${record.form_id}:${record.battle_format}`,
+    record,
+  ]),
+);
 const rankings = parseCsv("champions_form_usage_rankings.csv")
   .filter((record) => Number(record.usage_rank) <= RANK_LIMIT)
   .sort(
@@ -91,6 +104,26 @@ const rankings = parseCsv("champions_form_usage_rankings.csv")
 const scrapedAt = new Date().toISOString();
 const statPointOutput = [];
 const natureOutput = [];
+const preservedRecordLabels = [];
+
+/**
+ * 一時的に取得できなかった組み合わせだけ、前回の正常なレコードを引き継ぐ。
+ * 初回取得まで握りつぶすと欠損に気づけないため、過去値がなければ失敗させる。
+ */
+function preservePreviousRecords(ranking, form, reason) {
+  const key = `${ranking.form_id}:${ranking.battle_format}`;
+  const previousStatPoints = previousStatPointsByKey.get(key);
+  const previousNature = previousNaturesByKey.get(key);
+  if (!previousStatPoints || !previousNature) {
+    throw new Error(`${reason} No previous record exists for ${form.name} (${ranking.battle_format}).`);
+  }
+
+  statPointOutput.push(previousStatPoints);
+  natureOutput.push(previousNature);
+  preservedRecordLabels.push(
+    `${form.name} (${ranking.battle_format}: ${reason})`,
+  );
+}
 
 for (const ranking of rankings) {
   if (!FORMATS.includes(ranking.battle_format)) continue;
@@ -107,7 +140,14 @@ for (const ranking of rankings) {
     });
     if (response.ok) break;
   }
-  if (!response?.ok) throw new Error(`OP.GG returned HTTP ${response?.status} for ${sourceUrl}.`);
+  if (!response?.ok) {
+    preservePreviousRecords(
+      ranking,
+      form,
+      `OP.GG returned HTTP ${response?.status} for ${sourceUrl}.`,
+    );
+    continue;
+  }
 
   const $ = load(await response.text());
   const cardTexts = $("div.relative.grid.min-h-16")
@@ -127,13 +167,23 @@ for (const ranking of rankings) {
     /^1([\d.]+)%HP(\d+)Attack(\d+)Defense(\d+)Sp\.Atk(\d+)Sp\.Def(\d+)Speed(\d+)$/,
   );
   if (!match) {
-    throw new Error(`Could not parse the top stat points for ${form.name} (${ranking.battle_format}).`);
+    preservePreviousRecords(
+      ranking,
+      form,
+      "Could not parse the top stat points.",
+    );
+    continue;
   }
   const natureMatch = cardTexts
     .map((text) => text.match(/^1([\d.]+)%([A-Za-z]+)(?:\+|$)/))
     .find((candidate) => candidate && natureIds.has(candidate[2].toLowerCase()));
   if (!natureMatch) {
-    throw new Error(`Could not parse the top nature for ${form.name} (${ranking.battle_format}).`);
+    preservePreviousRecords(
+      ranking,
+      form,
+      "Could not parse the top nature.",
+    );
+    continue;
   }
   const [, usageRate, hp, attack, defense, specialAttack, specialDefense, speed] = match;
   const [, natureUsageRate, natureName] = natureMatch;
@@ -175,6 +225,13 @@ if (statPointOutput.length !== expectedRecordCount) {
 if (natureOutput.length !== expectedRecordCount) {
   throw new Error(
     `Expected ${expectedRecordCount} nature records, found ${natureOutput.length}.`,
+  );
+}
+if (preservedRecordLabels.length > 0) {
+  const preview = preservedRecordLabels.slice(0, 10).join(", ");
+  const remaining = preservedRecordLabels.length - 10;
+  console.warn(
+    `Preserved ${preservedRecordLabels.length} previous stat/nature records: ${preview}${remaining > 0 ? `, and ${remaining} more` : ""}.`,
   );
 }
 
