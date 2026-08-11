@@ -95,7 +95,6 @@ const previousNaturesByKey = new Map(
   ]),
 );
 const rankings = parseCsv("champions_form_usage_rankings.csv")
-  .filter((record) => Number(record.usage_rank) <= RANK_LIMIT)
   .sort(
     (left, right) =>
       left.battle_format.localeCompare(right.battle_format) ||
@@ -105,6 +104,8 @@ const scrapedAt = new Date().toISOString();
 const statPointOutput = [];
 const natureOutput = [];
 const preservedRecordLabels = [];
+const skippedRecordLabels = [];
+const selectedCountByFormat = new Map(FORMATS.map((format) => [format, 0]));
 
 /**
  * 一時的に取得できなかった組み合わせだけ、前回の正常なレコードを引き継ぐ。
@@ -115,18 +116,30 @@ function preservePreviousRecords(ranking, form, reason) {
   const previousStatPoints = previousStatPointsByKey.get(key);
   const previousNature = previousNaturesByKey.get(key);
   if (!previousStatPoints || !previousNature) {
-    throw new Error(`${reason} No previous record exists for ${form.name} (${ranking.battle_format}).`);
+    skippedRecordLabels.push(
+      `${form.name} (${ranking.battle_format}: ${reason})`,
+    );
+    return false;
   }
 
   statPointOutput.push(previousStatPoints);
   natureOutput.push(previousNature);
+  selectedCountByFormat.set(
+    ranking.battle_format,
+    (selectedCountByFormat.get(ranking.battle_format) ?? 0) + 1,
+  );
   preservedRecordLabels.push(
     `${form.name} (${ranking.battle_format}: ${reason})`,
   );
+  return true;
 }
 
 for (const ranking of rankings) {
   if (!FORMATS.includes(ranking.battle_format)) continue;
+  // 上位側で詳細データが欠けても、次順位を採用して各ルール100件を維持する。
+  if ((selectedCountByFormat.get(ranking.battle_format) ?? 0) >= RANK_LIMIT) {
+    continue;
+  }
   const form = formsById.get(ranking.form_id);
   if (!form) throw new Error(`Unknown form_id ${ranking.form_id}.`);
   let sourceUrl = "";
@@ -211,6 +224,10 @@ for (const ranking of rankings) {
     source_url: sourceUrl,
     scraped_at: scrapedAt,
   });
+  selectedCountByFormat.set(
+    ranking.battle_format,
+    (selectedCountByFormat.get(ranking.battle_format) ?? 0) + 1,
+  );
   console.log(
     `${ranking.battle_format} #${ranking.usage_rank} ${form.name}: ${hp}-${attack}-${defense}-${specialAttack}-${specialDefense}-${speed} / ${natureId}`,
   );
@@ -232,6 +249,13 @@ if (preservedRecordLabels.length > 0) {
   const remaining = preservedRecordLabels.length - 10;
   console.warn(
     `Preserved ${preservedRecordLabels.length} previous stat/nature records: ${preview}${remaining > 0 ? `, and ${remaining} more` : ""}.`,
+  );
+}
+if (skippedRecordLabels.length > 0) {
+  const preview = skippedRecordLabels.slice(0, 10).join(", ");
+  const remaining = skippedRecordLabels.length - 10;
+  console.warn(
+    `Skipped ${skippedRecordLabels.length} unavailable rankings with no previous record: ${preview}${remaining > 0 ? `, and ${remaining} more` : ""}.`,
   );
 }
 
