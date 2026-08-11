@@ -24,7 +24,7 @@ type PokemonSearchFormProps = {
   championsOnlyLocked?: boolean;
   advancedSearch?: {
     initialFilters: PokemonAdvancedSearchFilters;
-    initialMoveName?: string;
+    initialMoveNames?: string[];
   };
 };
 
@@ -49,7 +49,7 @@ export function PokemonSearchForm({
       advancedSearch &&
         ((advancedSearch.initialFilters.types?.length ?? 0) > 0 ||
           Object.keys(advancedSearch.initialFilters.stats ?? {}).length > 0 ||
-          advancedSearch.initialFilters.moveId),
+          (advancedSearch.initialFilters.moveIds?.length ?? 0) > 0),
     ) || (!championsOnlyLocked && initialChampionsOnly),
   );
 
@@ -168,7 +168,7 @@ export function PokemonSearchForm({
           {advancedSearch ? (
             <PokemonAdvancedSearch
               initialFilters={advancedSearch.initialFilters}
-              initialMoveName={advancedSearch.initialMoveName}
+              initialMoveNames={advancedSearch.initialMoveNames}
             />
           ) : null}
         </div>

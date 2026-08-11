@@ -89,7 +89,8 @@ export type PokemonAdvancedSearchFilters = {
       PokemonStatRange
     >
   >;
-  moveId?: string;
+  /** すべて習得できることを要求する技ID。重複を除いて先頭2件まで使う。 */
+  moveIds?: string[];
 };
 
 export type MoveSearchResult = {
@@ -174,6 +175,9 @@ export async function searchPokemon(
   const hiraganaQuery = escapeLikePattern(toHiragana(normalizedQuery));
   const katakanaQuery = escapeLikePattern(toKatakana(normalizedQuery));
   const selectedTypes = [...new Set(advancedFilters?.types ?? [])].slice(0, 2);
+  const selectedMoveIds = [...new Set(advancedFilters?.moveIds ?? [])]
+    .filter(Boolean)
+    .slice(0, 2);
   const statRanges = advancedFilters?.stats ?? {};
   const statDefinitions = [
     { id: "hp", parameter: "h" },
@@ -254,12 +258,32 @@ export async function searchPokemon(
           )
           ${statClauses}
           AND (
-            @moveId = ''
+            @move1 = ''
             OR EXISTS (
               SELECT 1
               FROM form_moves
               WHERE
-                form_moves.move_id = @moveId
+                form_moves.move_id = @move1
+                AND (
+                  form_moves.form_id = forms.id
+                  OR form_moves.form_id = (
+                    SELECT default_form.id
+                    FROM forms AS default_form
+                    WHERE
+                      default_form.species_id = forms.species_id
+                      AND default_form.is_default = 1
+                    LIMIT 1
+                  )
+                )
+            )
+          )
+          AND (
+            @move2 = ''
+            OR EXISTS (
+              SELECT 1
+              FROM form_moves
+              WHERE
+                form_moves.move_id = @move2
                 AND (
                   form_moves.form_id = forms.id
                   OR form_moves.form_id = (
@@ -318,7 +342,8 @@ export async function searchPokemon(
       "@championsOnly": championsOnly ? 1 : 0,
       "@type1": selectedTypes[0] ?? "",
       "@type2": selectedTypes[1] ?? "",
-      "@moveId": advancedFilters?.moveId ?? "",
+      "@move1": selectedMoveIds[0] ?? "",
+      "@move2": selectedMoveIds[1] ?? "",
       ...Object.fromEntries(
         statDefinitions.flatMap(({ id: statId, parameter }) => [
           [`@${parameter}Min`, statRanges[statId]?.min ?? null],

@@ -14,6 +14,8 @@ type TrainingSearchParams = {
   type2?: string | string[];
   move?: string | string[];
   moveName?: string | string[];
+  move2?: string | string[];
+  moveName2?: string | string[];
 } & Record<string, string | string[] | undefined>;
 
 function first(value: string | string[] | undefined) {
@@ -67,9 +69,9 @@ export default async function TrainingSearchPage({
   const advancedFilters: PokemonAdvancedSearchFilters = {
     types: selectedTypes,
     stats,
-    moveId: first(params.move) || undefined,
+    moveIds: [first(params.move), first(params.move2)].filter(Boolean),
   };
-  const moveName = first(params.moveName);
+  const moveNames = [first(params.moveName), first(params.moveName2)];
   const resultKey = JSON.stringify({ query, advancedFilters });
 
   return (
@@ -85,7 +87,7 @@ export default async function TrainingSearchPage({
             championsOnlyLocked
             advancedSearch={{
               initialFilters: advancedFilters,
-              initialMoveName: moveName,
+              initialMoveNames: moveNames,
             }}
           />
         </div>

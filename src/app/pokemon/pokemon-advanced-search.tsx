@@ -42,70 +42,13 @@ const STAT_DEFINITIONS = [
 
 type PokemonAdvancedSearchProps = {
   initialFilters: PokemonAdvancedSearchFilters;
-  initialMoveName?: string;
+  initialMoveNames?: string[];
 };
 
 export function PokemonAdvancedSearch({
   initialFilters,
-  initialMoveName = "",
+  initialMoveNames = [],
 }: PokemonAdvancedSearchProps) {
-  const moveInputId = useId();
-  const [moveQuery, setMoveQuery] = useState(initialMoveName);
-  const [selectedMove, setSelectedMove] = useState<MoveSearchResult | null>(
-    initialFilters.moveId
-      ? { id: initialFilters.moveId, name: initialMoveName }
-      : null,
-  );
-  const [moveSuggestions, setMoveSuggestions] = useState<MoveSearchResult[]>([]);
-  const {
-    isOpen,
-    highlightedIndex,
-    getInputProps,
-    getItemProps,
-    getMenuProps,
-  } = useCombobox({
-    items: moveSuggestions,
-    initialInputValue: initialMoveName,
-    itemToString: (move) => move?.name ?? "",
-    onInputValueChange: ({ inputValue }) => {
-      const nextValue = inputValue ?? "";
-      setMoveQuery(nextValue);
-      if (selectedMove && nextValue !== selectedMove.name) {
-        setSelectedMove(null);
-      }
-      if (!nextValue.trim()) setMoveSuggestions([]);
-    },
-    onSelectedItemChange: ({ selectedItem }) => {
-      if (selectedItem) {
-        setSelectedMove(selectedItem);
-        setMoveQuery(selectedItem.name);
-        setMoveSuggestions([]);
-      }
-    },
-  });
-
-  useEffect(() => {
-    const normalizedQuery = moveQuery.trim();
-    if (!normalizedQuery || normalizedQuery === selectedMove?.name) return;
-
-    let active = true;
-    const timer = window.setTimeout(() => {
-      void searchMoves(normalizedQuery)
-        .then((moves) => {
-          if (active) setMoveSuggestions(moves);
-        })
-        .catch((error: unknown) => {
-          console.error("技候補を読み込めませんでした。", error);
-          if (active) setMoveSuggestions([]);
-        });
-    }, 220);
-
-    return () => {
-      active = false;
-      window.clearTimeout(timer);
-    };
-  }, [moveQuery, selectedMove?.name]);
-
   const selectedTypes = initialFilters.types ?? [];
 
   return (
@@ -145,52 +88,129 @@ export function PokemonAdvancedSearch({
 
       <fieldset className={styles.moveFilter}>
         <legend>覚える技</legend>
-        <div className={styles.moveCombobox}>
-          <label htmlFor={moveInputId}>技名</label>
-          <input
-            {...getInputProps({
-              id: moveInputId,
-              type: "search",
-              placeholder: "技名を入力",
-              autoComplete: "off",
-            })}
+        {[0, 1].map((slot) => (
+          <MoveFilter
+            key={slot}
+            slot={slot}
+            initialMoveId={initialFilters.moveIds?.[slot] ?? ""}
+            initialMoveName={initialMoveNames[slot] ?? ""}
           />
-          <input type="hidden" name="move" value={selectedMove?.id ?? ""} />
-          <input
-            type="hidden"
-            name="moveName"
-            value={selectedMove?.name ?? ""}
-          />
-          <ul
-            {...getMenuProps({
-              className: styles.moveSuggestionList,
-              "aria-label": "技の候補",
-            })}
-            hidden={
-              !isOpen || !moveQuery.trim() || moveSuggestions.length === 0
-            }
-          >
-            {isOpen
-              ? moveSuggestions.map((move, index) => (
-                  <li
-                    key={move.id}
-                    {...getItemProps({ item: move, index })}
-                    className={
-                      highlightedIndex === index
-                        ? styles.suggestionHighlighted
-                        : ""
-                    }
-                  >
-                    {move.name}
-                  </li>
-                ))
-              : null}
-          </ul>
-          {moveQuery && !selectedMove ? (
-            <small>候補から技を選んでください</small>
-          ) : null}
-        </div>
+        ))}
       </fieldset>
+    </div>
+  );
+}
+
+/** 1つの技条件を候補検索付きで編集し、確定したIDと表示名をURLへ送る。 */
+function MoveFilter({
+  slot,
+  initialMoveId,
+  initialMoveName,
+}: {
+  slot: number;
+  initialMoveId: string;
+  initialMoveName: string;
+}) {
+  const moveInputId = useId();
+  const [moveQuery, setMoveQuery] = useState(initialMoveName);
+  const [selectedMove, setSelectedMove] = useState<MoveSearchResult | null>(
+    initialMoveId ? { id: initialMoveId, name: initialMoveName } : null,
+  );
+  const [moveSuggestions, setMoveSuggestions] = useState<MoveSearchResult[]>([]);
+  const {
+    isOpen,
+    highlightedIndex,
+    getInputProps,
+    getItemProps,
+    getMenuProps,
+  } = useCombobox({
+    items: moveSuggestions,
+    initialInputValue: initialMoveName,
+    itemToString: (move) => move?.name ?? "",
+    onInputValueChange: ({ inputValue }) => {
+      const nextValue = inputValue ?? "";
+      setMoveQuery(nextValue);
+      if (selectedMove && nextValue !== selectedMove.name) setSelectedMove(null);
+      if (!nextValue.trim()) setMoveSuggestions([]);
+    },
+    onSelectedItemChange: ({ selectedItem }) => {
+      if (!selectedItem) return;
+      setSelectedMove(selectedItem);
+      setMoveQuery(selectedItem.name);
+      setMoveSuggestions([]);
+    },
+  });
+
+  useEffect(() => {
+    const normalizedQuery = moveQuery.trim();
+    if (!normalizedQuery || normalizedQuery === selectedMove?.name) return;
+
+    let active = true;
+    const timer = window.setTimeout(() => {
+      void searchMoves(normalizedQuery)
+        .then((moves) => {
+          if (active) setMoveSuggestions(moves);
+        })
+        .catch((error: unknown) => {
+          console.error("技候補を読み込めませんでした。", error);
+          if (active) setMoveSuggestions([]);
+        });
+    }, 220);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [moveQuery, selectedMove?.name]);
+
+  const parameterSuffix = slot === 0 ? "" : "2";
+  return (
+    <div className={styles.moveCombobox}>
+      <label htmlFor={moveInputId}>技名 {slot + 1}</label>
+      <input
+        {...getInputProps({
+          id: moveInputId,
+          type: "search",
+          placeholder: "技名を入力",
+          autoComplete: "off",
+        })}
+      />
+      <input
+        type="hidden"
+        name={`move${parameterSuffix}`}
+        value={selectedMove?.id ?? ""}
+      />
+      <input
+        type="hidden"
+        name={`moveName${parameterSuffix}`}
+        value={selectedMove?.name ?? ""}
+      />
+      <ul
+        {...getMenuProps({
+          className: styles.moveSuggestionList,
+          "aria-label": `技${slot + 1}の候補`,
+        })}
+        hidden={!isOpen || !moveQuery.trim() || moveSuggestions.length === 0}
+      >
+        {isOpen
+          ? moveSuggestions.map((move, index) => (
+              <li
+                key={move.id}
+                {...getItemProps({ item: move, index })}
+                className={
+                  highlightedIndex === index
+                    ? styles.suggestionHighlighted
+                    : ""
+                }
+              >
+                {move.name}
+              </li>
+            ))
+          : null}
+      </ul>
+      {moveQuery && !selectedMove ? (
+        <small>候補から技を選んでください</small>
+      ) : null}
     </div>
   );
 }
