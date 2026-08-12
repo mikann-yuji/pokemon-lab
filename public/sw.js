@@ -1,4 +1,8 @@
-const CACHE_NAME = "pokemon-lab-v43";
+// ビルド前に生成した識別子も更新比較の対象になるため、アプリのpushを確実に検知できる。
+importScripts("/sw-version.js");
+
+const BUILD_VERSION = self.POKEMON_LAB_BUILD_VERSION ?? "development";
+const CACHE_NAME = `pokemon-lab-${BUILD_VERSION}`;
 const IMAGE_CACHE_NAME = "pokemon-lab-images-v1";
 const IMAGE_CACHE_LIMIT = 300;
 
@@ -20,6 +24,7 @@ const APP_ROUTES = [
 ];
 
 const CORE_ASSETS = [
+  "/sw-version.js",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",

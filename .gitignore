@@ -22,6 +22,7 @@
 /public/sqlite-runtime-diagnostic.html
 /public/sqlite-catalog.db.gz
 /public/catalog-manifest.json
+/public/sw-version.js
 /.tmp/
 
 # production

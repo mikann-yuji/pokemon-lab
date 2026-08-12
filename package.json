@@ -7,7 +7,7 @@
     "db:init": "node scripts/init-db.mjs",
     "predev": "npm run sqlite:assets && npm run db:init",
     "dev": "next dev",
-    "prebuild": "npm run sqlite:assets && npm run db:init",
+    "prebuild": "node scripts/generate-service-worker-version.mjs && npm run sqlite:assets && npm run db:init",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
