@@ -28,6 +28,7 @@ import type {
   DamageCalculatorPokemon,
 } from "../domain/damage-calculator-types";
 import {
+  resolveAdaptabilityStabMultiplier,
   resolveAbilityAttackerTypes,
   resolveAbilityMoveConversion,
   resolveMoveTypeChangingAbilityStabMultiplier,
@@ -491,6 +492,7 @@ function getAbilityPowerMultiplier(input: DamageCalculationInput) {
       (modifier) =>
         modifier.modifierKind === "power" ||
         (modifier.modifierKind === "stab" &&
+          selectedAbilityId !== "adaptability" &&
           selectedAbilityId !== "protean" &&
           selectedAbilityId !== "libero"),
     )
@@ -509,6 +511,11 @@ function getAbilityPowerMultiplier(input: DamageCalculationInput) {
 
   return (
     catalogMultiplier *
+    resolveAdaptabilityStabMultiplier(
+      selectedAbilityId,
+      input.move.typeName,
+      input.attacker.types,
+    ) *
     // ちからずくは任意条件ではなく、追加効果を持つ技なら常に発動する。
     resolveSheerForcePowerMultiplier(
       selectedAbilityId,

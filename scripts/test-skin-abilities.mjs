@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   hasAbilityMoveConversion,
   hasMoveTypeChangingAbility,
+  resolveAdaptabilityStabMultiplier,
   resolveAbilityAttackerTypes,
   resolveAbilityMoveConversion,
   resolveMoveTypeChangingAbilityStabMultiplier,
@@ -67,6 +68,28 @@ test("an unrelated ability leaves the move unchanged", () => {
     powerMultiplier: 1,
   });
   assert.equal(hasAbilityMoveConversion("huge-power"), false);
+});
+
+test("adaptability raises matching STAB from 1.5x to 2x", () => {
+  assert.equal(
+    1.5 * resolveAdaptabilityStabMultiplier("adaptability", "Water", ["Water"]),
+    2,
+  );
+  assert.equal(
+    1.5 * resolveAdaptabilityStabMultiplier("adaptability", "Water", ["Water", "Dark"]),
+    2,
+  );
+});
+
+test("adaptability does not boost a move without STAB", () => {
+  assert.equal(
+    resolveAdaptabilityStabMultiplier("adaptability", "Ice", ["Water", "Dark"]),
+    1,
+  );
+  assert.equal(
+    resolveAdaptabilityStabMultiplier("torrent", "Water", ["Water"]),
+    1,
+  );
 });
 
 test("dragonize Double-Edge is neutral against Rock and Dark", () => {

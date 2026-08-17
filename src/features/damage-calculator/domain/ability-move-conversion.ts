@@ -106,6 +106,20 @@ export function resolveMoveTypeChangingAbilityStabMultiplier(
   return 1.5;
 }
 
+/**
+ * てきおうりょくによって、通常のタイプ一致1.5倍を2倍へ引き上げる補正を返す。
+ * 基礎の一致補正は計算ライブラリが処理するため、ここでは差分の4/3倍だけを返す。
+ */
+export function resolveAdaptabilityStabMultiplier(
+  abilityId: string | null | undefined,
+  moveType: TypeName,
+  attackerTypes: readonly TypeName[],
+) {
+  return abilityId === "adaptability" && attackerTypes.includes(moveType)
+    ? 4 / 3
+    : 1;
+}
+
 export function hasMoveTypeChangingAbility(
   abilityId: string | null | undefined,
 ) {
