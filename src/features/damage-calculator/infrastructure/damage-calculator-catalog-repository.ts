@@ -78,7 +78,12 @@ type AbilityModifierRow = SqliteRow & {
 type HeldItemRow = SqliteRow & {
   id: string;
   name: string;
-  modifierKind: "power" | "attacking_stat" | "received_damage" | null;
+  modifierKind:
+    | "power"
+    | "attacking_stat"
+    | "final_damage"
+    | "received_damage"
+    | null;
   multiplier: number | null;
   maxMultiplier: number | null;
   condition:

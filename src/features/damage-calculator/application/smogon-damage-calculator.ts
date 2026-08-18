@@ -398,6 +398,24 @@ function getHeldItemPowerMultiplier(input: DamageCalculationInput) {
   return modifier.multiplier;
 }
 
+/** 攻撃側持ち物のうち、威力計算後の最終ダメージへかかる倍率を返す。 */
+function getHeldItemFinalDamageMultiplier(input: DamageCalculationInput) {
+  const modifier = input.attacker.heldItem?.damageModifier;
+  if (
+    !modifier ||
+    modifier.modifierKind !== "final_damage" ||
+    !itemModifierApplies(modifier, input)
+  ) {
+    return 1;
+  }
+  if (modifier.condition === "consecutive_use") {
+    const count = Math.max(1, input.metronomeConsecutiveUseCount ?? 1);
+    const multiplier = 1 + (modifier.multiplier - 1) * (count - 1);
+    return Math.min(modifier.maxMultiplier ?? multiplier, multiplier);
+  }
+  return modifier.multiplier;
+}
+
 /**
  * ダメージ計算ページで、手動条件付き特性が有効化されているか確認する。
  *
@@ -752,13 +770,14 @@ export class SmogonDamageCalculator {
     const sourceResult = this.ruleset.calculate
       ? this.ruleset.calculate(generation, attacker, defender, move, field)
       : calculate(generation, attacker, defender, move, field);
-    const receivedDamageMultiplier =
+    const finalDamageMultiplier =
+      getHeldItemFinalDamageMultiplier(effectiveInput) *
       getReceivedDamageItemMultiplier(effectiveInput) *
       getAbilityReceivedDamageMultiplier(effectiveInput);
-    if (receivedDamageMultiplier !== 1) {
+    if (finalDamageMultiplier !== 1) {
       sourceResult.damage = scaleDamage(
         sourceResult.damage,
-        receivedDamageMultiplier,
+        finalDamageMultiplier,
       );
     }
     const [minimum, maximum] = sourceResult.range();
@@ -808,12 +827,6 @@ export class SmogonDamageCalculator {
       this.ruleset.resolveSpeciesId?.(pokemon) ?? normalizeId(pokemon.name);
     const calculatorSpecies =
       generation.species.get(sourceId as never)?.name ?? "Bulbasaur";
-    const heldItemId = pokemon.heldItem
-      ? normalizeId(pokemon.heldItem.id)
-      : null;
-    const calculatorItem = heldItemId
-      ? generation.items.get(heldItemId as never)?.name
-      : undefined;
     const types = (
       pokemon.types.length > 1
         ? [pokemon.types[0], pokemon.types[1]]
@@ -822,7 +835,9 @@ export class SmogonDamageCalculator {
     const options: PokemonOptions = {
       level: this.ruleset.level,
       ability: this.ruleset.ability ?? "None",
-      ...(calculatorItem ? { item: calculatorItem } : {}),
+      // 持ち物補正はcatalog.dbを正として、このクラス内で一度だけ適用する。
+      // @smogon/calcにも持ち物を渡すと、いのちのたま等の既知アイテムが
+      // ライブラリ側でも発動し、補正が二重になる。
       nature: this.ruleset.nature,
       ivs: { ...this.ruleset.ivs },
       evs: { ...this.ruleset.evs },

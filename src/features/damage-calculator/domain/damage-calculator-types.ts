@@ -57,7 +57,11 @@ export type DamageCalculatorMove = {
 };
 
 export type DamageCalculatorItemDamageModifier = {
-  modifierKind: "power" | "attacking_stat" | "received_damage";
+  modifierKind:
+    | "power"
+    | "attacking_stat"
+    | "final_damage"
+    | "received_damage";
   multiplier: number;
   maxMultiplier: number | null;
   condition:
