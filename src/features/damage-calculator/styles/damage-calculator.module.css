@@ -1611,6 +1611,11 @@ a.pokemonSummary:focus-visible {
   white-space: nowrap;
 }
 
+.survivalList .survivalIncomingDamage {
+  color: #8a3a18;
+  font-weight: 850;
+}
+
 .survivalOutcome {
   justify-items: end;
   text-align: right;

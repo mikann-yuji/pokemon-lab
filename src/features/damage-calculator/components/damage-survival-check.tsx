@@ -29,6 +29,10 @@ import {
   type SurvivalCheckHistory,
 } from "../infrastructure/survival-check-history-repository";
 import type { TypeEffectivenessSource } from "@/domain/type-matchup";
+import {
+  HIGH_RANDOM_ONE_HIT_THRESHOLD,
+  isSurvivalAdvantage,
+} from "../domain/survival-check-logic";
 import styles from "../styles/damage-calculator.module.css";
 
 type SurvivalTeamMember = {
@@ -48,6 +52,11 @@ type SurvivalResult = {
   attackerSpeed: number;
   defenderSpeed: number;
   turnOrder: "先攻" | "後攻" | "同速";
+  incomingMove: DamageCalculatorMove | null;
+  incomingMinimumPercent: number | null;
+  incomingMaximumPercent: number | null;
+  incomingOneHitProbability: number | null;
+  safeLaterGuaranteedOneHit: boolean;
   canRemove: boolean;
 };
 
@@ -159,6 +168,56 @@ function calculateMemberResults(
             left.calculation.maximumPercent,
       )[0];
 
+    const rankedIncomingMoves = defender.moves
+      .filter(
+        (move) => move.usageRank !== null && move.usageRank !== undefined,
+      )
+      .sort(
+        (left, right) =>
+          (left.usageRank ?? Number.MAX_SAFE_INTEGER) -
+          (right.usageRank ?? Number.MAX_SAFE_INTEGER),
+      )
+      .slice(0, 4);
+    const incomingMoves = (
+      rankedIncomingMoves.length > 0
+        ? rankedIncomingMoves
+        : defender.moves.slice(0, 4)
+    )
+      .flatMap((move) => {
+        try {
+          const calculation = championsDamageCalculator.calculate({
+            attacker: defender,
+            defender: attacker,
+            move,
+            typeEffectivenessSource,
+            abilityConditionEnabled: {
+              defender: condition.abilityEnabled,
+            },
+          });
+          return [{ move, calculation }];
+        } catch {
+          return [];
+        }
+      })
+      .sort(
+        (left, right) =>
+          right.calculation.oneHitProbability -
+            left.calculation.oneHitProbability ||
+          right.calculation.maximumPercent -
+            left.calculation.maximumPercent ||
+          right.calculation.minimumPercent - left.calculation.minimumPercent,
+      );
+    const strongestIncoming = incomingMoves[0];
+    const outgoingMinimumPercent = best?.calculation.minimumPercent ?? 0;
+    const safeLaterGuaranteedOneHit =
+      turnOrder === "後攻" &&
+      outgoingMinimumPercent >= 100 &&
+      incomingMoves.length > 0 &&
+      incomingMoves.every(
+        ({ calculation }) =>
+          calculation.oneHitProbability < HIGH_RANDOM_ONE_HIT_THRESHOLD,
+      );
+
     return [
       {
         ranking,
@@ -170,9 +229,21 @@ function calculateMemberResults(
         attackerSpeed,
         defenderSpeed,
         turnOrder,
-        canRemove:
-          turnOrder === "先攻" &&
-          (best?.calculation.minimumPercent ?? 0) >= 50,
+        incomingMove: strongestIncoming?.move ?? null,
+        incomingMinimumPercent:
+          strongestIncoming?.calculation.minimumPercent ?? null,
+        incomingMaximumPercent:
+          strongestIncoming?.calculation.maximumPercent ?? null,
+        incomingOneHitProbability:
+          strongestIncoming?.calculation.oneHitProbability ?? null,
+        safeLaterGuaranteedOneHit,
+        canRemove: isSurvivalAdvantage({
+          movesFirst: turnOrder === "先攻",
+          outgoingMinimumPercent,
+          incomingOneHitProbabilities: incomingMoves.map(
+            ({ calculation }) => calculation.oneHitProbability,
+          ),
+        }),
       },
     ];
   });
@@ -924,14 +995,21 @@ function SurvivalResultRow({
     attackerSpeed,
     defenderSpeed,
     turnOrder,
+    incomingMove,
+    incomingMinimumPercent,
+    incomingMaximumPercent,
+    incomingOneHitProbability,
+    safeLaterGuaranteedOneHit,
     canRemove,
   } = result;
   const isGuaranteedFirstTurnOneHit =
     turnOrder === "先攻" && (minimumPercent ?? 0) >= 100;
+  const isHighlightedOneHit =
+    isGuaranteedFirstTurnOneHit || safeLaterGuaranteedOneHit;
   return (
     <article
       className={
-        isGuaranteedFirstTurnOneHit
+        isHighlightedOneHit
           ? styles.survivalGuaranteedOneHitRow
           : undefined
       }
@@ -952,6 +1030,10 @@ function SurvivalResultRow({
             <mark className={styles.survivalGuaranteedOneHitBadge}>
               先攻確定1発
             </mark>
+          ) : safeLaterGuaranteedOneHit ? (
+            <mark className={styles.survivalGuaranteedOneHitBadge}>
+              後攻確1・高乱数耐え
+            </mark>
           ) : null}
         </strong>
         <span>
@@ -960,6 +1042,17 @@ function SurvivalResultRow({
             ? `・${minimumPercent.toFixed(1)}〜${maximumPercent.toFixed(1)}%`
             : ""}
         </span>
+        {incomingMove &&
+        incomingMinimumPercent !== null &&
+        incomingMaximumPercent !== null &&
+        incomingOneHitProbability !== null ? (
+          <span className={styles.survivalIncomingDamage}>
+            相手最大: {incomingMove.name}・
+            {incomingMinimumPercent.toFixed(1)}〜
+            {incomingMaximumPercent.toFixed(1)}%・1発率
+            {(incomingOneHitProbability * 100).toFixed(1)}%
+          </span>
+        ) : null}
         <small>
           {STAT_IDS.map(
             (statId) =>

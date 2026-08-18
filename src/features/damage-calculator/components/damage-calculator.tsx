@@ -44,7 +44,10 @@ import {
 import { useDamageCalculatorStore } from "./damage-calculator-store";
 import { useDamageCalculatorUserData } from "./use-damage-calculator-user-data";
 import { useDamageHistoryPersistence } from "./use-damage-history-persistence";
-import { getVariableMovePowers } from "../domain/variable-move-power";
+import {
+  getDefaultVariableMovePower,
+  getVariableMovePowers,
+} from "../domain/variable-move-power";
 import { resolveAbilityMoveConversion } from "../domain/ability-move-conversion";
 import { getPopularStatProfile } from "../infrastructure/popular-stat-points-repository";
 
@@ -468,9 +471,10 @@ export function DamageCalculator({
       ? variableMovePowerSelection?.moveId === selectedMoveBase.id &&
         variableMovePowerOptions.includes(variableMovePowerSelection.power)
         ? variableMovePowerSelection.power
-        : variableMovePowerOptions.includes(selectedMoveBase.power)
-          ? selectedMoveBase.power
-          : variableMovePowerOptions[0]
+        : getDefaultVariableMovePower(
+            selectedMoveBase,
+            variableMovePowerOptions,
+          )
       : selectedMoveBase?.power;
   const selectedMove =
     selectedMoveBase && selectedMovePower !== undefined

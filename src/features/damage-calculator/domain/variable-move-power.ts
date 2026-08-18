@@ -26,8 +26,22 @@ const VARIABLE_MOVE_POWERS: Record<string, readonly number[]> = {
   punishment: range(60, 200, 20),
 };
 
+const DEFAULT_VARIABLE_MOVE_POWERS: Record<string, number> = {
+  "last-respects": 150,
+};
+
 export function getVariableMovePowers(
   move: DamageCalculatorMove | null | undefined,
 ) {
   return move ? (VARIABLE_MOVE_POWERS[move.id] ?? null) : null;
+}
+
+export function getDefaultVariableMovePower(
+  move: DamageCalculatorMove,
+  options: readonly number[],
+) {
+  const preferred = DEFAULT_VARIABLE_MOVE_POWERS[move.id];
+  if (preferred !== undefined && options.includes(preferred)) return preferred;
+  if (options.includes(move.power)) return move.power;
+  return options[0];
 }
