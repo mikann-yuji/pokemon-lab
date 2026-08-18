@@ -45,3 +45,10 @@ export function getDefaultVariableMovePower(
   if (options.includes(move.power)) return move.power;
   return options[0];
 }
+
+export function applyDefaultVariableMovePower(move: DamageCalculatorMove) {
+  const options = getVariableMovePowers(move);
+  if (!options) return move;
+  const power = getDefaultVariableMovePower(move, options);
+  return power === move.power ? move : { ...move, power };
+}

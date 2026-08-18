@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { isSurvivalAdvantage } from "../src/features/damage-calculator/domain/survival-check-logic.ts";
 import {
+  applyDefaultVariableMovePower,
   getDefaultVariableMovePower,
   getVariableMovePowers,
 } from "../src/features/damage-calculator/domain/variable-move-power.ts";
@@ -33,4 +34,5 @@ test("Last Respects defaults to 150 power", () => {
   const options = getVariableMovePowers(move);
   assert.ok(options);
   assert.equal(getDefaultVariableMovePower(move, options), 150);
+  assert.equal(applyDefaultVariableMovePower(move).power, 150);
 });

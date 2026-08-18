@@ -33,6 +33,7 @@ import {
   HIGH_RANDOM_ONE_HIT_THRESHOLD,
   isSurvivalAdvantage,
 } from "../domain/survival-check-logic";
+import { applyDefaultVariableMovePower } from "../domain/variable-move-power";
 import styles from "../styles/damage-calculator.module.css";
 
 type SurvivalTeamMember = {
@@ -144,7 +145,8 @@ function calculateMemberResults(
           ? "後攻"
           : "同速";
     const best = attacker.moves
-      .flatMap((move) => {
+      .flatMap((sourceMove) => {
+        const move = applyDefaultVariableMovePower(sourceMove);
         try {
           const calculation = championsDamageCalculator.calculate({
             attacker,
@@ -183,7 +185,8 @@ function calculateMemberResults(
         ? rankedIncomingMoves
         : defender.moves.slice(0, 4)
     )
-      .flatMap((move) => {
+      .flatMap((sourceMove) => {
+        const move = applyDefaultVariableMovePower(sourceMove);
         try {
           const calculation = championsDamageCalculator.calculate({
             attacker: defender,
