@@ -29,6 +29,39 @@ test("a slower guaranteed OHKO is not favorable against a high-random OHKO", () 
   );
 });
 
+test("a faster guaranteed two-hit KO is carried over against a high-random OHKO", () => {
+  assert.equal(
+    isSurvivalAdvantage({
+      movesFirst: true,
+      outgoingMinimumPercent: 50,
+      incomingOneHitProbabilities: [0.75, 0, 0, 0],
+    }),
+    false,
+  );
+});
+
+test("a faster guaranteed two-hit KO stays favorable below a high-random OHKO", () => {
+  assert.equal(
+    isSurvivalAdvantage({
+      movesFirst: true,
+      outgoingMinimumPercent: 50,
+      incomingOneHitProbabilities: [0.6875, 0, 0, 0],
+    }),
+    true,
+  );
+});
+
+test("a faster guaranteed OHKO stays favorable against a guaranteed OHKO", () => {
+  assert.equal(
+    isSurvivalAdvantage({
+      movesFirst: true,
+      outgoingMinimumPercent: 100,
+      incomingOneHitProbabilities: [1],
+    }),
+    true,
+  );
+});
+
 test("Last Respects defaults to 150 power", () => {
   const move = { id: "last-respects", power: 50 };
   const options = getVariableMovePowers(move);
