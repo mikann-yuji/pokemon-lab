@@ -411,6 +411,7 @@ export function MetronomeUseControl({
 export function DamageStatControls({
   title,
   statLabel,
+  actualValue,
   value,
   showRank = true,
   showNature = true,
@@ -418,6 +419,7 @@ export function DamageStatControls({
 }: {
   title: string;
   statLabel: string;
+  actualValue?: number | null;
   value: StatAdjustment;
   showRank?: boolean;
   showNature?: boolean;
@@ -435,7 +437,12 @@ export function DamageStatControls({
     <div className={styles.statControls}>
       <div className={styles.statControlsHeader}>
         <strong>{title}</strong>
-        <span>{statLabel}</span>
+        <div className={styles.statControlsMetrics}>
+          {actualValue !== null && actualValue !== undefined ? (
+            <small>実数値 {actualValue}</small>
+          ) : null}
+          <span>{statLabel}</span>
+        </div>
       </div>
       <div className={styles.statControlGrid}>
         <label className={styles.pointField}>

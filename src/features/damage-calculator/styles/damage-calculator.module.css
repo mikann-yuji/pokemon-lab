@@ -868,6 +868,19 @@ a.pokemonSummary:focus-visible {
   font-size: 0.72rem;
 }
 
+.statControlsMetrics {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.statControlsMetrics small {
+  color: #66758a;
+  font-size: 0.56rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .statControlsHeader span,
 .rankValue {
   flex: 0 0 auto;

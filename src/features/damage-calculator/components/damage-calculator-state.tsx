@@ -4,7 +4,6 @@ import { useState } from "react";
 import type {
   DamageCalculatorAbility,
   DamageCalculatorHeldItem,
-  DamageCalculatorMove,
   DamageCalculatorNature,
   DamageCalculatorPokemon,
 } from "../domain/damage-calculator-types";
@@ -361,19 +360,6 @@ export function applyAbility(
   ability: DamageCalculatorAbility | null,
 ): DamageCalculatorPokemon | null {
   return pokemon ? { ...pokemon, selectedAbility: ability } : pokemon;
-}
-
-/**
- * ダメージ計算ページで、選択技から攻撃側/防御側に必要な補正能力を決める。
- *
- * @param move - 選択されている技。未選択ならundefined。
- * @returns 物理ならA/B、特殊ならC/D、未選択なら両側null。
- */
-export function getRelevantStatIds(move: DamageCalculatorMove | undefined) {
-  if (!move) return { attacker: null, defender: null };
-  return move.damageClass === "physical"
-    ? ({ attacker: "attack", defender: "defense" } as const)
-    : ({ attacker: "special-attack", defender: "special-defense" } as const);
 }
 
 /**

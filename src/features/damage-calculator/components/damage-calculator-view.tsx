@@ -46,7 +46,10 @@ import type {
   SpeedComparisonRow,
   StatAdjustment,
 } from "./damage-calculator-types";
-import type { StatAdjustmentState } from "./damage-calculator-state";
+import {
+  calculateActualStat,
+  type StatAdjustmentState,
+} from "./damage-calculator-state";
 import styles from "../styles/damage-calculator.module.css";
 
 // 通常ダメージ計算ページの見た目を組み立てるファイル。
@@ -317,6 +320,16 @@ export function DamageCalculatorView({
             title="攻撃側の補正"
             statLabel={STAT_LABELS[statId]}
             value={statAdjustments.attacker[statId]}
+            actualValue={
+              attacker
+                ? calculateActualStat(
+                    attacker,
+                    statId,
+                    statAdjustments.attacker[statId].point,
+                    statAdjustments.attacker[statId].nature,
+                  )
+                : null
+            }
             onChange={(values) => onStatAdjustmentChange("attacker", statId, values)}
           />
         ))}
@@ -364,6 +377,16 @@ export function DamageCalculatorView({
             title={statId === "hp" ? "防御側のHP" : "防御側の補正"}
             statLabel={STAT_LABELS[statId]}
             value={statAdjustments.defender[statId]}
+            actualValue={
+              defender
+                ? calculateActualStat(
+                    defender,
+                    statId,
+                    statAdjustments.defender[statId].point,
+                    statAdjustments.defender[statId].nature,
+                  )
+                : null
+            }
             showRank={statId !== "hp"}
             showNature={statId !== "hp"}
             onChange={(values) => onStatAdjustmentChange("defender", statId, values)}

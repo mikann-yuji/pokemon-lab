@@ -38,7 +38,6 @@ import {
   createStatAdjustmentsFromBuild,
   createStatAdjustmentsFromPoints,
   getAegislashForm,
-  getRelevantStatIds,
   switchAegislashForm,
 } from "./damage-calculator-state";
 import { useDamageCalculatorStore } from "./damage-calculator-store";
@@ -49,6 +48,7 @@ import {
   getVariableMovePowers,
 } from "../domain/variable-move-power";
 import { resolveAbilityMoveConversion } from "../domain/ability-move-conversion";
+import { getRelevantStatIds } from "../domain/relevant-damage-stats";
 import { getPopularStatProfile } from "../infrastructure/popular-stat-points-repository";
 
 /**
