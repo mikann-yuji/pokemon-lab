@@ -87,48 +87,16 @@ export function TrainingStatEditor({
                   onAbilityPointChange(stat.id, Number(event.target.value))
                 }
               />
-              <div className={styles.pointSliderRow}>
-                <button
-                  type="button"
-                  aria-label={`${stat.name}の能力ポイントを1下げる`}
-                  title="1下げる"
-                  disabled={(abilityPoints[stat.id] ?? 0) <= 0}
-                  onClick={() =>
-                    onAbilityPointChange(
-                      stat.id,
-                      (abilityPoints[stat.id] ?? 0) - 1,
-                    )
-                  }
-                >
-                  ‹
-                </button>
-                <input
-                  aria-label={`${stat.name}の能力ポイントスライダー`}
-                  type="range"
-                  min="0"
-                  max="32"
-                  value={abilityPoints[stat.id] ?? 0}
-                  onChange={(event) =>
-                    onAbilityPointChange(stat.id, Number(event.target.value))
-                  }
-                />
-                <button
-                  type="button"
-                  aria-label={`${stat.name}の能力ポイントを1上げる`}
-                  title="1上げる"
-                  disabled={
-                    (abilityPoints[stat.id] ?? 0) >= 32 || pointTotal >= 66
-                  }
-                  onClick={() =>
-                    onAbilityPointChange(
-                      stat.id,
-                      (abilityPoints[stat.id] ?? 0) + 1,
-                    )
-                  }
-                >
-                  ›
-                </button>
-              </div>
+              <input
+                aria-label={`${stat.name}の能力ポイントスライダー`}
+                type="range"
+                min="0"
+                max="32"
+                value={abilityPoints[stat.id] ?? 0}
+                onChange={(event) =>
+                  onAbilityPointChange(stat.id, Number(event.target.value))
+                }
+              />
             </div>
             <b>{actualStats[stat.id]}</b>
             <button

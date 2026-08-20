@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 import { championsDamageCalculator } from "@/features/damage-calculator/config/champions-damage-ruleset";
 import { DamageSurvivalCheck } from "@/features/damage-calculator/components/damage-survival-check";
 import { useDamageCalculatorCatalogStore } from "@/features/damage-calculator/components/damage-calculator-catalog-store";
@@ -92,6 +92,19 @@ export function TrainingDamagePreview({
   const [considerSitrusBerry, setConsiderSitrusBerry] = useState(false);
   const canConsiderSitrusBerry = itemId === "sitrus-berry";
   const sitrusBerryEnabled = canConsiderSitrusBerry && considerSitrusBerry;
+  // バーと実数値の更新を先に描画し、上位100体×攻守の重い計算は操作が
+  // 一段落してから低優先度で追従させる。連続操作中の再計算もまとめられる。
+  const [calculationAbilityPoints, setCalculationAbilityPoints] =
+    useState(abilityPoints);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      startTransition(() => {
+        setCalculationAbilityPoints({ ...abilityPoints });
+      });
+    }, 180);
+    return () => window.clearTimeout(timeoutId);
+  }, [abilityPoints]);
 
   useEffect(() => {
     let active = true;
@@ -132,7 +145,7 @@ export function TrainingDamagePreview({
         nature,
         itemId,
         abilityId,
-        abilityPoints,
+        abilityPoints: calculationAbilityPoints,
         moveIds,
         updatedAt: 0,
       },
@@ -141,7 +154,7 @@ export function TrainingDamagePreview({
     );
   }, [
     abilityId,
-    abilityPoints,
+    calculationAbilityPoints,
     heldItems,
     itemId,
     moveIds,
