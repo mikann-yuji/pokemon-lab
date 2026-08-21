@@ -80,6 +80,7 @@ export type DamageCalculatorItemDamageModifier = {
 export type DamageCalculatorHeldItem = {
   id: string;
   name: string;
+  isMegaStone: boolean;
   damageModifier: DamageCalculatorItemDamageModifier | null;
 };
 

@@ -78,6 +78,7 @@ type AbilityModifierRow = SqliteRow & {
 type HeldItemRow = SqliteRow & {
   id: string;
   name: string;
+  isMegaStone: number;
   modifierKind:
     | "power"
     | "attacking_stat"
@@ -339,6 +340,7 @@ export async function getChampionsDamageCalculatorHeldItems(): Promise<
     SELECT
       items.id,
       COALESCE(champions_items.name_ja, items.name_ja, items.id) AS name,
+      CASE WHEN champions_items.major_category = 'メガストーン' THEN 1 ELSE 0 END AS isMegaStone,
       champions_item_damage_modifiers.modifier_kind AS modifierKind,
       champions_item_damage_modifiers.multiplier,
       champions_item_damage_modifiers.max_multiplier AS maxMultiplier,
@@ -355,6 +357,7 @@ export async function getChampionsDamageCalculatorHeldItems(): Promise<
   return rows.map((row) => ({
     id: row.id,
     name: row.name,
+    isMegaStone: row.isMegaStone === 1,
     damageModifier:
       row.multiplier === null || row.condition === null
         ? null

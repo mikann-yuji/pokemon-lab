@@ -34,6 +34,7 @@ import {
   resolveMoveTypeChangingAbilityStabMultiplier,
   resolveSheerForcePowerMultiplier,
 } from "../domain/ability-move-conversion";
+import { getDefenderItemMovePowerMultiplier } from "../domain/move-power-modifiers";
 
 type BattleSide = "attacker" | "defender";
 /** @smogon/calcのPokemonコンストラクター第3引数。rulesetのフックで部分上書きする。 */
@@ -753,7 +754,11 @@ export class SmogonDamageCalculator {
       getEffectiveMovePower(effectiveInput),
       getHeldItemPowerMultiplier(effectiveInput) *
         getAbilityPowerMultiplier(effectiveInput) *
-        moveConversion.powerMultiplier,
+        moveConversion.powerMultiplier *
+        getDefenderItemMovePowerMultiplier(
+          effectiveInput.move.id,
+          effectiveInput.defender.heldItem,
+        ),
       effectiveInput.hits,
     );
     applyAttackingStatMultiplier(
