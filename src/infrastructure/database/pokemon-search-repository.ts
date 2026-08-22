@@ -91,9 +91,16 @@ export type PokemonAdvancedSearchFilters = {
   >;
   /** すべて習得できることを要求する技ID。重複を除いて先頭2件まで使う。 */
   moveIds?: string[];
+  /** フォームが持つことを要求する特性ID。 */
+  abilityIds?: string[];
 };
 
 export type MoveSearchResult = {
+  id: string;
+  name: string;
+};
+
+export type AbilitySearchResult = {
   id: string;
   name: string;
 };
@@ -178,6 +185,11 @@ export async function searchPokemon(
   const selectedMoveIds = [...new Set(advancedFilters?.moveIds ?? [])]
     .filter(Boolean)
     .slice(0, 2);
+  const selectedAbilityIds = [
+    ...new Set(advancedFilters?.abilityIds ?? []),
+  ]
+    .filter(Boolean)
+    .slice(0, 1);
   const statRanges = advancedFilters?.stats ?? {};
   const statDefinitions = [
     { id: "hp", parameter: "h" },
@@ -297,6 +309,16 @@ export async function searchPokemon(
                 )
             )
           )
+          AND (
+            @ability = ''
+            OR EXISTS (
+              SELECT 1
+              FROM form_abilities
+              WHERE
+                form_abilities.form_id = forms.id
+                AND form_abilities.ability_id = @ability
+            )
+          )
         ORDER BY
           CASE
             WHEN forms.name LIKE @prefix ESCAPE '\\'
@@ -344,6 +366,7 @@ export async function searchPokemon(
       "@type2": selectedTypes[1] ?? "",
       "@move1": selectedMoveIds[0] ?? "",
       "@move2": selectedMoveIds[1] ?? "",
+      "@ability": selectedAbilityIds[0] ?? "",
       ...Object.fromEntries(
         statDefinitions.flatMap(({ id: statId, parameter }) => [
           [`@${parameter}Min`, statRanges[statId]?.min ?? null],
@@ -404,6 +427,50 @@ export async function searchMoves(
         END,
         moves.name_ja,
         moves.id
+      LIMIT @limit
+    `,
+    {
+      "@pattern": `%${escapedQuery}%`,
+      "@hiraganaPattern": `%${hiraganaQuery}%`,
+      "@katakanaPattern": `%${katakanaQuery}%`,
+      "@prefix": `${escapedQuery}%`,
+      "@hiraganaPrefix": `${hiraganaQuery}%`,
+      "@katakanaPrefix": `${katakanaQuery}%`,
+      "@limit": Math.max(1, Math.min(limit, 20)),
+    },
+  );
+}
+
+/** 特性名の部分一致候補をcatalog.dbから取得する。 */
+export async function searchAbilities(
+  query: string,
+  limit = 8,
+): Promise<AbilitySearchResult[]> {
+  const normalizedQuery = query.trim();
+  if (!normalizedQuery) return [];
+
+  const escapedQuery = escapeLikePattern(normalizedQuery);
+  const hiraganaQuery = escapeLikePattern(toHiragana(normalizedQuery));
+  const katakanaQuery = escapeLikePattern(toKatakana(normalizedQuery));
+  return sqliteWorkerClient.catalogQuery<AbilitySearchResult>(
+    `
+      SELECT abilities.id, COALESCE(abilities.name_ja, abilities.id) AS name
+      FROM abilities
+      WHERE
+        abilities.id LIKE @pattern ESCAPE '\\'
+        OR abilities.name_ja LIKE @pattern ESCAPE '\\'
+        OR abilities.name_ja LIKE @hiraganaPattern ESCAPE '\\'
+        OR abilities.name_ja LIKE @katakanaPattern ESCAPE '\\'
+      ORDER BY
+        CASE
+          WHEN abilities.id LIKE @prefix ESCAPE '\\'
+            OR abilities.name_ja LIKE @prefix ESCAPE '\\'
+            OR abilities.name_ja LIKE @hiraganaPrefix ESCAPE '\\'
+            OR abilities.name_ja LIKE @katakanaPrefix ESCAPE '\\'
+          THEN 0 ELSE 1
+        END,
+        abilities.name_ja,
+        abilities.id
       LIMIT @limit
     `,
     {

@@ -4,7 +4,9 @@ import { useCombobox } from "downshift";
 import { useEffect, useId, useState } from "react";
 import { TYPE_NAMES, type TypeName } from "@/domain/type-matchup";
 import {
+  searchAbilities,
   searchMoves,
+  type AbilitySearchResult,
   type MoveSearchResult,
   type PokemonAdvancedSearchFilters,
 } from "@/infrastructure/database/pokemon-search-repository";
@@ -43,11 +45,13 @@ const STAT_DEFINITIONS = [
 type PokemonAdvancedSearchProps = {
   initialFilters: PokemonAdvancedSearchFilters;
   initialMoveNames?: string[];
+  initialAbilityName?: string;
 };
 
 export function PokemonAdvancedSearch({
   initialFilters,
   initialMoveNames = [],
+  initialAbilityName = "",
 }: PokemonAdvancedSearchProps) {
   const selectedTypes = initialFilters.types ?? [];
 
@@ -97,6 +101,126 @@ export function PokemonAdvancedSearch({
           />
         ))}
       </fieldset>
+
+      <fieldset className={styles.abilityFilter}>
+        <legend>とくせい</legend>
+        <AbilityFilter
+          initialAbilityId={initialFilters.abilityIds?.[0] ?? ""}
+          initialAbilityName={initialAbilityName}
+        />
+      </fieldset>
+    </div>
+  );
+}
+
+/** 特性条件を候補検索付きで編集し、確定したIDと表示名をURLへ送る。 */
+function AbilityFilter({
+  initialAbilityId,
+  initialAbilityName,
+}: {
+  initialAbilityId: string;
+  initialAbilityName: string;
+}) {
+  const inputId = useId();
+  const [query, setQuery] = useState(initialAbilityName);
+  const [selectedAbility, setSelectedAbility] =
+    useState<AbilitySearchResult | null>(
+      initialAbilityId
+        ? { id: initialAbilityId, name: initialAbilityName }
+        : null,
+    );
+  const [suggestions, setSuggestions] = useState<AbilitySearchResult[]>([]);
+  const {
+    isOpen,
+    highlightedIndex,
+    getInputProps,
+    getItemProps,
+    getMenuProps,
+  } = useCombobox({
+    items: suggestions,
+    initialInputValue: initialAbilityName,
+    itemToString: (ability) => ability?.name ?? "",
+    onInputValueChange: ({ inputValue }) => {
+      const nextValue = inputValue ?? "";
+      setQuery(nextValue);
+      if (selectedAbility && nextValue !== selectedAbility.name) {
+        setSelectedAbility(null);
+      }
+      if (!nextValue.trim()) setSuggestions([]);
+    },
+    onSelectedItemChange: ({ selectedItem }) => {
+      if (!selectedItem) return;
+      setSelectedAbility(selectedItem);
+      setQuery(selectedItem.name);
+      setSuggestions([]);
+    },
+  });
+
+  useEffect(() => {
+    const normalizedQuery = query.trim();
+    if (!normalizedQuery || normalizedQuery === selectedAbility?.name) return;
+
+    let active = true;
+    const timer = window.setTimeout(() => {
+      void searchAbilities(normalizedQuery)
+        .then((abilities) => {
+          if (active) setSuggestions(abilities);
+        })
+        .catch((error: unknown) => {
+          console.error("特性候補を読み込めませんでした。", error);
+          if (active) setSuggestions([]);
+        });
+    }, 220);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [query, selectedAbility?.name]);
+
+  return (
+    <div className={styles.moveCombobox}>
+      <label htmlFor={inputId}>特性名</label>
+      <input
+        {...getInputProps({
+          id: inputId,
+          type: "search",
+          placeholder: "特性名を入力",
+          autoComplete: "off",
+        })}
+      />
+      <input type="hidden" name="ability" value={selectedAbility?.id ?? ""} />
+      <input
+        type="hidden"
+        name="abilityName"
+        value={selectedAbility?.name ?? ""}
+      />
+      <ul
+        {...getMenuProps({
+          className: styles.moveSuggestionList,
+          "aria-label": "特性の候補",
+        })}
+        hidden={!isOpen || !query.trim() || suggestions.length === 0}
+      >
+        {isOpen
+          ? suggestions.map((ability, index) => (
+              <li
+                key={ability.id}
+                {...getItemProps({ item: ability, index })}
+                className={
+                  highlightedIndex === index
+                    ? styles.suggestionHighlighted
+                    : ""
+                }
+              >
+                {ability.name}
+              </li>
+            ))
+          : null}
+      </ul>
+      {query && !selectedAbility ? (
+        <small>候補から特性を選んでください</small>
+      ) : null}
     </div>
   );
 }

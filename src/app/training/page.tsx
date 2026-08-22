@@ -16,6 +16,8 @@ type TrainingSearchParams = {
   moveName?: string | string[];
   move2?: string | string[];
   moveName2?: string | string[];
+  ability?: string | string[];
+  abilityName?: string | string[];
 } & Record<string, string | string[] | undefined>;
 
 function first(value: string | string[] | undefined) {
@@ -70,8 +72,10 @@ export default async function TrainingSearchPage({
     types: selectedTypes,
     stats,
     moveIds: [first(params.move), first(params.move2)].filter(Boolean),
+    abilityIds: [first(params.ability)].filter(Boolean),
   };
   const moveNames = [first(params.moveName), first(params.moveName2)];
+  const abilityName = first(params.abilityName);
   const resultKey = JSON.stringify({ query, advancedFilters });
 
   return (
@@ -88,6 +92,7 @@ export default async function TrainingSearchPage({
             advancedSearch={{
               initialFilters: advancedFilters,
               initialMoveNames: moveNames,
+              initialAbilityName: abilityName,
             }}
           />
         </div>

@@ -25,6 +25,7 @@ type PokemonSearchFormProps = {
   advancedSearch?: {
     initialFilters: PokemonAdvancedSearchFilters;
     initialMoveNames?: string[];
+    initialAbilityName?: string;
   };
 };
 
@@ -49,7 +50,8 @@ export function PokemonSearchForm({
       advancedSearch &&
         ((advancedSearch.initialFilters.types?.length ?? 0) > 0 ||
           Object.keys(advancedSearch.initialFilters.stats ?? {}).length > 0 ||
-          (advancedSearch.initialFilters.moveIds?.length ?? 0) > 0),
+          (advancedSearch.initialFilters.moveIds?.length ?? 0) > 0 ||
+          (advancedSearch.initialFilters.abilityIds?.length ?? 0) > 0),
     ) || (!championsOnlyLocked && initialChampionsOnly),
   );
 
@@ -169,6 +171,7 @@ export function PokemonSearchForm({
             <PokemonAdvancedSearch
               initialFilters={advancedSearch.initialFilters}
               initialMoveNames={advancedSearch.initialMoveNames}
+              initialAbilityName={advancedSearch.initialAbilityName}
             />
           ) : null}
         </div>
