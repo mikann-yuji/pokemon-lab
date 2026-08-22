@@ -35,6 +35,7 @@ import {
   resolveSheerForcePowerMultiplier,
 } from "../domain/ability-move-conversion";
 import { getDefenderItemMovePowerMultiplier } from "../domain/move-power-modifiers";
+import { getPoltergeistDefenderItem } from "../domain/poltergeist";
 
 type BattleSide = "attacker" | "defender";
 /** @smogon/calcのPokemonコンストラクター第3引数。rulesetのフックで部分上書きする。 */
@@ -748,6 +749,13 @@ export class SmogonDamageCalculator {
     const generation = Generations.get(this.ruleset.generation);
     const attacker = this.toPokemon("attacker", effectiveInput.attacker);
     const defender = this.toPokemon("defender", effectiveInput.defender);
+    // 持ち物補正はアプリ側で適用するため、通常は@smogon/calcへ持ち物を渡さない。
+    // ただしポルターガイストはライブラリ内で相手の持ち物の有無を見て成否を判定するため、
+    // 実際に持っている場合だけダミーの持ち物を設定して技を成立させる。
+    defender.item = getPoltergeistDefenderItem(
+      effectiveInput.move.id,
+      effectiveInput.defender.heldItem,
+    ) as typeof defender.item;
     const move = this.toMove(
       effectiveInput.move,
       effectiveInput.isCritical ?? false,

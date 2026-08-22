@@ -16,6 +16,7 @@
     "test:skin-abilities": "node --experimental-strip-types --test scripts/test-skin-abilities.mjs",
     "test:held-items": "node --test scripts/test-held-item-modifiers.mjs",
     "test:knock-off": "node --experimental-strip-types --test scripts/test-knock-off-power.mjs",
+    "test:poltergeist": "node --experimental-strip-types --test scripts/test-poltergeist-damage.mjs",
     "test:damage-stats": "node --experimental-strip-types --test scripts/test-relevant-damage-stats.mjs",
     "test:survival-check": "node --experimental-strip-types --test scripts/test-survival-check.mjs",
     "seeds:fetch": "node scripts/fetch-pokeapi-seeds.mjs && node scripts/fetch-pokeapi-items.mjs && node scripts/fetch-champions-items.mjs && node scripts/fetch-champions-move-usage.mjs && node scripts/fetch-champions-usage-rankings.mjs",
