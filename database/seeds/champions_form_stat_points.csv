@@ -56,9 +56,9 @@ form_id,battle_format,hp,attack,defense,special_attack,special_defense,speed,usa
 473,double,2,32,0,0,0,32,54.6,M-5,https://op.gg/pokemon-champions/pokedex/mamoswine?format=double,2026-08-08T04:33:21.918Z
 143,double,32,0,2,0,32,0,22.1,M-5,https://op.gg/pokemon-champions/pokedex/snorlax?format=double,2026-08-08T04:33:21.918Z
 71,double,32,2,0,32,0,0,57.6,M-5,https://op.gg/pokemon-champions/pokedex/victreebel?format=double,2026-08-08T04:33:21.918Z
-956,double,1,0,1,32,0,32,27.5,M-5,https://op.gg/pokemon-champions/pokedex/espathra?format=double,2026-08-08T04:33:21.918Z
 584,double,25,0,0,32,1,8,9.1,M-5,https://op.gg/pokemon-champions/pokedex/vanilluxe?format=double,2026-08-08T04:33:21.918Z
 925,double,2,32,0,0,0,32,69.7,M-5,https://op.gg/pokemon-champions/pokedex/maushold-family-of-four?format=double,2026-08-08T04:33:21.918Z
+956,double,1,0,1,32,0,32,27.5,M-5,https://op.gg/pokemon-champions/pokedex/espathra?format=double,2026-08-08T04:33:21.918Z
 10008,double,2,0,0,32,0,32,25.6,M-5,https://op.gg/pokemon-champions/pokedex/rotom-heat?format=double,2026-08-08T04:33:21.918Z
 10239,double,2,0,0,32,0,32,40,M-5,https://op.gg/pokemon-champions/pokedex/zoroark-hisui?format=double,2026-08-08T04:33:21.918Z
 302,double,32,0,32,0,2,0,40.9,M-5,https://op.gg/pokemon-champions/pokedex/sableye?format=double,2026-08-08T04:33:21.918Z
@@ -85,8 +85,8 @@ form_id,battle_format,hp,attack,defense,special_attack,special_defense,speed,usa
 858,double,32,0,2,32,0,0,19.5,M-5,https://op.gg/pokemon-champions/pokedex/hatterene?format=double,2026-08-08T04:33:21.918Z
 904,double,17,0,17,0,0,32,14.7,M-5,https://op.gg/pokemon-champions/pokedex/overqwil?format=double,2026-08-08T04:33:21.918Z
 666,double,6,0,28,0,0,32,36.6,M-5,https://op.gg/pokemon-champions/pokedex/vivillon?format=double,2026-08-08T04:33:21.918Z
-534,double,32,22,0,0,12,0,21.3,M-5,https://op.gg/pokemon-champions/pokedex/conkeldurr?format=double,2026-08-08T04:33:21.918Z
 196,double,2,0,0,32,0,32,35,M-5,https://op.gg/pokemon-champions/pokedex/espeon?format=double,2026-08-08T04:33:21.918Z
+534,double,32,22,0,0,12,0,21.3,M-5,https://op.gg/pokemon-champions/pokedex/conkeldurr?format=double,2026-08-08T04:33:21.918Z
 668,double,2,0,0,32,0,32,45.2,M-5,https://op.gg/pokemon-champions/pokedex/pyroar?format=double,2026-08-08T04:33:21.918Z
 727,double,32,0,32,0,2,0,7.5,M-5,https://op.gg/pokemon-champions/pokedex/incineroar?format=double,2026-08-08T04:33:21.918Z
 660,double,2,32,0,0,0,32,40.4,M-5,https://op.gg/pokemon-champions/pokedex/diggersby?format=double,2026-08-08T04:33:21.918Z
@@ -156,9 +156,9 @@ form_id,battle_format,hp,attack,defense,special_attack,special_defense,speed,usa
 473,single,2,32,0,0,0,32,54.6,M-5,https://op.gg/pokemon-champions/pokedex/mamoswine?format=single,2026-08-08T04:33:21.918Z
 143,single,32,0,2,0,32,0,22.1,M-5,https://op.gg/pokemon-champions/pokedex/snorlax?format=single,2026-08-08T04:33:21.918Z
 71,single,32,2,0,32,0,0,57.6,M-5,https://op.gg/pokemon-champions/pokedex/victreebel?format=single,2026-08-08T04:33:21.918Z
-956,single,1,0,1,32,0,32,27.5,M-5,https://op.gg/pokemon-champions/pokedex/espathra?format=single,2026-08-08T04:33:21.918Z
 584,single,25,0,0,32,1,8,9.1,M-5,https://op.gg/pokemon-champions/pokedex/vanilluxe?format=single,2026-08-08T04:33:21.918Z
 925,single,2,32,0,0,0,32,69.7,M-5,https://op.gg/pokemon-champions/pokedex/maushold-family-of-four?format=single,2026-08-08T04:33:21.918Z
+956,single,1,0,1,32,0,32,27.5,M-5,https://op.gg/pokemon-champions/pokedex/espathra?format=single,2026-08-08T04:33:21.918Z
 10008,single,2,0,0,32,0,32,25.6,M-5,https://op.gg/pokemon-champions/pokedex/rotom-heat?format=single,2026-08-08T04:33:21.918Z
 10239,single,2,0,0,32,0,32,40,M-5,https://op.gg/pokemon-champions/pokedex/zoroark-hisui?format=single,2026-08-08T04:33:21.918Z
 302,single,32,0,32,0,2,0,40.9,M-5,https://op.gg/pokemon-champions/pokedex/sableye?format=single,2026-08-08T04:33:21.918Z
@@ -185,8 +185,8 @@ form_id,battle_format,hp,attack,defense,special_attack,special_defense,speed,usa
 858,single,32,0,2,32,0,0,19.5,M-5,https://op.gg/pokemon-champions/pokedex/hatterene?format=single,2026-08-08T04:33:21.918Z
 904,single,17,0,17,0,0,32,14.7,M-5,https://op.gg/pokemon-champions/pokedex/overqwil?format=single,2026-08-08T04:33:21.918Z
 666,single,6,0,28,0,0,32,36.6,M-5,https://op.gg/pokemon-champions/pokedex/vivillon?format=single,2026-08-08T04:33:21.918Z
-534,single,32,22,0,0,12,0,21.3,M-5,https://op.gg/pokemon-champions/pokedex/conkeldurr?format=single,2026-08-08T04:33:21.918Z
 196,single,2,0,0,32,0,32,35,M-5,https://op.gg/pokemon-champions/pokedex/espeon?format=single,2026-08-08T04:33:21.918Z
+534,single,32,22,0,0,12,0,21.3,M-5,https://op.gg/pokemon-champions/pokedex/conkeldurr?format=single,2026-08-08T04:33:21.918Z
 668,single,2,0,0,32,0,32,45.2,M-5,https://op.gg/pokemon-champions/pokedex/pyroar?format=single,2026-08-08T04:33:21.918Z
 727,single,32,0,32,0,2,0,7.5,M-5,https://op.gg/pokemon-champions/pokedex/incineroar?format=single,2026-08-08T04:33:21.918Z
 660,single,2,32,0,0,0,32,40.4,M-5,https://op.gg/pokemon-champions/pokedex/diggersby?format=single,2026-08-08T04:33:21.918Z
