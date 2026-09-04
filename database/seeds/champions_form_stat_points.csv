@@ -41,8 +41,8 @@ form_id,battle_format,hp,attack,defense,special_attack,special_defense,speed,usa
 36,double,32,0,32,0,2,0,25.2,M-5,https://op.gg/pokemon-champions/pokedex/clefable?format=double,2026-08-08T04:33:21.918Z
 952,double,32,0,32,0,2,0,16.8,M-5,https://op.gg/pokemon-champions/pokedex/scovillain?format=double,2026-08-08T04:33:21.918Z
 10061,double,22,0,11,1,0,32,25.6,M-5,https://op.gg/pokemon-champions/pokedex/floette-eternal-flower?format=double,2026-08-08T04:33:21.918Z
-937,double,2,32,0,0,0,32,29.1,M-5,https://op.gg/pokemon-champions/pokedex/ceruledge?format=double,2026-08-08T04:33:21.918Z
 9,double,31,0,3,32,0,0,10.4,M-5,https://op.gg/pokemon-champions/pokedex/blastoise?format=double,2026-08-08T04:33:21.918Z
+937,double,2,32,0,0,0,32,29.1,M-5,https://op.gg/pokemon-champions/pokedex/ceruledge?format=double,2026-08-08T04:33:21.918Z
 861,double,32,0,32,0,2,0,26.2,M-5,https://op.gg/pokemon-champions/pokedex/grimmsnarl?format=double,2026-08-08T04:33:21.918Z
 530,double,2,32,0,0,0,32,49.5,M-5,https://op.gg/pokemon-champions/pokedex/excadrill?format=double,2026-08-08T04:33:21.918Z
 248,double,32,0,2,0,32,0,17.4,M-5,https://op.gg/pokemon-champions/pokedex/tyranitar?format=double,2026-08-08T04:33:21.918Z
@@ -90,10 +90,10 @@ form_id,battle_format,hp,attack,defense,special_attack,special_defense,speed,usa
 668,double,2,0,0,32,0,32,45.2,M-5,https://op.gg/pokemon-champions/pokedex/pyroar?format=double,2026-08-08T04:33:21.918Z
 727,double,32,0,32,0,2,0,7.5,M-5,https://op.gg/pokemon-champions/pokedex/incineroar?format=double,2026-08-08T04:33:21.918Z
 936,double,2,0,0,32,0,32,40.1,M-5,https://op.gg/pokemon-champions/pokedex/armarouge?format=double,2026-08-08T04:33:21.918Z
-660,double,2,32,0,0,0,32,40.4,M-5,https://op.gg/pokemon-champions/pokedex/diggersby?format=double,2026-08-08T04:33:21.918Z
 214,double,2,32,0,0,0,32,24.5,M-5,https://op.gg/pokemon-champions/pokedex/heracross?format=double,2026-08-08T04:33:21.918Z
-10172,double,32,0,2,0,32,0,22.2,M-5,https://op.gg/pokemon-champions/pokedex/slowking-galarian?format=double,2026-08-08T04:33:21.918Z
+660,double,2,32,0,0,0,32,40.4,M-5,https://op.gg/pokemon-champions/pokedex/diggersby?format=double,2026-08-08T04:33:21.918Z
 855,double,14,0,26,0,0,26,18.9,M-5,https://op.gg/pokemon-champions/pokedex/polteageist?format=double,2026-08-08T04:33:21.918Z
+10172,double,32,0,2,0,32,0,22.2,M-5,https://op.gg/pokemon-champions/pokedex/slowking-galarian?format=double,2026-08-08T04:33:21.918Z
 10230,double,2,32,0,0,0,32,47.8,M-5,https://op.gg/pokemon-champions/pokedex/arcanine-hisui?format=double,2026-08-08T04:33:21.918Z
 733,double,32,2,32,0,0,0,17.2,M-5,https://op.gg/pokemon-champions/pokedex/toucannon?format=double,2026-08-08T04:33:21.918Z
 964,double,2,32,0,0,0,32,46.9,M-5,https://op.gg/pokemon-champions/pokedex/palafin?format=double,2026-08-08T04:33:21.918Z
@@ -141,8 +141,8 @@ form_id,battle_format,hp,attack,defense,special_attack,special_defense,speed,usa
 36,single,32,0,32,0,2,0,25.2,M-5,https://op.gg/pokemon-champions/pokedex/clefable?format=single,2026-08-08T04:33:21.918Z
 952,single,32,0,32,0,2,0,16.8,M-5,https://op.gg/pokemon-champions/pokedex/scovillain?format=single,2026-08-08T04:33:21.918Z
 10061,single,22,0,11,1,0,32,25.6,M-5,https://op.gg/pokemon-champions/pokedex/floette-eternal-flower?format=single,2026-08-08T04:33:21.918Z
-937,single,2,32,0,0,0,32,29.1,M-5,https://op.gg/pokemon-champions/pokedex/ceruledge?format=single,2026-08-08T04:33:21.918Z
 9,single,31,0,3,32,0,0,10.4,M-5,https://op.gg/pokemon-champions/pokedex/blastoise?format=single,2026-08-08T04:33:21.918Z
+937,single,2,32,0,0,0,32,29.1,M-5,https://op.gg/pokemon-champions/pokedex/ceruledge?format=single,2026-08-08T04:33:21.918Z
 861,single,32,0,32,0,2,0,26.2,M-5,https://op.gg/pokemon-champions/pokedex/grimmsnarl?format=single,2026-08-08T04:33:21.918Z
 530,single,2,32,0,0,0,32,49.5,M-5,https://op.gg/pokemon-champions/pokedex/excadrill?format=single,2026-08-08T04:33:21.918Z
 248,single,32,0,2,0,32,0,17.4,M-5,https://op.gg/pokemon-champions/pokedex/tyranitar?format=single,2026-08-08T04:33:21.918Z
@@ -190,10 +190,10 @@ form_id,battle_format,hp,attack,defense,special_attack,special_defense,speed,usa
 668,single,2,0,0,32,0,32,45.2,M-5,https://op.gg/pokemon-champions/pokedex/pyroar?format=single,2026-08-08T04:33:21.918Z
 727,single,32,0,32,0,2,0,7.5,M-5,https://op.gg/pokemon-champions/pokedex/incineroar?format=single,2026-08-08T04:33:21.918Z
 936,single,2,0,0,32,0,32,40.1,M-5,https://op.gg/pokemon-champions/pokedex/armarouge?format=single,2026-08-08T04:33:21.918Z
-660,single,2,32,0,0,0,32,40.4,M-5,https://op.gg/pokemon-champions/pokedex/diggersby?format=single,2026-08-08T04:33:21.918Z
 214,single,2,32,0,0,0,32,24.5,M-5,https://op.gg/pokemon-champions/pokedex/heracross?format=single,2026-08-08T04:33:21.918Z
-10172,single,32,0,2,0,32,0,22.2,M-5,https://op.gg/pokemon-champions/pokedex/slowking-galarian?format=single,2026-08-08T04:33:21.918Z
+660,single,2,32,0,0,0,32,40.4,M-5,https://op.gg/pokemon-champions/pokedex/diggersby?format=single,2026-08-08T04:33:21.918Z
 855,single,14,0,26,0,0,26,18.9,M-5,https://op.gg/pokemon-champions/pokedex/polteageist?format=single,2026-08-08T04:33:21.918Z
+10172,single,32,0,2,0,32,0,22.2,M-5,https://op.gg/pokemon-champions/pokedex/slowking-galarian?format=single,2026-08-08T04:33:21.918Z
 10230,single,2,32,0,0,0,32,47.8,M-5,https://op.gg/pokemon-champions/pokedex/arcanine-hisui?format=single,2026-08-08T04:33:21.918Z
 733,single,32,2,32,0,0,0,17.2,M-5,https://op.gg/pokemon-champions/pokedex/toucannon?format=single,2026-08-08T04:33:21.918Z
 964,single,2,32,0,0,0,32,46.9,M-5,https://op.gg/pokemon-champions/pokedex/palafin?format=single,2026-08-08T04:33:21.918Z

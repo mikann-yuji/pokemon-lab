@@ -41,8 +41,8 @@ form_id,battle_format,nature_id,usage_rate,season,source_url,scraped_at
 36,double,bold,71.8,M-5,https://op.gg/pokemon-champions/pokedex/clefable?format=double,2026-08-08T04:33:21.918Z
 952,double,bold,43.7,M-5,https://op.gg/pokemon-champions/pokedex/scovillain?format=double,2026-08-08T04:33:21.918Z
 10061,double,timid,71.7,M-5,https://op.gg/pokemon-champions/pokedex/floette-eternal-flower?format=double,2026-08-08T04:33:21.918Z
-937,double,adamant,81.1,M-5,https://op.gg/pokemon-champions/pokedex/ceruledge?format=double,2026-08-08T04:33:21.918Z
 9,double,modest,85.5,M-5,https://op.gg/pokemon-champions/pokedex/blastoise?format=double,2026-08-08T04:33:21.918Z
+937,double,adamant,81.1,M-5,https://op.gg/pokemon-champions/pokedex/ceruledge?format=double,2026-08-08T04:33:21.918Z
 861,double,impish,60.2,M-5,https://op.gg/pokemon-champions/pokedex/grimmsnarl?format=double,2026-08-08T04:33:21.918Z
 530,double,adamant,58.4,M-5,https://op.gg/pokemon-champions/pokedex/excadrill?format=double,2026-08-08T04:33:21.918Z
 248,double,careful,44.1,M-5,https://op.gg/pokemon-champions/pokedex/tyranitar?format=double,2026-08-08T04:33:21.918Z
@@ -90,10 +90,10 @@ form_id,battle_format,nature_id,usage_rate,season,source_url,scraped_at
 668,double,timid,74,M-5,https://op.gg/pokemon-champions/pokedex/pyroar?format=double,2026-08-08T04:33:21.918Z
 727,double,adamant,29.1,M-5,https://op.gg/pokemon-champions/pokedex/incineroar?format=double,2026-08-08T04:33:21.918Z
 936,double,modest,77.7,M-5,https://op.gg/pokemon-champions/pokedex/armarouge?format=double,2026-08-08T04:33:21.918Z
-660,double,adamant,80.2,M-5,https://op.gg/pokemon-champions/pokedex/diggersby?format=double,2026-08-08T04:33:21.918Z
 214,double,adamant,72.2,M-5,https://op.gg/pokemon-champions/pokedex/heracross?format=double,2026-08-08T04:33:21.918Z
-10172,double,calm,54.4,M-5,https://op.gg/pokemon-champions/pokedex/slowking-galarian?format=double,2026-08-08T04:33:21.918Z
+660,double,adamant,80.2,M-5,https://op.gg/pokemon-champions/pokedex/diggersby?format=double,2026-08-08T04:33:21.918Z
 855,double,bold,61.5,M-5,https://op.gg/pokemon-champions/pokedex/polteageist?format=double,2026-08-08T04:33:21.918Z
+10172,double,calm,54.4,M-5,https://op.gg/pokemon-champions/pokedex/slowking-galarian?format=double,2026-08-08T04:33:21.918Z
 10230,double,adamant,74.4,M-5,https://op.gg/pokemon-champions/pokedex/arcanine-hisui?format=double,2026-08-08T04:33:21.918Z
 733,double,adamant,65,M-5,https://op.gg/pokemon-champions/pokedex/toucannon?format=double,2026-08-08T04:33:21.918Z
 964,double,adamant,86.3,M-5,https://op.gg/pokemon-champions/pokedex/palafin?format=double,2026-08-08T04:33:21.918Z
@@ -141,8 +141,8 @@ form_id,battle_format,nature_id,usage_rate,season,source_url,scraped_at
 36,single,bold,71.8,M-5,https://op.gg/pokemon-champions/pokedex/clefable?format=single,2026-08-08T04:33:21.918Z
 952,single,bold,43.7,M-5,https://op.gg/pokemon-champions/pokedex/scovillain?format=single,2026-08-08T04:33:21.918Z
 10061,single,timid,71.7,M-5,https://op.gg/pokemon-champions/pokedex/floette-eternal-flower?format=single,2026-08-08T04:33:21.918Z
-937,single,adamant,81.1,M-5,https://op.gg/pokemon-champions/pokedex/ceruledge?format=single,2026-08-08T04:33:21.918Z
 9,single,modest,85.5,M-5,https://op.gg/pokemon-champions/pokedex/blastoise?format=single,2026-08-08T04:33:21.918Z
+937,single,adamant,81.1,M-5,https://op.gg/pokemon-champions/pokedex/ceruledge?format=single,2026-08-08T04:33:21.918Z
 861,single,impish,60.2,M-5,https://op.gg/pokemon-champions/pokedex/grimmsnarl?format=single,2026-08-08T04:33:21.918Z
 530,single,adamant,58.4,M-5,https://op.gg/pokemon-champions/pokedex/excadrill?format=single,2026-08-08T04:33:21.918Z
 248,single,careful,44.1,M-5,https://op.gg/pokemon-champions/pokedex/tyranitar?format=single,2026-08-08T04:33:21.918Z
@@ -190,10 +190,10 @@ form_id,battle_format,nature_id,usage_rate,season,source_url,scraped_at
 668,single,timid,74,M-5,https://op.gg/pokemon-champions/pokedex/pyroar?format=single,2026-08-08T04:33:21.918Z
 727,single,adamant,29.1,M-5,https://op.gg/pokemon-champions/pokedex/incineroar?format=single,2026-08-08T04:33:21.918Z
 936,single,modest,77.7,M-5,https://op.gg/pokemon-champions/pokedex/armarouge?format=single,2026-08-08T04:33:21.918Z
-660,single,adamant,80.2,M-5,https://op.gg/pokemon-champions/pokedex/diggersby?format=single,2026-08-08T04:33:21.918Z
 214,single,adamant,72.2,M-5,https://op.gg/pokemon-champions/pokedex/heracross?format=single,2026-08-08T04:33:21.918Z
-10172,single,calm,54.4,M-5,https://op.gg/pokemon-champions/pokedex/slowking-galarian?format=single,2026-08-08T04:33:21.918Z
+660,single,adamant,80.2,M-5,https://op.gg/pokemon-champions/pokedex/diggersby?format=single,2026-08-08T04:33:21.918Z
 855,single,bold,61.5,M-5,https://op.gg/pokemon-champions/pokedex/polteageist?format=single,2026-08-08T04:33:21.918Z
+10172,single,calm,54.4,M-5,https://op.gg/pokemon-champions/pokedex/slowking-galarian?format=single,2026-08-08T04:33:21.918Z
 10230,single,adamant,74.4,M-5,https://op.gg/pokemon-champions/pokedex/arcanine-hisui?format=single,2026-08-08T04:33:21.918Z
 733,single,adamant,65,M-5,https://op.gg/pokemon-champions/pokedex/toucannon?format=single,2026-08-08T04:33:21.918Z
 964,single,adamant,86.3,M-5,https://op.gg/pokemon-champions/pokedex/palafin?format=single,2026-08-08T04:33:21.918Z
