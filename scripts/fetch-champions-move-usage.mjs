@@ -20,10 +20,14 @@ const slugOverrides = new Map([
   ["castform-rainy", ["castform"]],
   ["castform-snowy", ["castform"]],
   ["floette-eternal", ["floette"]],
+  ["mr-rime", ["mr.-rime"]],
   ["tauros-paldea-combat-breed", ["tauros-paldean-combat"]],
   ["tauros-paldea-blaze-breed", ["tauros-paldean-blaze"]],
   ["tauros-paldea-aqua-breed", ["tauros-paldean-aqua"]],
   ["meowstic-male-mega", ["mega-meowstic"]],
+  ["absol-mega-z", ["mega-absol-z"]],
+  ["garchomp-mega-z", ["mega-garchomp-z"]],
+  ["lucario-mega-z", ["mega-lucario-z"]],
 ]);
 
 function parseCsv(filename) {

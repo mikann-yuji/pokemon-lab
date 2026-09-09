@@ -13,6 +13,7 @@ const seedDirectory = path.join(process.cwd(), "database", "seeds");
 // PokeAPI does not yet contain these Champions/Legends Z-A Mega Stones.
 // Values are the English slugs used by the English Champions item source.
 const championsOnlyItemIds = new Map([
+  ["アブソルナイトZ", "absolite-z"],
   ["ウツボットナイト", "victreebelite"],
   ["エアームドナイト", "skarmorite"],
   ["エンブオナイト", "emboarite"],
@@ -20,15 +21,18 @@ const championsOnlyItemIds = new Map([
   ["カイリュナイト", "dragoninite"],
   ["カエンジシナイト", "pyroarite"],
   ["ガメノデスナイト", "barbaraclite"],
+  ["ガブリアスナイトZ", "garchompite-z"],
   ["カラマネナイト", "malamarite"],
   ["キラフロルナイト", "glimmoranite"],
   ["ケケンカニナイト", "crabominite"],
   ["ゲッコウガナイト", "greninjite"],
+  ["グソクムシャナイト", "golisopite"],
   ["ゴルーグナイト", "golurkite"],
   ["ジジーロナイト", "drampanite"],
   ["シビルドナイト", "eelektrossite"],
   ["シャンデラナイト", "chandelurite"],
   ["スコヴィラナイト", "scovillainite"],
+  ["セグレイブナイト", "baxcalibrite"],
   ["スターミナイト", "starminite"],
   ["ズルズキナイト", "scraftite"],
   ["タイレーツナイト", "falinksite"],
@@ -46,6 +50,7 @@ const championsOnlyItemIds = new Map([
   ["ユキメノコナイト", "froslassite"],
   ["ライチュウナイトX", "raichunite-x"],
   ["ライチュウナイトY", "raichunite-y"],
+  ["ルカリオナイトZ", "lucarionite-z"],
   ["ルチャブルナイト", "hawluchanite"],
 ]);
 

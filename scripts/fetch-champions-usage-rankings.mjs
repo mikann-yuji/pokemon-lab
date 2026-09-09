@@ -8,6 +8,8 @@ import { load } from "cheerio";
 
 const SOURCE_URL = "https://op.gg/pokemon-champions/tier";
 const FORMATS = ["single", "double"];
+// レギュレーションによって参加可能数は変わるため、ページ破損を検知できる余裕を残す。
+const MINIMUM_RANKING_COUNT = 150;
 const seedDirectory = path.join(process.cwd(), "database", "seeds");
 const slugOverrides = new Map([
   ["pyroar-male", ["pyroar"]],
@@ -18,6 +20,9 @@ const slugOverrides = new Map([
   ["palafin-zero", ["palafin"]],
   ["floette-eternal", ["floette-eternal-flower"]],
   ["mr-rime", ["mr.-rime"]],
+  ["absol-mega-z", ["mega-absol-z"]],
+  ["garchomp-mega-z", ["mega-garchomp-z"]],
+  ["lucario-mega-z", ["mega-lucario-z"]],
   ["tauros-paldea-combat-breed", ["tauros-paldean-combat"]],
   ["tauros-paldea-blaze-breed", ["tauros-paldean-blaze"]],
   ["tauros-paldea-aqua-breed", ["tauros-paldean-aqua"]],
@@ -164,7 +169,7 @@ for (const battleFormat of FORMATS) {
       `Unknown OP.GG slugs for ${battleFormat}:\n${[...new Set(unknownSlugs)].join("\n")}`,
     );
   }
-  if (uniqueRankings.size < 200) {
+  if (uniqueRankings.size < MINIMUM_RANKING_COUNT) {
     throw new Error(
       `Only ${uniqueRankings.size} ${battleFormat} rankings were scraped.`,
     );
