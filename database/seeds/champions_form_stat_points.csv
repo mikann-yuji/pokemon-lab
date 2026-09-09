@@ -11,8 +11,8 @@ form_id,battle_format,hp,attack,defense,special_attack,special_defense,speed,usa
 376,double,2,32,0,0,0,32,21.2,M-5,https://op.gg/pokemon-champions/pokedex/metagross?format=double,2026-08-08T04:33:21.918Z
 6,double,2,0,0,32,0,32,22.9,M-5,https://op.gg/pokemon-champions/pokedex/charizard?format=double,2026-08-08T04:33:21.918Z
 902,double,2,32,0,0,0,32,44.7,M-5,https://op.gg/pokemon-champions/pokedex/basculegion-male?format=double,2026-08-08T04:33:21.918Z
-212,double,32,2,32,0,0,0,18.9,M-5,https://op.gg/pokemon-champions/pokedex/scizor?format=double,2026-08-08T04:33:21.918Z
 823,double,32,0,32,0,2,0,42.8,M-5,https://op.gg/pokemon-champions/pokedex/corviknight?format=double,2026-08-08T04:33:21.918Z
+212,double,32,2,32,0,0,0,18.9,M-5,https://op.gg/pokemon-champions/pokedex/scizor?format=double,2026-08-08T04:33:21.918Z
 26,double,2,0,0,32,0,32,56,M-5,https://op.gg/pokemon-champions/pokedex/raichu?format=double,2026-08-08T04:33:21.918Z
 635,double,2,0,0,32,0,32,75,M-5,https://op.gg/pokemon-champions/pokedex/hydreigon?format=double,2026-08-08T04:33:21.918Z
 94,double,2,0,0,32,0,32,36.3,M-5,https://op.gg/pokemon-champions/pokedex/gengar?format=double,2026-08-08T04:33:21.918Z
@@ -92,8 +92,8 @@ form_id,battle_format,hp,attack,defense,special_attack,special_defense,speed,usa
 727,double,32,0,32,0,2,0,7.5,M-5,https://op.gg/pokemon-champions/pokedex/incineroar?format=double,2026-08-08T04:33:21.918Z
 534,double,32,22,0,0,12,0,21.3,M-5,https://op.gg/pokemon-champions/pokedex/conkeldurr?format=double,2026-08-08T04:33:21.918Z
 660,double,2,32,0,0,0,32,40.4,M-5,https://op.gg/pokemon-champions/pokedex/diggersby?format=double,2026-08-08T04:33:21.918Z
-855,double,14,0,26,0,0,26,18.9,M-5,https://op.gg/pokemon-champions/pokedex/polteageist?format=double,2026-08-08T04:33:21.918Z
 10172,double,32,0,2,0,32,0,22.2,M-5,https://op.gg/pokemon-champions/pokedex/slowking-galarian?format=double,2026-08-08T04:33:21.918Z
+855,double,14,0,26,0,0,26,18.9,M-5,https://op.gg/pokemon-champions/pokedex/polteageist?format=double,2026-08-08T04:33:21.918Z
 10230,double,2,32,0,0,0,32,47.8,M-5,https://op.gg/pokemon-champions/pokedex/arcanine-hisui?format=double,2026-08-08T04:33:21.918Z
 733,double,32,2,32,0,0,0,17.2,M-5,https://op.gg/pokemon-champions/pokedex/toucannon?format=double,2026-08-08T04:33:21.918Z
 964,double,2,32,0,0,0,32,46.9,M-5,https://op.gg/pokemon-champions/pokedex/palafin?format=double,2026-08-08T04:33:21.918Z
@@ -111,8 +111,8 @@ form_id,battle_format,hp,attack,defense,special_attack,special_defense,speed,usa
 376,single,2,32,0,0,0,32,21.2,M-5,https://op.gg/pokemon-champions/pokedex/metagross?format=single,2026-08-08T04:33:21.918Z
 6,single,2,0,0,32,0,32,22.9,M-5,https://op.gg/pokemon-champions/pokedex/charizard?format=single,2026-08-08T04:33:21.918Z
 902,single,2,32,0,0,0,32,44.7,M-5,https://op.gg/pokemon-champions/pokedex/basculegion-male?format=single,2026-08-08T04:33:21.918Z
-212,single,32,2,32,0,0,0,18.9,M-5,https://op.gg/pokemon-champions/pokedex/scizor?format=single,2026-08-08T04:33:21.918Z
 823,single,32,0,32,0,2,0,42.8,M-5,https://op.gg/pokemon-champions/pokedex/corviknight?format=single,2026-08-08T04:33:21.918Z
+212,single,32,2,32,0,0,0,18.9,M-5,https://op.gg/pokemon-champions/pokedex/scizor?format=single,2026-08-08T04:33:21.918Z
 26,single,2,0,0,32,0,32,56,M-5,https://op.gg/pokemon-champions/pokedex/raichu?format=single,2026-08-08T04:33:21.918Z
 635,single,2,0,0,32,0,32,75,M-5,https://op.gg/pokemon-champions/pokedex/hydreigon?format=single,2026-08-08T04:33:21.918Z
 94,single,2,0,0,32,0,32,36.3,M-5,https://op.gg/pokemon-champions/pokedex/gengar?format=single,2026-08-08T04:33:21.918Z
@@ -192,8 +192,8 @@ form_id,battle_format,hp,attack,defense,special_attack,special_defense,speed,usa
 727,single,32,0,32,0,2,0,7.5,M-5,https://op.gg/pokemon-champions/pokedex/incineroar?format=single,2026-08-08T04:33:21.918Z
 534,single,32,22,0,0,12,0,21.3,M-5,https://op.gg/pokemon-champions/pokedex/conkeldurr?format=single,2026-08-08T04:33:21.918Z
 660,single,2,32,0,0,0,32,40.4,M-5,https://op.gg/pokemon-champions/pokedex/diggersby?format=single,2026-08-08T04:33:21.918Z
-855,single,14,0,26,0,0,26,18.9,M-5,https://op.gg/pokemon-champions/pokedex/polteageist?format=single,2026-08-08T04:33:21.918Z
 10172,single,32,0,2,0,32,0,22.2,M-5,https://op.gg/pokemon-champions/pokedex/slowking-galarian?format=single,2026-08-08T04:33:21.918Z
+855,single,14,0,26,0,0,26,18.9,M-5,https://op.gg/pokemon-champions/pokedex/polteageist?format=single,2026-08-08T04:33:21.918Z
 10230,single,2,32,0,0,0,32,47.8,M-5,https://op.gg/pokemon-champions/pokedex/arcanine-hisui?format=single,2026-08-08T04:33:21.918Z
 733,single,32,2,32,0,0,0,17.2,M-5,https://op.gg/pokemon-champions/pokedex/toucannon?format=single,2026-08-08T04:33:21.918Z
 964,single,2,32,0,0,0,32,46.9,M-5,https://op.gg/pokemon-champions/pokedex/palafin?format=single,2026-08-08T04:33:21.918Z
