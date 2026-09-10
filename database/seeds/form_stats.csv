@@ -8099,3 +8099,9 @@ form_id,stat_id,base_stat,effort
 10325,special-attack,105,0
 10325,special-defense,101,0
 10325,speed,87,0
+10326,hp,74,0
+10326,attack,48,0
+10326,defense,76,0
+10326,special-attack,143,0
+10326,special-defense,101,0
+10326,speed,124,0

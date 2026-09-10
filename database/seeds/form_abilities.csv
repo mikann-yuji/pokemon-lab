@@ -2930,9 +2930,15 @@ form_id,ability_id,slot,is_hidden
 10304,electric-surge,1,0
 10305,no-guard,1,0
 10306,levitate,1,0
+10307,sharpness,1,0
 10308,contrary,1,0
+10309,levitate,1,0
+10310,aura-guard,1,0
 10313,unseen-fist,1,0
 10314,trace,1,0
 10315,iron-fist,1,0
+10316,tough-claws,1,0
 10320,spicy-spray,1,0
 10321,adaptability,1,0
+10325,thermal-exchange,1,0
+10326,trace,1,0

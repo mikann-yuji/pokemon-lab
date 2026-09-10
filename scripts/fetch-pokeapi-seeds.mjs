@@ -11,6 +11,16 @@ const speciesLimit = process.env.POKEAPI_SPECIES_LIMIT
   ? Number(process.env.POKEAPI_SPECIES_LIMIT)
   : null;
 const maxAttempts = 3;
+// PokeAPIへの日本語収録前でも、Champions公式データとして確認できた新特性を表示する。
+const championsAbilityLocalizations = new Map([
+  [
+    "aura-guard",
+    {
+      nameJa: "はどうのぼうご",
+      effectJa: "相手が使った接触する物理技で受けるダメージが半分になる。",
+    },
+  ],
+]);
 // 同じURLを何度も取得しないよう、Promise自体をキャッシュする。
 const responseCache = new Map();
 
@@ -323,15 +333,21 @@ const formRows = pokemonResources.map((pokemon) => {
   };
 });
 
-const abilityRows = abilityResources.map((ability) => ({
-  id: ability.name,
-  pokeapi_id: ability.id,
-  name_ja: localizedName(ability.names),
-  generation_id: resourceId(ability.generation),
-  is_main_series: booleanToInteger(ability.is_main_series),
-  effect_en: masterText(ability, "en"),
-  effect_ja: masterText(ability, "ja-Hrkt") ?? masterText(ability, "ja"),
-}));
+const abilityRows = abilityResources.map((ability) => {
+  const championsLocalization = championsAbilityLocalizations.get(ability.name);
+  return {
+    id: ability.name,
+    pokeapi_id: ability.id,
+    name_ja: localizedName(ability.names) ?? championsLocalization?.nameJa,
+    generation_id: resourceId(ability.generation),
+    is_main_series: booleanToInteger(ability.is_main_series),
+    effect_en: masterText(ability, "en"),
+    effect_ja:
+      masterText(ability, "ja-Hrkt") ??
+      masterText(ability, "ja") ??
+      championsLocalization?.effectJa,
+  };
+});
 const formAbilityRows = pokemonResources.flatMap((pokemon) =>
   pokemon.abilities.map(({ ability, is_hidden: isHidden, slot }) => ({
     form_id: pokemon.id,
