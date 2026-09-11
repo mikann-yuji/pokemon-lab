@@ -7,6 +7,8 @@ import path from "node:path";
 import { load } from "cheerio";
 
 const SOURCE_ORIGIN = "https://op.gg";
+const CHAMPIONS_VERSION_GROUP_ID = "32";
+const TRAIN_LEARN_METHOD_ID = "12";
 const seedDirectory = path.join(process.cwd(), "database", "seeds");
 const slugOverrides = new Map([
   ["pyroar-male", ["pyroar"]],
@@ -201,6 +203,67 @@ if (missingMoves.length > 0) {
 if (output.length < championForms.length) {
   throw new Error(
     `Only ${output.length} move usage rows were scraped for ${championForms.length} forms.`,
+  );
+}
+
+// PokeAPIで新フォームのmovesが未整備でも、OP.GGで確認できた採用技は選択肢へ含める。
+const formMoves = parseCsv("form_moves.csv");
+const defaultFormIdBySpeciesId = new Map(
+  [...forms.values()]
+    .filter((form) => form.is_default === "1")
+    .map((form) => [form.species_id, form.id]),
+);
+const existingChampionMoves = new Set(
+  formMoves
+    .filter((move) => move.version_group_id === CHAMPIONS_VERSION_GROUP_ID)
+    .map((move) => `${move.form_id}:${move.move_id}`),
+);
+const supplementedFormMoves = [];
+
+for (const usage of output) {
+  const form = forms.get(usage.form_id);
+  if (!form) continue;
+  // メガシンカ前後は同じ技を使用するため、画面と同じ通常フォームを技の参照元にする。
+  const moveSourceFormId =
+    form.is_mega === "1"
+      ? (defaultFormIdBySpeciesId.get(form.species_id) ?? form.id)
+      : form.id;
+  const key = `${moveSourceFormId}:${usage.move_id}`;
+  if (existingChampionMoves.has(key)) continue;
+
+  existingChampionMoves.add(key);
+  supplementedFormMoves.push({
+    form_id: moveSourceFormId,
+    move_id: usage.move_id,
+    version_group_id: CHAMPIONS_VERSION_GROUP_ID,
+    learn_method_id: TRAIN_LEARN_METHOD_ID,
+    level_learned_at: "0",
+    move_order: "0",
+  });
+}
+
+if (supplementedFormMoves.length > 0) {
+  const formMoveHeaders = [
+    "form_id",
+    "move_id",
+    "version_group_id",
+    "learn_method_id",
+    "level_learned_at",
+    "move_order",
+  ];
+  const formMoveCsv = [
+    formMoveHeaders.join(","),
+    ...[...formMoves, ...supplementedFormMoves].map((record) =>
+      formMoveHeaders.map((header) => csvValue(record[header])).join(","),
+    ),
+  ].join("\n");
+  writeFileSync(
+    path.join(seedDirectory, "form_moves.csv"),
+    `${formMoveCsv}\n`,
+    "utf8",
+  );
+  console.log(
+    `Supplemented form_moves.csv with ${supplementedFormMoves.length} OP.GG moves.`,
   );
 }
 
