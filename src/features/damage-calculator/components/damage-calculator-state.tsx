@@ -150,6 +150,34 @@ export function applyPopularStatPointsToPokemon(
   };
 }
 
+/** 育成補正と持ち物を維持しつつ、メガシンカ前後のフォーム固有情報を入れ替える。 */
+export function switchMegaForm(
+  pokemon: DamageCalculatorPokemon,
+  targetForm: DamageCalculatorPokemon,
+): DamageCalculatorPokemon {
+  return {
+    ...pokemon,
+    id: targetForm.id,
+    speciesId: targetForm.speciesId,
+    isMega: targetForm.isMega,
+    name: targetForm.name,
+    nameJa: targetForm.nameJa,
+    imageUrl: targetForm.imageUrl,
+    fallbackImageUrl: targetForm.fallbackImageUrl,
+    weightKg: targetForm.weightKg,
+    types: targetForm.types,
+    stats: targetForm.stats,
+    moves: targetForm.moves,
+    abilities: targetForm.abilities,
+    selectedAbility:
+      targetForm.abilities.find(({ id }) => id === pokemon.selectedAbility?.id) ??
+      targetForm.abilities[0] ??
+      null,
+    // 旧フォームの種族値で算出した実数値は使わず、現在の能力ポイントから再計算する。
+    actualStats: undefined,
+  };
+}
+
 /** 採用率1位の性格を、能力ごとの補正方向へ変換する。 */
 function getPopularNatureCorrection(
   nature: DamageCalculatorNature | null,

@@ -14,6 +14,8 @@ import type {
 
 type PokemonBaseRow = SqliteRow & {
   id: number;
+  speciesId: number;
+  isMega: number;
   name: string;
   nameJa: string;
   imageUrl: string | null;
@@ -130,6 +132,8 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
     sqliteWorkerClient.catalogQuery<PokemonBaseRow>(`
       SELECT
         forms.id,
+        forms.species_id AS speciesId,
+        forms.is_mega AS isMega,
         forms.name,
         COALESCE(forms.name_ja, forms.form_name_ja, forms.name) AS nameJa,
         COALESCE(forms.artwork_default_url, forms.sprite_default_url) AS imageUrl,
@@ -313,6 +317,8 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
   // DBのweightはhectogramなので、@smogon/calcが期待するkgへ変換する。
   return baseRows.map((row) => ({
     id: row.id,
+    speciesId: row.speciesId,
+    isMega: row.isMega === 1,
     name: row.name,
     nameJa: row.nameJa,
     imageUrl: row.imageUrl,

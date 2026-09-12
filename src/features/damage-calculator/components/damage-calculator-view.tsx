@@ -124,6 +124,7 @@ type DamageCalculatorViewProps = {
     side: DamageSide,
     form: "shield" | "blade",
   ) => void;
+  onMegaFormChange: (side: DamageSide, formId: number) => void;
   onAbilityConditionChange: (side: DamageSide, enabled: boolean) => void;
   onHeldItemChange: (side: DamageSide, itemId: string) => void;
   onMetronomeCountChange: (value: number) => void;
@@ -219,6 +220,7 @@ export function DamageCalculatorView({
   onRestoreHistory,
   onAbilityChange,
   onAegislashFormChange,
+  onMegaFormChange,
   onAbilityConditionChange,
   onHeldItemChange,
   onMetronomeCountChange,
@@ -272,6 +274,7 @@ export function DamageCalculatorView({
         onAegislashFormChange={(form) =>
           onAegislashFormChange("attacker", form)
         }
+        onMegaFormChange={(formId) => onMegaFormChange("attacker", formId)}
         onAbilityConditionChange={(enabled) =>
           onAbilityConditionChange("attacker", enabled)
         }
@@ -366,6 +369,7 @@ export function DamageCalculatorView({
         onAegislashFormChange={(form) =>
           onAegislashFormChange("defender", form)
         }
+        onMegaFormChange={(formId) => onMegaFormChange("defender", formId)}
         onAbilityConditionChange={(enabled) =>
           onAbilityConditionChange("defender", enabled)
         }
@@ -486,6 +490,7 @@ function BattleSidePanel({
   getTrainingDetailHref,
   onAbilityChange,
   onAegislashFormChange,
+  onMegaFormChange,
   onAbilityConditionChange,
   onHeldItemChange,
 }: {
@@ -516,9 +521,16 @@ function BattleSidePanel({
   ) => string | undefined;
   onAbilityChange: (abilityId: string) => void;
   onAegislashFormChange: (form: "shield" | "blade") => void;
+  onMegaFormChange: (formId: number) => void;
   onAbilityConditionChange: (enabled: boolean) => void;
   onHeldItemChange: (itemId: string) => void;
 }) {
+  const megaForms = pokemonCatalog.filter(
+    (form) => form.speciesId === pokemon?.speciesId && form.isMega,
+  );
+  const baseForm = pokemonCatalog.find(
+    (form) => form.speciesId === pokemon?.speciesId && !form.isMega,
+  );
   // 攻撃側/防御側で共通する入力のまとまり。
   // パネルごとの違いはchildrenで受け取り、同じ見た目を維持する。
   return (
@@ -586,6 +598,33 @@ function BattleSidePanel({
         pokemon={pokemon}
         href={getTrainingDetailHref(pokemon, selectedBuildId)}
       />
+      {pokemon && baseForm && megaForms.length > 0 ? (
+        <div className={styles.megaFormControl}>
+          <label>
+            <input
+              type="checkbox"
+              checked={pokemon.isMega}
+              onChange={(event) =>
+                onMegaFormChange(
+                  event.target.checked ? megaForms[0].id : baseForm.id,
+                )
+              }
+            />
+            メガシンカ
+          </label>
+          {pokemon.isMega && megaForms.length > 1 ? (
+            <select
+              aria-label="メガシンカ後の姿"
+              value={pokemon.id}
+              onChange={(event) => onMegaFormChange(Number(event.target.value))}
+            >
+              {megaForms.map((form) => (
+                <option key={form.id} value={form.id}>{form.nameJa}</option>
+              ))}
+            </select>
+          ) : null}
+        </div>
+      ) : null}
       {pokemon?.name === "aegislash-shield" ||
       pokemon?.name === "aegislash-blade" ? (
         <fieldset className={styles.aegislashForm}>

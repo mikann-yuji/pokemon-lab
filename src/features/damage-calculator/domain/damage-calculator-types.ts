@@ -125,6 +125,10 @@ export type DamageCalculatorNature = {
 export type DamageCalculatorPokemon = {
   /** formsテーブルの主キー。 */
   id: number;
+  /** 同じ種族の通常フォームとメガフォームを結び付けるID。 */
+  speciesId: number;
+  /** メガシンカ後のフォームならtrue。 */
+  isMega: boolean;
   /** ライブラリとの名前解決にも使う英語名。 */
   name: string;
   /** 検索候補と結果に表示する日本語名。 */

@@ -171,6 +171,8 @@ function toDamagePokemon(
 
   return {
     id: pokemon.pokemonId,
+    speciesId: sourcePokemon?.speciesId ?? pokemon.pokemonId,
+    isMega: sourcePokemon?.isMega ?? false,
     name: pokemon.name,
     nameJa: pokemon.nameJa,
     imageUrl: pokemon.imageUrl,

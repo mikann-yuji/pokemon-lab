@@ -39,6 +39,7 @@ import {
   createStatAdjustmentsFromPoints,
   getAegislashForm,
   switchAegislashForm,
+  switchMegaForm,
 } from "./damage-calculator-state";
 import { useDamageCalculatorStore } from "./damage-calculator-store";
 import { useDamageCalculatorUserData } from "./use-damage-calculator-user-data";
@@ -356,6 +357,18 @@ export function DamageCalculator({
     selectPokemon(side, switchAegislashForm(pokemon, targetForm));
   }
 
+  /** メガ前後のフォーム固有データを差し替え、能力補正と持ち物は維持する。 */
+  function changeMegaForm(side: DamageSide, targetFormId: number) {
+    const pokemon = side === "attacker" ? attacker : defender;
+    const targetForm = pokemonCatalog.find(({ id }) => id === targetFormId);
+    if (!pokemon || !targetForm || pokemon.speciesId !== targetForm.speciesId) return;
+
+    // 非同期の採用率上位配分が、切り替え後のフォームへ後から上書きされないようにする。
+    directSelectionRequestRef.current[side] += 1;
+    selectPokemon(side, switchMegaForm(pokemon, targetForm));
+    setAbilityConditionEnabled(side, false);
+  }
+
   /**
    * ダメージ計算ページで、能力ポイント・ランク・性格補正の入力変更を保存する。
    *
@@ -657,6 +670,7 @@ export function DamageCalculator({
       onRestoreHistory={restoreHistory}
       onAbilityChange={changeAbility}
       onAegislashFormChange={changeAegislashForm}
+      onMegaFormChange={changeMegaForm}
       onAbilityConditionChange={setAbilityConditionEnabled}
       onHeldItemChange={changeHeldItem}
       onMetronomeCountChange={setMetronomeConsecutiveUseCount}
