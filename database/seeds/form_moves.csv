@@ -638643,3 +638643,6 @@ form_id,move_id,version_group_id,learn_method_id,level_learned_at,move_order
 828,nasty-plot,32,12,0,0
 930,memento,32,12,0,0
 931,roost,32,12,0,0
+122,grass-knot,32,12,0,0
+673,rock-slide,32,12,0,0
+812,endeavor,32,12,0,0
