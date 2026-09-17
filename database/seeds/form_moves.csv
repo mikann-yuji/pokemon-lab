@@ -638654,3 +638654,5 @@ form_id,move_id,version_group_id,learn_method_id,level_learned_at,move_order
 853,stomping-tantrum,32,12,0,0
 871,recover,32,12,0,0
 10261,endeavor,32,12,0,0
+317,rest,32,12,0,0
+876,substitute,32,12,0,0
