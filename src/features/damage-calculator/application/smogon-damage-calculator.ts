@@ -905,6 +905,11 @@ export class SmogonDamageCalculator {
       isCrit: isCritical,
       ...(hits ? { hits } : {}),
       overrides: {
+        // 体重から求めた威力はアプリ側で補正済み。ライブラリの同名技による
+        // 威力再計算を避け、かたいツメ等の倍率が上書きされないようにする。
+        ...(["grass-knot", "low-kick"].includes(move.id)
+          ? { name: `${calculatorMove} (Resolved)` }
+          : {}),
         basePower: Math.max(1, Math.floor(basePower * powerMultiplier)),
         type: move.typeName,
         category: move.damageClass === "physical" ? "Physical" : "Special",

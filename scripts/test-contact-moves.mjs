@@ -27,7 +27,7 @@ const pokemon = {
 };
 const defender = { ...pokemon, selectedAbility: null };
 
-for (const [id, contact] of [["dragon-claw", true], ["earthquake", false], ["grass-knot", true], ["flamethrower", false]]) {
+for (const [id, contact] of [["dragon-claw", true], ["earthquake", false], ["grass-knot", true], ["low-kick", true], ["flamethrower", false]]) {
   test(`${id}: catalog contact flag and automatic 1.3x power agree`, () => {
     const row = catalog.prepare("SELECT id, name_ja AS name, type_name AS typeName, damage_class_name AS damageClass, power, accuracy, effect_chance AS effectChance, is_contact FROM moves WHERE id = ?").get(id);
     assert.equal(row.is_contact, Number(contact));
