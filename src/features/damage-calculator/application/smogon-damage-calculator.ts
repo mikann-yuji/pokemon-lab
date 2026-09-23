@@ -908,7 +908,7 @@ export class SmogonDamageCalculator {
         // 体重から求めた威力はアプリ側で補正済み。ライブラリの同名技による
         // 威力再計算を避け、かたいツメ等の倍率が上書きされないようにする。
         ...(["grass-knot", "low-kick"].includes(move.id)
-          ? { name: `${calculatorMove} (Resolved)` }
+          ? { name: `${calculatorMove} (Resolved)` as Move["name"] }
           : {}),
         basePower: Math.max(1, Math.floor(basePower * powerMultiplier)),
         type: move.typeName,
