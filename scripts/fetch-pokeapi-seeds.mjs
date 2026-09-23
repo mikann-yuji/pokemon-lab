@@ -4,6 +4,7 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { fetchContactMoves, isContactMove } from "./fetch-move-contact-flags.mjs";
 
 const apiBaseUrl = "https://pokeapi.co/api/v2";
 const outputDirectory = path.join(process.cwd(), "database", "seeds");
@@ -381,6 +382,7 @@ const formTypeRows = pokemonResources.flatMap((pokemon) =>
   })),
 );
 
+const contactMoves = await fetchContactMoves();
 const moveRows = moveResources.map((move) => ({
   id: move.name,
   pokeapi_id: move.id,
@@ -395,6 +397,7 @@ const moveRows = moveResources.map((move) => ({
   accuracy: move.accuracy,
   priority: move.priority,
   effect_chance: move.effect_chance,
+  is_contact: Number(isContactMove(move.name, contactMoves)),
   effect_en: masterText(move, "en"),
   effect_ja: masterText(move, "ja-Hrkt") ?? masterText(move, "ja"),
 }));
@@ -526,6 +529,7 @@ writeCsv(
     "effect_chance",
     "effect_en",
     "effect_ja",
+    "is_contact",
   ],
   moveRows,
 );

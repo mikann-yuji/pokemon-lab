@@ -43,6 +43,21 @@
 
 ## ダメージ計算画面
 
+### 接触技とかたいツメ
+
+`moves.is_contact` は0/1の接触フラグ。`scripts/fetch-move-contact-flags.mjs` が
+[Bulbapediaの接触技一覧](https://bulbapedia.bulbagarden.net/wiki/Contact#List_of_contact_moves)
+をスクレイピングして `moves.csv` に反映する。物理/特殊の分類からは推測しない。
+
+- 再取得: `npm run moves:contact:fetch`（`catalog:refresh`、`seeds:fetch` でも取得）
+- 配布カタログへ反映: `npm run sqlite:assets`
+- 回帰テスト: `npm run test:contact-moves`
+
+読み込み時に `DamageCalculatorMove.isContact` へ変換する。かたいツメは
+`contact` 条件の威力補正1.3倍を使い、攻撃側かつ接触技のときだけ自動適用する。
+チェックボックスは技選択から導出した読み取り専用表示とし、手動条件の保存値には依存しない。
+共通計算器を使う逆引き・育成・対戦シミュレータにも同じ判定が適用される。
+
 ファイル: `src/features/damage-calculator/components/damage-calculator.tsx`
 
 主な内部状態:

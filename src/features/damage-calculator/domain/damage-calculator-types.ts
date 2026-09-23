@@ -47,6 +47,8 @@ export type DamageCalculatorMove = {
   damageClass: "physical" | "special";
   /** 技の基本威力。 */
   power: number;
+  /** 技が直接接触するか。 */
+  isContact: boolean;
   /** 命中率。必中や特殊判定の技はnull。 */
   accuracy: number | null;
   /** 相手へ発生する追加効果の確率。追加効果がない技はnull。 */
@@ -88,6 +90,7 @@ export type DamageCalculatorAbilityDamageModifier = {
   modifierKind: "power" | "attacking_stat" | "received_damage" | "stab";
   multiplier: number;
   condition:
+    | "contact"
     | "always"
     | "type_match"
     | "physical"

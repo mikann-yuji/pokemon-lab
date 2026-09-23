@@ -103,6 +103,7 @@ const numericColumns = new Map([
       "accuracy",
       "priority",
       "effect_chance",
+      "is_contact",
     ]),
   ],
   ["version_groups", new Set(["id", "sort_order", "generation_id"])],

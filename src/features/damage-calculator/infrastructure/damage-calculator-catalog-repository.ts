@@ -42,6 +42,7 @@ type PokemonMoveRow = SqliteRow & {
   description: string | null;
   damageClass: "physical" | "special";
   power: number;
+  isContact: number;
   accuracy: number | null;
   effectChance: number | null;
   usageRate: number | null;
@@ -61,6 +62,7 @@ type AbilityModifierRow = SqliteRow & {
   modifierKind: "power" | "attacking_stat" | "received_damage" | "stab";
   multiplier: number;
   condition:
+    | "contact"
     | "always"
     | "type_match"
     | "physical"
@@ -218,6 +220,7 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
         moves.damage_class_name AS damageClass,
         COALESCE(moves.power, 0) AS power,
         moves.accuracy,
+        moves.is_contact AS isContact,
         moves.effect_chance AS effectChance,
         ranked_move_usage.usage_rate AS usageRate,
         ranked_move_usage.usageRank
@@ -289,7 +292,7 @@ export async function getChampionsDamageCalculatorPokemon(): Promise<
   const movesByFormId = new Map<number, DamageCalculatorMove[]>();
   for (const { formId, ...move } of moveRows) {
     const moves = movesByFormId.get(formId) ?? [];
-    moves.push(move);
+    moves.push({ ...move, isContact: move.isContact === 1 });
     movesByFormId.set(formId, moves);
   }
 

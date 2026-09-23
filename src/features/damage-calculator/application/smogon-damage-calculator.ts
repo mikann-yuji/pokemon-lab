@@ -449,6 +449,8 @@ function abilityModifierApplies(
 ) {
   const manualEnabled = abilityManualConditionEnabled(side, input);
   switch (modifier.condition) {
+    case "contact":
+      return side === "attacker" && input.move.isContact === true;
     case "always":
       return true;
     case "type_match":

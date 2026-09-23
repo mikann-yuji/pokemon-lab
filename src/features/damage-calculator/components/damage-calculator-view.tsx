@@ -264,6 +264,7 @@ export function DamageCalculatorView({
         selectedBuildId={selectedBuildIds.attacker}
         heldItems={heldItems}
         abilityConditionEnabled={abilityConditionEnabled.attacker}
+        contactMoveSelected={selectedMove?.isContact === true}
         onOpenTeam={() => onOpenTeamModal("attacker")}
         onClearTeam={() => onClearTeam("attacker")}
         onSelectTeamMember={(build) => onSelectTeamMember("attacker", build)}
@@ -481,6 +482,7 @@ function BattleSidePanel({
   selectedBuildId,
   heldItems,
   abilityConditionEnabled,
+  contactMoveSelected = false,
   children,
   onOpenTeam,
   onClearTeam,
@@ -506,6 +508,7 @@ function BattleSidePanel({
   selectedBuildId: number | null;
   heldItems: DamageCalculatorHeldItem[];
   abilityConditionEnabled: boolean;
+  contactMoveSelected?: boolean;
   children?: React.ReactNode;
   onOpenTeam: () => void;
   onClearTeam: () => void;
@@ -649,6 +652,7 @@ function BattleSidePanel({
         <AbilityField
           pokemon={pokemon}
           conditionEnabled={abilityConditionEnabled}
+          contactMoveSelected={contactMoveSelected}
           onAbilityChange={onAbilityChange}
           onConditionChange={onAbilityConditionChange}
         />

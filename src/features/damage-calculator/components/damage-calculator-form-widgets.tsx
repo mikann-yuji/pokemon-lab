@@ -272,11 +272,13 @@ function AbilityOptionContent({ ability }: { ability: DamageCalculatorAbility })
 export function AbilityField({
   pokemon,
   conditionEnabled,
+  contactMoveSelected = false,
   onAbilityChange,
   onConditionChange,
 }: {
   pokemon: DamageCalculatorPokemon | null;
   conditionEnabled: boolean;
+  contactMoveSelected?: boolean;
   onAbilityChange: (abilityId: string) => void;
   onConditionChange: (enabled: boolean) => void;
 }) {
@@ -284,6 +286,9 @@ export function AbilityField({
   // 通常のselectでは説明文や補正有無を候補内に出しにくいため。
   const [open, setOpen] = useState(false);
   const selectedAbility = pokemon?.selectedAbility ?? null;
+  const automaticContact = selectedAbility?.damageModifiers.some(
+    ({ condition }) => condition === "contact",
+  ) ?? false;
 
   function selectAbility(abilityId: string) {
     onAbilityChange(abilityId);
@@ -335,14 +340,17 @@ export function AbilityField({
           </div>
         ) : null}
       </div>
-      {hasManualAbilityCondition(selectedAbility) ? (
+      {automaticContact || hasManualAbilityCondition(selectedAbility) ? (
         <label className={styles.conditionToggle}>
           <input
             type="checkbox"
-            checked={conditionEnabled}
+            checked={automaticContact ? contactMoveSelected : conditionEnabled}
+            disabled={automaticContact}
             onChange={(event) => onConditionChange(event.target.checked)}
           />
-          {hasMoveTypeChangingAbility(selectedAbility?.id)
+          {automaticContact
+            ? "接触技（自動判定）"
+            : hasMoveTypeChangingAbility(selectedAbility?.id)
             ? "特性を適用"
             : "条件を有効"}
         </label>

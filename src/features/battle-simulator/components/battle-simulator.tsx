@@ -131,6 +131,7 @@ function toBattlePokemon(
       name: move.name,
       typeName: move.typeName,
       damageClass: move.damageClass,
+      isContact: move.isContact,
       power: move.power,
       accuracy: move.accuracy,
     }));
@@ -196,6 +197,7 @@ function toDamageMove(move: BattlePokemon["moves"][number]): DamageCalculatorMov
     typeName: move.typeName,
     description: null,
     damageClass: move.damageClass,
+    isContact: move.isContact,
     power: move.power,
     accuracy: move.accuracy,
     // 対戦用の保存形式には追加効果率がないため、ちからずくの自動判定対象外にする。
