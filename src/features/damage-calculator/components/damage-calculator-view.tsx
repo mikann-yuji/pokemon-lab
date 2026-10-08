@@ -360,6 +360,7 @@ export function DamageCalculatorView({
         selectedBuildId={selectedBuildIds.defender}
         heldItems={heldItems}
         abilityConditionEnabled={abilityConditionEnabled.defender}
+        contactMoveSelected={selectedMove?.isContact === true}
         onOpenTeam={() => onOpenTeamModal("defender")}
         onClearTeam={() => onClearTeam("defender")}
         onSelectTeamMember={(build) => onSelectTeamMember("defender", build)}
@@ -652,7 +653,14 @@ function BattleSidePanel({
         <AbilityField
           pokemon={pokemon}
           conditionEnabled={abilityConditionEnabled}
-          contactMoveSelected={contactMoveSelected}
+          contactMoveSelected={contactMoveSelected && Boolean(
+            pokemon?.selectedAbility?.damageModifiers.some((modifier) =>
+              modifier.condition === "contact" &&
+              (side === "defender"
+                ? modifier.modifierKind === "received_damage"
+                : modifier.modifierKind !== "received_damage"),
+            ),
+          )}
           onAbilityChange={onAbilityChange}
           onConditionChange={onAbilityConditionChange}
         />

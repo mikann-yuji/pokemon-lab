@@ -450,7 +450,10 @@ function abilityModifierApplies(
   const manualEnabled = abilityManualConditionEnabled(side, input);
   switch (modifier.condition) {
     case "contact":
-      return side === "attacker" && input.move.isContact === true;
+      return input.move.isContact === true &&
+        (modifier.modifierKind === "received_damage"
+          ? side === "defender"
+          : side === "attacker");
     case "always":
       return true;
     case "type_match":
@@ -635,7 +638,7 @@ function scaleDamage(
   damage: Result["damage"],
   multiplier: number,
 ): Result["damage"] {
-  const scale = (value: number) => Math.max(1, Math.floor(value * multiplier));
+  const scale = (value: number) => value === 0 ? 0 : Math.max(1, Math.floor(value * multiplier));
   if (typeof damage === "number") {
     return scale(damage);
   }

@@ -64,4 +64,36 @@ test("contact modifier is automatic and keeps the requested 1.3 multiplier", () 
   assert.equal(modifier.multiplier, 1.3);
 });
 
+const auraModifier = catalog.prepare("SELECT modifier_kind AS modifierKind, multiplier, condition, move_type_name AS moveTypeName FROM champions_ability_damage_modifiers WHERE ability_id = 'aura-guard'").get();
+const auraGuard = { id: "aura-guard", name: "はどうのぼうご", effect: null, damageModifiers: [auraModifier] };
+
+test("Mega Lucario Z has Aura Guard with an automatic contact damage reduction", () => {
+  const form = catalog.prepare("SELECT forms.name FROM forms JOIN form_abilities ON form_abilities.form_id = forms.id WHERE form_abilities.ability_id = 'aura-guard'").get();
+  assert.equal(form.name, "lucario-mega-z");
+  assert.deepEqual(auraModifier, { modifierKind: "received_damage", multiplier: 0.5, condition: "contact", moveTypeName: null });
+});
+
+for (const [id, contact] of [["dragon-claw", true], ["grass-knot", true], ["earthquake", false], ["flamethrower", false]]) {
+  test(`Aura Guard halves only incoming contact damage: ${id}`, () => {
+    const row = catalog.prepare("SELECT id, name_ja AS name, type_name AS typeName, damage_class_name AS damageClass, power, accuracy, effect_chance AS effectChance, is_contact FROM moves WHERE id = ?").get(id);
+    const move = { ...row, isContact: row.is_contact === 1, power: 80, description: null, usageRate: null };
+    const attacker = { ...pokemon, selectedAbility: null };
+    const target = { ...defender, types: ["Fighting", "Steel"] };
+    const base = calculator.calculate({ attacker, defender: target, move });
+    const guarded = calculator.calculate({ attacker, defender: { ...target, selectedAbility: auraGuard }, move });
+    assert.deepEqual(guarded.damageRolls, base.damageRolls.map(value => contact ? Math.max(1, Math.floor(value / 2)) : value));
+    const attacking = calculator.calculate({ attacker: { ...attacker, selectedAbility: auraGuard }, defender: target, move });
+    assert.deepEqual(attacking.damageRolls, base.damageRolls);
+    const both = calculator.calculate({ attacker: pokemon, defender: { ...target, selectedAbility: auraGuard }, move });
+    const claws = calculator.calculate({ attacker: pokemon, defender: target, move });
+    assert.deepEqual(both.damageRolls, claws.damageRolls.map(value => contact ? Math.max(1, Math.floor(value / 2)) : value));
+  });
+}
+
+test("Aura Guard does not turn an immune hit into one damage", () => {
+  const move = { id: "dragon-claw", name: "ドラゴンクロー", typeName: "Dragon", damageClass: "physical", power: 80, isContact: true, accuracy: 100, effectChance: null, description: null, usageRate: null };
+  const result = calculator.calculate({ attacker: pokemon, defender: { ...defender, types: ["Fairy"], selectedAbility: auraGuard }, move });
+  assert.equal(result.maximum, 0);
+});
+
 test.after(() => catalog.close());
